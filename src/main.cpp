@@ -1,3 +1,4 @@
+#include <vector>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -36,19 +37,19 @@ int	main() {
 	if (listen(fd, 1) < 0)
 		perror("listen");
 
-	int	pollfd_len = 100;
-	int client_count = 1;
+	std::vector<struct pollfd> fdlist = std::vector<struct pollfd>();
 
-	struct pollfd *fdlist = new pollfd[pollfd_len];
-	// struct pollfd fdlist[10];
-	fdlist[0].fd = fd;
-	fdlist[0].events = POLLIN;
+	struct pollfd pfd;
+	pfd.fd = fd;
+	pfd.events = POLLIN;
+
+	fdlist.push_back(pfd);
 
 	int n = 0;
 
 	while (1)
 	{
-		int poll_status = poll(fdlist, (nfds_t)client_count, -1);
+		int poll_status = poll(&fdlist[0], (nfds_t)fdlist.size(), -1);
 
 		if (poll_status == -1)
 		{
@@ -78,24 +79,23 @@ int	main() {
 			send(conn, str.c_str(), str.length(), 0);
 			print(buf);
 
-			fdlist[client_count].fd = conn;
-			fdlist[client_count].events = POLLIN;
-			client_count++;
+			pfd.fd = conn;
+			pfd.events = POLLIN;
+			fdlist.push_back(pfd);
 		}
 
-		for (int i = 1; i < client_count; i++)
+		for (size_t i = 1; i < fdlist.size(); i++)
 		{
 			if (fdlist[i].revents & POLLIN)
 			{
-				// TODO: Remove socket(when recv returns 0)
-
 				bzero(buf, BUFSIZE - 1);
-				if (recv(conn, buf, BUFSIZE - 1, 0) == 0)
+				if (recv(conn, buf, BUFSIZE - 1, 0) == 0) // TODO: may return -1
 				{
 					close(fdlist[i].fd);
-					client_count--;
-					fdlist[i] = fdlist[client_count];
+					fdlist[i] = fdlist.back();
 					i--;
+					fdlist.pop_back();
+					std::cout << "CLIENT LEFT\n";
 					continue;
 				}
 				print(buf);
@@ -113,6 +113,5 @@ int	main() {
 		}
 	}
 
-	delete[] fdlist;
 	close(fd);
 }
