@@ -69,6 +69,7 @@ int	main() {
 			if (conn < 0)
 			{
 				perror("accept");
+				return 1;
 			}
 
 			std::cout << "NEW CLIENT\n";
@@ -91,7 +92,7 @@ int	main() {
 					perror("recv");
 					return 1;
 				}
-				else if (recv_len == 0) // TODO: may return -1
+				else if (recv_len == 0)
 				{
 					close(fdlist[i].fd);
 					fdlist[i] = fdlist.back();
