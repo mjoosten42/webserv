@@ -25,7 +25,7 @@ int	main() {
 	server_address.sin_family = AF_INET; // Specify IPv4 protocol
 	server_address.sin_addr.s_addr = inet_addr("127.0.0.1"); // Specify localhost as 
 
-	std::cout << "Now listening on "  << ntohs(addr.sin_port) << std::endl;
+	std::cout << "Now listening on "  << ntohs(server_address.sin_port) << std::endl;
 
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &tmp, sizeof(tmp)) < 0)
 		perror("setsockopt");
