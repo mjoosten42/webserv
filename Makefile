@@ -3,7 +3,6 @@ NAME = webserv
 CXX = c++
 
 CXX_FLAGS = -Wall -Werror -Wextra -std=c++98 -MMD -MP
-LD_FLAGS = -Wall -Werror -Wextra -std=c++98 -MMD -MP
 
 SRC_DIR = src
 INC_DIR = include
@@ -16,11 +15,8 @@ include make/dependecies.mk
 
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 
-DEBUG := 0
-
-ifeq ($(DEBUG),1)
+ifdef DEBUG
 	CXX_FLAGS += -g -fsanitize=address
-	LD_FLAGS += -g -fsanitize=address
 endif
 
 INCLUDE = -I $(INC_DIR)
@@ -28,7 +24,7 @@ INCLUDE = -I $(INC_DIR)
 all: $(NAME)
 
 $(NAME): $(OBJECTS)
-	$(CXX) $(LD_FLAGS) $(OBJECTS) -o $(NAME)
+	$(CXX) $(CXX_FLAGS) $(OBJECTS) -o $(NAME)
 
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
 	@mkdir -p $(@D)

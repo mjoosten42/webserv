@@ -1,1 +1,1 @@
-SOURCES =
+SOURCES =	src/main.cpp \
