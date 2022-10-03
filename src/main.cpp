@@ -11,27 +11,26 @@
 #define BUFSIZE 2048
 
 int	main() {
-	sockaddr_in	addr;
+	sockaddr_in	server_address;
 	sockaddr	client;
 	socklen_t	tmp = 1;
 	char		buf[BUFSIZE];
-
 	int 		fd;
 	int			conn;
 	
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 
-	bzero(&addr, sizeof(addr));
-	addr.sin_port = htons(8080);
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	bzero(&server_address, sizeof(server_address));
+	server_address.sin_port = htons(8080); // Specify port, htons Tranlsates endianness.
+	server_address.sin_family = AF_INET; // Specify IPv4 protocol
+	server_address.sin_addr.s_addr = inet_addr("127.0.0.1"); // Specify localhost as 
 
 	std::cout << "Now listening on "  << ntohs(addr.sin_port) << std::endl;
 
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &tmp, sizeof(tmp)) < 0)
 		perror("setsockopt");
 	
-	if (bind(fd, (sockaddr *)&addr, sizeof(addr)) < 0)
+	if (bind(fd, (sockaddr *)&server_address, sizeof(server_address)) < 0)
 		perror("bind");
 
 	if (listen(fd, 1) < 0)
