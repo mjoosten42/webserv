@@ -8,7 +8,7 @@
 #include "utils.hpp"
 
 
-#define BUFSIZE 1024
+#define BUFSIZE 2048
 
 int	main() {
 	sockaddr_in	addr;
@@ -72,12 +72,6 @@ int	main() {
 			}
 
 			std::cout << "NEW CLIENT\n";
-			bzero(buf, BUFSIZE - 1);
-			recv(conn, buf, BUFSIZE - 1, 0);
-			print(buf);
-			std::string	str("HTTP/1.1 200 OK\nCache-Control: no-cache\nServer: libnhttpd\nDate: Wed Jul 4 15:32:03 2012\nConnection: Keep-Alive:\nContent-Type: text/plain\nContent-Length: 6\n\namogus");
-			send(conn, str.c_str(), str.length(), 0);
-			print(buf);
 
 			pfd.fd = conn;
 			pfd.events = POLLIN;
@@ -89,7 +83,15 @@ int	main() {
 			if (fdlist[i].revents & POLLIN)
 			{
 				bzero(buf, BUFSIZE - 1);
-				if (recv(conn, buf, BUFSIZE - 1, 0) == 0) // TODO: may return -1
+
+				ssize_t recv_len = recv(fdlist[i].fd, buf, BUFSIZE - 1, 0);
+
+				if (recv_len == -1)
+				{
+					perror("recv");
+					return 1;
+				}
+				else if (recv_len == 0) // TODO: may return -1
 				{
 					close(fdlist[i].fd);
 					fdlist[i] = fdlist.back();
@@ -107,7 +109,12 @@ int	main() {
 				str += number_str;
 				str += "\r\n\r\n";
 				n++;
-				send(conn, str.c_str(), str.length(), 0);
+
+				if (send(fdlist[i].fd, str.c_str(), str.length(), 0) == -1)
+				{
+					perror("send");
+					return 1;
+				}
 				print(buf);
 			}
 		}
