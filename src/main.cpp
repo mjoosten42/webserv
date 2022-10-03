@@ -39,7 +39,8 @@ int	main() {
 	int	pollfd_len = 100;
 	int client_count = 1;
 
-	struct pollfd *fdlist = (struct pollfd *)malloc(pollfd_len * sizeof(struct pollfd));
+	struct pollfd *fdlist = new pollfd[pollfd_len];
+	// struct pollfd fdlist[10];
 	fdlist[0].fd = fd;
 	fdlist[0].events = POLLIN;
 
@@ -82,14 +83,21 @@ int	main() {
 			client_count++;
 		}
 
-		for (int i = 0; i < client_count; i++)
+		for (int i = 1; i < client_count; i++)
 		{
 			if (fdlist[i].revents & POLLIN)
 			{
 				// TODO: Remove socket(when recv returns 0)
 
 				bzero(buf, BUFSIZE - 1);
-				recv(conn, buf, BUFSIZE - 1, 0);
+				if (recv(conn, buf, BUFSIZE - 1, 0) == 0)
+				{
+					close(fdlist[i].fd);
+					client_count--;
+					fdlist[i] = fdlist[client_count];
+					i--;
+					continue;
+				}
 				print(buf);
 
 				std::string number_str = std::to_string(n);
@@ -105,5 +113,6 @@ int	main() {
 		}
 	}
 
+	delete[] fdlist;
 	close(fd);
 }
