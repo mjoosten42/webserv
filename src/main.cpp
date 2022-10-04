@@ -33,6 +33,8 @@ int	main() {
 	if (listen(fd, 1) < 0)
 		perror("listen");
 
+	set_fd_nonblocking(fd);
+
 	Poller poller = Poller(fd);
 	poller.start();
 

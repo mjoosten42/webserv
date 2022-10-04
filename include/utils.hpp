@@ -8,3 +8,5 @@ void	print(const T& value) {
 }
 
 void	fatal_perror(const char *msg);
+
+void	set_fd_nonblocking(const int fd);

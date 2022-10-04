@@ -38,6 +38,8 @@ void Poller::acceptClient()
 		fatal_perror("accept");
 	}
 
+	set_fd_nonblocking(clientfd);
+
 	std::cout << "NEW CLIENT\n";
 
 	this->m_pollfds.push_back(create_pollfd(clientfd, POLLIN));
