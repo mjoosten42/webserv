@@ -32,7 +32,7 @@ int initialize_port(int port) {
 
 	if (listen(fd, SOMAXCONN) < 0)
 		fatal_perror("listen");
-		
+
 	set_fd_nonblocking(fd);
 
 	Poller poller = Poller(fd);
