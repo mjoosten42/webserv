@@ -56,6 +56,6 @@ print:
 format: files
 	clang-format -i $(SOURCES) $(HEADERS)
 
-.PHONY: all files clean fclean re print run format
+.PHONY: all clean fclean re run files print format
 
 -include $(OBJECTS:.o:.d)

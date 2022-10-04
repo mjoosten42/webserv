@@ -1,16 +1,19 @@
 #pragma once
 
+#include <map>
 #include <string>
-#include <vector>
 
 using std::string;
 
+enum methods { GET, POST, DELETE };
+
 class Request {
 	public:
-		Request(const string& total);
+		Request(int fd, const string& total);
 
 	private:
-		std::vector<std::pair<string, string> > headers;
-		string									body;
-		int										fd;
+		int						 m_fd;
+		methods					 m_method;
+		std::map<string, string> m_headers;
+		string					 m_body;
 };
