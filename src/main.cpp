@@ -32,6 +32,8 @@ int initialize_port(int port) {
 	const socklen_t enabled = 1;
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(enabled)) < 0)
 		fatal_perror("setsockopt");
+		
+	set_fd_nonblocking(socket_fd);
 
 	//  "Assign name to socket" = link socket_fd we configured to the server's socket information
 	if (bind(socket_fd, reinterpret_cast<sockaddr *>(&server), sizeof(server)) < 0)
@@ -42,8 +44,6 @@ int initialize_port(int port) {
 		fatal_perror("listen");
 
 	std::cout << "LISTENING ON " << port << std::endl;
-
-	set_fd_nonblocking(socket_fd);
 
 	return socket_fd;
 }
