@@ -37,13 +37,13 @@ int initialize_port(int port) {
 
 	if (listen(socket_fd, SOMAXCONN) < 0)
 		fatal_perror("listen");
+	std::cout << "LISTEN ON " << port << std::endl;
 		
 	set_fd_nonblocking(socket_fd);
 
 	Poller poller = Poller(socket_fd);
 	poller.start();
 
-	std::cout << "LISTEN ON " << port << std::endl;
 
 	return socket_fd;
 }

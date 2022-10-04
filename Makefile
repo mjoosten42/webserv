@@ -12,8 +12,6 @@ SOURCES =
 include make/sources.mk
 HEADERS =
 include make/headers.mk
-DEPS = 
-include make/dependecies.mk
 
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 
@@ -54,11 +52,10 @@ print:
 	@echo "---SOURCES: $(SOURCES)" | xargs -n1
 	@echo "---HEADERS: $(HEADERS)" | xargs -n1
 	@echo "---OBJECTS: $(OBJECTS)" | xargs -n1
-	@echo "---DEPS: $(DEPS)" | xargs -n1
 
-format:
+format: files
 	clang-format -i $(SOURCES) $(HEADERS)
 
 .PHONY: all files clean fclean re print run format
 
--include $(DEPS)
+-include $(OBJECTS:.o:.d)
