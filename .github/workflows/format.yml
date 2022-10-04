@@ -1,0 +1,13 @@
+name: format
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: format
+        run: make format
