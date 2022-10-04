@@ -1,6 +1,6 @@
 #include "Poller.hpp"
-#include "Server.hpp"
 
+#include "Server.hpp"
 #include "utils.hpp"
 
 #include <sys/socket.h> // accept
@@ -8,19 +8,16 @@
 
 #define BUFSIZE 2048
 
-Poller::Poller(std::vector<Server>& servers) : m_servers(servers)
-{
+Poller::Poller(std::vector<Server>& servers): m_servers(servers) {
 	setupPollfdsServers();
 }
 
 Poller::~Poller() {}
 
-void Poller::setupPollfdsServers()
-{
-	for (std::vector<Server>::iterator it = m_servers.begin(); it != m_servers.end(); it++)
-	{
+void Poller::setupPollfdsServers() {
+	for (std::vector<Server>::iterator it = m_servers.begin(); it != m_servers.end(); it++) {
 		m_pollfds.push_back(create_pollfd(it->getFD(), POLLIN));
-		m_fdservermap[it->getFD()] = *it;
+		m_fdservermap[it->getFD()] = &*it;
 	}
 }
 
@@ -63,6 +60,13 @@ bool Poller::receiveFromClient(int fd) {
 	}
 	print(buf);
 
+	num_recvs++;
+
+	//  TODO; probably some stuff should be delegated to some other class here
+
+	std::string toSend = "server FD: " + std::to_string(m_fdservermap[fd]->getFD());
+	toSend += ", num receives: " + std::to_string(num_recvs) + "\n";
+
 	std::string number_str = std::to_string(num_recvs);
 	std::string str("HTTP/1.1 200 OK\r\n"
 					"Cache-Control: no-cache\r\n"
@@ -71,11 +75,10 @@ bool Poller::receiveFromClient(int fd) {
 					"Connection: Keep-Alive:\r\n"
 					"Content-Type: text/plain\r\n"
 					"Content-Length: ");
-	str += std::to_string(number_str.length());
+	str += std::to_string(toSend.length());
 	str += "\r\n\r\n";
-	str += number_str;
+	str += toSend;
 	str += "\r\n\r\n";
-	num_recvs++;
 
 	if (send(fd, str.c_str(), str.length(), 0) == -1)
 		fatal_perror("send");
@@ -94,10 +97,8 @@ void Poller::start() {
 			std::cerr << "No events? wtf??\n";
 
 		for (size_t i = 0; i < m_servers.size(); i++)
-		{
 			if (m_pollfds[i].revents & POLLIN)
 				acceptClient(m_pollfds[i].fd);
-		}
 
 		//  loop through sockets to see if there are new messages
 		for (size_t i = m_servers.size(); i < m_pollfds.size(); i++) {

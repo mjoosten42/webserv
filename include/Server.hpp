@@ -1,15 +1,14 @@
 #pragma once
 
-class Server
-{
-public:
-	Server();
-	~Server();
+class Server {
+	public:
+		Server();
+		~Server();
 
-	int getFD() const;
+		int getFD() const;
 
-	void setup(int port);
+		void setup(int port);
 
-private:
-	int	m_fd;
+	private:
+		int m_fd;
 };
