@@ -7,8 +7,6 @@
 
 enum methods { GET, POST, DELETE };
 
-enum state { READING, DONE };
-
 class Request {
 	public:
 		Request(int fd, const std::string& total);
@@ -18,6 +16,5 @@ class Request {
 		methods							   m_method;
 		std::map<std::string, std::string> m_headers;
 		std::string						   m_body;
-		state							   m_state;
 		Server							  *m_server;
 };

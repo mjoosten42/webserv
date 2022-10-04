@@ -3,10 +3,9 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <poll.h>
+#include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <vector>
 
 int initialize_port(int port);
 
@@ -32,7 +31,7 @@ int initialize_port(int port) {
 	const socklen_t enabled = 1;
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(enabled)) < 0)
 		fatal_perror("setsockopt");
-		
+
 	set_fd_nonblocking(socket_fd);
 
 	//  "Assign name to socket" = link socket_fd we configured to the server's socket information
