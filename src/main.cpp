@@ -11,6 +11,7 @@
 int initialize_port(int port);
 
 int main() {
+	// Setting up server's listening socket
 	int fd = initialize_port(8080);
 
 	Poller poller(fd);
@@ -36,6 +37,7 @@ int initialize_port(int port) {
 	if (bind(socket_fd, reinterpret_cast<sockaddr *>(&server), sizeof(server)) < 0)
 		fatal_perror("bind");
 
+	// Listens on socket, accepting at most 128 connections
 	if (listen(socket_fd, SOMAXCONN) < 0)
 		fatal_perror("listen");
 
