@@ -1,0 +1,5 @@
+Servers and clients pollfds are stored in a vector.
+If server has POLLIN, accept.
+If client has POLLIN, handle request.
+Map of <fd, request>
+Servers in array
