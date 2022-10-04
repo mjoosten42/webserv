@@ -47,7 +47,7 @@ BreakBeforeBraces: Attach
 BreakBeforeTernaryOperators: false
 BreakConstructorInitializers: AfterColon
 BreakInheritanceList: AfterColon
-BreakStringLiterals: false
+BreakStringLiterals: true
 CompactNamespaces: false
 EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: Always

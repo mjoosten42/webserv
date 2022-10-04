@@ -1,40 +1,39 @@
-#include <vector>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <poll.h>
-
-#include <unistd.h>
-
-
-#include "utils.hpp"
 #include "Poller.hpp"
+#include "utils.hpp"
 
-int	main() {
-	sockaddr_in	server_address;
-	socklen_t	tmp = 1;
-	int 		fd;
-	
-	fd = socket(AF_INET, SOCK_STREAM, 0);
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <poll.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <vector>
 
-	bzero(&server_address, sizeof(server_address));
-	server_address.sin_port = htons(8080); // Specify port, htons Tranlsates endianness.
-	server_address.sin_family = AF_INET; // Specify IPv4 protocol
-	server_address.sin_addr.s_addr = inet_addr("127.0.0.1"); // Specify localhost as 
+int initialize_port(int port);
 
-	std::cout << "Now listening on "  << ntohs(server_address.sin_port) << std::endl;
+int main() {
+	int fd = initialize_port(8080);
 
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &tmp, sizeof(tmp)) < 0)
-		perror("setsockopt");
-	
-	if (bind(fd, (sockaddr *)&server_address, sizeof(server_address)) < 0)
-		perror("bind");
-
-	if (listen(fd, 1) < 0)
-		perror("listen");
-
-	Poller poller = Poller(fd);
+	Poller poller(fd);
 	poller.start();
 
 	close(fd);
+}
+
+int initialize_port(int port) {
+	sockaddr_in server_address = { 0, AF_INET, htons(port), { inet_addr("127.0.0.1") }, { 0 } };
+	const int	fd			   = socket(AF_INET, SOCK_STREAM, 0);
+	const int	enable		   = 1;
+
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0)
+		fatal_perror("setsockopt");
+
+	if (bind(fd, reinterpret_cast<sockaddr *>(&server_address), sizeof(server_address)) < 0)
+		fatal_perror("bind");
+
+	if (listen(fd, SOMAXCONN) < 0)
+		fatal_perror("listen");
+
+	std::cout << "LISTEN ON " << port << std::endl;
+
+	return fd;
 }
