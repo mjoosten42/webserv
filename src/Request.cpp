@@ -8,6 +8,7 @@
 
 Request::Request(int fd, const std::string& total) {
 	(void)total;
+	(void)m_server;
 	m_fd			  = fd;
 	m_method		  = GET;
 	m_headers["Host"] = "localhost:8080";

@@ -16,5 +16,5 @@ class Request {
 		methods							   m_method;
 		std::map<std::string, std::string> m_headers;
 		std::string						   m_body;
-		Server							  *m_server;
+		Server							*m_server;
 };
