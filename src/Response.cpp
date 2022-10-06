@@ -6,7 +6,7 @@
 /*   By: lindsay <lindsay@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/08/18 13:30:35 by lindsay       #+#    #+#                 */
-/*   Updated: 2022/10/06 15:16:06 by limartin      ########   odam.nl         */
+/*   Updated: 2022/10/06 15:19:40 by limartin      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,11 @@ Response::~Response() {
 
 Response& Response::operator=(const Response& assignment) {
 	if (this != &assignment) {
-		//  TODO: REQUIRES PER CLASS IMPLEMENTATION
+		this->m_fd = assignment.m_fd;	   //  currently unused
+		this->m_server = assignment.m_server; //  currently unused
+		this->m_statusLine = assignment.m_statusLine;
+		this->m_header = assignment.m_header;
+		this->m_body = assignment.m_body;
 	}
 	return (*this);
 }
