@@ -49,7 +49,6 @@ bool Poller::receiveFromClient(int fd) {
 		return false;
 	}
 
-	Request request(fd, m_fdservermap[fd], std::string(buf));
 	print(std::string(80, '-'));
 	print(buf);
 	print(std::string(80, '-'));

@@ -5,11 +5,15 @@
 #include <map>
 #include <string>
 
-enum methods { NONE, GET, POST, DELETE };
+enum methods { GET, POST, DELETE };
+
+enum progress { NONE, METHOD, LOCATION, HTTP, HEADERS, BODY, DONE };
 
 class Request {
 	public:
-		Request(int fd, const Server *server, const std::string& total);
+		Request(int fd, const Server *server);
+
+		void addToRequest(const std::string& str);
 
 	private:
 		int								   m_fd;
@@ -18,4 +22,5 @@ class Request {
 		std::string						   m_body;
 		const Server					  *m_server;
 		std::string						   m_location;
+		progress						   m_progress;
 };

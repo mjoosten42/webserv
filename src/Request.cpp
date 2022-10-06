@@ -10,16 +10,24 @@
 //  	GET / HTTP/1.1
 //  		Host: localhost:8080
 
-Request::Request(int fd, const Server *server, const std::string& total): m_fd(fd), m_server(server) {
-	std::stringstream ss(total);
-	std::string		  method;
-
-	ss >> method;
-	ss >> m_location;
-	m_method = NONE;
-	if (method == std::string("GET"))
-		m_method = GET;
+Request::Request(int fd, const Server *server): m_fd(fd), m_server(server), m_progress(NONE) {
 	m_headers["Host"] = "localhost:8080";
 	(void)m_fd;
 	(void)m_server;
+}
+
+void Request::addToRequest(const std::string& str) {
+	std::stringstream ss(str);
+	std::string tmp;
+
+	switch (m_progress) {
+		case NONE:
+			ss >> tmp;
+			if (tmp == "GET")
+				m_method = GET;
+			break;
+
+		default:
+			break;
+	}
 }
