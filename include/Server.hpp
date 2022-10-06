@@ -2,6 +2,7 @@
 
 class Server {
 	public:
+		Server();
 		Server(int port);
 		~Server();
 

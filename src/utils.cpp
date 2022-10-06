@@ -15,3 +15,13 @@ void set_fd_nonblocking(const int fd) {
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1)
 		fatal_perror("fcntl");
 }
+
+void printPollFds(const std::vector<pollfd>& vector) {
+	std::cout << "Fds: { ";
+	for (uint i = 0; i < vector.size(); i++) {
+		std::cout << vector[i].fd;
+		if (i + 1 < vector.size())
+			std::cout << ", ";
+	}
+	std::cout << " }\n";
+}

@@ -8,6 +8,10 @@
 #include <sys/socket.h>
 #include <unistd.h> // close
 
+Server::Server() {
+	m_fd = -1;
+}
+
 Server::Server(int port) {
 	//  Specify server socket info: IPv4 protocol family, port in correct endianness, IP address
 	sockaddr_in server		= { 0, AF_INET, htons(port), { inet_addr("127.0.0.1") }, { 0 } };
@@ -31,11 +35,11 @@ Server::Server(int port) {
 	if (listen(m_fd, SOMAXCONN) < 0)
 		fatal_perror("listen");
 
-	std::cout << "Server " << m_fd << " now listerning on " << port << std::endl;
+	std::cout << "SERVER " << m_fd << " LISTENING ON " << port << std::endl;
 }
 
+//  Note: closing in a copy will cause errors, either don't copy or use reference-counting
 Server::~Server() {
-	//  don't close for now
 	std::cout << "Closing server: " << m_fd << std::endl;
 	if (close(m_fd) < 0)
 		perror("close");

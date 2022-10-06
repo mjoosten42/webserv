@@ -1,5 +1,6 @@
 #include "Poller.hpp"
 
+#include "Request.hpp"
 #include "Server.hpp"
 #include "utils.hpp"
 
@@ -8,7 +9,7 @@
 
 #define BUFSIZE 2048
 
-Poller::Poller(Server *servers, int size): m_servers(servers), m_nb_servers(size) {
+Poller::Poller(const Server *servers, int size): m_servers(servers), m_nb_servers(size) {
 	for (const Server *it = m_servers; it != m_servers + size; it++) {
 		pollfd client = { it->getFD(), POLLIN, 0 };
 		m_pollfds.push_back(client);
@@ -18,28 +19,19 @@ Poller::Poller(Server *servers, int size): m_servers(servers), m_nb_servers(size
 
 Poller::~Poller() {}
 
-pollfd Poller::create_pollfd(int fd, short events) const {
-	pollfd temp;
-
-	temp.fd		= fd;
-	temp.events = events;
-
-	return temp;
-}
-
 //  accepts a client
 void Poller::acceptClient(int serverfd) {
-	int clientfd = accept(serverfd, NULL, NULL);
+	pollfd client = { accept(serverfd, NULL, NULL), POLLIN, 0 };
 
-	if (clientfd < 0)
+	if (client.fd < 0)
 		fatal_perror("accept");
 
-	set_fd_nonblocking(clientfd);
+	set_fd_nonblocking(client.fd);
 
-	std::cout << "NEW CLIENT\n";
+	std::cout << "NEW CLIENT: " << client.fd << std::endl;
 
-	m_pollfds.push_back(create_pollfd(clientfd, POLLIN));
-	m_fdservermap[clientfd] = m_fdservermap[serverfd];
+	m_pollfds.push_back(client);
+	m_fdservermap[client.fd] = m_fdservermap[serverfd];
 }
 
 //  when POLLIN is set, receives a message from the client
@@ -55,7 +47,11 @@ bool Poller::receiveFromClient(int fd) {
 		close(fd);
 		return false;
 	}
+
+	Request request(fd, m_fdservermap[fd], std::string(buf));
+	print(std::string(80, '-'));
 	print(buf);
+	print(std::string(80, '-'));
 
 	num_recvs++;
 
@@ -66,7 +62,6 @@ bool Poller::receiveFromClient(int fd) {
 
 	std::string number_str = std::to_string(num_recvs);
 	std::string str("HTTP/1.1 200 OK\r\n"
-					"Cache-Control: no-cache\r\n"
 					"Server: amogus\r\n"
 					"Date: Wed Jul 4 15:32:03 2012\r\n"
 					"Connection: Keep-Alive:\r\n"
@@ -79,12 +74,13 @@ bool Poller::receiveFromClient(int fd) {
 
 	if (send(fd, str.c_str(), str.length(), 0) == -1)
 		fatal_perror("send");
-	print(buf);
 	return true;
 }
 
 void Poller::start() {
 	while (true) {
+		std::cout << "\n\tSTARTING LOOP\n";
+
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 
 		if (poll_status == -1)
@@ -93,11 +89,12 @@ void Poller::start() {
 		else if (poll_status == 0)
 			std::cerr << "No events? wtf??\n";
 
+		//  Loop over servers for new clients
 		for (size_t i = 0; i < m_nb_servers; i++)
 			if (m_pollfds[i].revents & POLLIN)
 				acceptClient(m_pollfds[i].fd);
 
-		//  loop through sockets to see if there are new messages
+		//  loop over clients for new messages
 		for (size_t i = m_nb_servers; i < m_pollfds.size(); i++) {
 			if (m_pollfds[i].revents & POLLIN) {
 				if (receiveFromClient(m_pollfds[i].fd) == false) {
@@ -110,6 +107,6 @@ void Poller::start() {
 			}
 		}
 
-		print(m_pollfds);
+		printPollFds(m_pollfds);
 	}
 }
