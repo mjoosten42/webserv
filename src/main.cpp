@@ -5,8 +5,11 @@
 #include <vector>
 
 int main() {
-	Server *servers = new Server(8080);
+	const Server *servers = new Server(8080);
+	Poller		  poller(servers, 1);
 
-	Poller poller(servers, 1);
 	poller.start();
+
+	//  Never reached
+	delete servers;
 }
