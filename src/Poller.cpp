@@ -104,10 +104,10 @@ void Poller::start() {
 		for (size_t i = m_servers.size(); i < m_pollfds.size(); i++) {
 			if (m_pollfds[i].revents & POLLIN) {
 				if (receiveFromClient(m_pollfds[i].fd) == false) {
+					m_fdservermap.erase(m_pollfds[i].fd);
 					m_pollfds[i] = m_pollfds.back();
 					m_pollfds.pop_back();
 					i--;
-					m_fdservermap.erase(m_pollfds[i].fd);
 					std::cout << "CLIENT LEFT\n";
 				}
 			}
