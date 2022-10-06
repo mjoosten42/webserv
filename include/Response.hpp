@@ -6,7 +6,7 @@
 /*   By: lindsay <lindsay@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/08/18 13:30:42 by lindsay       #+#    #+#                 */
-/*   Updated: 2022/10/06 15:15:40 by limartin      ########   odam.nl         */
+/*   Updated: 2022/10/06 15:41:06 by limartin      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,11 @@
 #define RESPONSE_HPP
 
 #include "Server.hpp"
+#include "utils.hpp"
 
 #include <sstream> //	getResponseAsString
 #include <string>
+#include <sys/socket.h> //send
 #include <vector>
 
 typedef std::vector<std::string>	   str_vector_t;
@@ -32,18 +34,20 @@ class Response {
 		Response& operator=(const Response& assignment); //  Assignment operator
 
 	public:					   //  Pubic member variables & methods
-		int			 m_fd;	   //  currently unused
+		int			 m_fd;
 		Server		*m_server; //  currently unused
 		std::string	 m_statusLine;
 		str_vector_t m_header;
 		str_vector_t m_body;
-		std::string	 getResponseAsString(void) const;
+		bool		 sendResponse(void) const;
 
 	protected: //  Protected member variables & methods
 
 	private: //  Private member variables & methods
 
 	public: //  Accessors
+		std::string getResponseAsCPPString(void) const;
+		const char *getResponseAsCString(void) const;
 
 	private: //  Nested classes
 };

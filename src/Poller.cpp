@@ -1,7 +1,7 @@
 #include "Poller.hpp"
 
-#include "Response.hpp"
 #include "Request.hpp"
+#include "Response.hpp"
 #include "Server.hpp"
 #include "utils.hpp"
 
@@ -57,6 +57,7 @@ bool Poller::receiveFromClient(int fd) {
 
 	//  TODO; probably some stuff should be delegated to some other class here
 	Response response;
+	response.m_fd = fd;
 
 	std::string bodyContent = "server FD: " + std::to_string(m_fdservermap[fd]->getFD());
 	bodyContent += ", num receives: " + std::to_string(num_recvs) + "\n";
@@ -74,9 +75,7 @@ bool Poller::receiveFromClient(int fd) {
 
 	//  std::string number_str = std::to_string(num_recvs); // WAS UNUSED.
 
-	if (send(fd, response.getResponseAsString().c_str(), response.getResponseAsString().length(), 0) == -1)
-		fatal_perror("send");
-	return true;
+	return (response.sendResponse());
 }
 
 void Poller::start() {

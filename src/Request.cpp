@@ -18,7 +18,7 @@ Request::Request(int fd, const Server *server): m_fd(fd), m_server(server), m_pr
 
 void Request::addToRequest(const std::string& str) {
 	std::stringstream ss(str);
-	std::string tmp;
+	std::string		  tmp;
 
 	switch (m_progress) {
 		case NONE:
