@@ -2,12 +2,10 @@
 
 class Server {
 	public:
-		Server();
+		Server(int port);
 		~Server();
 
 		int getFD() const;
-
-		void setup(int port);
 
 	private:
 		int m_fd;
