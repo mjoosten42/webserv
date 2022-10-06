@@ -38,7 +38,6 @@ Server::Server(int port) {
 }
 
 Server::~Server() {
-	//  don't close for now
 	std::cout << "Closing server: " << m_fd << std::endl;
 	if (close(m_fd) < 0)
 		perror("close");
