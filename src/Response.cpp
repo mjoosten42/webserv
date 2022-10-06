@@ -6,7 +6,7 @@
 /*   By: lindsay <lindsay@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/08/18 13:30:35 by lindsay       #+#    #+#                 */
-/*   Updated: 2022/10/06 14:53:15 by limartin      ########   odam.nl         */
+/*   Updated: 2022/10/06 15:16:06 by limartin      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ Response& Response::operator=(const Response& assignment) {
 	return (*this);
 }
 
-std::string Response::getFormattedResponse(void) const {
+std::string Response::getResponseAsString(void) const {
 	std::stringstream ret;
 	std::string		  endline = "\r\n";
 

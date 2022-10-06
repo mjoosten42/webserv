@@ -74,7 +74,7 @@ bool Poller::receiveFromClient(int fd) {
 
 	//  std::string number_str = std::to_string(num_recvs); // WAS UNUSED.
 
-	if (send(fd, response.getFormattedResponse().c_str(), response.getFormattedResponse().length(), 0) == -1)
+	if (send(fd, response.getResponseAsString().c_str(), response.getResponseAsString().length(), 0) == -1)
 		fatal_perror("send");
 	return true;
 }

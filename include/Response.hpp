@@ -6,7 +6,7 @@
 /*   By: lindsay <lindsay@student.codam.nl>           +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/08/18 13:30:42 by lindsay       #+#    #+#                 */
-/*   Updated: 2022/10/06 15:05:24 by limartin      ########   odam.nl         */
+/*   Updated: 2022/10/06 15:15:40 by limartin      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 #include "Server.hpp"
 
-#include <sstream> //	getFormattedResponse
+#include <sstream> //	getResponseAsString
 #include <string>
 #include <vector>
 
@@ -37,7 +37,7 @@ class Response {
 		std::string	 m_statusLine;
 		str_vector_t m_header;
 		str_vector_t m_body;
-		std::string	 getFormattedResponse(void) const;
+		std::string	 getResponseAsString(void) const;
 
 	protected: //  Protected member variables & methods
 
