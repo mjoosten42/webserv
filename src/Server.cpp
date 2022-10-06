@@ -12,12 +12,12 @@ Server::Server() {
 	m_fd = -1;
 }
 
-Server::Server(int port) {
+Server::Server(int port): m_root("/") {
 	//  Specify server socket info: IPv4 protocol family, port in correct
 	//	endianness, IP address
 	sockaddr_in server		= { 0, AF_INET, htons(port), { inet_addr("127.0.0.1") }, { 0 } };
 
-	//  Setup socket_fd: specify domain (IPv4), communication type, and 
+	//  Setup socket_fd: specify domain (IPv4), communication type, and
 	//	protocol (default for socket)
 	m_fd					= socket(AF_INET, SOCK_STREAM, 0);
 
@@ -29,7 +29,7 @@ Server::Server(int port) {
 
 	set_fd_nonblocking(m_fd);
 
-	//  "Assign name to socket" = link socket_fd we configured to the server's 
+	//  "Assign name to socket" = link socket_fd we configured to the server's
 	//	socket information
 	if (bind(m_fd, reinterpret_cast<sockaddr *>(&server), sizeof(server)) < 0)
 		fatal_perror("bind");

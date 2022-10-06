@@ -9,5 +9,6 @@ class Server {
 		int getFD() const;
 
 	private:
-		int m_fd;
+		int			m_fd;
+		std::string m_root;
 };
