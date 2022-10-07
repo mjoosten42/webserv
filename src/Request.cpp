@@ -81,10 +81,7 @@ void Request::parseHeaders() {
 	line >> header.first;
 	line >> header.second;
 	while ((header.first != CRLF || header.first != "\n") && !header.first.empty()) {
-		std::transform(header.first.begin(),
-					   header.first.end(),
-					   header.first.begin(),
-					   ::toupper); //  header field is case-insensitive
+		strToUpper(header.first);
 		if (header.first.back() != ':')
 			std::cerr << "Header field must end in ':' : " << header.first << std::endl;
 		insert = m_headers.insert(header);
