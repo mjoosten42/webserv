@@ -16,7 +16,7 @@ void printMap(const std::map<T, U>& map) {
 	typename std::map<T, U>::const_iterator next;
 	std::cout << "Map: { ";
 	for (it = map.begin(); it != map.end(); ++it) {
-		std::cout << "{ " << it->first << ", " << it->second << " } ";
+		std::cout << "{ " << it->first << " " << it->second << " } ";
 		next = it;
 		next++;
 		if (next != map.end())

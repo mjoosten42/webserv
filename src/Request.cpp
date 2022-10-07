@@ -32,10 +32,10 @@ void Request::parse() {
 	m_total.erase(0, m_pos); //  Cut of start-line and headers, leaving only the body
 	m_total.swap(m_body);	 //  No copying needed
 
-	 std::cout << "Method: " << m_method << std::endl;
-	 std::cout << "Location: " << m_location << std::endl;
-	 printStringMap(m_headers);
-	 std::cout << "Body: {\n" << m_body << "}\n";
+	std::cout << "Method: " << m_method << std::endl;
+	std::cout << "Location: " << m_location << std::endl;
+	printStringMap(m_headers);
+	std::cout << "Body: {\n" << m_body << "}\n";
 }
 
 std::string Request::getNextLine() {
@@ -91,6 +91,7 @@ void Request::parseHeaders() {
 	line >> header.first;
 	line >> header.second;
 	while ((header.first != CRLF || header.first != "\n") && !header.first.empty()) {
+		std::transform(header.first.begin(), header.first.end(), header.first.begin(), ::toupper); // header field is case-insensitive
 		if (header.first.back() != ':')
 			std::cerr << "Header field must end in ':' : " << header.first << std::endl;
 		insert = m_headers.insert(header);

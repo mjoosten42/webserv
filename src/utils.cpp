@@ -57,7 +57,7 @@ bool sendSingle(const int socket_fd, std::ifstream& infile, std::string& headers
 		return false;
 	}
 	size = infile.gcount();
-	headers += "Content-Length: " + std::to_string(size) + "\r\n\r\n";// tODO: REMOVE CPP11
+	headers += "Content-Length: " + std::to_string(size) + "\r\n\r\n"; //  TODO: REMOVE CPP11
 	std::memmove(buf + headers.length(), buf, size);
 	std::memcpy(buf, headers.c_str(), headers.length());
 	std::memcpy(buf + headers.length() + size, "\r\n", 2);
@@ -104,6 +104,6 @@ void handleGetWithStaticFile(const int socket_fd, const std::string& filename) {
 
 	std::string headers = std::string("HTTP/1.1 200 OK\r\n"
 									  "Connection: Keep-Alive\r\n"
-									  "Content-Type: text/plain\r\n");
+									  "Content-Type: text/html\r\n");
 	transferFile(socket_fd, infile, headers);
 }
