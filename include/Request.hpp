@@ -12,7 +12,6 @@ class Request {
 		Request(int fd, const Server *server);
 
 		void add(const std::string& str);
-
 		void parse();
 
 	private:

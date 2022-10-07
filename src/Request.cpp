@@ -91,6 +91,8 @@ void Request::parseHeaders() {
 	line >> header.first;
 	line >> header.second;
 	while ((header.first != CRLF || header.first != "\n") && !header.first.empty()) {
+		if (header.first.back() != ':')
+			std::cerr << "Header field must end in ':' : " << header.first << std::endl;
 		insert = m_headers.insert(header);
 		if (!insert.second)
 			std::cerr << "Duplicate headers: " << header.first << std::endl;
@@ -104,16 +106,10 @@ void Request::parseHeaders() {
 	}
 
 	/* https://www.rfc-editor.org/rfc/rfc7230#section-3.1
-	**	Each header field consists of a case-insensitive field name followed
+	**	"Each header field consists of a case-insensitive field name followed
 	**	by a colon (":"), optional leading whitespace, the field value, and
-	**	optional trailing whitespace.
+	**	optional trailing whitespace."
 	**
 	**	Thus, no whitespace between field name and colon
 	*/
-
-	//  Check if all headers fields
-	std::map<std::string, std::string>::const_iterator it = m_headers.begin();
-	for (; it != m_headers.end(); ++it)
-		if (it->first.back() != ':')
-			std::cerr << "Header field must end in ':' : " << it->first << std::endl;
 }
