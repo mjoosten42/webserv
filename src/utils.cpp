@@ -1,8 +1,11 @@
 #include "utils.hpp"
 
-#include <fcntl.h>	// fcntl
+#include <fcntl.h> // fcntl
+#include <map>
 #include <stdio.h>	// perror
 #include <stdlib.h> // exit
+#include <string>
+#include <vector>
 
 //  perrors and exits.
 void fatal_perror(const char *msg) {
@@ -24,4 +27,22 @@ void printPollFds(const std::vector<pollfd>& vector) {
 			std::cout << ", ";
 	}
 	std::cout << " }\n";
+}
+
+void printStringMap(const std::map<std::string, std::string>& map) {
+	std::map<std::string, std::string>::const_iterator it = map.begin();
+	std::cout << "Map: {\n";
+	for (; it != map.end(); ++it)
+		std::cout << "  { " << it->first << ", " << it->second << " }\n";
+	std::cout << "}\n";
+}
+
+void printMethod(int method) {
+	std::cout << "Method: ";
+	if (method == 0)
+		std::cout << "GET\n";
+	if (method == 1)
+		std::cout << "POST\n";
+	if (method == 2)
+		std::cout << "DELETE\n";
 }

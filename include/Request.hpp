@@ -5,20 +5,28 @@
 #include <map>
 #include <string>
 
-enum methods { GET, POST, DELETE };
-
-enum progress { METHOD, LOCATION, HTTP, HEADERS, BODY, DONE };
+enum methods { GET, POST, DELETE, NONE };
 
 class Request {
 	public:
 		Request(int fd, const Server *server);
 
-		void addToRequest(const std::string& str);
+		void add(const std::string& str);
+
+		void parse();
+
+	private:
+		std::string getNextLine();
+		std::size_t newLineLength(std::size_t pos);
+		methods		testMethod(const std::string	&str);
+		void		parseStartLine();
+		void		parseHeaders();
 
 	private:
 		int								   m_fd;
 		const Server					  *m_server;
-		progress						   m_progress;
+		std::string						   m_total;
+		std::size_t						   m_pos;
 		methods							   m_method;
 		std::string						   m_location;
 		std::map<std::string, std::string> m_headers;

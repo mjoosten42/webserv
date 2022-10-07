@@ -53,11 +53,16 @@ bool Poller::receiveFromClient(int fd) {
 	print(buf);
 	print(std::string(80, '-'));
 
+	Request request(fd, m_fdservermap[fd]);
+
+	request.add(buf);
+	request.parse();
+
 	num_recvs++;
 
 	//  TODO; probably some stuff should be delegated to some other class here
 	Response response;
-	response.m_fd = fd;
+	response.m_fd			= fd;
 
 	std::string bodyContent = "server FD: " + std::to_string(m_fdservermap[fd]->getFD());
 	bodyContent += ", num receives: " + std::to_string(num_recvs) + "\n";

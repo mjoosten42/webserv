@@ -1,8 +1,6 @@
 #pragma once
 #include <string>
 
-#include <string>
-
 class Server {
 	public:
 		Server();

@@ -68,7 +68,8 @@ NamespaceIndentation: All
 PPIndentWidth: -1
 PackConstructorInitializers: NextLine
 
-QualifierAlignment: Left
+QualifierAlignment: Custom
+QualifierOrder: [ "const", "static", "type"]
 PointerAlignment: Right
 ReferenceAlignment: Left
 

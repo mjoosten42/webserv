@@ -15,7 +15,9 @@ include make/headers.mk
 
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 
-ifdef DEBUG
+DEBUG := 1
+
+ifeq ($(DEBUG), 1)
 	CXX_FLAGS += -g -fsanitize=address
 endif
 

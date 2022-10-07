@@ -33,7 +33,7 @@ class Response {
 	public:												 //  Operator overloads
 		Response& operator=(const Response& assignment); //  Assignment operator
 
-	public:					   //  Pubic member variables & methods
+	public: //  Pubic member variables & methods
 		int			 m_fd;
 		Server		*m_server; //  currently unused
 		std::string	 m_statusLine;
@@ -47,7 +47,6 @@ class Response {
 
 	public: //  Accessors
 		std::string getResponseAsCPPString(void) const;
-		const char *getResponseAsCString(void) const;
 
 	private: //  Nested classes
 };
