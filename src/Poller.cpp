@@ -1,5 +1,6 @@
 #include "Poller.hpp"
 
+#include "GetStaticFileTransfer.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
