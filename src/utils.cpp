@@ -57,10 +57,9 @@ bool sendSingle(const int socket_fd, std::ifstream& infile, std::string& headers
 		return false;
 	}
 	size = infile.gcount();
-	headers += "Content-Length: " + std::to_string(size) + "\r\n\r\n"; //  tODO: REMOVE CPP11
-	std::memmove(buf + headers.length(), buf, headers.length());
+	headers += "Content-Length: " + std::to_string(size) + "\r\n\r\n";// tODO: REMOVE CPP11
+	std::memmove(buf + headers.length(), buf, size);
 	std::memcpy(buf, headers.c_str(), headers.length());
-	//  print (buf);
 	std::memcpy(buf + headers.length() + size, "\r\n", 2);
 
 	//  TODO: fix bug here
