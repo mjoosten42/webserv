@@ -99,3 +99,7 @@ void Request::parseHeaders() {
 			break;
 	}
 }
+
+std::string& Request::getLocation() {
+	return m_location;
+}

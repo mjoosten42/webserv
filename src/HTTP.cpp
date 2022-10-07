@@ -8,8 +8,8 @@
 
 //  Note: according to RFC, \r\n is the correct newline
 //  However, it recommends parsers to also consider just \n sufficient
-//  Request1.1 mandatory [port is optional]
-//  	GET / Request/1.1
+//  HTTP 1.1 mandatory [port is optional]
+//  	GET / HTTP/1.1
 //  		Host: localhost:8080
 
 HTTP::HTTP(int fd, const Server *server): m_fd(fd), m_server(server) {

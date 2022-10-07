@@ -52,7 +52,7 @@ bool transferFile(const int socket_fd, std::ifstream& infile, std::string& heade
 }
 
 void handleGetWithStaticFile(const int socket_fd, const std::string& filename) {
-	std::ifstream infile(filename, std::ios::in | std::ios::binary);
+	std::ifstream infile("." + filename, std::ios::in | std::ios::binary); // TODO: remove dot
 
 	if (!infile.is_open()) {
 		//  TODO: send 404 or 500

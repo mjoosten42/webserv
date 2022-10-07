@@ -23,8 +23,9 @@ Poller::~Poller() {}
 
 //  accepts a client
 void Poller::acceptClient(int serverfd) {
-	int	   fd	  = accept(serverfd, NULL, NULL);
-	pollfd client = { fd, POLLIN, 0 };
+	int			  fd	 = accept(serverfd, NULL, NULL);
+	pollfd		  client = { fd, POLLIN, 0 }; // TODO: add POLLHUP
+	const Server *server = m_fdToServerMap[serverfd];
 
 	if (fd < 0)
 		fatal_perror("accept");
@@ -32,9 +33,7 @@ void Poller::acceptClient(int serverfd) {
 	set_fd_nonblocking(fd);
 
 	m_pollfds.push_back(client);
-	m_fdToServerMap[fd]	  = m_fdToServerMap[serverfd];
-
-	m_requestResponse[fd] = stuff(fd, m_fdToServerMap[fd]);
+	m_requestResponse[fd] = stuff(fd, server);
 
 	std::cout << "NEW CLIENT: " << fd << std::endl;
 }
@@ -42,9 +41,11 @@ void Poller::acceptClient(int serverfd) {
 //  when POLLIN is set, receives a message from the client
 //  returns true on success, false when the client sents EOF.
 bool Poller::receiveFromClient(int fd) {
-	static int num_recvs	= 0;
-	char	   buf[BUFSIZE] = { 0 };
-	ssize_t	   recv_len		= recv(fd, buf, BUFSIZE - 1, 0);
+	static int num_recvs = 0;
+	char	   buf[BUFSIZE];
+	ssize_t	   recv_len = recv(fd, buf, BUFSIZE - 1, 0);
+
+	buf[recv_len]		= 0;
 
 	if (recv_len == -1) {
 		fatal_perror("recv");
@@ -96,7 +97,7 @@ bool Poller::receiveFromClient(int fd) {
 	//  if (send(fd, str.c_str(), str.length(), 0) == -1)
 	//  	fatal_perror("send");
 
-	handleGetWithStaticFile(fd, "Makefile");
+	handleGetWithStaticFile(fd, m_requestResponse[fd].request.getLocation());
 	//  handleGetWithStaticFile(fd, "Notes");
 	//   response.sendResponse();
 	return true;
@@ -120,14 +121,10 @@ void Poller::start() {
 				acceptClient(m_pollfds[i].fd);
 
 		//  loop over clients for new messages
-		for (size_t i = m_nb_servers; i < m_pollfds.size(); i++) {
-			if (m_pollfds[i].revents & POLLIN) {
-				if (receiveFromClient(m_pollfds[i].fd) == false) {
-					removeClient(m_pollfds[i].fd);
-					i--;
-				}
-			}
-		}
+		for (size_t i = m_nb_servers; i < m_pollfds.size(); i++)
+			if (m_pollfds[i].revents & POLLIN)
+				if (receiveFromClient(m_pollfds[i].fd) == false)
+					removeClient(m_pollfds[i--].fd);
 
 		printPollFds(m_pollfds);
 	}

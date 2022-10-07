@@ -11,6 +11,7 @@ class Server;
 
 struct stuff {
 		stuff(): request(-1, NULL), response(-1, NULL), server(NULL) {}
+
 		stuff(int fd, const Server *server): request(fd, server), response(fd, server), server(server) {}
 
 		Request		  request;
