@@ -1,39 +1,29 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        ::::::::            */
-/*   Response.cpp                                       :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: lindsay <lindsay@student.codam.nl>           +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2022/08/18 13:30:35 by lindsay       #+#    #+#                 */
-/*   Updated: 2022/10/06 15:42:34 by limartin      ########   odam.nl         */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Response.hpp"
 
-Response::Response() {
-	return;
+#include "utils.hpp"
+
+#include <sstream>
+#include <sys/socket.h>
+
+struct Status {
+		int			code;
+		const char *message;
+};
+
+const static Status statusMessages[] = { { 200, "OK" }, { 404, "Not Found" } };
+
+std::string Response::statusMsg(int code) const {
+	const static int size = sizeof(statusMessages) / sizeof(*statusMessages);
+
+	for (int i = 0; i < size; i++)
+		if (statusMessages[i].code == code)
+			return statusMessages[i].message;
+	std::cerr << "Status code not found: " << code << std::endl;
+	return "";
 }
 
-Response::Response(const Response& copy) {
-	*this = copy;
-	return;
-}
-
-Response::~Response() {
-	return;
-}
-
-Response& Response::operator=(const Response& assignment) {
-	if (this != &assignment) {
-		m_fd		 = assignment.m_fd;
-		m_server	 = assignment.m_server; //  currently unused
-		m_statusLine = assignment.m_statusLine;
-		m_header	 = assignment.m_header;
-		m_body		 = assignment.m_body;
-	}
-	return (*this);
+std::string Response::statusLine() const {
+	return "HTTP/1.1" + std::to_string(m_statusCode) + statusMsg(m_statusCode);
 }
 
 bool Response::sendResponse(void) const {
@@ -44,16 +34,14 @@ bool Response::sendResponse(void) const {
 }
 
 std::string Response::getResponseAsCPPString(void) const {
-	std::stringstream ret;
-	std::string		  endline = "\r\n";
+	std::map<std::string, std::string>::const_iterator it;
+	std::stringstream								   ret;
 
-	ret << m_statusLine << endline;
-	for (const_str_vector_t::iterator it = m_header.begin(); it != m_header.end(); it++)
-		ret << *it << endline;
-	ret << endline;
-	for (const_str_vector_t::iterator it = m_body.begin(); it != m_body.end(); it++)
-		ret << *it << endline;
-	ret << endline;
+	ret << statusLine() << CRLF;
+	for (it = m_headers.begin(); it != m_headers.end(); it++)
+		ret << it->first << " " << it->second << CRLF;
+	ret << CRLF;
+	ret << m_body << CRLF;
 
 	return (ret.str());
 }

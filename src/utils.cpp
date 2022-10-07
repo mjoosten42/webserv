@@ -33,6 +33,6 @@ void printStringMap(const std::map<std::string, std::string>& map) {
 	std::map<std::string, std::string>::const_iterator it = map.begin();
 	std::cout << "Map: {\n";
 	for (; it != map.end(); ++it)
-		std::cout << "  { " << it->first << ", " << it->second << " }\n";
+		std::cout << "  { " << it->first << " " << it->second << " }\n";
 	std::cout << "}\n";
 }

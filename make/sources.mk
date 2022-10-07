@@ -1,4 +1,5 @@
 SOURCES =	src/GetStaticFileTransfer.cpp \
+	src/HTTP.cpp \
 	src/main.cpp \
 	src/Poller.cpp \
 	src/Request.cpp \

@@ -57,7 +57,7 @@ bool Poller::receiveFromClient(int fd) {
 	Request request(fd, m_fdservermap[fd]);
 
 	request.add(buf);
-	request.parse();
+	request.stringToData();
 
 	num_recvs++;
 
