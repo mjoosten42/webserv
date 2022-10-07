@@ -12,6 +12,10 @@ struct Status {
 
 const static Status statusMessages[] = { { 200, "OK" }, { 404, "Not Found" } };
 
+Response::Response(): HTTP(-1, NULL) {}
+
+Response::Response(int fd, const Server *server): HTTP(fd, server) {}
+
 std::string Response::statusMsg(int code) const {
 	const static int size = sizeof(statusMessages) / sizeof(*statusMessages);
 

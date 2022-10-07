@@ -15,7 +15,7 @@ Poller::Poller(const Server *servers, int size): m_servers(servers), m_nb_server
 	for (const Server *it = m_servers; it != m_servers + size; it++) {
 		pollfd client = { it->getFD(), POLLIN, 0 };
 		m_pollfds.push_back(client);
-		m_fdservermap[it->getFD()] = &*it;
+		m_fdToServerMap[it->getFD()] = it;
 	}
 }
 
@@ -23,17 +23,20 @@ Poller::~Poller() {}
 
 //  accepts a client
 void Poller::acceptClient(int serverfd) {
-	pollfd client = { accept(serverfd, NULL, NULL), POLLIN, 0 };
+	int	   fd	  = accept(serverfd, NULL, NULL);
+	pollfd client = { fd, POLLIN, 0 };
 
-	if (client.fd < 0)
+	if (fd < 0)
 		fatal_perror("accept");
 
-	set_fd_nonblocking(client.fd);
-
-	std::cout << "NEW CLIENT: " << client.fd << std::endl;
+	set_fd_nonblocking(fd);
 
 	m_pollfds.push_back(client);
-	m_fdservermap[client.fd] = m_fdservermap[serverfd];
+	m_fdToServerMap[fd]	  = m_fdToServerMap[serverfd];
+
+	m_requestResponse[fd] = stuff(fd, m_fdToServerMap[fd]);
+
+	std::cout << "NEW CLIENT: " << fd << std::endl;
 }
 
 //  when POLLIN is set, receives a message from the client
@@ -50,14 +53,8 @@ bool Poller::receiveFromClient(int fd) {
 		return false;
 	}
 
-	print(std::string(80, '-'));
-	print(buf);
-	print(std::string(80, '-'));
-
-	Request request(fd, m_fdservermap[fd]);
-
-	request.add(buf);
-	request.stringToData();
+	m_requestResponse[fd].request.add(buf);
+	m_requestResponse[fd].request.stringToData();
 
 	num_recvs++;
 
@@ -125,10 +122,7 @@ void Poller::start() {
 		for (size_t i = m_nb_servers; i < m_pollfds.size(); i++) {
 			if (m_pollfds[i].revents & POLLIN) {
 				if (receiveFromClient(m_pollfds[i].fd) == false) {
-					std::cout << "CLIENT " << m_pollfds[i].fd << " LEFT\n";
-					m_fdservermap.erase(m_pollfds[i].fd);
-					m_pollfds[i] = m_pollfds.back();
-					m_pollfds.pop_back();
+					removeClient(m_pollfds[i].fd);
 					i--;
 				}
 			}
@@ -136,4 +130,16 @@ void Poller::start() {
 
 		printPollFds(m_pollfds);
 	}
+}
+
+void Poller::removeClient(int fd) {
+	m_fdToServerMap.erase(fd);
+
+	for (size_t i = 0; i < m_pollfds.size(); i++)
+		if (m_pollfds[i].fd == fd)
+			m_pollfds.erase(m_pollfds.begin() + i);
+
+	m_requestResponse.erase(fd);
+
+	std::cout << "CLIENT " << fd << " LEFT\n";
 }

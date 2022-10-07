@@ -7,6 +7,8 @@
 #include <sstream>
 #include <string>
 
+Request::Request(): HTTP(-1, NULL) {}
+
 Request::Request(int fd, const Server *server): HTTP(fd, server), m_pos(0) {}
 
 void Request::add(const char *str) {
@@ -29,7 +31,7 @@ void Request::stringToData() {
 std::string Request::getNextLine() {
 	std::size_t pos = m_total.find_first_of(CRLF, m_pos); //  find index of next newline
 	if (pos == std::string::npos)						  //  EOF
-		return std::string();
+		return "";
 	std::string line = m_total.substr(m_pos, pos - m_pos); //  extract the substring between old newline and new newline
 	m_pos			 = pos + newLineLength(pos);		   //  update old newline, skipping \n or \r\n
 	return line;

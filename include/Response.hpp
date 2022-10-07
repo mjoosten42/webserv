@@ -7,8 +7,9 @@
 
 class Response: public HTTP {
 	public:
+		Response();
 		Response(int fd, const Server *server);
-	
+
 		bool		sendResponse(void) const;
 		std::string statusLine() const;
 		std::string getResponseAsCPPString(void) const;
