@@ -1,3 +1,4 @@
+#include "MIME.hpp"
 #include "utils.hpp"
 
 #include <fstream> // ifstream etc.
@@ -60,6 +61,8 @@ void handleGetWithStaticFile(const int socket_fd, const std::string& filename) {
 
 	std::string headers = std::string("HTTP/1.1 200 OK\r\n"
 									  "Connection: Keep-Alive\r\n"
-									  "Content-Type: text/html\r\n");
+									  "Content-Type: ");
+	headers += MIME::fromFileName(filename) + "\r\n";
+
 	transferFile(socket_fd, infile, headers);
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <sys/poll.h>
@@ -30,3 +31,12 @@ void printStringMap(const std::map<std::string, std::string>& map);
 void printMethod(int method);
 void fatal_perror(const char *msg);
 void set_fd_nonblocking(const int fd);
+
+//  does std::transform on the entire container from beginning to end
+template <class T, typename F>
+void transformBeginEnd(T& container, F operation) {
+	std::transform(container.begin(), container.end(), container.begin(), operation);
+}
+
+void strToLower(std::string& str);
+void strToUpper(std::string& str);
