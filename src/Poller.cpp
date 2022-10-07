@@ -61,26 +61,46 @@ bool Poller::receiveFromClient(int fd) {
 	num_recvs++;
 
 	//  TODO; probably some stuff should be delegated to some other class here
-	Response response;
-	response.m_fd			= fd;
+	// Response response;
+	// response.m_fd			= fd;
 
-	std::string bodyContent = "server FD: " + std::to_string(m_fdservermap[fd]->getFD());
-	bodyContent += ", num receives: " + std::to_string(num_recvs) + "\n";
+	// std::string bodyContent = "server FD: " + std::to_string(m_fdservermap[fd]->getFD());
+	// bodyContent += ", num receives: " + std::to_string(num_recvs) + "\n";
 
-	response.m_statusLine = "HTTP/1.1 200 OK";
+	// response.m_statusLine = "HTTP/1.1 200 OK";
 
-	response.m_header.push_back("Cache-Control: no-cache");
-	response.m_header.push_back("Server: amogus");
-	response.m_header.push_back("Date: Wed Jul 4 15:32:03 2012");
-	response.m_header.push_back("Connection: Keep-Alive:");
-	response.m_header.push_back("Content-Type: text/plain");
-	response.m_header.push_back("Content-Length: " + std::to_string(bodyContent.length()));
+	// response.m_header.push_back("Cache-Control: no-cache");
+	// response.m_header.push_back("Server: amogus");
+	// response.m_header.push_back("Date: Wed Jul 4 15:32:03 2012");
+	// response.m_header.push_back("Connection: Keep-Alive:");
+	// response.m_header.push_back("Content-Type: text/plain");
+	// response.m_header.push_back("Content-Length: " + std::to_string(bodyContent.length()));
 
-	response.m_body.push_back(bodyContent);
+	// response.m_body.push_back(bodyContent);
 
 	//  std::string number_str = std::to_string(num_recvs); // WAS UNUSED.
 
-	return (response.sendResponse());
+	// std::string toSend = "server FD: " + std::to_string(m_fdservermap[fd]->getFD());
+	// toSend += ", num receives: " + std::to_string(num_recvs) + "\n";
+
+	// std::string number_str = std::to_string(num_recvs);
+	// std::string str("HTTP/1.1 200 OK\r\n"
+	// 				"Server: amogus\r\n"
+	// 				"Date: Wed Jul 4 15:32:03 2012\r\n"
+	// 				"Connection: Keep-Alive:\r\n"
+	// 				"Content-Type: text/plain\r\n"
+	// 				"Content-Length: ");
+	// str += std::to_string(toSend.length());
+	// str += "\r\n\r\n";
+	// str += toSend;
+	// str += "\r\n\r\n";
+
+	// if (send(fd, str.c_str(), str.length(), 0) == -1)
+	// 	fatal_perror("send");
+
+	handleGetWithStaticFile(fd, "Notes");
+	// response.sendResponse();
+	return true;
 }
 
 void Poller::start() {
