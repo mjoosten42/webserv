@@ -35,7 +35,7 @@ class Response {
 
 	public: //  Pubic member variables & methods
 		int			 m_fd;
-		Server		*m_server; //  currently unused
+		Server	   *m_server; //  currently unused
 		std::string	 m_statusLine;
 		str_vector_t m_header;
 		str_vector_t m_body;

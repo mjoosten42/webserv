@@ -1,5 +1,6 @@
 #include "Poller.hpp"
 
+#include "GetStaticFileTransfer.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
@@ -98,7 +99,7 @@ bool Poller::receiveFromClient(int fd) {
 	//  if (send(fd, str.c_str(), str.length(), 0) == -1)
 	//  	fatal_perror("send");
 
-	handleGetWithStaticFile(fd, "Notes");
+	handleGetWithStaticFile(fd, "html/index.html");
 	//  response.sendResponse();
 	return true;
 }
