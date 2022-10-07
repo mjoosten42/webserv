@@ -24,7 +24,7 @@ Poller::~Poller() {}
 //  accepts a client
 void Poller::acceptClient(int serverfd) {
 	int			  fd	 = accept(serverfd, NULL, NULL);
-	pollfd		  client = { fd, POLLIN, 0 }; // TODO: add POLLHUP
+	pollfd		  client = { fd, POLLIN, 0 }; //  TODO: add POLLHUP
 	const Server *server = m_fdToServerMap[serverfd];
 
 	if (fd < 0)

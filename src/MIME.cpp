@@ -361,29 +361,6 @@ const static t_entry entries[] = { { "*3gpp", "audio/3gpp" },
 
 #define NUMBER_ENTRIES (sizeof(entries) / sizeof(t_entry))
 
-//  yep... back to C again! binary search.
-//  finds the corresponding MIME type in the entries. Returns nullptr on failure.
-const static char *findEntry(const char *key) {
-	int pivot = NUMBER_ENTRIES / 2;
-	int min	  = 0;
-	int max	  = NUMBER_ENTRIES - 1;
-
-	while (min <= max) {
-		int delta = std::strcmp(key, entries[pivot].key);
-
-		if (delta < 0)
-			max = pivot - 1;
-
-		else if (delta > 0)
-			min = pivot + 1;
-
-		else //  if (delta == 0) is implied
-			return entries[pivot].value;
-		pivot = (min + max) / 2;
-	}
-	return nullptr;
-}
-
 std::string MIME::fromFileName(const std::string& filename) {
 	size_t lastDotIndex = filename.find_last_of('.');
 	if (lastDotIndex == std::string::npos) {
@@ -393,7 +370,7 @@ std::string MIME::fromFileName(const std::string& filename) {
 	std::string extension = filename.substr(lastDotIndex + 1);
 	strToLower(extension); //  WHY DOESN'T HAVE CPP HAVE A TOLOWER FUNCTION FOR A STRING?!?!
 
-	const char *result = findEntry(extension.c_str());
+	const char *result = binarySearchKeyValue(extension.c_str(), entries, NUMBER_ENTRIES, ::strcmp);
 	if (result == nullptr)
 		return DEFAULT_MIME_TYPE;
 	return std::string(result);

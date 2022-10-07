@@ -9,16 +9,16 @@ class Request: public HTTP {
 		Request();
 		Request(int fd, const Server *server);
 
-		void add(const char *str);
-		void stringToData();
+		void		 add(const char *str);
+		void		 stringToData();
 		std::string& getLocation();
 
 	private:
-		std::string	 getNextLine();
-		std::size_t	 newLineLength(std::size_t pos);
-		std::string	 testMethod(const std::string &str) const;
-		void		 parseStartLine();
-		void		 parseHeaders();
+		std::string getNextLine();
+		std::size_t newLineLength(std::size_t pos);
+		std::string testMethod(const std::string& str) const;
+		void		parseStartLine();
+		void		parseHeaders();
 
 	private:
 		std::string m_location;

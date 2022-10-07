@@ -6,22 +6,29 @@
 #include <sys/socket.h>
 
 struct Status {
-		int			code;
-		const char *message;
+		int			key;
+		const char *value;
 };
 
-const static Status statusMessages[] = { { 200, "OK" }, { 404, "Not Found" } };
+const static Status statusMessages[] = {
+	{ 200, "OK" }, { 400, "Bad Request" }, { 403, "Forbidden" }, { 404, "Not Found" }, { 500, "Internal Server Error" },
+};
+
+#define STATUS_MESSAGES_LENGTH (sizeof(statusMessages) / sizeof(*statusMessages))
+
+static int compareFunc(int a, int b) {
+	return a - b;
+}
 
 Response::Response(): HTTP(-1, NULL) {}
 
 Response::Response(int fd, const Server *server): HTTP(fd, server) {}
 
 std::string Response::statusMsg(int code) const {
-	const static int size = sizeof(statusMessages) / sizeof(*statusMessages);
-
-	for (int i = 0; i < size; i++)
-		if (statusMessages[i].code == code)
-			return statusMessages[i].message;
+	const char *msg = binarySearchKeyValue<int, const Status[STATUS_MESSAGES_LENGTH], int(int, int), const char *>(
+		code, statusMessages, STATUS_MESSAGES_LENGTH, compareFunc);
+	if (msg != nullptr)
+		return std::string(msg);
 	std::cerr << "Status code not found: " << code << std::endl;
 	return "";
 }
