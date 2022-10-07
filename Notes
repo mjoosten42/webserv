@@ -3,3 +3,12 @@ If server has POLLIN, accept.
 If client has POLLIN, handle request.
 Map of <fd, request>
 Servers in array
+
+Headers headers;
+headers.statusline = "200 OK";
+headers["Connection"] = "Keep-Alive";
+headers["Content-Type"] = "text/html";
+headers.setBodySize(500);
+headers.fromString("derp");
+
+headers.buildString();
