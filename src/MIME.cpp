@@ -368,14 +368,14 @@ const static char *findEntry(const char *key) {
 	size_t min	 = 0;
 	size_t max	 = NUMBER_ENTRIES - 1;
 
-	while (max != pivot) {
+	while (min <= max) {
 		int delta = std::strcmp(key, entries[pivot].key);
 
 		if (delta < 0)
-			max = pivot;
+			max = pivot - 1;
 
 		else if (delta > 0)
-			min = pivot;
+			min = pivot + 1;
 
 		else //  if (delta == 0) is implied
 			return entries[pivot].value;
