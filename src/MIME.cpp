@@ -364,18 +364,18 @@ const static t_entry entries[] = { { "*3gpp", "audio/3gpp" },
 //  yep... back to C again! binary search.
 //  finds the corresponding MIME type in the entries. Returns nullptr on failure.
 const static char *findEntry(const char *key) {
-	size_t pivot = NUMBER_ENTRIES / 2;
-	size_t min	 = 0;
-	size_t max	 = NUMBER_ENTRIES - 1;
+	int pivot = NUMBER_ENTRIES / 2;
+	int min	  = 0;
+	int max	  = NUMBER_ENTRIES - 1;
 
-	while (max != pivot) {
+	while (min <= max) {
 		int delta = std::strcmp(key, entries[pivot].key);
 
 		if (delta < 0)
-			max = pivot;
+			max = pivot - 1;
 
 		else if (delta > 0)
-			min = pivot;
+			min = pivot + 1;
 
 		else //  if (delta == 0) is implied
 			return entries[pivot].value;
