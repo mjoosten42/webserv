@@ -99,8 +99,9 @@ bool Poller::receiveFromClient(int fd) {
 	//  if (send(fd, str.c_str(), str.length(), 0) == -1)
 	//  	fatal_perror("send");
 
-	handleGetWithStaticFile(fd, "html/index.html");
-	//  response.sendResponse();
+	handleGetWithStaticFile(fd, "Makefile");
+	//  handleGetWithStaticFile(fd, "Notes");
+	//   response.sendResponse();
 	return true;
 }
 
