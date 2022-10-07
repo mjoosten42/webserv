@@ -1,31 +1,19 @@
 #include "Request.hpp"
 
+#include "HTTP.hpp"
 #include "utils.hpp"
 
-#include <fstream>
-#include <iostream> // TODO:remove
+#include <iostream> // TODO: remove
 #include <sstream>
 #include <string>
-#include <sys/socket.h> // send()
 
-#define CRLF "\r\n"
+Request::Request(int fd, const Server *server): HTTP(fd, server), m_pos(0) {}
 
-//  Note: according to RFC, \r\n is the correct newline
-//  However, it recommends parsers to also consider just \n sufficient
-//  http1.1 mandatory [port is optional]
-//  	GET / HTTP/1.1
-//  		Host: localhost:8080
-
-Request::Request(int fd, const Server *server): m_fd(fd), m_server(server), m_pos(0) {
-	(void)m_server;
-	(void)m_fd;
-}
-
-void Request::add(const std::string& str) {
+void Request::add(const char *str) {
 	m_total += str;
 }
 
-void Request::parse() {
+void Request::stringToData() {
 	parseStartLine();
 	parseHeaders();
 
@@ -55,7 +43,7 @@ std::size_t Request::newLineLength(std::size_t pos) {
 	return -1;
 }
 
-std::string Request::testMethod(const std::string& str) {
+std::string Request::testMethod(const std::string& str) const {
 	const static char *table[] = { "GET", "POST", "DELETE" };
 	const static int   size	   = sizeof(table) / sizeof(*table);
 
@@ -91,6 +79,10 @@ void Request::parseHeaders() {
 	line >> header.first;
 	line >> header.second;
 	while ((header.first != CRLF || header.first != "\n") && !header.first.empty()) {
+		std::transform(header.first.begin(),
+					   header.first.end(),
+					   header.first.begin(),
+					   ::toupper); //  header field is case-insensitive
 		if (header.first.back() != ':')
 			std::cerr << "Header field must end in ':' : " << header.first << std::endl;
 		insert = m_headers.insert(header);
@@ -104,12 +96,4 @@ void Request::parseHeaders() {
 		if (header.first.empty())
 			break;
 	}
-
-	/* https://www.rfc-editor.org/rfc/rfc7230#section-3.1
-	**	"Each header field consists of a case-insensitive field name followed
-	**	by a colon (":"), optional leading whitespace, the field value, and
-	**	optional trailing whitespace."
-	**
-	**	Thus, no whitespace between field name and colon
-	*/
 }
