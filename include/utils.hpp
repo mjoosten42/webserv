@@ -30,3 +30,5 @@ void printStringMap(const std::map<std::string, std::string>& map);
 void printMethod(int method);
 void fatal_perror(const char *msg);
 void set_fd_nonblocking(const int fd);
+
+void handleGetWithStaticFile(const int socket_fd, const std::string& filename);
