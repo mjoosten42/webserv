@@ -11,7 +11,7 @@
 #define CRLF "\r\n"
 
 //  Note: according to RFC, \r\n is the correct newline
-//  However, it recommends parsers to also condsider just \n sufficient
+//  However, it recommends parsers to also consider just \n sufficient
 //  http1.1 mandatory [port is optional]
 //  	GET / HTTP/1.1
 //  		Host: localhost:8080
@@ -32,10 +32,10 @@ void Request::parse() {
 	m_total.erase(0, m_pos); //  Cut of start-line and headers, leaving only the body
 	m_total.swap(m_body);	 //  No copying needed
 
-	//  printMethod(m_method);
-	//  std::cout << "Location: " << m_location << std::endl;
-	//  printStringMap(m_headers);
-	//  std::cout << "Body: {\n" << m_body << "}\n";
+	 std::cout << "Method: " << m_method << std::endl;
+	 std::cout << "Location: " << m_location << std::endl;
+	 printStringMap(m_headers);
+	 std::cout << "Body: {\n" << m_body << "}\n";
 }
 
 std::string Request::getNextLine() {
@@ -55,14 +55,14 @@ std::size_t Request::newLineLength(std::size_t pos) {
 	return -1;
 }
 
-methods Request::testMethod(const std::string& str) {
+std::string Request::testMethod(const std::string& str) {
 	const static char *table[] = { "GET", "POST", "DELETE" };
 	const static int   size	   = sizeof(table) / sizeof(*table);
 
 	for (int i = 0; i < size; i++)
 		if (str == table[i])
-			return static_cast<methods>(i);
-	return NONE;
+			return str;
+	return "";
 }
 
 void Request::parseStartLine() {
@@ -70,7 +70,7 @@ void Request::parseStartLine() {
 	std::string		   word;
 
 	line >> word;
-	if ((m_method = testMethod(word)) == NONE)
+	if ((m_method = testMethod(word)) == "")
 		std::cerr << "Incorrect method: " << word << std::endl;
 
 	line >> m_location;

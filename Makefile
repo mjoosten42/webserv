@@ -16,9 +16,14 @@ include make/headers.mk
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 
 DEBUG := 1
+SAN := 0
 
 ifeq ($(DEBUG), 1)
-	CXX_FLAGS += -g -fsanitize=address
+	CXX_FLAGS += -g
+endif
+
+ifeq ($(SAN), 1)
+	CXX_FLAGS += -fsanitsize=address
 endif
 
 INCLUDE = -I $(INC_DIR)
