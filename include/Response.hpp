@@ -14,8 +14,7 @@ class Response: public HTTP {
 		std::string statusLine() const;
 		std::string getResponseAsCPPString(void) const;
 
-	private:
-		std::string statusMsg(int code) const;
+		static std::string statusMsg(int code); //  TODO: rename
 
 	private:
 		int m_statusCode;

@@ -24,11 +24,11 @@ Response::Response(): HTTP(-1, NULL) {}
 
 Response::Response(int fd, const Server *server): HTTP(fd, server) {}
 
-std::string Response::statusMsg(int code) const {
+std::string Response::statusMsg(int code) {
 	const char *msg = binarySearchKeyValue<int, const Status[STATUS_MESSAGES_LENGTH], int(int, int), const char *>(
 		code, statusMessages, STATUS_MESSAGES_LENGTH, compareFunc);
 	if (msg != nullptr)
-		return std::string(msg);
+		return std::to_string(code) + " " + std::string(msg); //  TODO: c++11
 	std::cerr << "Status code not found: " << code << std::endl;
 	return "";
 }
