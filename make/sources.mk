@@ -1,4 +1,5 @@
-SOURCES =	src/ConfigParser.cpp \
+SOURCES = \
+	src/ConfigParser.cpp \
 	src/GetStaticFileTransfer.cpp \
 	src/Handler.cpp \
 	src/HTTP.cpp \
