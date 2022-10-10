@@ -26,13 +26,3 @@ void printStringMap(const std::map<std::string, std::string>& map) {
 		std::cout << "  { " << it->first << " " << it->second << " }\n";
 	std::cout << "}\n";
 }
-
-//  converts an ASCII string to lowercase
-void strToLower(std::string& str) {
-	transformBeginEnd(str, ::tolower);
-}
-
-//  converts an ASCII string to uppercase
-void strToUpper(std::string& str) {
-	transformBeginEnd(str, ::toupper);
-}

@@ -1,4 +1,5 @@
-SOURCES =	src/GetStaticFileTransfer.cpp \
+SOURCES =	src/ConfigParser.cpp \
+	src/GetStaticFileTransfer.cpp \
 	src/Handler.cpp \
 	src/HTTP.cpp \
 	src/main.cpp \
@@ -8,4 +9,5 @@ SOURCES =	src/GetStaticFileTransfer.cpp \
 	src/Response.cpp \
 	src/Server.cpp \
 	src/shared_fd.cpp \
+	src/stringutils.cpp \
 	src/utils.cpp \
