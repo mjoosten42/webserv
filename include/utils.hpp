@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <iostream>
 #include <map>
 #include <sys/poll.h>
@@ -64,6 +63,3 @@ template <class T, typename F>
 void transformBeginEnd(T& container, F operation) {
 	std::transform(container.begin(), container.end(), container.begin(), operation);
 }
-
-void strToLower(std::string& str);
-void strToUpper(std::string& str);

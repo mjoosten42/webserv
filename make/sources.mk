@@ -9,4 +9,5 @@ SOURCES =	src/ConfigParser.cpp \
 	src/Response.cpp \
 	src/Server.cpp \
 	src/shared_fd.cpp \
+	src/stringutils.cpp \
 	src/utils.cpp \
