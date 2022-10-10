@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -28,5 +29,12 @@ struct s_block_directive {
 
 class ConfigParser {
 	public:
-		t_block_directive main_context;
+		ConfigParser();
+		bool			  parse_config(const char *path);
+		t_block_directive m_main_context;
+
+	private:
+		void debug_print_simple(t_simple_directive s);
+		void debug_print_block(t_block_directive b);
+		void debug_print_config();
 };
