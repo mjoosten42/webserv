@@ -16,6 +16,12 @@ std::string& Request::getLocation() {
 	return m_location;
 }
 
+void Request::reset() {
+	m_total = "";
+	m_method = "";
+	m_location = "";
+}
+
 void Request::parseStartLine() {
 	std::istringstream line(getNextLine());
 	std::string		   word;
@@ -32,6 +38,12 @@ void Request::parseStartLine() {
 	line >> word;
 	if (word != "HTTP/1.1")
 		std::cerr << "HTTP 1.1 only: " << word << std::endl;
+
+	// serve index.html when the location ends with a /
+	if (m_location.back() == '/')
+	{
+		m_location += "index.html"; // TODO: when index php, do just that instead etc.
+	}
 
 	std::cout << "Method: " << m_method << std::endl;
 	std::cout << "Location: " << m_location << std::endl;
