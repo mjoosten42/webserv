@@ -24,7 +24,7 @@ Poller::~Poller() {}
 //  accepts a client
 void Poller::acceptClient(int serverfd) {
 	int			  fd	 = accept(serverfd, NULL, NULL);
-	pollfd		  client = { fd, POLLIN, 0 }; //  TODO: add POLLHUP
+	pollfd		  client = { fd, POLLIN, 0 };
 	const Server *server = m_fdToServerMap[serverfd];
 
 	if (fd < 0)
@@ -50,7 +50,6 @@ bool Poller::receiveFromClient(int fd) {
 	if (recv_len == -1) {
 		fatal_perror("recv");
 	} else if (recv_len == 0) {
-		close(fd);
 		return false;
 	}
 
@@ -105,8 +104,10 @@ bool Poller::receiveFromClient(int fd) {
 
 void Poller::start() {
 	while (true) {
-		std::cout << "\n\tSTARTING LOOP\n";
+		std::cout << "\n----STARTING LOOP----\n";
 
+		printPollFds(m_pollfds);
+	
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 
 		if (poll_status == -1)
@@ -121,12 +122,14 @@ void Poller::start() {
 				acceptClient(m_pollfds[i].fd);
 
 		//  loop over clients for new messages
-		for (size_t i = m_nb_servers; i < m_pollfds.size(); i++)
-			if (m_pollfds[i].revents & POLLIN)
-				if (receiveFromClient(m_pollfds[i].fd) == false)
-					removeClient(m_pollfds[i--].fd);
-
-		printPollFds(m_pollfds);
+		for (size_t i = m_nb_servers; i < m_pollfds.size(); i++) {
+			if (m_pollfds[i].revents & (POLLERR | POLLNVAL))
+				std::cerr << "Client " << m_pollfds[i].fd << " error\n";
+			if (m_pollfds[i].revents & POLLHUP)
+				removeClient(m_pollfds[i--].fd);
+			else if (m_pollfds[i].revents & POLLIN)
+				receiveFromClient(m_pollfds[i].fd);
+		}
 	}
 }
 
@@ -138,6 +141,11 @@ void Poller::removeClient(int fd) {
 			m_pollfds.erase(m_pollfds.begin() + i);
 
 	m_requestResponse.erase(fd);
+
+	if (close(fd) < 0) {
+		std::cerr << "Fd " << fd << ": ";
+		fatal_perror("close");
+	}
 
 	std::cout << "CLIENT " << fd << " LEFT\n";
 }
