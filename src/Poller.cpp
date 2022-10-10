@@ -33,13 +33,22 @@ bool Poller::receiveFromClient(int fd) {
 	static char buf[BUFSIZE];
 	ssize_t		recv_len = recv(fd, buf, BUFSIZE - 1, 0);
 
-	if (recv_len == -1)
-		fatal_perror("recv");
-
-	if (recv_len == 0)
+	if (recv_len <= 0) {
+		if (recv_len == -1) {
+			if (errno != ECONNRESET && errno != ETIMEDOUT)
+				fatal_perror("recv");
+			std::cerr << "INFO: Connection reset or timeout\n";
+		}
 		return false;
+	}
 
 	buf[recv_len] = 0;
+
+	m_handlers[fd].m_request.reset();
+
+	std::cout << std::string(80, '-') << std::endl;
+	std::cout << buf << std::endl;
+	std::cout << std::string(80, '-') << std::endl;
 
 	m_handlers[fd].m_request.add(buf);
 
@@ -55,7 +64,11 @@ void Poller::start() {
 	while (true) {
 		std::cout << "\n----STARTING LOOP----\n";
 
-		printFds(m_pollfds.begin(), m_pollfds.end());
+		std::cout << "Servers: ";
+		printFds(m_pollfds.begin(), m_pollfds.begin() + m_servers.size());
+
+		std::cout << "Clients: ";
+		printFds(m_pollfds.begin() + m_servers.size(), m_pollfds.end());
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 

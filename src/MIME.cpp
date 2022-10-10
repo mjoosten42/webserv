@@ -372,8 +372,8 @@ std::string MIME::fromFileName(const std::string& filename) {
 	strToLower(extension); //  WHY DOESN'T HAVE CPP HAVE A TOLOWER FUNCTION FOR A STRING?!?!
 
 	//  not sure if I like this line of code...
-	const char *result = binarySearchKeyValue<const char *>(extension, entries, entriesSize);
-	if (result == nullptr)
+	const char *result = binarySearchKeyValue(extension, entries, entriesSize);
+	if (result == NULL)
 		return DEFAULT_MIME_TYPE;
-	return std::string(result);
+	return result;
 }

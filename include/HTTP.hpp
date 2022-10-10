@@ -9,6 +9,8 @@ class HTTP {
 
 		void stringToData();
 
+		void reset();
+
 	protected:
 		std::string	 getNextLine();
 		std::size_t	 newLineLength(std::size_t pos);

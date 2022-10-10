@@ -2,7 +2,7 @@
 
 #include "utils.hpp"
 
-// GENERAL ORGANISATION:
+//  GENERAL ORGANISATION:
 
 ConfigParser::ConfigParser() {
 	m_main_context.name = "main";
@@ -26,7 +26,7 @@ bool ConfigParser::parse_config(const char *path) {
 	return (true);
 }
 
-// READING FILE AND CONFIRMING VALIDITY:
+//  READING FILE AND CONFIRMING VALIDITY:
 
 //  Parsing validity steps:
 //  discard comments first (PARSING SIMPLIFICATION) //DONE
@@ -94,7 +94,7 @@ void ConfigParser::state_closeblock()
 
 
 
-// DEBUG PRINTING:
+//  DEBUG PRINTING:
 
 void ConfigParser::debug_print_simple(t_simple_directive s) {
 	std::cout << s.name << "   " << s.params << ";" << std::endl;
