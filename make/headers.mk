@@ -1,4 +1,5 @@
 HEADERS =	include/GetStaticFileTransfer.hpp \
+	include/Handler.hpp \
 	include/HTTP.hpp \
 	include/MIME.hpp \
 	include/Poller.hpp \

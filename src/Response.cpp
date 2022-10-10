@@ -20,9 +20,7 @@ static int compareFunc(int a, int b) {
 	return a - b;
 }
 
-Response::Response(): HTTP(-1, NULL) {}
-
-Response::Response(int fd, const Server *server): HTTP(fd, server) {}
+Response::Response(): HTTP() {}
 
 std::string Response::statusMsg(int code) {
 	const char *msg = binarySearchKeyValue<int, const Status[STATUS_MESSAGES_LENGTH], int(int, int), const char *>(
@@ -35,13 +33,6 @@ std::string Response::statusMsg(int code) {
 
 std::string Response::statusLine() const {
 	return "HTTP/1.1" + std::to_string(m_statusCode) + statusMsg(m_statusCode);
-}
-
-bool Response::sendResponse(void) const {
-	std::string response = getResponseAsCPPString();
-	if (send(m_fd, response.c_str(), response.length(), 0) == -1)
-		fatal_perror("send");
-	return (true);
 }
 
 std::string Response::getResponseAsCPPString(void) const {

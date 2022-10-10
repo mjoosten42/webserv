@@ -6,6 +6,9 @@
 #include <sys/poll.h>
 #include <vector>
 
+// TODO: move to defines.hpp?
+#define CRLF "\r\n"
+
 template <typename T>
 void print(const T& value) {
 	std::cout << value << "\n";

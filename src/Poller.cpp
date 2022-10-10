@@ -1,6 +1,7 @@
 #include "Poller.hpp"
 
 #include "GetStaticFileTransfer.hpp"
+#include "Handler.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
@@ -33,7 +34,7 @@ void Poller::acceptClient(int serverfd) {
 	set_fd_nonblocking(fd);
 
 	m_pollfds.push_back(client);
-	m_requestResponse[fd] = stuff(fd, server);
+	m_handlers[fd] = Handler(fd, server);
 
 	std::cout << "NEW CLIENT: " << fd << std::endl;
 }
@@ -47,14 +48,13 @@ bool Poller::receiveFromClient(int fd) {
 
 	buf[recv_len]		= 0;
 
-	if (recv_len == -1) {
+	if (recv_len == -1)
 		fatal_perror("recv");
-	} else if (recv_len == 0) {
+	else if (recv_len == 0)
 		return false;
-	}
 
-	m_requestResponse[fd].request.add(buf);
-	m_requestResponse[fd].request.stringToData();
+	m_handlers[fd].request.add(buf);
+	m_handlers[fd].request.stringToData();
 
 	num_recvs++;
 
@@ -96,7 +96,7 @@ bool Poller::receiveFromClient(int fd) {
 	//  if (send(fd, str.c_str(), str.length(), 0) == -1)
 	//  	fatal_perror("send");
 
-	handleGetWithStaticFile(fd, m_requestResponse[fd].request.getLocation());
+	handleGetWithStaticFile(fd, m_handlers[fd].request.getLocation());
 	//  handleGetWithStaticFile(fd, "Notes");
 	//   response.sendResponse();
 	return true;
@@ -107,7 +107,7 @@ void Poller::start() {
 		std::cout << "\n----STARTING LOOP----\n";
 
 		printPollFds(m_pollfds);
-	
+
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 
 		if (poll_status == -1)
@@ -140,11 +140,11 @@ void Poller::removeClient(int fd) {
 		if (m_pollfds[i].fd == fd)
 			m_pollfds.erase(m_pollfds.begin() + i);
 
-	m_requestResponse.erase(fd);
+	m_handlers.erase(fd);
 
 	if (close(fd) < 0) {
 		std::cerr << "Fd " << fd << ": ";
-		fatal_perror("close");
+		perror("close");
 	}
 
 	std::cout << "CLIENT " << fd << " LEFT\n";

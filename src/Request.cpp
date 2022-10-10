@@ -7,9 +7,9 @@
 #include <sstream>
 #include <string>
 
-Request::Request(): HTTP(-1, NULL) {}
+#define CRLF "\r\n"
 
-Request::Request(int fd, const Server *server): HTTP(fd, server), m_pos(0) {}
+Request::Request(): m_pos(0) {}
 
 void Request::add(const char *str) {
 	m_total += str;

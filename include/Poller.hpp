@@ -8,16 +8,7 @@
 #include <vector>
 
 class Server;
-
-struct stuff {
-		stuff(): request(-1, NULL), response(-1, NULL), server(NULL) {}
-
-		stuff(int fd, const Server *server): request(fd, server), response(fd, server), server(server) {}
-
-		Request		  request;
-		Response	  response;
-		const Server *server;
-};
+class Handler;
 
 class Poller {
 	public:
@@ -37,6 +28,6 @@ class Poller {
 		const Server *m_servers; //  array of servers
 		std::size_t	  m_nb_servers;
 
-		std::map<int, const Server *> m_fdToServerMap;	 //  the map which maps the client fds with corresponding server
-		std::map<int, stuff>		  m_requestResponse; //  map fd to its request, response and server
+		std::map<int, const Server *> m_fdToServerMap; //  the map which maps the client fds with corresponding server
+		std::map<int, Handler>		  m_handlers;	   //  map fd to its handler
 };

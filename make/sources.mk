@@ -1,4 +1,5 @@
 SOURCES =	src/GetStaticFileTransfer.cpp \
+	src/Handler.cpp \
 	src/HTTP.cpp \
 	src/main.cpp \
 	src/MIME.cpp \

@@ -7,7 +7,6 @@
 class Request: public HTTP {
 	public:
 		Request();
-		Request(int fd, const Server *server);
 
 		void		 add(const char *str);
 		void		 stringToData();
