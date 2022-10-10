@@ -2,17 +2,31 @@
 
 #include "utils.hpp"
 
-//  TOKENS: ' ' ';' '#' '{' '}'
-
-//  Parsing validity steps:
-//  discard comments first (PARSING SIMPLIFICATION) //DONE
-//  then check whether bracers are properly paired (INVALID_BRACES)
-//  check whether no text between ';' and '}' (MISSING SEMICOLON)
-//  finally check whether every simple directive has name and params (MISSING ARGS)
+// GENERAL ORGANISATION:
 
 ConfigParser::ConfigParser() {
 	m_main_context.name = "main";
 }
+
+bool ConfigParser::parse_config(const char *path) {
+	std::vector<std::string> config_file = loadConfigToStrVector(path);
+	discardComments(config_file);
+	//  std::vector<std::string>::iterator it;
+	//  for (it = conf_vector.begin(); it != conf_vector.end(); ++it) {
+	//          print(*it);
+	//  }
+
+	debug_print_config();
+	return (true);
+}
+
+// READING FILE AND CONFIRMING VALIDITY:
+
+//  Parsing validity steps:
+//  discard comments first (PARSING SIMPLIFICATION) //DONE
+//  then check whether bracers are properly paired (INVALID_BRACES)
+//  check whether no text between ';' and '}' or EOF (MISSING SEMICOLON)
+//  finally check whether every simple directive has name and params (MISSING ARGS)
 
 std::vector<std::string> ConfigParser::loadConfigToStrVector(const char *path) {
 	std::ifstream			 conf_stream(path);
@@ -36,17 +50,11 @@ void ConfigParser::discardComments(std::vector<std::string>& config) {
 	}
 }
 
-bool ConfigParser::parse_config(const char *path) {
-	std::vector<std::string> config_file = loadConfigToStrVector(path);
-	discardComments(config_file);
-	//  std::vector<std::string>::iterator it;
-	//  for (it = conf_vector.begin(); it != conf_vector.end(); ++it) {
-	//          print(*it);
-	//  }
+// STORING TO PARSING STRUCT
 
-	//  debug_print_config();
-	return (true);
-}
+//  Tokens to consider: ' ' ';' '#' '{' '}'
+
+// DEBUG PRINTING:
 
 void ConfigParser::debug_print_simple(t_simple_directive s) {
 	std::cout << s.name << "   " << s.params << ";" << std::endl;
