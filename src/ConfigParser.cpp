@@ -13,6 +13,7 @@ ConfigParser::ConfigParser() {
 }
 
 bool ConfigParser::parse_config(const char *path) {
+    (void)path;
 	debug_print_config();
 	return (true);
 }
@@ -30,9 +31,10 @@ void ConfigParser::debug_print_block(t_block_directive b) {
 	std::vector<t_block_directive>::iterator it_b;
 	for (it_b = b.block_directives.begin(); it_b != b.block_directives.end(); ++it_b)
 		debug_print_block(*it_b);
-	std::cout << std::endl << "}";
+	std::cout << std::endl << "}" << std::endl;
 }
 
 void ConfigParser::debug_print_config() {
+    std::cout << "DEBUG PRINTING CONFIG FILE THAT HAS BEEN PARSED:" << std::endl;
 	debug_print_block(m_main_context);
 }
