@@ -80,7 +80,8 @@ void Poller::start() {
 		//  loop over clients for new messages
 		for (size_t i = m_nb_servers; i < m_pollfds.size(); i++) {
 			if (m_pollfds[i].revents & POLLIN)
-				receiveFromClient(m_pollfds[i].fd);
+				if (!receiveFromClient(m_pollfds[i].fd))
+					removeClient(m_pollfds[i--].fd);
 			if (m_pollfds[i].revents & POLLHUP)
 				removeClient(m_pollfds[i--].fd);
 		}

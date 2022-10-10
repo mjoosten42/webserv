@@ -23,7 +23,7 @@ ifeq ($(DEBUG), 1)
 endif
 
 ifeq ($(SAN), 1)
-	CXX_FLAGS += -fsanitsize=address
+	CXX_FLAGS += -fsanitize=address
 endif
 
 INCLUDE = -I $(INC_DIR)

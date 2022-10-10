@@ -1,5 +1,7 @@
 #pragma once
 
+#include "shared_fd.hpp"
+
 #include <string>
 
 class Server {
@@ -11,6 +13,6 @@ class Server {
 		int getFD() const;
 
 	private:
-		int			m_fd;
+		shared_fd	m_fd;
 		std::string m_root;
 };

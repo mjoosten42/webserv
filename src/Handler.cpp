@@ -5,17 +5,10 @@
 #include <sys/socket.h>
 #include <unistd.h> // close
 
-Handler::Handler(): m_fd(-1), m_server(NULL) {}
+Handler::Handler(): m_fd(make_shared(-1)), m_server(NULL) {}
 
-Handler::Handler(int fd, const Server *server): m_fd(fd), m_server(server) {
+Handler::Handler(int fd, const Server *server): m_fd(make_shared(fd)), m_server(server) {
 	(void)m_server;
-}
-
-Handler::~Handler() {
-	//  if (close(m_fd < 0)) {
-	//  	std::cerr << "Fd " << m_fd << ": ";
-	//  	perror("close");
-	//  }
 }
 
 void Handler::sendResponse() const {
