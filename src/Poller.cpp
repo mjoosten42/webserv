@@ -2,8 +2,6 @@
 
 #include "GetStaticFileTransfer.hpp"
 #include "Handler.hpp"
-#include "Request.hpp"
-#include "Response.hpp"
 #include "Server.hpp"
 #include "utils.hpp"
 
@@ -53,8 +51,8 @@ bool Poller::receiveFromClient(int fd) {
 	else if (recv_len == 0)
 		return false;
 
-	m_handlers[fd].request.add(buf);
-	m_handlers[fd].request.stringToData();
+	m_handlers[fd].m_request.add(buf);
+	m_handlers[fd].m_request.stringToData();
 
 	num_recvs++;
 
@@ -96,7 +94,7 @@ bool Poller::receiveFromClient(int fd) {
 	//  if (send(fd, str.c_str(), str.length(), 0) == -1)
 	//  	fatal_perror("send");
 
-	handleGetWithStaticFile(fd, m_handlers[fd].request.getLocation());
+	handleGetWithStaticFile(fd, m_handlers[fd].m_request.getLocation());
 	//  handleGetWithStaticFile(fd, "Notes");
 	//   response.sendResponse();
 	return true;
