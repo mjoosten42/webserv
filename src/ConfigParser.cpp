@@ -1,7 +1,5 @@
 #include "ConfigParser.hpp"
 
-//  ConfigParser::ConfigParser() {}
-
 //  TOKENS: ' ' ';' '#' '{' '}'
 
 //  Parsing validity steps:
@@ -9,6 +7,15 @@
 //  then check whether bracers are properly paired (INVALID_BRACES)
 //  check whether no text between ';' and '}' (MISSING SEMICOLON)
 //  finally check whether every simple directive has name and params (MISSING ARGS)
+
+ConfigParser::ConfigParser() {
+	m_main_context.name = "main";
+}
+
+bool ConfigParser::parse_config(const char *path) {
+	debug_print_config();
+	return (true);
+}
 
 void ConfigParser::debug_print_simple(t_simple_directive s) {
 	std::cout << s.name << "   " << s.params << ";" << std::endl;

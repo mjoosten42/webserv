@@ -40,7 +40,7 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 	if (send(socket_fd, headers.c_str(), headers.length(), 0) == -1)
 		fatal_perror("send"); //  TODO: remove those!!
 
-	char	 *buf = new char[CHUNK_SENDING_SIZE];
+	char  *buf = new char[CHUNK_SENDING_SIZE];
 	size_t size;
 	size_t bufoffset;
 
@@ -68,7 +68,7 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 
 		//  add the size of the chunk, and finish the buffer with CRLF
 		{
-			char	 *size_str		= ft_itoa_hex_size_t(size);
+			char  *size_str		= ft_itoa_hex_size_t(size);
 			size_t size_str_len = std::strlen(size_str);
 			bufoffset			= 3 - size_str_len;
 
@@ -91,7 +91,7 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 //  TODO: think about architecture; how would we modularlize this?
 //  Also, remove fixed size, make it dynamic so that the headers can be arbitrarily large.
 bool sendSingle(const int socket_fd, std::ifstream& infile, std::string& headers) {
-	char	 *buf = new char[SENDING_BUF_SIZE];
+	char  *buf = new char[SENDING_BUF_SIZE];
 	size_t size;
 
 	infile.read(buf, FILE_BUF_SIZE);

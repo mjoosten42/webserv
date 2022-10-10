@@ -29,7 +29,8 @@ struct s_block_directive {
 
 class ConfigParser {
 	public:
-		bool			  parse_congfig();
+		ConfigParser();
+		bool			  parse_config(const char *path);
 		t_block_directive m_main_context;
 
 	private:
