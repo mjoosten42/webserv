@@ -6,7 +6,7 @@
 #include <sys/poll.h>
 #include <vector>
 
-// TODO: move to defines.hpp?
+//  TODO: move to defines.hpp?
 #define CRLF "\r\n"
 
 template <typename T>
@@ -31,7 +31,7 @@ void printMap(const std::map<T, U>& map) {
 
 //  a binary search template. key is the ky you want to search. The entries is an array of structs with a key and value.
 //  Size is the length of the array. The compare function should substract b from a, ex. strcmp.
-template <class T, class A, typename F, class R>
+template <class R, class T, class A, typename F>
 R binarySearchKeyValue(T key, A entries, const int size, F compareFunc) {
 	int pivot = size / 2;
 	int min	  = 0;
