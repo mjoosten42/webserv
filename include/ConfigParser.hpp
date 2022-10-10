@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -34,7 +35,9 @@ class ConfigParser {
 		t_block_directive m_main_context;
 
 	private:
-		void debug_print_simple(t_simple_directive s);
-		void debug_print_block(t_block_directive b);
-		void debug_print_config();
+		std::vector<std::string> loadConfigToStrVector(const char *path);
+		void					 discardComments(std::vector<std::string> &config);
+		void					 debug_print_simple(t_simple_directive s);
+		void					 debug_print_block(t_block_directive b);
+		void					 debug_print_config();
 };

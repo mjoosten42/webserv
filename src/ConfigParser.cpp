@@ -1,22 +1,60 @@
 #include "ConfigParser.hpp"
 
-//  TOKENS: ' ' ';' '#' '{' '}'
+#include "utils.hpp"
 
-//  Parsing validity steps:
-//  discard comments first (PARSING SIMPLIFICATION)
-//  then check whether bracers are properly paired (INVALID_BRACES)
-//  check whether no text between ';' and '}' (MISSING SEMICOLON)
-//  finally check whether every simple directive has name and params (MISSING ARGS)
+// GENERAL ORGANISATION:
 
 ConfigParser::ConfigParser() {
 	m_main_context.name = "main";
 }
 
 bool ConfigParser::parse_config(const char *path) {
-	(void)path;
+	std::vector<std::string> config_file = loadConfigToStrVector(path);
+	discardComments(config_file);
+	//  std::vector<std::string>::iterator it;
+	//  for (it = conf_vector.begin(); it != conf_vector.end(); ++it) {
+	//          print(*it);
+	//  }
+
 	debug_print_config();
 	return (true);
 }
+
+// READING FILE AND CONFIRMING VALIDITY:
+
+//  Parsing validity steps:
+//  discard comments first (PARSING SIMPLIFICATION) //DONE
+//  then check whether bracers are properly paired (INVALID_BRACES)
+//  check whether no text between ';' and '}' or EOF (MISSING SEMICOLON)
+//  finally check whether every simple directive has name and params (MISSING ARGS)
+
+std::vector<std::string> ConfigParser::loadConfigToStrVector(const char *path) {
+	std::ifstream			 conf_stream(path);
+	std::vector<std::string> ret;
+	if (conf_stream.is_open()) {
+		while (conf_stream.good()) {
+			std::string tmp;
+			std::getline(conf_stream, tmp);
+			ret.push_back(tmp);
+		}
+	}
+	return (ret);
+}
+
+void ConfigParser::discardComments(std::vector<std::string>& config) {
+	std::vector<std::string>::iterator it;
+	for (it = config.begin(); it != config.end(); ++it) {
+		size_t pos = (*it).find_first_of('#');
+		if (pos != std::string::npos)
+			(*it).resize(pos);
+	}
+}
+
+// STORING TO PARSING STRUCT
+
+//  Tokens to consider: ' ' ';' '#' '{' '}'
+
+// DEBUG PRINTING:
 
 void ConfigParser::debug_print_simple(t_simple_directive s) {
 	std::cout << s.name << "   " << s.params << ";" << std::endl;
