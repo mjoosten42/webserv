@@ -33,18 +33,18 @@ bool Poller::receiveFromClient(int fd) {
 	static char buf[BUFSIZE];
 	ssize_t		recv_len = recv(fd, buf, BUFSIZE - 1, 0);
 
-	if (recv_len == -1)
-		std::cerr << "Fd: " << fd << std::endl;
-
-	if (recv_len == 0)
+	if (recv_len <= 0) {
+		if (recv_len == -1) {
+			if (errno != ECONNRESET && errno != ETIMEDOUT)
+				fatal_perror("recv");
+			std::cerr << "INFO: Connection reset or timeout\n";
+		}
 		return false;
+	}
 
 	buf[recv_len] = 0;
 
 	m_handlers[fd].m_request.reset();
-
-	if (recv_len == -1)
-		fatal_perror("recv");
 
 	std::cout << std::string(80, '-') << std::endl;
 	std::cout << buf << std::endl;
