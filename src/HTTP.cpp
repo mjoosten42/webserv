@@ -24,6 +24,13 @@ void HTTP::stringToData() {
 	std::cout << "Body: {\n" << m_body << "}\n";
 }
 
+void HTTP::reset() {
+	m_total = "";
+	m_pos	= 0;
+	m_headers.clear();
+	m_body = "";
+}
+
 std::string HTTP::getNextLine() {
 	std::size_t pos = m_total.find_first_of(CRLF, m_pos); //  find index of next newline
 	if (pos == std::string::npos)						  //  EOF

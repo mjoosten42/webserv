@@ -36,7 +36,7 @@ class ConfigParser {
 
 	private:
 		std::vector<std::string> loadConfigToStrVector(const char *path);
-		void					 discardComments(std::vector<std::string> &config);
+		void					 discardComments(std::vector<std::string>					 &config);
 		void					 debug_print_simple(t_simple_directive s);
 		void					 debug_print_block(t_block_directive b);
 		void					 debug_print_config();

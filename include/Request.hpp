@@ -9,6 +9,7 @@ class Request: public HTTP {
 		Request();
 
 		void		 add(const char *str);
+		void		 reset();
 		std::string& getLocation();
 
 	private:
