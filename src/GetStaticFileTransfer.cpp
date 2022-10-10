@@ -4,6 +4,7 @@
 #include "utils.hpp"
 
 #include <fstream> // ifstream etc.
+#include <sstream> // stringstream
 
 #define SENDING_BUF_SIZE 4096
 #define FILE_BUF_SIZE (SENDING_BUF_SIZE - 1024)
@@ -34,13 +35,15 @@ void sendFail(const int socket_fd, int code, const std::string& msg) {
 #define CHUNK_SENDING_SIZE (CHUNK_MAX_LENGTH + 3 + 2 * 2)
 
 bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& headers) {
+	static std::stringstream ss; //  this is static so it doesn't have to be initialized every function call.
+
 	headers += "Transfer-Encoding: chunked\r\n\r\n";
 
 	//  send header first.
 	if (send(socket_fd, headers.c_str(), headers.length(), 0) == -1)
 		fatal_perror("send"); //  TODO: remove those!!
 
-	char  *buf = new char[CHUNK_SENDING_SIZE];
+	char	 *buf = new char[CHUNK_SENDING_SIZE];
 	size_t size;
 	size_t bufoffset;
 
@@ -68,16 +71,16 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 
 		//  add the size of the chunk, and finish the buffer with CRLF
 		{
-			char  *size_str		= ft_itoa_hex_size_t(size);
-			size_t size_str_len = std::strlen(size_str);
+			ss.seekp(std::ios::beg);
+			ss << std::hex << size;
+
+			size_t size_str_len = ss.tellp();
 			bufoffset			= 3 - size_str_len;
 
-			std::memcpy(buf + bufoffset, size_str, size_str_len);
+			std::memcpy(buf + bufoffset, ss.str().c_str(), size_str_len);
 			std::memcpy(buf + bufoffset + size_str_len, "\r\n", 2);
 
 			std::memcpy(buf + bufoffset + size_str_len + 2 + size, "\r\n", 2);
-
-			delete[] size_str;
 		}
 
 		if (send(socket_fd, buf + bufoffset, CHUNK_SENDING_SIZE - (CHUNK_MAX_LENGTH - size) - bufoffset, 0) == -1)
@@ -91,7 +94,7 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 //  TODO: think about architecture; how would we modularlize this?
 //  Also, remove fixed size, make it dynamic so that the headers can be arbitrarily large.
 bool sendSingle(const int socket_fd, std::ifstream& infile, std::string& headers) {
-	char  *buf = new char[SENDING_BUF_SIZE];
+	char	 *buf = new char[SENDING_BUF_SIZE];
 	size_t size;
 
 	infile.read(buf, FILE_BUF_SIZE);

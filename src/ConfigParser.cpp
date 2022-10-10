@@ -13,7 +13,7 @@ ConfigParser::ConfigParser() {
 }
 
 bool ConfigParser::parse_config(const char *path) {
-    (void)path;
+	(void)path;
 	debug_print_config();
 	return (true);
 }
@@ -35,6 +35,6 @@ void ConfigParser::debug_print_block(t_block_directive b) {
 }
 
 void ConfigParser::debug_print_config() {
-    std::cout << "DEBUG PRINTING CONFIG FILE THAT HAS BEEN PARSED:" << std::endl;
+	std::cout << "DEBUG PRINTING CONFIG FILE THAT HAS BEEN PARSED:" << std::endl;
 	debug_print_block(m_main_context);
 }
