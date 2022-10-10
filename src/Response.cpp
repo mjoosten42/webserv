@@ -23,8 +23,7 @@ static int compareFunc(int a, int b) {
 Response::Response(): HTTP() {}
 
 std::string Response::statusMsg(int code) {
-	const char *msg = binarySearchKeyValue<int, const Status[STATUS_MESSAGES_LENGTH], int(int, int), const char *>(
-		code, statusMessages, STATUS_MESSAGES_LENGTH, compareFunc);
+	const char *msg = binarySearchKeyValue<const char *>(code, statusMessages, STATUS_MESSAGES_LENGTH, compareFunc);
 	if (msg != nullptr)
 		return std::to_string(code) + " " + std::string(msg); //  TODO: c++11
 	std::cerr << "Status code not found: " << code << std::endl;
@@ -47,3 +46,5 @@ std::string Response::getResponseAsCPPString(void) const {
 
 	return (ret.str());
 }
+
+void Response::parseStartLine() {}

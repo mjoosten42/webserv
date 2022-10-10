@@ -40,11 +40,10 @@ void Poller::acceptClient(int serverfd) {
 //  when POLLIN is set, receives a message from the client
 //  returns true on success, false when the client sents EOF.
 bool Poller::receiveFromClient(int fd) {
-	static int num_recvs = 0;
-	char	   buf[BUFSIZE];
-	ssize_t	   recv_len = recv(fd, buf, BUFSIZE - 1, 0);
+	static char buf[BUFSIZE];
+	ssize_t		recv_len = recv(fd, buf, BUFSIZE - 1, 0);
 
-	buf[recv_len]		= 0;
+	buf[recv_len]		 = 0;
 
 	if (recv_len == -1)
 		fatal_perror("recv");
@@ -54,49 +53,8 @@ bool Poller::receiveFromClient(int fd) {
 	m_handlers[fd].m_request.add(buf);
 	m_handlers[fd].m_request.stringToData();
 
-	num_recvs++;
-
-	//  TODO; probably some stuff should be delegated to some other class here
-	//  Response response;
-	//  response.m_fd			= fd;
-
-	//  std::string bodyContent = "server FD: " + std::to_string(m_fdservermap[fd]->getFD());
-	//  bodyContent += ", num receives: " + std::to_string(num_recvs) + "\n";
-
-	//  response.m_statusLine = "HTTP/1.1 200 OK";
-
-	//  response.m_header.push_back("Cache-Control: no-cache");
-	//  response.m_header.push_back("Server: amogus");
-	//  response.m_header.push_back("Date: Wed Jul 4 15:32:03 2012");
-	//  response.m_header.push_back("Connection: Keep-Alive:");
-	//  response.m_header.push_back("Content-Type: text/plain");
-	//  response.m_header.push_back("Content-Length: " + std::to_string(bodyContent.length()));
-
-	//  response.m_body.push_back(bodyContent);
-
-	//  std::string number_str = std::to_string(num_recvs); // WAS UNUSED.
-
-	//  std::string toSend = "server FD: " + std::to_string(m_fdservermap[fd]->getFD());
-	//  toSend += ", num receives: " + std::to_string(num_recvs) + "\n";
-
-	//  std::string number_str = std::to_string(num_recvs);
-	//  std::string str("HTTP/1.1 200 OK\r\n"
-	//  				"Server: amogus\r\n"
-	//  				"Date: Wed Jul 4 15:32:03 2012\r\n"
-	//  				"Connection: Keep-Alive:\r\n"
-	//  				"Content-Type: text/plain\r\n"
-	//  				"Content-Length: ");
-	//  str += std::to_string(toSend.length());
-	//  str += "\r\n\r\n";
-	//  str += toSend;
-	//  str += "\r\n\r\n";
-
-	//  if (send(fd, str.c_str(), str.length(), 0) == -1)
-	//  	fatal_perror("send");
-
 	handleGetWithStaticFile(fd, m_handlers[fd].m_request.getLocation());
-	//  handleGetWithStaticFile(fd, "Notes");
-	//   response.sendResponse();
+
 	return true;
 }
 
@@ -121,12 +79,10 @@ void Poller::start() {
 
 		//  loop over clients for new messages
 		for (size_t i = m_nb_servers; i < m_pollfds.size(); i++) {
-			if (m_pollfds[i].revents & (POLLERR | POLLNVAL))
-				std::cerr << "Client " << m_pollfds[i].fd << " error\n";
+			if (m_pollfds[i].revents & POLLIN)
+				receiveFromClient(m_pollfds[i].fd);
 			if (m_pollfds[i].revents & POLLHUP)
 				removeClient(m_pollfds[i--].fd);
-			else if (m_pollfds[i].revents & POLLIN)
-				receiveFromClient(m_pollfds[i].fd);
 		}
 	}
 }
@@ -139,11 +95,6 @@ void Poller::removeClient(int fd) {
 			m_pollfds.erase(m_pollfds.begin() + i);
 
 	m_handlers.erase(fd);
-
-	if (close(fd) < 0) {
-		std::cerr << "Fd " << fd << ": ";
-		perror("close");
-	}
 
 	std::cout << "CLIENT " << fd << " LEFT\n";
 }

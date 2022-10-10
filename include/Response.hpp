@@ -11,6 +11,7 @@ class Response: public HTTP {
 
 		std::string statusLine() const;
 		std::string getResponseAsCPPString(void) const;
+		void		parseStartLine();
 
 		static std::string statusMsg(int code); //  TODO: rename
 
