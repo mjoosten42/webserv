@@ -28,10 +28,11 @@ void printMap(const std::map<T, U>& map) {
 	std::cout << " }\n";
 }
 
-//  a binary search template. key is the ky you want to search. The entries is an array of structs with a key and value.
-//  Size is the length of the array. The compare function should substract b from a, ex. strcmp.
-template <class R, class T, class A>
-R binarySearchKeyValue(T key, A entries, const int size) {
+//  A binary search template. Key is the key you want to search.
+//  The entries is an array of structs with a key and value.
+//  Size is the length of the array.
+template <class Key, class Value>
+const char *binarySearchKeyValue(Key key, Value entries[], int size) {
 	int pivot = size / 2;
 	int min	  = 0;
 	int max	  = size - 1;
@@ -43,11 +44,11 @@ R binarySearchKeyValue(T key, A entries, const int size) {
 		else if (entries[pivot].key < key)
 			min = pivot + 1;
 
-		else //  if (delta == 0) is implied
+		else
 			return entries[pivot].value;
 		pivot = (min + max) / 2;
 	}
-	return nullptr;
+	return NULL;
 }
 
 template <typename InputIt>

@@ -16,12 +16,11 @@
 void sendFail(const int socket_fd, int code, const std::string& msg) {
 	Response r;
 
-	r.setStatusCode(code);
-	std::string message = "<h1>" + std::to_string(code) + " " + r.statusMessage(code) + "</h1>\r\n";
+	std::string message = "<h1>" + std::to_string(code) + " " + r.getStatusMessage(code) + "</h1>\r\n";
 	message += "<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n";
 
 	std::string responseText("HTTP/1.1 ");
-	responseText += std::to_string(code) + " " + r.statusMessage(code) + "\r\n";
+	responseText += std::to_string(code) + " " + r.getStatusMessage(code) + "\r\n";
 	responseText += "Content-Type: text/html\r\n";
 	responseText += "Content-Length: " + std::to_string(message.length()) + "\r\n";
 	responseText += "\r\n";

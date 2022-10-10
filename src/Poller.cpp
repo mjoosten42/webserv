@@ -61,7 +61,11 @@ void Poller::start() {
 	while (true) {
 		std::cout << "\n----STARTING LOOP----\n";
 
-		printFds(m_pollfds.begin(), m_pollfds.end());
+		std::cout << "Servers: ";
+		printFds(m_pollfds.begin(), m_pollfds.begin() + m_servers.size());
+
+		std::cout << "Clients: ";
+		printFds(m_pollfds.begin() + m_servers.size(), m_pollfds.end());
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 
