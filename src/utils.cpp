@@ -19,16 +19,6 @@ void set_fd_nonblocking(const int fd) {
 		fatal_perror("fcntl");
 }
 
-void printPollFds(const std::vector<pollfd>& vector) {
-	std::cout << "Fds: { ";
-	for (uint i = 0; i < vector.size(); i++) {
-		std::cout << vector[i].fd;
-		if (i + 1 < vector.size())
-			std::cout << ", ";
-	}
-	std::cout << " }\n";
-}
-
 void printStringMap(const std::map<std::string, std::string>& map) {
 	std::map<std::string, std::string>::const_iterator it = map.begin();
 	std::cout << "Map: {\n";

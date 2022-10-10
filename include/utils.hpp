@@ -53,7 +53,17 @@ R binarySearchKeyValue(T key, A entries, const int size, F compareFunc) {
 	return nullptr;
 }
 
-void printPollFds(const std::vector<pollfd>& vector);
+template <typename InputIt>
+void printFds(InputIt first, InputIt last) {
+	std::cout << "{ ";
+	for (; first != last; first++) {
+		std::cout << first->fd;
+		if (first + 1 < last)
+			std::cout << ", ";
+	}
+	std::cout << " }\n";
+}
+
 void printStringMap(const std::map<std::string, std::string>& map);
 void printMethod(int method);
 void fatal_perror(const char *msg);

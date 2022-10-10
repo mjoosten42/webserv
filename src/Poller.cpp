@@ -10,21 +10,11 @@
 
 #define BUFSIZE 2048
 
-Poller::Poller(const Server *servers, int size): m_servers(servers), m_nb_servers(size) {
-	for (const Server *it = m_servers; it != m_servers + size; it++) {
-		pollfd client = { it->getFD(), POLLIN, 0 };
-		m_pollfds.push_back(client);
-		m_fdToServerMap[it->getFD()] = it;
-	}
-}
-
-Poller::~Poller() {}
-
 //  accepts a client
-void Poller::acceptClient(int serverfd) {
-	int			  fd	 = accept(serverfd, NULL, NULL);
+void Poller::acceptClient(int server_fd) {
+	int			  fd	 = accept(server_fd, NULL, NULL);
 	pollfd		  client = { fd, POLLIN, 0 };
-	const Server *server = m_fdToServerMap[serverfd];
+	const Server *server = &m_servers[server_fd];
 
 	if (fd < 0)
 		fatal_perror("accept");
@@ -51,7 +41,9 @@ bool Poller::receiveFromClient(int fd) {
 		return false;
 
 	m_handlers[fd].m_request.add(buf);
-	m_handlers[fd].m_request.stringToData();
+
+	if (recv_len != BUFSIZE - 1)
+		m_handlers[fd].m_request.stringToData();
 
 	handleGetWithStaticFile(fd, m_handlers[fd].m_request.getLocation());
 
@@ -62,7 +54,7 @@ void Poller::start() {
 	while (true) {
 		std::cout << "\n----STARTING LOOP----\n";
 
-		printPollFds(m_pollfds);
+		printFds(m_pollfds.begin(), m_pollfds.end());
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 
@@ -73,12 +65,12 @@ void Poller::start() {
 			std::cerr << "No events? wtf??\n";
 
 		//  Loop over servers for new clients
-		for (size_t i = 0; i < m_nb_servers; i++)
+		for (size_t i = 0; i < m_servers.size(); i++)
 			if (m_pollfds[i].revents & POLLIN)
 				acceptClient(m_pollfds[i].fd);
 
 		//  loop over clients for new messages
-		for (size_t i = m_nb_servers; i < m_pollfds.size(); i++) {
+		for (size_t i = m_servers.size(); i < m_pollfds.size(); i++) {
 			if (m_pollfds[i].revents & POLLIN)
 				if (!receiveFromClient(m_pollfds[i].fd))
 					removeClient(m_pollfds[i--].fd);
@@ -89,8 +81,6 @@ void Poller::start() {
 }
 
 void Poller::removeClient(int fd) {
-	m_fdToServerMap.erase(fd);
-
 	for (size_t i = 0; i < m_pollfds.size(); i++)
 		if (m_pollfds[i].fd == fd)
 			m_pollfds.erase(m_pollfds.begin() + i);
