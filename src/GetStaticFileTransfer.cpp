@@ -13,11 +13,14 @@
 //  very much temporary
 //  for the future: server also needs to be passed, as that may have custom 404 pages etc.
 void sendFail(const int socket_fd, int code, const std::string& msg) {
-	std::string message = "<h1>" + Response::statusMsg(code) + "</h1>\r\n";
+	Response r;
+
+	r.setStatusCode(code);
+	std::string message = "<h1>" + std::to_string(code) + " " + r.statusMessage(code) + "</h1>\r\n";
 	message += "<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n";
 
 	std::string responseText("HTTP/1.1 ");
-	responseText += Response::statusMsg(code) + "\r\n";
+	responseText += std::to_string(code) + " " + r.statusMessage(code) + "\r\n";
 	responseText += "Content-Type: text/html\r\n";
 	responseText += "Content-Length: " + std::to_string(message.length()) + "\r\n";
 	responseText += "\r\n";
@@ -40,7 +43,7 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 	if (send(socket_fd, headers.c_str(), headers.length(), 0) == -1)
 		fatal_perror("send"); //  TODO: remove those!!
 
-	char	 *buf = new char[CHUNK_SENDING_SIZE];
+	char  *buf = new char[CHUNK_SENDING_SIZE];
 	size_t size;
 	size_t bufoffset;
 
@@ -68,7 +71,7 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 
 		//  add the size of the chunk, and finish the buffer with CRLF
 		{
-			char	 *size_str		= ft_itoa_hex_size_t(size);
+			char  *size_str		= ft_itoa_hex_size_t(size);
 			size_t size_str_len = std::strlen(size_str);
 			bufoffset			= 3 - size_str_len;
 
@@ -91,7 +94,7 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 //  TODO: think about architecture; how would we modularlize this?
 //  Also, remove fixed size, make it dynamic so that the headers can be arbitrarily large.
 bool sendSingle(const int socket_fd, std::ifstream& infile, std::string& headers) {
-	char	 *buf = new char[SENDING_BUF_SIZE];
+	char  *buf = new char[SENDING_BUF_SIZE];
 	size_t size;
 
 	infile.read(buf, FILE_BUF_SIZE);

@@ -62,6 +62,7 @@ void HTTP::parseHeaders() {
 		strToUpper(header.first);
 		if (header.first.back() != ':')
 			std::cerr << "Header field must end in ':' : " << header.first << std::endl;
+		header.first.pop_back();
 		insert = m_headers.insert(header);
 		if (!insert.second)
 			std::cerr << "Duplicate headers: " << header.first << std::endl;

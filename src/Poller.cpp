@@ -33,12 +33,13 @@ bool Poller::receiveFromClient(int fd) {
 	static char buf[BUFSIZE];
 	ssize_t		recv_len = recv(fd, buf, BUFSIZE - 1, 0);
 
-	buf[recv_len]		 = 0;
-
 	if (recv_len == -1)
 		fatal_perror("recv");
-	else if (recv_len == 0)
+
+	if (recv_len == 0)
 		return false;
+
+	buf[recv_len] = 0;
 
 	m_handlers[fd].m_request.add(buf);
 

@@ -10,10 +10,13 @@ class Response: public HTTP {
 		Response();
 
 		std::string statusLine() const;
+		std::string statusMessage(int code) const;
 		std::string getResponseAsCPPString(void) const;
-		void		parseStartLine();
 
-		static std::string statusMsg(int code); //  TODO: rename
+		void setStatusCode(int code);
+
+	private:
+		void parseStartLine();
 
 	private:
 		int m_statusCode;

@@ -10,7 +10,6 @@ class shared_fd {
 		shared_fd(const shared_fd& other);
 		~shared_fd();
 		shared_fd& operator=(const shared_fd& other);
-		int		   operator*() const;
 				   operator int() const;
 
 	private:
