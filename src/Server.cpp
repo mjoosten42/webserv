@@ -10,7 +10,7 @@
 
 Server::Server(): m_fd(make_shared(-1)) {}
 
-Server::Server(int port): m_root(".") {
+Server::Server(int port): m_root("html") { //  TODO
 	//  Specify server socket info: IPv4 protocol family, port in correct
 	//	endianness, IP address
 	sockaddr_in server		= { 0, AF_INET, htons(port), { inet_addr("127.0.0.1") }, { 0 } };

@@ -360,7 +360,7 @@ const static t_entry entries[] = { { "*3gpp", "audio/3gpp" },
 								   { "yml", "text/yaml" },
 								   { "zip", "application/zip" } };
 
-#define NUMBER_ENTRIES (sizeof(entries) / sizeof(t_entry))
+const static int entriesSize = sizeof(entries) / sizeof(*entries);
 
 std::string MIME::fromFileName(const std::string& filename) {
 	size_t lastDotIndex = filename.find_last_of('.');
@@ -372,7 +372,7 @@ std::string MIME::fromFileName(const std::string& filename) {
 	strToLower(extension); //  WHY DOESN'T HAVE CPP HAVE A TOLOWER FUNCTION FOR A STRING?!?!
 
 	//  not sure if I like this line of code...
-	const char *result = binarySearchKeyValue<const char *>(extension.c_str(), entries, NUMBER_ENTRIES, ::strcmp);
+	const char *result = binarySearchKeyValue<const char *>(extension, entries, entriesSize);
 	if (result == nullptr)
 		return DEFAULT_MIME_TYPE;
 	return std::string(result);

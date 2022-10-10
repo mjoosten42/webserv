@@ -4,6 +4,7 @@
 #include "utils.hpp"
 
 #include <fstream> // ifstream etc.
+#include <sstream> // stringstream
 
 #define SENDING_BUF_SIZE 4096
 #define FILE_BUF_SIZE (SENDING_BUF_SIZE - 1024)
@@ -13,11 +14,14 @@
 //  very much temporary
 //  for the future: server also needs to be passed, as that may have custom 404 pages etc.
 void sendFail(const int socket_fd, int code, const std::string& msg) {
-	std::string message = "<h1>" + Response::statusMsg(code) + "</h1>\r\n";
+	Response r;
+
+	r.setStatusCode(code);
+	std::string message = "<h1>" + std::to_string(code) + " " + r.statusMessage(code) + "</h1>\r\n";
 	message += "<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n";
 
 	std::string responseText("HTTP/1.1 ");
-	responseText += Response::statusMsg(code) + "\r\n";
+	responseText += std::to_string(code) + " " + r.statusMessage(code) + "\r\n";
 	responseText += "Content-Type: text/html\r\n";
 	responseText += "Content-Length: " + std::to_string(message.length()) + "\r\n";
 	responseText += "\r\n";
@@ -34,6 +38,8 @@ void sendFail(const int socket_fd, int code, const std::string& msg) {
 #define CHUNK_SENDING_SIZE (CHUNK_MAX_LENGTH + 3 + 2 * 2)
 
 bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& headers) {
+	static std::stringstream ss; //  this is static so it doesn't have to be initialized every function call.
+
 	headers += "Transfer-Encoding: chunked\r\n\r\n";
 
 	//  send header first.
@@ -68,16 +74,16 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 
 		//  add the size of the chunk, and finish the buffer with CRLF
 		{
-			char  *size_str		= ft_itoa_hex_size_t(size);
-			size_t size_str_len = std::strlen(size_str);
+			ss.seekp(std::ios::beg);
+			ss << std::hex << size;
+
+			size_t size_str_len = ss.tellp();
 			bufoffset			= 3 - size_str_len;
 
-			std::memcpy(buf + bufoffset, size_str, size_str_len);
+			std::memcpy(buf + bufoffset, ss.str().c_str(), size_str_len);
 			std::memcpy(buf + bufoffset + size_str_len, "\r\n", 2);
 
 			std::memcpy(buf + bufoffset + size_str_len + 2 + size, "\r\n", 2);
-
-			delete[] size_str;
 		}
 
 		if (send(socket_fd, buf + bufoffset, CHUNK_SENDING_SIZE - (CHUNK_MAX_LENGTH - size) - bufoffset, 0) == -1)

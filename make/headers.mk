@@ -1,4 +1,5 @@
-HEADERS =	include/ConfigParser.hpp \
+HEADERS = \
+	include/ConfigParser.hpp \
 	include/GetStaticFileTransfer.hpp \
 	include/Handler.hpp \
 	include/HTTP.hpp \

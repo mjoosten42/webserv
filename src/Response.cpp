@@ -14,24 +14,20 @@ const static Status statusMessages[] = {
 	{ 200, "OK" }, { 400, "Bad Request" }, { 403, "Forbidden" }, { 404, "Not Found" }, { 500, "Internal Server Error" },
 };
 
-#define STATUS_MESSAGES_LENGTH (sizeof(statusMessages) / sizeof(*statusMessages))
-
-static int compareFunc(int a, int b) {
-	return a - b;
-}
+const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMessages);
 
 Response::Response(): HTTP() {}
 
-std::string Response::statusMsg(int code) {
-	const char *msg = binarySearchKeyValue<const char *>(code, statusMessages, STATUS_MESSAGES_LENGTH, compareFunc);
+std::string Response::statusMessage(int code) const {
+	const char *msg = binarySearchKeyValue<const char *>(code, statusMessages, statusMessagesSize);
 	if (msg != nullptr)
-		return std::to_string(code) + " " + std::string(msg); //  TODO: c++11
+		return msg;
 	std::cerr << "Status code not found: " << code << std::endl;
-	return "";
+	exit(EXIT_FAILURE);
 }
 
 std::string Response::statusLine() const {
-	return "HTTP/1.1" + std::to_string(m_statusCode) + statusMsg(m_statusCode);
+	return "HTTP/1.1" + std::to_string(m_statusCode) + statusMessage(m_statusCode);
 }
 
 std::string Response::getResponseAsCPPString(void) const {
@@ -40,7 +36,7 @@ std::string Response::getResponseAsCPPString(void) const {
 
 	ret << statusLine() << CRLF;
 	for (it = m_headers.begin(); it != m_headers.end(); it++)
-		ret << it->first << " " << it->second << CRLF;
+		ret << it->first << ": " << it->second << CRLF;
 	ret << CRLF;
 	ret << m_body << CRLF;
 
@@ -48,3 +44,7 @@ std::string Response::getResponseAsCPPString(void) const {
 }
 
 void Response::parseStartLine() {}
+
+void Response::setStatusCode(int code) {
+	m_statusCode = code;
+}
