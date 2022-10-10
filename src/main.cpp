@@ -6,11 +6,11 @@
 #include <vector>
 
 int main() {
-	const Server *servers = new Server(8080);
-	Poller		  poller(servers, 1);
+	std::vector<Server> servers;
+
+	servers.push_back(8080);
+
+	Poller poller(servers.begin(), servers.end());
 
 	poller.start();
-
-	//  Never reached
-	delete servers;
 }

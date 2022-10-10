@@ -65,4 +65,4 @@ format: files
 
 .PHONY: all clean fclean re run files print format
 
--include $(OBJECTS:.o:.d)
+-include $(OBJECTS:.o=.d)

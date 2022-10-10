@@ -10,7 +10,7 @@
 
 Server::Server(): m_fd(make_shared(-1)) {}
 
-Server::Server(int port): m_root("/") {
+Server::Server(int port): m_root(".") {
 	//  Specify server socket info: IPv4 protocol family, port in correct
 	//	endianness, IP address
 	sockaddr_in server		= { 0, AF_INET, htons(port), { inet_addr("127.0.0.1") }, { 0 } };
@@ -37,11 +37,6 @@ Server::Server(int port): m_root("/") {
 		fatal_perror("listen");
 
 	std::cout << "SERVER " << m_fd << " LISTENING ON " << port << std::endl;
-}
-
-//  Note: closing in a copy will cause errors, either don't copy or use reference-counting
-Server::~Server() {
-	std::cout << "Closing server: " << m_fd << std::endl;
 }
 
 int Server::getFD() const {

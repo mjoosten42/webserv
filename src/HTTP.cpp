@@ -1,5 +1,6 @@
 #include "HTTP.hpp"
 
+#include "stringutils.hpp"
 #include "utils.hpp"
 
 #include <sstream>
