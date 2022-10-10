@@ -7,4 +7,5 @@ SOURCES =	src/GetStaticFileTransfer.cpp \
 	src/Request.cpp \
 	src/Response.cpp \
 	src/Server.cpp \
+	src/shared_fd.cpp \
 	src/utils.cpp \

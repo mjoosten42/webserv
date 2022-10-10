@@ -8,9 +8,7 @@
 #include <sys/socket.h>
 #include <unistd.h> // close
 
-Server::Server() {
-	m_fd = -1;
-}
+Server::Server(): m_fd(make_shared(-1)) {}
 
 Server::Server(int port): m_root("/") {
 	//  Specify server socket info: IPv4 protocol family, port in correct
@@ -19,7 +17,7 @@ Server::Server(int port): m_root("/") {
 
 	//  Setup socket_fd: specify domain (IPv4), communication type, and
 	//	protocol (default for socket)
-	m_fd					= socket(AF_INET, SOCK_STREAM, 0);
+	m_fd					= make_shared(socket(AF_INET, SOCK_STREAM, 0));
 
 	//  On socket_fd, applied at socket level (SOL_SOCKET), set option
 	//  SO_REUSEADDR (allow bind() to reuse local addresses), to be enabled
@@ -44,8 +42,6 @@ Server::Server(int port): m_root("/") {
 //  Note: closing in a copy will cause errors, either don't copy or use reference-counting
 Server::~Server() {
 	std::cout << "Closing server: " << m_fd << std::endl;
-	if (close(m_fd) < 0)
-		perror("close");
 }
 
 int Server::getFD() const {
