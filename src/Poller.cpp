@@ -43,12 +43,13 @@ bool Poller::receiveFromClient(int fd) {
 
 	buf[recv_len] = 0;
 
-	std::cout << "----START BUF" << std::string(80, '-') << std::endl;
-	std::cout << buf;
-	std::cout << "----END BUF" << std::string(80, '-') << std::endl;
+	std::cout << RED << "----START BUF" << std::string(80, '-') << DEFAULT << std::endl;
+	std::cout << buf << std::endl;
+	std::cout << RED << "----END BUF" << std::string(80, '-') << DEFAULT << std::endl;
 
 	m_handlers[fd].m_request.add(buf);
 	m_handlers[fd].m_request.stringToData();
+	std::cout << m_handlers[fd].m_request << std::endl;
 	m_handlers[fd].handle();
 	m_handlers[fd].reset();
 
@@ -57,13 +58,10 @@ bool Poller::receiveFromClient(int fd) {
 
 void Poller::start() {
 	while (true) {
-		std::cout << "\n----STARTING LOOP----\n";
-
-		//  std::cout << "Servers: ";
-		//  printFds(m_pollfds.begin(), m_pollfds.begin() + m_servers.size());
-
-		std::cout << "Clients: ";
-		printFds(m_pollfds.begin() + m_servers.size(), m_pollfds.end());
+		std::cout << RED << "\n----STARTING LOOP----\n" << DEFAULT;
+		//  std::cout << RED << "Servers: " << DEFAULT << printFds(m_pollfds.begin(), m_pollfds.begin() +
+		//  m_servers.size());
+		std::cout << RED << "Clients: " << DEFAULT << printFds(m_pollfds.begin() + m_servers.size(), m_pollfds.end());
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 

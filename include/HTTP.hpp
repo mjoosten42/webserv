@@ -7,17 +7,10 @@ class HTTP {
 	public:
 		HTTP();
 
-		void stringToData();
+		const std::string						& getBody() const;
+		const std::map<std::string, std::string>& getHeaders() const;
 
 		void reset();
-
-		std::string& getBody();
-
-	protected:
-		std::string	 getNextLine();
-		std::size_t	 newLineLength(std::size_t pos);
-		virtual void parseStartLine() = 0;
-		void		 parseHeaders();
 
 	protected:
 		std::string						   m_total;

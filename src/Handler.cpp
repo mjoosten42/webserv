@@ -38,7 +38,7 @@ void Handler::handle() {
 }
 
 void Handler::handleGet() {
-	m_response.setStatusCode(200);
+	m_response.setStatusCode(200); //  Assume OK unless otherwise
 	m_response.setStatusCode(handleGetWithStaticFile(m_request.getLocation()));
 
 	if (m_response.getStatusCode() != 200)
@@ -58,15 +58,18 @@ int Handler::handleGetWithStaticFile(const std::string& filename) {
 }
 
 void Handler::sendFail(int code, const std::string& msg) {
+	m_response.addToBody("<style> h1 {text-align: center} </style>");
+	m_response.addToBody("<style> p {text-align: center} </style>");
+	m_response.addToBody("<h1>" + toString(code) + " " + m_response.getStatusMessage() + "</h1>");
+	m_response.addToBody("<p>something went wrong somewhere: <b>" + msg + "</b></p>");
+
 	m_response.addHeader("Content-Type", "text/html");
 	m_response.addHeader("Content-Length", toString(m_response.getBody().length()));
-
-	m_response.addToBody("<h1>" + toString(code) + " " + m_response.getStatusMessage() + "</h1>\r\n");
-	m_response.addToBody("<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n");
 
 	sendResponse();
 }
 
+//  Send response using statuscode/header/body members
 void Handler::sendResponse() const {
 	std::string response = m_response.getResponseAsString();
 	if (send(m_fd, response.c_str(), response.length(), 0) == -1)
@@ -112,7 +115,7 @@ int Handler::sendChunked(std::ifstream& infile) {
 		//  add the size of the chunk, and finish the buffer with CRLF
 		{
 			std::stringstream ss;
-		
+
 			ss.seekp(std::ios::beg);
 			ss << std::hex << size;
 
@@ -142,7 +145,6 @@ int Handler::sendSingle(std::ifstream& infile) {
 	}
 	size = infile.gcount();
 	m_response.addHeader("Content-Length", toString(size));
-	m_response.setStatusCode(200);
 	m_response.addToBody(buf);
 
 	sendResponse();

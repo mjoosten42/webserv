@@ -20,11 +20,11 @@ class Handler {
 	private:
 		void handleGet();
 		int	 handleGetWithStaticFile(const std::string &filename);
-		void sendFail(int code, const std::string& msg);
-		void sendResponse() const;
 		int	 transferFile(std::ifstream &infile);
-		int	 sendSingle(std::ifstream &infile);
 		int	 sendChunked(std::ifstream &infile);
+		int	 sendSingle(std::ifstream &infile);
+		void sendResponse() const;
+		void sendFail(int code, const std::string& msg);
 
 	private:
 		shared_fd	  m_fd;

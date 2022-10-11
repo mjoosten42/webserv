@@ -36,7 +36,7 @@ std::string Response::getStatusMessage() const {
 }
 
 std::string Response::getStatusLine() const {
-	return "HTTP/1.1 " + toString(m_statusCode) + " " + getStatusMessage();
+	return "HTTP/1.1 " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
 }
 
 std::string Response::getResponseAsString() const {
@@ -66,7 +66,7 @@ void Response::setStatusCode(int code) {
 }
 
 void Response::addToBody(const std::string& str) {
-	m_body += str;
+	m_body += str + CRLF;
 }
 
 void Response::addHeader(const std::string& field, const std::string& value) {

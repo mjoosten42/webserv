@@ -5,6 +5,10 @@
 #include <sys/poll.h>
 #include <vector>
 
+//  Terminal colors
+#define RED "\033[0;31m"
+#define DEFAULT "\033[0m"
+
 //  TODO: move to defines.hpp?
 #define CRLF "\r\n"
 
@@ -52,20 +56,21 @@ const char *binarySearchKeyValue(Key key, Value entries[], int size) {
 }
 
 template <typename InputIt>
-void printFds(InputIt first, InputIt last) {
-	std::cout << "{ ";
+std::string printFds(InputIt first, InputIt last) {
+	std::string Fds;
+	Fds += "{ ";
 	for (; first != last; first++) {
-		std::cout << first->fd;
+		Fds += first->fd;
 		if (first + 1 < last)
-			std::cout << ", ";
+			Fds += ", ";
 	}
-	std::cout << " }\n";
+	Fds += " }\n";
+	return Fds;
 }
 
-void printStringMap(const std::map<std::string, std::string>& map);
-void printMethod(int method);
-void fatal_perror(const char *msg);
-void set_fd_nonblocking(const int fd);
+std::string getStringMapAsString(const std::map<std::string, std::string>& map);
+void		fatal_perror(const char *msg);
+void		set_fd_nonblocking(const int fd);
 
 //  does std::transform on the entire container from beginning to end
 template <class T, typename F>

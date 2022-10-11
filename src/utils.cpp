@@ -19,10 +19,11 @@ void set_fd_nonblocking(const int fd) {
 		fatal_perror("fcntl");
 }
 
-void printStringMap(const std::map<std::string, std::string>& map) {
+std::string getStringMapAsString(const std::map<std::string, std::string>& map) {
 	std::map<std::string, std::string>::const_iterator it = map.begin();
-	std::cout << "Map: {\n";
+	std::string										   strings;
+
 	for (; it != map.end(); ++it)
-		std::cout << "  { " << it->first << " " << it->second << " }\n";
-	std::cout << "}\n";
+		strings += "  " + it->first + ": " + it->second + "\n";
+	return strings;
 }
