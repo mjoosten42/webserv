@@ -21,8 +21,12 @@ class Handler {
 
 	private:
 		void handleGet();
-		int	 handleGetWithStaticFile(const int socket_fd, const std::string &filename);
+		int	 handleGetWithStaticFile(const std::string &filename);
 		void sendFail(int code, const std::string& msg);
+		void sendResponse() const;
+		int	 transferFile(std::ifstream &infile);
+		int	 sendSingle(std::ifstream &infile);
+		int	 sendChunked(std::ifstream &infile);
 
 	private:
 		shared_fd	  m_fd;
