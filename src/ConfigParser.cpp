@@ -60,29 +60,12 @@ void ConfigParser::discardComments(std::vector<std::string>& config) {
 
 //  FINITE STATE MACHINE:
 
-<<<<<<< HEAD
-void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
-=======
 void ConfigParser::finite_state_machine(std::vector<std::string>& file)
 {
 	t_block_directive *context = &m_main_context;
->>>>>>> 4ae07df17de17d0a636847b3a28c1edb884fb6fd
 	std::vector<std::string>::iterator it;
 	
 	for (it = file.begin(); it != file.end(); ++it) {
-<<<<<<< HEAD
-		size_t pos = (*it).find_first_of(m_tokens + SEMICOLON, 0, SIZE); //  Find first token in line that isn't a space
-		if (pos != std::string::npos) {
-			//  print((*it)[pos]);
-			//  switch ((*it)[pos]):
-			//  {
-			//  	case m_tokens[SEMICOLON]:
-			//  	case m_tokens[OPEN_BRACE]:
-			//  	case m_tokens[CLOSE_BRACE]:
-			//  	default:
-			//  		continue //Pointer to current state and run that function?
-			//  }
-=======
 		*it = trimLeadingWhiteSpace(*it);
 		size_t pos = (*it).find_first_of(m_tokens + SEMICOLON, 0, SIZE); // Find first token in line that isn't a space
 		if (pos != std::string::npos){
@@ -102,14 +85,10 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file)
 				default:
 					continue; //Pointer to current state and run that function?
 			}
->>>>>>> 4ae07df17de17d0a636847b3a28c1edb884fb6fd
 		}
 	}
 }
 
-<<<<<<< HEAD
-void ConfigParser::state_simpledirective() {}
-=======
 void ConfigParser::state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator it)
 {
 	t_simple_directive tmp;
@@ -148,11 +127,6 @@ void ConfigParser::state_closeblock(t_block_directive **context, std::vector<std
 	(*context) = (*context)->parent_context;
 	++it;
 }
->>>>>>> 4ae07df17de17d0a636847b3a28c1edb884fb6fd
-
-void ConfigParser::state_openblock() {}
-
-void ConfigParser::state_closeblock() {}
 
 //  DEBUG PRINTING:
 
