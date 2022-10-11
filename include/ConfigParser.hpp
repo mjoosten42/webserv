@@ -39,8 +39,9 @@ class ConfigParser {
 		std::vector<std::string> readFile(const char *path);
 
 	private: //  Checking validity
-		bool check_validity(std::vector<std::string>& config_file);
-		void discardComments(std::vector<std::string>& config);
+		bool check_validity(std::vector<std::string>& config);
+		void discard_comments(std::vector<std::string>& config);
+		bool check_braces_error(std::vector<std::string>& config);
 
 	private: //	Finite state machine
 		enum Token { SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
