@@ -57,6 +57,7 @@ void ConfigParser::state_openblock(t_block_directive **context, std::vector<std:
 }
 
 void ConfigParser::state_closeblock(t_block_directive **context, std::vector<std::string>::iterator it) {
-	(*context) = (*context)->parent_context;
+	if ((*context)->parent_context != NULL)
+		(*context) = (*context)->parent_context;
 	++it;
 }

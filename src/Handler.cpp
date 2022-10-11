@@ -112,7 +112,7 @@ int Handler::sendChunked(std::ifstream& infile) {
 		//  add the size of the chunk, and finish the buffer with CRLF
 		{
 			std::stringstream ss;
-		
+
 			ss.seekp(std::ios::beg);
 			ss << std::hex << size;
 
