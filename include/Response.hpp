@@ -9,10 +9,11 @@ class Response: public HTTP {
 	public:
 		Response();
 
-		int			getStatusCode() const;
-		std::string getStatusLine() const;
-		std::string getStatusMessage() const;
-		std::string getResponseAsCPPString(void) const;
+		int				   getStatusCode() const;
+		std::string		   getStatusLine() const;
+		std::string		   getStatusMessage() const;
+		std::string		   getResponseAsString(void) const;
+		const std::string& getBody() const;
 
 		void setStatusCode(int code);
 		void addToBody(const std::string& str);
@@ -21,7 +22,8 @@ class Response: public HTTP {
 		void reset();
 
 	private:
-		void parseStartLine();
+		void		parseStartLine();
+		std::string getHeadersAsString() const;
 
 	private:
 		int m_statusCode;

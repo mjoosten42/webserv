@@ -5,8 +5,6 @@
 #include "Server.hpp"
 #include "shared_fd.hpp"
 
-enum state { EMPTY, READING, PROCESSING, WRITING, DONE };
-
 class Handler {
 	public:
 		Handler();
