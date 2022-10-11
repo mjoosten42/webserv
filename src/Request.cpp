@@ -52,6 +52,7 @@ void Request::parseStartLine() {
 	line >> word;
 	if (word != "HTTP/1.1")
 		std::cerr << "HTTP 1.1 only: " << word << std::endl;
+	//  TODO: send bad request
 
 	if (m_location == "/")
 		m_location += "html/";

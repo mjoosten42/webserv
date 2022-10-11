@@ -3,6 +3,7 @@
 #include "MIME.hpp"
 #include "Server.hpp"
 #include "shared_fd.hpp"
+#include "stringutils.hpp"
 #include "utils.hpp"
 
 #include <fstream>
@@ -59,11 +60,11 @@ int Handler::handleGetWithStaticFile(const std::string& filename) {
 //  very much temporary
 //  for the future: server also needs to be passed, as that may have custom 404 pages etc.
 void Handler::sendFail(int code, const std::string& msg) {
-	m_response.addToBody("<h1>" + std::to_string(code) + " " + m_response.getStatusMessage() + "</h1>\r\n");
+	m_response.addToBody("<h1>" + toString(code) + " " + m_response.getStatusMessage() + "</h1>\r\n");
 	m_response.addToBody("<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n");
 
 	m_response.addHeader("Content-Type", "text/html");
-	m_response.addHeader("Content-Length", std::to_string(m_response.getBody().length()));
+	m_response.addHeader("Content-Length", toString(m_response.getBody().length()));
 
 	sendResponse();
 }
@@ -149,7 +150,7 @@ int Handler::sendSingle(std::ifstream& infile) {
 		return 404;
 	}
 	size = infile.gcount();
-	m_response.addHeader("Content-Length", std::to_string(size));
+	m_response.addHeader("Content-Length", toString(size));
 	m_response.setStatusCode(200);
 	m_response.addToBody(buf);
 
