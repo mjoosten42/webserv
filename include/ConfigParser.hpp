@@ -26,6 +26,7 @@ struct s_block_directive {
 		std::string						name;
 		std::vector<t_simple_directive> simple_directives;
 		std::vector<t_block_directive>	block_directives;
+		t_block_directive				*parent_context;
 };
 
 class ConfigParser {
@@ -39,16 +40,15 @@ class ConfigParser {
 		void					 discardComments(std::vector<std::string>					 &config);
 
 	private: //	Finite state machine
-		enum Token { SPACE, SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
-
+		enum Token { SPACE, SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE}; //TODO: Handle other whitespace chars?
 		char m_tokens[SIZE];
 		void finite_state_machine(std::vector<std::string>& file);
-		void state_simpledirective();
-		void state_openblock();
-		void state_closeblock();
-
+		void state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator it);
+		void state_openblock(t_block_directive **context, std::vector<std::string>::iterator it);
+		void state_closeblock(t_block_directive **context, std::vector<std::string>::iterator it);
+	
 	private: //  Debug functions
-		void debug_print_simple(t_simple_directive s);
-		void debug_print_block(t_block_directive b);
+		void debug_print_simple(t_simple_directive s, std::string tabs);
+		void debug_print_block(t_block_directive b, std::string tabs);
 		void debug_print_config();
 };
