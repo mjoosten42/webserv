@@ -3,6 +3,10 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
+// TODO: Reject invalid config files
+// Split into separate files
+// Make functions that return just the server blocks
+
 //  GENERAL ORGANISATION:
 
 ConfigParser::ConfigParser() {
