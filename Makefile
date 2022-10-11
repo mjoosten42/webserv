@@ -46,7 +46,8 @@ clean:
 fclean: clean
 	$(RM) $(NAME)
 
-re: fclean
+re:
+	make fclean
 	make all
 
 run: all

@@ -47,7 +47,7 @@ std::string Response::getResponseAsCPPString(void) const {
 	for (it = m_headers.begin(); it != m_headers.end(); it++)
 		ret << it->first << ": " << it->second << CRLF;
 	ret << CRLF;
-	ret << m_body << CRLF;
+	ret << m_body;
 
 	return (ret.str());
 }
@@ -63,5 +63,5 @@ void Response::addToBody(const std::string& str) {
 }
 
 void Response::addHeader(const std::string& field, const std::string& value) {
-	m_headers[field + ":"] = value;
+	m_headers[field] = value;
 }

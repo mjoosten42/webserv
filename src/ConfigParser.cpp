@@ -1,12 +1,12 @@
 #include "ConfigParser.hpp"
 
-#include "utils.hpp"
 #include "stringutils.hpp"
+#include "utils.hpp"
 
 //  GENERAL ORGANISATION:
 
 ConfigParser::ConfigParser() {
-	m_main_context.name = "main";
+	m_main_context.name			  = "main";
 	m_main_context.parent_context = NULL;
 	m_tokens[SEMICOLON] = ';';
 	m_tokens[COMMENT] = '#';
@@ -59,11 +59,10 @@ void ConfigParser::discardComments(std::vector<std::string>& config) {
 
 //  FINITE STATE MACHINE:
 
-void ConfigParser::finite_state_machine(std::vector<std::string>& file)
-{
-	t_block_directive *context = &m_main_context;
+void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
+	t_block_directive				  *context = &m_main_context;
 	std::vector<std::string>::iterator it;
-	
+
 	for (it = file.begin(); it != file.end(); ++it) {
 		*it = trimLeadingWhiteSpace(*it);
 		size_t pos = (*it).find_first_of(m_tokens, 0, SIZE);
@@ -82,15 +81,14 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file)
 					state_closeblock(&context, it);
 					break;
 				default:
-					continue; //Pointer to current state and run that function?
+					continue; //  Pointer to current state and run that function?
 			}
 		}
 	}
 }
 
-void ConfigParser::state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator it)
-{
-	t_simple_directive tmp;
+void ConfigParser::state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator it) {
+	t_simple_directive	  tmp;
 	std::string::iterator str_i = (*it).begin();
 	std::string	*field = &(tmp.name);
 	while(*str_i != m_tokens[SEMICOLON])
@@ -99,7 +97,7 @@ void ConfigParser::state_simpledirective(t_block_directive **context, std::vecto
 			field = &(tmp.params);
 		*field = *field + *str_i;
 		str_i++;
-		if(str_i == (*it).end()){
+		if (str_i == (*it).end()) {
 			++it;
 			str_i = (*it).begin();
 		}
@@ -109,8 +107,7 @@ void ConfigParser::state_simpledirective(t_block_directive **context, std::vecto
 	return;
 }
 
-void ConfigParser::state_openblock(t_block_directive **context, std::vector<std::string>::iterator it)
-{
+void ConfigParser::state_openblock(t_block_directive **context, std::vector<std::string>::iterator it) {
 	t_block_directive tmp;
 	tmp.parent_context = *context;
 	std::string::iterator str_i;
@@ -121,8 +118,7 @@ void ConfigParser::state_openblock(t_block_directive **context, std::vector<std:
 	++it;
 }
 
-void ConfigParser::state_closeblock(t_block_directive **context, std::vector<std::string>::iterator it)
-{
+void ConfigParser::state_closeblock(t_block_directive **context, std::vector<std::string>::iterator it) {
 	(*context) = (*context)->parent_context;
 	++it;
 }
@@ -140,7 +136,7 @@ void ConfigParser::debug_print_block(t_block_directive b, std::string tabs) {
 	std::vector<t_simple_directive>::iterator it_s;
 	for (it_s = b.simple_directives.begin(); it_s != b.simple_directives.end(); ++it_s)
 		debug_print_simple(*it_s, tabs);
-	
+
 	std::vector<t_block_directive>::iterator it_b;
 	for (it_b = b.block_directives.begin(); it_b != b.block_directives.end(); ++it_b)
 		debug_print_block(*it_b, tabs);

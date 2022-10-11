@@ -26,7 +26,7 @@ struct s_block_directive {
 		std::string						name;
 		std::vector<t_simple_directive> simple_directives;
 		std::vector<t_block_directive>	block_directives;
-		t_block_directive				*parent_context;
+		t_block_directive			   *parent_context;
 };
 
 class ConfigParser {
@@ -46,7 +46,7 @@ class ConfigParser {
 		void state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator it);
 		void state_openblock(t_block_directive **context, std::vector<std::string>::iterator it);
 		void state_closeblock(t_block_directive **context, std::vector<std::string>::iterator it);
-	
+
 	private: //  Debug functions
 		void debug_print_simple(t_simple_directive s, std::string tabs);
 		void debug_print_block(t_block_directive b, std::string tabs);
