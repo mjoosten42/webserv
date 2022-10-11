@@ -5,11 +5,11 @@
 //  GENERAL ORGANISATION:
 
 ConfigParser::ConfigParser() {
-	m_main_context.name = "main";
-	m_tokens[SPACE] = ' ';
-	m_tokens[SEMICOLON] = ';';
-	m_tokens[COMMENT] = '#';
-	m_tokens[OPEN_BRACE] = '{';
+	m_main_context.name	  = "main";
+	m_tokens[SPACE]		  = ' ';
+	m_tokens[SEMICOLON]	  = ';';
+	m_tokens[COMMENT]	  = '#';
+	m_tokens[OPEN_BRACE]  = '{';
 	m_tokens[CLOSE_BRACE] = '}';
 }
 
@@ -56,43 +56,31 @@ void ConfigParser::discardComments(std::vector<std::string>& config) {
 	}
 }
 
-// FINITE STATE MACHINE:
+//  FINITE STATE MACHINE:
 
-void ConfigParser::finite_state_machine(std::vector<std::string>& file)
-{
+void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 	std::vector<std::string>::iterator it;
 	for (it = file.begin(); it != file.end(); ++it) {
-		size_t pos = (*it).find_first_of(m_tokens + SEMICOLON, 0, SIZE); // Find first token in line that isn't a space
-		if (pos != std::string::npos){
-			// print((*it)[pos]);
-			// switch ((*it)[pos]):
-			// {
-			// 	case m_tokens[SEMICOLON]:
-			// 	case m_tokens[OPEN_BRACE]:
-			// 	case m_tokens[CLOSE_BRACE]:
-			// 	default:
-			// 		continue //Pointer to current state and run that function?
-			// }
+		size_t pos = (*it).find_first_of(m_tokens + SEMICOLON, 0, SIZE); //  Find first token in line that isn't a space
+		if (pos != std::string::npos) {
+			//  print((*it)[pos]);
+			//  switch ((*it)[pos]):
+			//  {
+			//  	case m_tokens[SEMICOLON]:
+			//  	case m_tokens[OPEN_BRACE]:
+			//  	case m_tokens[CLOSE_BRACE]:
+			//  	default:
+			//  		continue //Pointer to current state and run that function?
+			//  }
 		}
 	}
 }
 
-void ConfigParser::state_simpledirective()
-{
+void ConfigParser::state_simpledirective() {}
 
-}
+void ConfigParser::state_openblock() {}
 
-void ConfigParser::state_openblock()
-{
-
-}
-
-void ConfigParser::state_closeblock()
-{
-
-}
-
-
+void ConfigParser::state_closeblock() {}
 
 //  DEBUG PRINTING:
 

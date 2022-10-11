@@ -20,15 +20,15 @@ void HTTP::stringToData() {
 	m_total.erase(0, m_pos); //  Cut of start-line and headers, leaving only the body
 	m_total.swap(m_body);	 //  No copying needed
 
-	printStringMap(m_headers);
-	std::cout << "Body: {\n" << m_body << "}\n";
+	//  printStringMap(m_headers);
+	//  std::cout << "Body: {\n" << m_body << "}\n";
 }
 
 void HTTP::reset() {
-	m_total = "";
-	m_pos	= 0;
 	m_headers.clear();
-	m_body = "";
+	m_total.clear();
+	m_body.clear();
+	m_pos = 0;
 }
 
 std::string HTTP::getNextLine() {
@@ -45,17 +45,8 @@ std::size_t HTTP::newLineLength(std::size_t pos) {
 		return 1;
 	if (m_total[pos + 1] == '\n') //  m_total[pos] must be \r
 		return 2;
+	std::cerr << "Newline error at " << pos << ": " << m_total << std::endl; //  TODO: assert
 	return -1;
-}
-
-std::string HTTP::testMethod(const std::string& str) const {
-	const static char *table[] = { "GET", "POST", "DELETE" };
-	const static int   size	   = sizeof(table) / sizeof(*table);
-
-	for (int i = 0; i < size; i++)
-		if (str == table[i])
-			return str;
-	return "";
 }
 
 void HTTP::parseHeaders() {
@@ -81,4 +72,8 @@ void HTTP::parseHeaders() {
 		if (header.first.empty())
 			break;
 	}
+}
+
+std::string& HTTP::getBody() {
+	return m_body;
 }

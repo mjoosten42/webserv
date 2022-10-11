@@ -39,13 +39,14 @@ class ConfigParser {
 		void					 discardComments(std::vector<std::string>					 &config);
 
 	private: //	Finite state machine
-		enum Token { SPACE, SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE};
+		enum Token { SPACE, SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
+
 		char m_tokens[SIZE];
 		void finite_state_machine(std::vector<std::string>& file);
 		void state_simpledirective();
 		void state_openblock();
 		void state_closeblock();
-	
+
 	private: //  Debug functions
 		void debug_print_simple(t_simple_directive s);
 		void debug_print_block(t_block_directive b);

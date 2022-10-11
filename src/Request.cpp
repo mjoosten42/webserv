@@ -6,6 +6,9 @@
 #include <sstream>
 #include <string>
 
+const static char *methodStrings[]	 = { "GET", "POST", "DELETE", "NONE" };
+const static int   methodStringsSize = sizeof(methodStrings) / sizeof(*methodStrings);
+
 Request::Request() {}
 
 void Request::add(const char *str) {
@@ -16,11 +19,20 @@ std::string& Request::getLocation() {
 	return m_location;
 }
 
+methods Request::getMethod() const {
+	return m_method;
+}
+
+//  TODO: remove
+void Request::printMethod() const {
+	std::cout << "Method: " << methodStrings[m_method] << std::endl;
+}
+
 void Request::reset() {
 	HTTP::reset();
-	m_total	   = "";
-	m_method   = "";
-	m_location = "";
+	m_total.clear();
+	m_method = NONE;
+	m_location.clear();
 }
 
 void Request::parseStartLine() {
@@ -28,7 +40,8 @@ void Request::parseStartLine() {
 	std::string		   word;
 
 	line >> word;
-	if ((m_method = testMethod(word)) == "")
+	m_method = parseMethod(word);
+	if (m_method == NONE)
 		std::cerr << "Incorrect method: " << word << std::endl;
 
 	line >> m_location;
@@ -40,10 +53,21 @@ void Request::parseStartLine() {
 	if (word != "HTTP/1.1")
 		std::cerr << "HTTP 1.1 only: " << word << std::endl;
 
-	//  serve index.html when the location ends with a /
+	if (m_location == "/")
+		m_location += "html/";
+
+	//  M: this depends on server
+	//   serve index.html when the location ends with a /
 	if (m_location.back() == '/')
 		m_location += "index.html"; //  TODO: when index php, do just that instead etc.
 
-	std::cout << "Method: " << m_method << std::endl;
+	printMethod();
 	std::cout << "Location: " << m_location << std::endl;
+}
+
+methods Request::parseMethod(const std::string& str) const {
+	for (int i = 0; i < methodStringsSize; i++)
+		if (str == methodStrings[i])
+			return static_cast<methods>(i);
+	return NONE;
 }

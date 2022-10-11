@@ -11,8 +11,14 @@ class Response: public HTTP {
 
 		int			getStatusCode() const;
 		std::string getStatusLine() const;
-		std::string getStatusMessage(int code) const;
+		std::string getStatusMessage() const;
 		std::string getResponseAsCPPString(void) const;
+
+		void setStatusCode(int code);
+		void addToBody(const std::string& str);
+		void addHeader(const std::string& field, const std::string& value);
+
+		void reset();
 
 	private:
 		void parseStartLine();

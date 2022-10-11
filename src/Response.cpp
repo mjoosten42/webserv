@@ -18,16 +18,25 @@ const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMes
 
 Response::Response(): HTTP() {}
 
-std::string Response::getStatusMessage(int code) const {
-	const char *msg = binarySearchKeyValue(code, statusMessages, statusMessagesSize);
+void Response::reset() {
+	HTTP::reset();
+	m_statusCode = 0;
+}
+
+int Response::getStatusCode() const {
+	return m_statusCode;
+}
+
+std::string Response::getStatusMessage() const {
+	const char *msg = binarySearchKeyValue(m_statusCode, statusMessages, statusMessagesSize);
 	if (msg != nullptr)
 		return msg;
-	std::cerr << "Status code not found: " << code << std::endl;
+	std::cerr << "Status code not found: " << m_statusCode << std::endl;
 	exit(EXIT_FAILURE);
 }
 
 std::string Response::getStatusLine() const {
-	return "HTTP/1.1" + std::to_string(m_statusCode) + getStatusMessage(m_statusCode);
+	return "HTTP/1.1 " + std::to_string(m_statusCode) + " " + getStatusMessage();
 }
 
 std::string Response::getResponseAsCPPString(void) const {
@@ -44,3 +53,15 @@ std::string Response::getResponseAsCPPString(void) const {
 }
 
 void Response::parseStartLine() {}
+
+void Response::setStatusCode(int code) {
+	m_statusCode = code;
+}
+
+void Response::addToBody(const std::string& str) {
+	m_body += str;
+}
+
+void Response::addHeader(const std::string& field, const std::string& value) {
+	m_headers[field + ":"] = value;
+}

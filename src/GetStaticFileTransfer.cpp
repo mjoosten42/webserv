@@ -11,26 +11,6 @@
 
 #include <sys/socket.h> // send
 
-//  very much temporary
-//  for the future: server also needs to be passed, as that may have custom 404 pages etc.
-void sendFail(const int socket_fd, int code, const std::string& msg) {
-	Response r;
-
-	std::string message = "<h1>" + std::to_string(code) + " " + r.getStatusMessage(code) + "</h1>\r\n";
-	message += "<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n";
-
-	std::string responseText("HTTP/1.1 ");
-	responseText += std::to_string(code) + " " + r.getStatusMessage(code) + "\r\n";
-	responseText += "Content-Type: text/html\r\n";
-	responseText += "Content-Length: " + std::to_string(message.length()) + "\r\n";
-	responseText += "\r\n";
-
-	responseText += message;
-
-	if (send(socket_fd, responseText.c_str(), responseText.length(), 0) == -1)
-		fatal_perror("send");
-}
-
 //  WARNING: CHUNK_MAX_LENGTH CANNOT EXCEED 0xfff as the length limit is hard coded.
 //  However, there is no reason for such a high limit anyways, since browsers do not always support this.
 #define CHUNK_MAX_LENGTH 1024
@@ -45,7 +25,7 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 	if (send(socket_fd, headers.c_str(), headers.length(), 0) == -1)
 		fatal_perror("send"); //  TODO: remove those!!
 
-	char	 *buf = new char[CHUNK_SENDING_SIZE];
+	char  *buf = new char[CHUNK_SENDING_SIZE];
 	size_t size;
 	size_t bufoffset;
 
@@ -56,7 +36,7 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 			//  TODO: 500, maybe exceptions?
 			//  fatal_perror("readddd");
 			std::cerr << "Reading infile failed!\n";
-			sendFail(socket_fd, 500, "Reading file failed");
+			//  sendFail(socket_fd, 500, "Reading file failed");
 			delete[] buf;
 			return false;
 		}
@@ -96,7 +76,7 @@ bool sendChunked(const int socket_fd, std::ifstream& infile, std::string& header
 //  TODO: think about architecture; how would we modularlize this?
 //  Also, remove fixed size, make it dynamic so that the headers can be arbitrarily large.
 bool sendSingle(const int socket_fd, std::ifstream& infile, std::string& headers) {
-	char	 *buf = new char[SENDING_BUF_SIZE];
+	char  *buf = new char[SENDING_BUF_SIZE];
 	size_t size;
 
 	infile.read(buf, FILE_BUF_SIZE);
@@ -104,7 +84,7 @@ bool sendSingle(const int socket_fd, std::ifstream& infile, std::string& headers
 		//  TODO: 500, maybe exceptions?
 		//  fatal_perror("readddd");
 		std::cerr << "Reading infile failed!\n";
-		sendFail(socket_fd, 500, "Reading file failed");
+		//  sendFail(socket_fd, 500, "Reading file failed");
 		delete[] buf;
 		return false;
 	}
@@ -135,21 +115,4 @@ bool transferFile(const int socket_fd, std::ifstream& infile, std::string& heade
 	}
 	infile.close();
 	return true;
-}
-
-void handleGetWithStaticFile(const int socket_fd, const std::string& filename) {
-	std::ifstream infile("." + filename, std::ios::in | std::ios::binary); //  TODO: remove dot
-
-	if (!infile.is_open()) {
-		//  TODO: send 401, 404 or 500
-		sendFail(socket_fd, 404, "Opening file failed whoops");
-		return;
-	}
-
-	std::string headers = std::string("HTTP/1.1 200 OK\r\n"
-									  "Connection: Keep-Alive\r\n"
-									  "Content-Type: ");
-	headers += MIME::fromFileName(filename) + "\r\n";
-
-	transferFile(socket_fd, infile, headers);
 }

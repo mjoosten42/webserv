@@ -364,14 +364,12 @@ const static int entriesSize   = sizeof(entries) / sizeof(*entries);
 
 std::string MIME::fromFileName(const std::string& filename) {
 	size_t lastDotIndex = filename.find_last_of('.');
-	if (lastDotIndex == std::string::npos) {
-		//  IDEA: maybe determine from content?
-		return DEFAULT_MIME_TYPE;
-	}
+	if (lastDotIndex == std::string::npos)
+		return DEFAULT_MIME_TYPE; //  IDEA: maybe determine from content?
+
 	std::string extension = filename.substr(lastDotIndex + 1);
 	strToLower(extension); //  WHY DOESN'T HAVE CPP HAVE A TOLOWER FUNCTION FOR A STRING?!?!
 
-	//  not sure if I like this line of code...
 	const char *result = binarySearchKeyValue(extension, entries, entriesSize);
 	if (result == NULL)
 		return DEFAULT_MIME_TYPE;

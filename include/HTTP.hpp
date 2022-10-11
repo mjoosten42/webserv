@@ -11,10 +11,11 @@ class HTTP {
 
 		void reset();
 
+		std::string& getBody();
+
 	protected:
 		std::string	 getNextLine();
 		std::size_t	 newLineLength(std::size_t pos);
-		std::string	 testMethod(const std::string &str) const;
 		virtual void parseStartLine() = 0;
 		void		 parseHeaders();
 

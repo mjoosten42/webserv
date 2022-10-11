@@ -1,3 +1,3 @@
 #pragma once
 
-void handleGetWithStaticFile(const int socket_fd, const std::string& filename);
+bool transferFile(const int socket_fd, std::ifstream& infile, std::string& headers);
