@@ -12,7 +12,7 @@ class Response: public HTTP {
 		int				   getStatusCode() const;
 		std::string		   getStatusLine() const;
 		std::string		   getStatusMessage() const;
-		std::string		   getResponseAsString(void) const;
+		std::string		   getResponseAsString(void);
 		const std::string& getBody() const;
 
 		void setStatusCode(int code);
@@ -22,7 +22,7 @@ class Response: public HTTP {
 		void reset();
 
 	private:
-		void		parseStartLine();
+		bool		parseStartLine();
 		std::string getHeadersAsString() const;
 
 	private:

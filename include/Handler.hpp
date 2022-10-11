@@ -17,11 +17,13 @@ class Handler {
 		Request	 m_request;
 		Response m_response;
 
+		void sendFail(int code, const std::string& msg);
+		void sendMoved(const std::string& location);
+
 	private:
 		void handleGet();
 		int	 handleGetWithStaticFile(const std::string &filename);
-		void sendFail(int code, const std::string& msg);
-		void sendResponse() const;
+		void sendResponse();
 		int	 transferFile(std::ifstream &infile);
 		int	 sendSingle(std::ifstream &infile);
 		int	 sendChunked(std::ifstream &infile);
