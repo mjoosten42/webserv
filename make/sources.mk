@@ -1,8 +1,8 @@
 SOURCES = \
-	src/Config/Debugging.cpp \
+	src/Config/CheckValidity.cpp \
+	src/Config/DebugPrint.cpp \
+	src/Config/FiniteStateMachine.cpp \
 	src/Config/Parser.cpp \
-	src/Config/StateMachine.cpp \
-	src/Config/Validity.cpp \
 	src/Handler.cpp \
 	src/HTTP.cpp \
 	src/main.cpp \

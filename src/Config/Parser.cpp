@@ -16,9 +16,9 @@ ConfigParser::ConfigParser() {
 
 bool ConfigParser::parse_config(const char *path) {
 	std::vector<std::string> config_file = readFile(path);
-	discardComments(config_file);
+	check_validity(config_file);
 	finite_state_machine(config_file);
-	debug_print_config(); //  If you want to see the parsed contents.
+	debug_print(); //  If you want to see the parsed contents.
 	return (true);
 }
 

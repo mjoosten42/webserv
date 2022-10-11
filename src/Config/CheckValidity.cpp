@@ -6,6 +6,11 @@
 //  check whether no text between ';' and '}' or EOF (MISSING SEMICOLON)
 //  finally check whether every simple directive has name and params (MISSING ARGS)
 
+bool ConfigParser::check_validity(std::vector<std::string>& config_file) {
+	discardComments(config_file);
+	return (true);
+}
+
 void ConfigParser::discardComments(std::vector<std::string>& config) {
 	std::vector<std::string>::iterator it;
 	for (it = config.begin(); it != config.end(); ++it) {
