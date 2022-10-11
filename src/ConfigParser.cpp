@@ -8,10 +8,10 @@
 ConfigParser::ConfigParser() {
 	m_main_context.name			  = "main";
 	m_main_context.parent_context = NULL;
-	m_tokens[SEMICOLON] = ';';
-	m_tokens[COMMENT] = '#';
-	m_tokens[OPEN_BRACE] = '{';
-	m_tokens[CLOSE_BRACE] = '}';
+	m_tokens[SEMICOLON]			  = ';';
+	m_tokens[COMMENT]			  = '#';
+	m_tokens[OPEN_BRACE]		  = '{';
+	m_tokens[CLOSE_BRACE]		  = '}';
 }
 
 bool ConfigParser::parse_config(const char *path) {
@@ -64,13 +64,12 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 	std::vector<std::string>::iterator it;
 
 	for (it = file.begin(); it != file.end(); ++it) {
-		*it = trimLeadingWhiteSpace(*it);
+		*it		   = trimLeadingWhiteSpace(*it);
 		size_t pos = (*it).find_first_of(m_tokens, 0, SIZE);
-		if (pos != std::string::npos){
-			// print((*it)[pos]);
-			// print(context->name); 
-			switch ((*it)[pos])
-			{
+		if (pos != std::string::npos) {
+			//  print((*it)[pos]);
+			//  print(context->name);
+			switch ((*it)[pos]) {
 				case (';'):
 					state_simpledirective(&context, it);
 					break;
@@ -90,10 +89,9 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 void ConfigParser::state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator it) {
 	t_simple_directive	  tmp;
 	std::string::iterator str_i = (*it).begin();
-	std::string	*field = &(tmp.name);
-	while(*str_i != m_tokens[SEMICOLON])
-	{
-		if(std::isspace(*str_i) && field == &(tmp.name))
+	std::string			 *field = &(tmp.name);
+	while (*str_i != m_tokens[SEMICOLON]) {
+		if (std::isspace(*str_i) && field == &(tmp.name))
 			field = &(tmp.params);
 		*field = *field + *str_i;
 		str_i++;
