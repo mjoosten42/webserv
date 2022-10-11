@@ -1,5 +1,8 @@
 SOURCES = \
-	src/Config/ConfigParser.cpp \
+	src/Config/Debugging.cpp \
+	src/Config/Parser.cpp \
+	src/Config/StateMachine.cpp \
+	src/Config/Validity.cpp \
 	src/Handler.cpp \
 	src/HTTP.cpp \
 	src/main.cpp \

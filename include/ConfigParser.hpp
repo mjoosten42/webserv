@@ -1,3 +1,5 @@
+#pragma once
+
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -36,7 +38,7 @@ class ConfigParser {
 		t_block_directive m_main_context;
 
 	private: //  Reading file, checking validity
-		std::vector<std::string> loadConfigToStrVector(const char *path);
+		std::vector<std::string> readFile(const char *path);
 		void					 discardComments(std::vector<std::string>					 &config);
 
 	private: //	Finite state machine

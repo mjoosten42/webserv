@@ -1,0 +1,24 @@
+#include "ConfigParser.hpp"
+
+void ConfigParser::debug_print_simple(t_simple_directive s, std::string tabs) {
+	std::cout << tabs << "Name: |" << s.name << "| Params: |" << s.params << "|;" << std::endl;
+}
+
+void ConfigParser::debug_print_block(t_block_directive b, std::string tabs) {
+	std::cout << tabs << b.name << std::endl << tabs << "{" << std::endl;
+	tabs = tabs + "   ";
+
+	std::vector<t_simple_directive>::iterator it_s;
+	for (it_s = b.simple_directives.begin(); it_s != b.simple_directives.end(); ++it_s)
+		debug_print_simple(*it_s, tabs);
+
+	std::vector<t_block_directive>::iterator it_b;
+	for (it_b = b.block_directives.begin(); it_b != b.block_directives.end(); ++it_b)
+		debug_print_block(*it_b, tabs);
+	std::cout << tabs.substr(3) << "}" << std::endl;
+}
+
+void ConfigParser::debug_print_config() {
+	std::cout << "DEBUG PRINTING CONFIG FILE THAT HAS BEEN PARSED:" << std::endl;
+	debug_print_block(m_main_context, "");
+}
