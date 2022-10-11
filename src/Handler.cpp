@@ -56,56 +56,46 @@ int Handler::handleGetWithStaticFile(const std::string& filename) {
 	return transferFile(infile);
 }
 
-//  very much temporary
-//  for the future: server also needs to be passed, as that may have custom 404 pages etc.
 void Handler::sendFail(int code, const std::string& msg) {
-	m_response.addToBody("<h1>" + std::to_string(code) + " " + m_response.getStatusMessage() + "</h1>\r\n");
-	m_response.addToBody("<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n");
-
 	m_response.addHeader("Content-Type", "text/html");
 	m_response.addHeader("Content-Length", std::to_string(m_response.getBody().length()));
+
+	m_response.addToBody("<h1>" + std::to_string(code) + " " + m_response.getStatusMessage() + "</h1>\r\n");
+	m_response.addToBody("<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n");
 
 	sendResponse();
 }
 
 void Handler::sendResponse() const {
-	std::string response = m_response.getResponseAsCPPString();
+	std::string response = m_response.getResponseAsString();
 	if (send(m_fd, response.c_str(), response.length(), 0) == -1)
 		fatal_perror("send");
 }
 
-#define SENDING_BUF_SIZE 4096
+#define SENDING_BUF_SIZE 0xFFF
 #define FILE_BUF_SIZE (SENDING_BUF_SIZE - 1024)
 
-#include <sys/socket.h> // send
-
-//  WARNING: CHUNK_MAX_LENGTH CANNOT EXCEED 0xfff as the length limit is hard coded.
+//  WARNING: CHUNK_MAX_LENGTH CANNOT EXCEED 0xFFF as the length limit is hard coded.
 //  However, there is no reason for such a high limit anyways, since browsers do not always support this.
 #define CHUNK_MAX_LENGTH 1024
 #define CHUNK_SENDING_SIZE (CHUNK_MAX_LENGTH + 3 + 2 * 2)
 
 int Handler::sendChunked(std::ifstream& infile) {
-	static std::stringstream ss; //  this is static so it doesn't have to be initialized every function call.
-
 	m_response.addHeader("Transfer-Encoding", "chunked");
 
-	std::string response = m_response.getResponseAsCPPString();
-	//  send header first.
+	std::string response = m_response.getResponseAsString();
 	if (send(m_fd, response.c_str(), response.length(), 0) == -1)
 		fatal_perror("send"); //  TODO: remove those!!
 
 	static char buf[CHUNK_SENDING_SIZE];
 	size_t		size;
-	size_t		bufoffset;
+	size_t		buf_offset;
 
 	while (true) {
 		infile.read(buf + 5, CHUNK_MAX_LENGTH);
 
 		if (infile.bad()) {
-			//  TODO: 500, maybe exceptions?
-			//  fatal_perror("readddd");
 			std::cerr << "Reading infile failed!\n";
-			//  sendFail(socket_fd, 500, "Reading file failed");
 			return 404;
 		}
 
@@ -120,19 +110,20 @@ int Handler::sendChunked(std::ifstream& infile) {
 
 		//  add the size of the chunk, and finish the buffer with CRLF
 		{
+			std::stringstream ss;
+		
 			ss.seekp(std::ios::beg);
 			ss << std::hex << size;
 
 			size_t size_str_len = ss.tellp();
-			bufoffset			= 3 - size_str_len;
+			buf_offset			= 3 - size_str_len;
 
-			std::memcpy(buf + bufoffset, ss.str().c_str(), size_str_len);
-			std::memcpy(buf + bufoffset + size_str_len, "\r\n", 2);
-
-			std::memcpy(buf + bufoffset + size_str_len + 2 + size, "\r\n", 2);
+			std::memcpy(buf + buf_offset, ss.str().c_str(), size_str_len);
+			std::memcpy(buf + buf_offset + size_str_len, "\r\n", 2);
+			std::memcpy(buf + buf_offset + size_str_len + 2 + size, "\r\n", 2);
 		}
 
-		if (send(m_fd, buf + bufoffset, CHUNK_SENDING_SIZE - (CHUNK_MAX_LENGTH - size) - bufoffset, 0) == -1)
+		if (send(m_fd, buf + buf_offset, CHUNK_SENDING_SIZE - (CHUNK_MAX_LENGTH - size) - buf_offset, 0) == -1)
 			fatal_perror("send");
 	}
 

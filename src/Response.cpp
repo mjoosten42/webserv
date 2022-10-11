@@ -36,20 +36,27 @@ std::string Response::getStatusMessage() const {
 }
 
 std::string Response::getStatusLine() const {
-	return "HTTP/1.1 " + std::to_string(m_statusCode) + " " + getStatusMessage();
+	return "HTTP/1.1 " + std::to_string(m_statusCode) + " " + getStatusMessage() + CRLF;
 }
 
-std::string Response::getResponseAsCPPString(void) const {
+std::string Response::getResponseAsString() const {
+	std::string response;
+
+	response += getStatusLine();
+	response += getHeadersAsString();
+	response += CRLF;
+	response += getBody();
+
+	return (response);
+}
+
+std::string Response::getHeadersAsString() const {
 	std::map<std::string, std::string>::const_iterator it;
-	std::stringstream								   ret;
+	std::string										   headers;
 
-	ret << getStatusLine() << CRLF;
 	for (it = m_headers.begin(); it != m_headers.end(); it++)
-		ret << it->first << ": " << it->second << CRLF;
-	ret << CRLF;
-	ret << m_body;
-
-	return (ret.str());
+		headers += it->first + ": " + it->second + CRLF;
+	return headers;
 }
 
 void Response::parseStartLine() {}
@@ -64,4 +71,8 @@ void Response::addToBody(const std::string& str) {
 
 void Response::addHeader(const std::string& field, const std::string& value) {
 	m_headers[field] = value;
+}
+
+const std::string& Response::getBody() const {
+	return m_body;
 }
