@@ -1,8 +1,8 @@
 #include "Response.hpp"
 
+#include "stringutils.hpp"
 #include "utils.hpp"
 
-#include <sstream>
 #include <sys/socket.h>
 
 struct Status {
@@ -36,7 +36,7 @@ std::string Response::getStatusMessage() const {
 }
 
 std::string Response::getStatusLine() const {
-	return "HTTP/1.1 " + std::to_string(m_statusCode) + " " + getStatusMessage() + CRLF;
+	return "HTTP/1.1 " + toString(m_statusCode) + " " + getStatusMessage();
 }
 
 std::string Response::getResponseAsString() const {

@@ -13,9 +13,9 @@ void strToUpper(std::string& str) {
 }
 
 std::string trimLeadingWhiteSpace(const std::string& s) {
-	std::string whitespaceChars = " \n\r\t\f\v";
-	size_t		start			= s.find_first_not_of(whitespaceChars);
-	std::string ret				= "";
+	const std::string whitespaceChars = " \n\r\t\f\v";
+	size_t			  start			  = s.find_first_not_of(whitespaceChars);
+	std::string		  ret			  = "";
 	if (start != std::string::npos)
 		ret = s.substr(start);
 	return (ret);

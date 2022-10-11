@@ -3,12 +3,15 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
+// TODO: Reject invalid config files
+// Split into separate files
+// Make functions that return just the server blocks
+
 //  GENERAL ORGANISATION:
 
 ConfigParser::ConfigParser() {
 	m_main_context.name			  = "main";
 	m_main_context.parent_context = NULL;
-	m_tokens[SPACE]				  = ' ';
 	m_tokens[SEMICOLON]			  = ';';
 	m_tokens[COMMENT]			  = '#';
 	m_tokens[OPEN_BRACE]		  = '{';
@@ -66,7 +69,7 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 
 	for (it = file.begin(); it != file.end(); ++it) {
 		*it		   = trimLeadingWhiteSpace(*it);
-		size_t pos = (*it).find_first_of(m_tokens + SEMICOLON, 0, SIZE); //  Find first token in line that isn't a space
+		size_t pos = (*it).find_first_of(m_tokens, 0, SIZE);
 		if (pos != std::string::npos) {
 			//  print((*it)[pos]);
 			//  print(context->name);
@@ -92,7 +95,7 @@ void ConfigParser::state_simpledirective(t_block_directive **context, std::vecto
 	std::string::iterator str_i = (*it).begin();
 	std::string			 *field = &(tmp.name);
 	while (*str_i != m_tokens[SEMICOLON]) {
-		if (*str_i == m_tokens[SPACE] && field == &(tmp.name))
+		if (std::isspace(*str_i) && field == &(tmp.name))
 			field = &(tmp.params);
 		*field = *field + *str_i;
 		str_i++;
@@ -110,7 +113,7 @@ void ConfigParser::state_openblock(t_block_directive **context, std::vector<std:
 	t_block_directive tmp;
 	tmp.parent_context = *context;
 	std::string::iterator str_i;
-	for (str_i = (*it).begin(); str_i != (*it).end() && *str_i != m_tokens[SPACE]; ++str_i)
+	for (str_i = (*it).begin(); str_i != (*it).end() && std::isspace(*str_i); ++str_i)
 		tmp.name = tmp.name + *str_i;
 	(*context)->block_directives.push_back(tmp);
 	(*context) = &((*context)->block_directives.back());
