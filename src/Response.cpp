@@ -36,7 +36,7 @@ std::string Response::getStatusMessage() const {
 }
 
 std::string Response::getStatusLine() const {
-	return "HTTP/1.1 " + toString(m_statusCode) + " " + getStatusMessage();
+	return "HTTP/1.1 " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
 }
 
 std::string Response::getResponseAsString() const {
