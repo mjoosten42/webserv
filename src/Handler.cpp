@@ -39,7 +39,7 @@ void Handler::handle() {
 
 void Handler::handleGet() {
 	m_response.setStatusCode(200);
-	handleGetWithStaticFile(m_request.getLocation());
+	m_response.setStatusCode(handleGetWithStaticFile(m_request.getLocation()));
 
 	if (m_response.getStatusCode() != 200)
 		sendFail(m_response.getStatusCode(), "Page is venting");
@@ -48,8 +48,11 @@ void Handler::handleGet() {
 int Handler::handleGetWithStaticFile(const std::string& filename) {
 	std::ifstream infile("." + filename, std::ios::in | std::ios::binary); //  TODO: remove dot
 
-	if (!infile.is_open())
+	if (!infile.is_open()) {
+		if (errno == EACCES)
+			return 403;
 		return 404;
+	}
 
 	m_response.addHeader("Connection", "Keep-Alive");
 	m_response.addHeader("Content-Type", MIME::fromFileName(filename));
@@ -91,6 +94,39 @@ void Handler::sendResponse() {
 }
 
 #define FILE_BUF_SIZE (4096 - 1024)
+
+int Handler::transferFile(std::ifstream& infile) {
+	int			   ret;
+	std::streampos begin = infile.tellg();
+	infile.seekg(0, std::ios::end);
+	std::streampos end = infile.tellg();
+	infile.seekg(0, std::ios::beg);
+
+	if (end - begin > FILE_BUF_SIZE) {
+		//  send multichunked
+		ret = sendChunked(infile);
+	} else {
+		//  send in single buf.
+		ret = sendSingle(infile);
+	}
+	infile.close();
+	return ret;
+}
+
+int Handler::sendSingle(std::ifstream& infile) {
+	static char buf[FILE_BUF_SIZE + 1];
+
+	infile.read(buf, FILE_BUF_SIZE);
+	if (infile.bad()) {
+		std::cerr << "Reading infile failed!\n";
+		return 404;
+	}
+	m_response.setStatusCode(200);
+	m_response.addToBody(buf);
+
+	sendResponse();
+	return 200;
+}
 
 //  WARNING: CHUNK_MAX_LENGTH CANNOT EXCEED 0xFFF as the length limit is hard coded.
 //  However, there is no reason for such a high limit anyways, since browsers do not always support this.
@@ -145,39 +181,4 @@ int Handler::sendChunked(std::ifstream& infile) {
 	}
 
 	return 200;
-}
-
-int Handler::sendSingle(std::ifstream& infile) {
-	static char buf[FILE_BUF_SIZE + 1];
-
-	infile.read(buf, FILE_BUF_SIZE);
-	if (infile.bad()) {
-		std::cerr << "Reading infile failed!\n";
-		if (errno == EACCES)
-			return 403;
-		return 404;
-	}
-	m_response.setStatusCode(200);
-	m_response.addToBody(buf);
-
-	sendResponse();
-	return 200;
-}
-
-int Handler::transferFile(std::ifstream& infile) {
-	int			   ret;
-	std::streampos begin = infile.tellg();
-	infile.seekg(0, std::ios::end);
-	std::streampos end = infile.tellg();
-	infile.seekg(0, std::ios::beg);
-
-	if (end - begin > FILE_BUF_SIZE) {
-		//  send multichunked
-		ret = sendChunked(infile);
-	} else {
-		//  send in single buf.
-		ret = sendSingle(infile);
-	}
-	infile.close();
-	return ret;
 }

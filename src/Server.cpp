@@ -8,12 +8,13 @@
 #include <sys/socket.h>
 #include <unistd.h> // close
 
-Server::Server(): m_fd(make_shared(-1)) {}
+Server::Server(): m_fd(make_shared(-1)) {
+}
 
-Server::Server(int port): m_root("html") { //  TODO
+Server::Server(int port): m_port(port), m_root("html") {
 	//  Specify server socket info: IPv4 protocol family, port in correct
 	//	endianness, IP address
-	sockaddr_in server		= { 0, AF_INET, htons(port), { inet_addr("127.0.0.1") }, { 0 } };
+	sockaddr_in server		= { 0, AF_INET, htons(m_port), { inet_addr("127.0.0.1") }, { 0 } };
 
 	//  Setup socket_fd: specify domain (IPv4), communication type, and
 	//	protocol (default for socket)
