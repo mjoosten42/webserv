@@ -20,7 +20,7 @@ bool ConfigParser::parse_config(const char *path) {
 	if (!(check_validity(config_file)))
 		fatal_perror("Invalid config file");
 	finite_state_machine(config_file);
-	debug_print(); //  If you want to see the parsed contents.
+	// debug_print(); //  If you want to see the parsed contents.
 	return (true);
 }
 

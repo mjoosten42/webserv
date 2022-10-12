@@ -45,7 +45,7 @@ Server::Server(int port): m_port(port), m_root("html") {
 	if (listen(m_fd, SOMAXCONN) < 0)
 		fatal_perror("listen");
 
-	std::cout << "SERVER " << m_fd << " LISTENING ON " << port << std::endl;
+	std::cout << RED "SERVER " << m_fd << " LISTENING ON " << port << DEFAULT "\n";
 }
 
 int Server::getFD() const {
