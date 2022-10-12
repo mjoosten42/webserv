@@ -1,5 +1,6 @@
 #include "Response.hpp"
 
+#include "defines.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
 
@@ -48,15 +49,12 @@ std::string Response::getStatusLine() const {
 std::string Response::getResponseAsString() {
 	std::string response;
 
+	addHeader("Content-Length", toString(m_body.length()));
+
 	response += getStatusLine();
-	if (m_body.length() > 0) {
-		addHeader("Content-Length", toString(m_body.length()));
-		response += getHeadersAsString();
-		response += CRLF;
-		response += getBody();
-	} else {
-		response += getHeadersAsString();
-	}
+	response += getHeadersAsString();
+	response += CRLF;
+	response += getBody();
 
 	return (response);
 }
@@ -68,16 +66,4 @@ std::string Response::getHeadersAsString() const {
 	for (it = m_headers.begin(); it != m_headers.end(); it++)
 		headers += it->first + ": " + it->second + CRLF;
 	return headers;
-}
-
-void Response::addToBody(const std::string& str) {
-	m_body += str + CRLF;
-}
-
-void Response::addHeader(const std::string& field, const std::string& value) {
-	m_headers[field] = value;
-}
-
-const std::string& Response::getBody() const {
-	return m_body;
 }

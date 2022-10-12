@@ -1,5 +1,7 @@
 HEADERS = \
 	include/ConfigParser.hpp \
+	include/Connection.hpp \
+	include/defines.hpp \
 	include/Handler.hpp \
 	include/HTTP.hpp \
 	include/MIME.hpp \
@@ -7,6 +9,5 @@ HEADERS = \
 	include/Request.hpp \
 	include/Response.hpp \
 	include/Server.hpp \
-	include/shared_fd.hpp \
 	include/stringutils.hpp \
 	include/utils.hpp \

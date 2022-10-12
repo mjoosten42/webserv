@@ -3,7 +3,6 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
-#include "shared_fd.hpp"
 
 class Handler {
 	public:
@@ -29,6 +28,6 @@ class Handler {
 		void sendResponse();
 
 	private:
-		shared_fd	  m_fd;
+		int			  m_fd;
 		const Server *m_server;
 };

@@ -2,17 +2,16 @@
 
 #include "Handler.hpp"
 #include "Server.hpp"
+#include "defines.hpp"
 #include "utils.hpp"
 
 #include <sys/socket.h> // accept
 #include <unistd.h>		// close
 
-#define BUFSIZE 2048
-
-//  accepts a client
+//  accepts a new client
 void Poller::acceptClient(int server_fd) {
 	int			  fd	 = accept(server_fd, NULL, NULL);
-	pollfd		  client = { fd, POLLIN, 0 }; //	 TODO: check for POLLOUT?
+	pollfd		  client = { fd, POLLIN | POLLOUT, 0 };
 	const Server *server = &m_servers[server_fd];
 
 	if (fd < 0)
@@ -21,37 +20,9 @@ void Poller::acceptClient(int server_fd) {
 	set_fd_nonblocking(fd);
 
 	m_pollfds.push_back(client);
-	m_handlers[fd] = Handler(fd, server);
+	m_connections[fd] = Connection(fd, server);
 
 	std::cout << "NEW CLIENT: " << fd << std::endl;
-}
-
-//  when POLLIN is set, receives a message from the client
-//  returns true on success, false when the client sents EOF.
-bool Poller::receiveFromClient(int fd) {
-	static char buf[BUFSIZE + 1];
-	ssize_t		recv_len = recv(fd, buf, BUFSIZE, 0);
-
-	if (recv_len <= 0) {
-		if (recv_len == -1) {
-			if (errno != ECONNRESET && errno != ETIMEDOUT)
-				fatal_perror("recv");
-			std::cerr << "INFO: Connection reset or timeout\n";
-		}
-		return false;
-	}
-
-	buf[recv_len] = 0;
-
-	std::cout << RED << "----START BUF" << std::string(80, '-') << DEFAULT << std::endl;
-	std::cout << buf << std::endl;
-	std::cout << RED << "----END BUF" << std::string(80, '-') << DEFAULT << std::endl;
-
-	m_handlers[fd].m_request.add(buf);
-	m_handlers[fd].handle();
-	m_handlers[fd].reset();
-
-	return true;
 }
 
 void Poller::start() {
@@ -67,9 +38,9 @@ void Poller::start() {
 		switch (poll_status) {
 			case -1:
 				fatal_perror("poll");
-				break;
 			case 0:
-				std::cerr << "No events? wtf??\n";
+				std::cerr << "Fds should be blocking: "
+						  << getPollFdsAsString(m_pollfds.begin(), m_pollfds.end()) << std::endl;
 				break;
 			default:
 				//  Loop over servers for new clients
@@ -79,9 +50,14 @@ void Poller::start() {
 
 				//  loop over clients for new messages
 				for (size_t i = m_servers.size(); i < m_pollfds.size(); i++) {
+					Connection& conn = m_connections[m_pollfds[i].fd];
+
+					std::cout << RED << getReventsAsString(m_pollfds[i].revents) << DEFAULT << std::endl;
+					
 					if (m_pollfds[i].revents & POLLIN)
-						if (!receiveFromClient(m_pollfds[i].fd))
-							removeClient(m_pollfds[i--].fd);
+						conn.receiveFromClient();
+					if (m_pollfds[i].revents & POLLOUT)
+						conn.sendToClient();
 					if (m_pollfds[i].revents & POLLHUP)
 						removeClient(m_pollfds[i--].fd);
 				}
@@ -94,7 +70,10 @@ void Poller::removeClient(int fd) {
 		if (m_pollfds[i].fd == fd)
 			m_pollfds.erase(m_pollfds.begin() + i);
 
-	m_handlers.erase(fd);
+	m_connections.erase(fd);
+
+	if (close(fd) == -1)
+		fatal_perror("close");
 
 	std::cout << "CLIENT " << fd << " LEFT\n";
 }

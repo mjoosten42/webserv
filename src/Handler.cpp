@@ -2,7 +2,7 @@
 
 #include "MIME.hpp"
 #include "Server.hpp"
-#include "shared_fd.hpp"
+#include "defines.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
 
@@ -12,9 +12,9 @@
 #include <string>
 #include <sys/socket.h> // send
 
-Handler::Handler(): m_fd(make_shared(-1)), m_server(NULL) {}
+Handler::Handler(): m_fd(-1), m_server(NULL) {}
 
-Handler::Handler(int fd, const Server *server): m_fd(make_shared(fd)), m_server(server) {
+Handler::Handler(int fd, const Server *server): m_fd(fd), m_server(server) {
 	(void)m_server;
 }
 
@@ -98,8 +98,6 @@ void Handler::sendResponse() {
 	//  TODO: if send fails just remove the socket or something instead of fatal perror
 }
 
-#define FILE_BUF_SIZE (4096 - 1024)
-
 int Handler::transferFile(std::ifstream& infile) {
 	int			   ret;
 	std::streampos begin = infile.tellg();
@@ -132,11 +130,6 @@ int Handler::sendSingle(std::ifstream& infile) {
 	sendResponse();
 	return 200;
 }
-
-//  WARNING: CHUNK_MAX_LENGTH CANNOT EXCEED 0xFFF as the length limit is hard coded.
-//  However, there is no reason for such a high limit anyways, since browsers do not always support this.
-#define CHUNK_MAX_LENGTH 1024
-#define CHUNK_SENDING_SIZE (CHUNK_MAX_LENGTH + 3 + 2 * 2)
 
 int Handler::sendChunked(std::ifstream& infile) {
 	m_response.addHeader("Transfer-Encoding", "chunked");

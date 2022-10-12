@@ -1,5 +1,6 @@
 #include "Server.hpp"
 
+#include "defines.hpp"
 #include "utils.hpp"
 
 #include <arpa/inet.h>
@@ -8,7 +9,7 @@
 #include <sys/socket.h>
 #include <unistd.h> // close
 
-Server::Server(): m_fd(make_shared(-1)) {
+Server::Server(): m_fd(-1) {
 	m_host			  = "localhost";
 	m_port			  = 8080;
 	m_name			  = "webserv.com";
@@ -26,7 +27,7 @@ Server::Server(int port): m_port(port), m_root("html") {
 
 	//  Setup socket_fd: specify domain (IPv4), communication type, and
 	//	protocol (default for socket)
-	m_fd					= make_shared(socket(AF_INET, SOCK_STREAM, 0));
+	m_fd					= socket(AF_INET, SOCK_STREAM, 0);
 
 	//  On socket_fd, applied at socket level (SOL_SOCKET), set option
 	//  SO_REUSEADDR (allow bind() to reuse local addresses), to be enabled

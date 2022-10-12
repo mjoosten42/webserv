@@ -1,7 +1,5 @@
 #pragma once
 
-#include "shared_fd.hpp"
-
 #include <string>
 #include <vector>
 
@@ -26,7 +24,7 @@ class Server {
 		int getFD() const;
 
 	private:
-		shared_fd			  m_fd;
+		int					  m_fd;
 		std::vector<Location> m_locations;
 
 		//  Config

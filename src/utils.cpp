@@ -27,3 +27,17 @@ std::string getStringMapAsString(const std::map<std::string, std::string>& map) 
 		strings += "  " + it->first + ": " + it->second + "\n";
 	return strings;
 }
+
+std::string getReventsAsString(short revents) {
+	std::string events;
+
+	if (revents & POLLIN)
+		events += "POLLIN | ";
+	if (revents & POLLOUT)
+		events += "POLLOUT | ";
+	if (revents & POLLHUP)
+		events += "POLLHUP | ";
+	if (revents & POLLNVAL)
+		events += "POLLNVAL";
+	return events;
+}
