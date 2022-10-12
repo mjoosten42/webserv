@@ -1,5 +1,7 @@
 #pragma once
 
+#include "stringutils.hpp"
+
 #include <iostream>
 #include <map>
 #include <sys/poll.h>
@@ -56,16 +58,15 @@ const char *binarySearchKeyValue(Key key, Value entries[], int size) {
 }
 
 template <typename InputIt>
-std::string printFds(InputIt first, InputIt last) {
-	std::string Fds;
-	Fds += "{ ";
+std::string getPollFdsAsString(InputIt first, InputIt last) {
+	std::string PollFds = "{ ";
 	for (; first != last; first++) {
-		Fds += first->fd;
-		if (first + 1 < last)
-			Fds += ", ";
+		PollFds += toString(first->fd);
+		if (first + 1 != last)
+			PollFds += ", ";
 	}
-	Fds += " }\n";
-	return Fds;
+	PollFds += " }\n";
+	return PollFds;
 }
 
 std::string getStringMapAsString(const std::map<std::string, std::string>& map);

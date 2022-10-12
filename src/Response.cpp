@@ -11,7 +11,8 @@ struct Status {
 };
 
 const static Status statusMessages[] = {
-	{ 200, "OK" }, { 400, "Bad Request" }, { 403, "Forbidden" }, { 404, "Not Found" }, { 500, "Internal Server Error" },
+	{ 200, "OK" },		  { 301, "Moved Permanently" }, { 400, "Bad Request" },
+	{ 403, "Forbidden" }, { 404, "Not Found" },			{ 500, "Internal Server Error" },
 };
 
 const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMessages);
@@ -39,13 +40,20 @@ std::string Response::getStatusLine() const {
 	return "HTTP/1.1 " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
 }
 
-std::string Response::getResponseAsString() const {
+//  Returns the response as a string to send over a socket. When there is a body present,
+//  the body is amended automatically and Content-Length is calculated.
+std::string Response::getResponseAsString() {
 	std::string response;
 
 	response += getStatusLine();
-	response += getHeadersAsString();
-	response += CRLF;
-	response += getBody();
+	if (m_body.length() > 0) {
+		addHeader("Content-Length", toString(m_body.length()));
+		response += getHeadersAsString();
+		response += CRLF;
+		response += getBody();
+	} else {
+		response += getHeadersAsString();
+	}
 
 	return (response);
 }
@@ -58,8 +66,6 @@ std::string Response::getHeadersAsString() const {
 		headers += it->first + ": " + it->second + CRLF;
 	return headers;
 }
-
-void Response::parseStartLine() {}
 
 void Response::setStatusCode(int code) {
 	m_statusCode = code;

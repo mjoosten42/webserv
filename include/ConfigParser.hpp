@@ -34,22 +34,27 @@ struct s_block_directive {
 class ConfigParser {
 	public:
 		ConfigParser();
+
 		bool					 parse_config(const char *path);
-		t_block_directive		 m_main_context;
 		std::vector<std::string> readFile(const char *path);
 
+	public:
+		t_block_directive m_main_context;
+
 	private: //  Checking validity
-		bool check_validity(std::vector<std::string>& config_file);
-		void discardComments(std::vector<std::string>& config);
+		bool check_validity(std::vector<std::string>& config);
+		void discard_comments(std::vector<std::string>& config);
+		bool check_braces_error(std::vector<std::string>& config);
 
 	private: //	Finite state machine
-		enum Token { SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
-
-		char m_tokens[SIZE];
 		void finite_state_machine(std::vector<std::string>& file);
 		void state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator it);
 		void state_openblock(t_block_directive **context, std::vector<std::string>::iterator it);
 		void state_closeblock(t_block_directive **context, std::vector<std::string>::iterator it);
+
+		enum Token { SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
+
+		char m_tokens[SIZE];
 
 	private: //  Debug printing
 		void debug_print();

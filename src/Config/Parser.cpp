@@ -4,6 +4,7 @@
 //  TODO: Reject invalid config files
 //  Split into separate files
 //  Make handler functions that return specific parts of the config e.g. all the servers.
+//	Handle escape characters in parsing
 
 ConfigParser::ConfigParser() {
 	m_main_context.name			  = "main";
@@ -16,7 +17,8 @@ ConfigParser::ConfigParser() {
 
 bool ConfigParser::parse_config(const char *path) {
 	std::vector<std::string> config_file = readFile(path);
-	check_validity(config_file);
+	if (!(check_validity(config_file)))
+		fatal_perror("Invalid config file");
 	finite_state_machine(config_file);
 	debug_print(); //  If you want to see the parsed contents.
 	return (true);

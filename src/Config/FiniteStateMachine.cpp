@@ -49,7 +49,7 @@ void ConfigParser::state_openblock(t_block_directive **context, std::vector<std:
 	t_block_directive tmp;
 	tmp.parent_context = *context;
 	std::string::iterator str_i;
-	for (str_i = (*it).begin(); str_i != (*it).end() && std::isspace(*str_i); ++str_i)
+	for (str_i = (*it).begin(); str_i != (*it).end() && !std::isspace(*str_i); ++str_i)
 		tmp.name = tmp.name + *str_i;
 	(*context)->block_directives.push_back(tmp);
 	(*context) = &((*context)->block_directives.back());

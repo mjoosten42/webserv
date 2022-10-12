@@ -58,10 +58,11 @@ bool Poller::receiveFromClient(int fd) {
 
 void Poller::start() {
 	while (true) {
-		std::cout << RED << "\n----STARTING LOOP----\n" << DEFAULT;
-		//  std::cout << RED << "Servers: " << DEFAULT << printFds(m_pollfds.begin(), m_pollfds.begin() +
-		//  m_servers.size());
-		std::cout << RED << "Clients: " << DEFAULT << printFds(m_pollfds.begin() + m_servers.size(), m_pollfds.end());
+		std::cout << RED "\n----STARTING LOOP----\n" DEFAULT;
+		// std::cout << RED "Servers: " DEFAULT
+		// 		  << getPollFdsAsString(m_pollfds.begin(), m_pollfds.begin() + m_servers.size());
+		std::cout << RED "Clients: " DEFAULT
+				  << getPollFdsAsString(m_pollfds.begin() + m_servers.size(), m_pollfds.end());
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 

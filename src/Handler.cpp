@@ -38,8 +38,8 @@ void Handler::handle() {
 }
 
 void Handler::handleGet() {
-	m_response.setStatusCode(200); //  Assume OK unless otherwise
-	m_response.setStatusCode(handleGetWithStaticFile(m_request.getLocation()));
+	m_response.setStatusCode(200);
+	handleGetWithStaticFile(m_request.getLocation());
 
 	if (m_response.getStatusCode() != 200)
 		sendFail(m_response.getStatusCode(), "Page is venting");
@@ -58,26 +58,39 @@ int Handler::handleGetWithStaticFile(const std::string& filename) {
 }
 
 void Handler::sendFail(int code, const std::string& msg) {
-	m_response.addToBody("<style> h1 {text-align: center} </style>");
-	m_response.addToBody("<style> p {text-align: center} </style>");
-	m_response.addToBody("<h1>" + toString(code) + " " + m_response.getStatusMessage() + "</h1>");
-	m_response.addToBody("<p>something went wrong somewhere: <b>" + msg + "</b></p>");
+	m_response.setStatusCode(code);
 
 	m_response.addHeader("Content-Type", "text/html");
-	m_response.addHeader("Content-Length", toString(m_response.getBody().length()));
+
+	m_response.addToBody("<h1>" + toString(code) + " " + m_response.getStatusMessage() + "</h1>\r\n");
+	m_response.addToBody("<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n");
 
 	sendResponse();
 }
 
-//  Send response using statuscode/header/body members
-void Handler::sendResponse() const {
+void Handler::sendMoved(const std::string& location) {
+	m_response.reset(); //  <!-- TODO, also add default server
+	m_response.setStatusCode(301);
+	m_response.addHeader("Location", location);
+	m_response.addHeader("Connection", "Close");
+
+	m_response.addHeader("Content-Type", "text/html");
+
+	m_response.addToBody("<h1>" + toString(m_response.getStatusCode()) + " " + m_response.getStatusMessage() +
+						 "</h1>\r\n");
+	m_response.addToBody("<p>The resource has been moved to <a href=\"" + location + "\">" + location + "</a>.</p>");
+
+	sendResponse();
+}
+
+void Handler::sendResponse() {
 	std::string response = m_response.getResponseAsString();
 	if (send(m_fd, response.c_str(), response.length(), 0) == -1)
 		fatal_perror("send");
+	//  TODO: if send fails just remove the socket or something instead of fatal perror
 }
 
-#define SENDING_BUF_SIZE 0xFFF
-#define FILE_BUF_SIZE (SENDING_BUF_SIZE - 1024)
+#define FILE_BUF_SIZE (4096 - 1024)
 
 //  WARNING: CHUNK_MAX_LENGTH CANNOT EXCEED 0xFFF as the length limit is hard coded.
 //  However, there is no reason for such a high limit anyways, since browsers do not always support this.
@@ -128,23 +141,23 @@ int Handler::sendChunked(std::ifstream& infile) {
 		}
 
 		if (send(m_fd, buf + buf_offset, CHUNK_SENDING_SIZE - (CHUNK_MAX_LENGTH - size) - buf_offset, 0) == -1)
-			fatal_perror("send");
+			fatal_perror("send"); //  TODO: EWOULDBLOCK
 	}
 
 	return 200;
 }
 
 int Handler::sendSingle(std::ifstream& infile) {
-	static char buf[SENDING_BUF_SIZE];
-	size_t		size;
+	static char buf[FILE_BUF_SIZE + 1];
 
 	infile.read(buf, FILE_BUF_SIZE);
 	if (infile.bad()) {
 		std::cerr << "Reading infile failed!\n";
+		if (errno == EACCES)
+			return 403;
 		return 404;
 	}
-	size = infile.gcount();
-	m_response.addHeader("Content-Length", toString(size));
+	m_response.setStatusCode(200);
 	m_response.addToBody(buf);
 
 	sendResponse();
