@@ -10,22 +10,25 @@ struct Status {
 		const char *value;
 };
 
-const static Status statusMessages[] = {
-	{ 200, "OK" },		  { 301, "Moved Permanently" }, { 400, "Bad Request" },
-	{ 403, "Forbidden" }, { 404, "Not Found" },			{ 500, "Internal Server Error" },
-};
+const static Status statusMessages[] = { { 200, "OK" },
+										 { 301, "Moved Permanently" },
+										 { 400, "Bad Request" },
+										 { 403, "Forbidden" },
+										 { 404, "Not Found" },
+										 { 413, "Payload Too Large" },
+										 { 418, "I'm a teapot" },
+										 { 500, "Internal Server Error" },
+										 { 501, "Not Implemented" },
+										 { 502, "Bad Gateway" },
+										 { 505, "HTTP Version Not Supported" } };
 
-const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMessages);
+const static int statusMessagesSize	 = sizeof(statusMessages) / sizeof(*statusMessages);
 
 Response::Response(): HTTP() {}
 
 void Response::reset() {
 	HTTP::reset();
 	m_statusCode = 0;
-}
-
-int Response::getStatusCode() const {
-	return m_statusCode;
 }
 
 std::string Response::getStatusMessage() const {
@@ -65,10 +68,6 @@ std::string Response::getHeadersAsString() const {
 	for (it = m_headers.begin(); it != m_headers.end(); it++)
 		headers += it->first + ": " + it->second + CRLF;
 	return headers;
-}
-
-void Response::setStatusCode(int code) {
-	m_statusCode = code;
 }
 
 void Response::addToBody(const std::string& str) {

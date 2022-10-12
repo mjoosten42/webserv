@@ -9,13 +9,11 @@ class Response: public HTTP {
 	public:
 		Response();
 
-		int				   getStatusCode() const;
 		std::string		   getStatusLine() const;
 		std::string		   getStatusMessage() const;
 		std::string		   getResponseAsString(void);
 		const std::string& getBody() const;
 
-		void setStatusCode(int code);
 		void addToBody(const std::string& str);
 		void addHeader(const std::string& field, const std::string& value);
 
@@ -24,6 +22,6 @@ class Response: public HTTP {
 	private:
 		std::string getHeadersAsString() const;
 
-	private:
+	public:
 		int m_statusCode;
 };

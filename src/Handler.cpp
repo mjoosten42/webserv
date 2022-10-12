@@ -24,6 +24,11 @@ void Handler::reset() {
 }
 
 void Handler::handle() {
+	int status = m_request.ProcessRequest();
+
+	if (status != 200)
+		return sendFail(status, "Error processing request");
+
 	switch (m_request.getMethod()) {
 		case GET:
 			handleGet();
@@ -38,11 +43,11 @@ void Handler::handle() {
 }
 
 void Handler::handleGet() {
-	m_response.setStatusCode(200);
-	m_response.setStatusCode(handleGetWithStaticFile(m_request.getLocation()));
+	m_response.m_statusCode = 200;
+	m_response.m_statusCode = handleGetWithStaticFile(m_request.getLocation());
 
-	if (m_response.getStatusCode() != 200)
-		sendFail(m_response.getStatusCode(), "Page is venting");
+	if (m_response.m_statusCode != 200)
+		sendFail(m_response.m_statusCode, "Page is venting");
 }
 
 int Handler::handleGetWithStaticFile(const std::string& filename) {
@@ -61,7 +66,7 @@ int Handler::handleGetWithStaticFile(const std::string& filename) {
 }
 
 void Handler::sendFail(int code, const std::string& msg) {
-	m_response.setStatusCode(code);
+	m_response.m_statusCode = code;
 
 	m_response.addHeader("Content-Type", "text/html");
 
@@ -73,13 +78,13 @@ void Handler::sendFail(int code, const std::string& msg) {
 
 void Handler::sendMoved(const std::string& location) {
 	m_response.reset(); //  <!-- TODO, also add default server
-	m_response.setStatusCode(301);
+	m_response.m_statusCode = 301;
 	m_response.addHeader("Location", location);
 	m_response.addHeader("Connection", "Close");
 
 	m_response.addHeader("Content-Type", "text/html");
 
-	m_response.addToBody("<h1>" + toString(m_response.getStatusCode()) + " " + m_response.getStatusMessage() +
+	m_response.addToBody("<h1>" + toString(m_response.m_statusCode) + " " + m_response.getStatusMessage() +
 						 "</h1>\r\n");
 	m_response.addToBody("<p>The resource has been moved to <a href=\"" + location + "\">" + location + "</a>.</p>");
 
@@ -121,7 +126,7 @@ int Handler::sendSingle(std::ifstream& infile) {
 		std::cerr << "Reading infile failed!\n";
 		return 404;
 	}
-	m_response.setStatusCode(200);
+	m_response.m_statusCode = 200;
 	m_response.addToBody(buf);
 
 	sendResponse();

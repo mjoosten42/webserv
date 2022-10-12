@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-enum methods { GET, POST, DELETE, NONE };
+enum methods { GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH };
 
 class Request: public HTTP {
 	public:
@@ -13,7 +13,7 @@ class Request: public HTTP {
 
 		void add(const char *str);
 		void reset();
-		void stringToData();
+		int	 ProcessRequest();
 
 		const std::string& getLocation() const;
 		methods			   getMethod() const;
@@ -22,15 +22,16 @@ class Request: public HTTP {
 		void printMethod() const; //  TODO: remove
 
 	private:
-		void		parseStartLine();
-		methods		parseMethod(const std::string	 &str) const;
-		void		parseHeaders();
+		int			parseStartLine();
+		int			parseHeaders();
 		std::string getNextLine();
-		std::size_t newLineLength(std::size_t pos);
+		std::size_t newLineLength(std::size_t pos) const;
 
 	private:
 		std::string m_location;
 		methods		m_method;
+		std::string m_total;
+		std::size_t m_pos;
 };
 
 std::ostream& operator<<(std::ostream& os, const Request& request);

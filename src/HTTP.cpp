@@ -2,13 +2,11 @@
 
 #include <string>
 
-HTTP::HTTP(): m_pos(0) {}
+HTTP::HTTP() {}
 
 void HTTP::reset() {
 	m_headers.clear();
-	m_total.clear();
 	m_body.clear();
-	m_pos = 0;
 }
 
 const std::string& HTTP::getBody() const {

@@ -48,8 +48,6 @@ bool Poller::receiveFromClient(int fd) {
 	std::cout << RED << "----END BUF" << std::string(80, '-') << DEFAULT << std::endl;
 
 	m_handlers[fd].m_request.add(buf);
-	m_handlers[fd].m_request.stringToData();
-	std::cout << m_handlers[fd].m_request << std::endl;
 	m_handlers[fd].handle();
 	m_handlers[fd].reset();
 
@@ -59,8 +57,8 @@ bool Poller::receiveFromClient(int fd) {
 void Poller::start() {
 	while (true) {
 		std::cout << RED "\n----STARTING LOOP----\n" DEFAULT;
-		// std::cout << RED "Servers: " DEFAULT
-		// 		  << getPollFdsAsString(m_pollfds.begin(), m_pollfds.begin() + m_servers.size());
+		//  std::cout << RED "Servers: " DEFAULT
+		//  		  << getPollFdsAsString(m_pollfds.begin(), m_pollfds.begin() + m_servers.size());
 		std::cout << RED "Clients: " DEFAULT
 				  << getPollFdsAsString(m_pollfds.begin() + m_servers.size(), m_pollfds.end());
 

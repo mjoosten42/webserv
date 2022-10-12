@@ -9,6 +9,14 @@
 #include <unistd.h> // close
 
 Server::Server(): m_fd(make_shared(-1)) {
+	m_host			  = "localhost";
+	m_port			  = 8080;
+	m_name			  = "webserv.com";
+	m_root			  = "html";
+	m_error_page	  = "404.html";
+
+	Location location = { "/", -1, "", "", false, "html" };
+	m_locations.push_back(location);
 }
 
 Server::Server(int port): m_port(port), m_root("html") {
