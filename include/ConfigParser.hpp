@@ -1,3 +1,5 @@
+#pragma once
+
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -32,12 +34,13 @@ struct s_block_directive {
 class ConfigParser {
 	public:
 		ConfigParser();
-		bool			  parse_config(const char *path);
-		t_block_directive m_main_context;
+		bool					 parse_config(const char *path);
+		t_block_directive		 m_main_context;
+		std::vector<std::string> readFile(const char *path);
 
-	private: //  Reading file, checking validity
-		std::vector<std::string> loadConfigToStrVector(const char *path);
-		void					 discardComments(std::vector<std::string>					 &config);
+	private: //  Checking validity
+		bool check_validity(std::vector<std::string>& config_file);
+		void discardComments(std::vector<std::string>& config);
 
 	private: //	Finite state machine
 		enum Token { SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
@@ -48,8 +51,8 @@ class ConfigParser {
 		void state_openblock(t_block_directive **context, std::vector<std::string>::iterator it);
 		void state_closeblock(t_block_directive **context, std::vector<std::string>::iterator it);
 
-	private: //  Debug functions
+	private: //  Debug printing
+		void debug_print();
 		void debug_print_simple(t_simple_directive s, std::string tabs);
 		void debug_print_block(t_block_directive b, std::string tabs);
-		void debug_print_config();
 };
