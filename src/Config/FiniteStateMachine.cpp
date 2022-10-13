@@ -46,11 +46,18 @@ void ConfigParser::state_simpledirective(t_block_directive **context, std::vecto
 }
 
 void ConfigParser::state_openblock(t_block_directive **context, std::vector<std::string>::iterator& it) {
-	t_block_directive tmp;
-	tmp.parent_context = *context;
+	t_block_directive	  tmp;
 	std::string::iterator str_i;
-	for (str_i = (*it).begin(); str_i != (*it).end() && !std::isspace(*str_i); ++str_i)
-		tmp.name = tmp.name + *str_i;
+	std::string			 *field = &(tmp.name);
+	tmp.parent_context			= *context;
+
+	for (str_i = (*it).begin(); str_i != (*it).end() && *str_i != m_tokens[OPEN_BRACE]; ++str_i) {
+		if (std::isspace(*str_i) && field == &(tmp.name))
+			field = &(tmp.additional_params);
+		*field = *field + *str_i;
+	}
+	tmp.additional_params = trimLeadingWhiteSpace(tmp.additional_params);
+	tmp.additional_params = trimTrailingWhiteSpace(tmp.additional_params);
 	(*context)->block_directives.push_back(tmp);
 	(*context) = &((*context)->block_directives.back());
 }

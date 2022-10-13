@@ -26,6 +26,7 @@ typedef struct s_block_directive t_block_directive;
 
 struct s_block_directive {
 		std::string						name;
+		std::string						additional_params;
 		std::vector<t_simple_directive> simple_directives;
 		std::vector<t_block_directive>	block_directives;
 		t_block_directive			   *parent_context;
