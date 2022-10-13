@@ -10,23 +10,25 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 		if (!(*it).empty()) {
 			switch ((*it)[pos]) {
 				case (';'):
-					state_simpledirective(&context, it);
+					state_simpledirective(&context, it, file);
 					break;
 				case ('{'):
 					state_openblock(&context, it);
 					break;
 				case ('}'):
-					state_closeblock(&context, it);
+					state_closeblock(&context);
 					break;
 				default:
-					state_simpledirective(&context, it); //  Enables multi-line simple directives
+					state_simpledirective(&context, it, file); //  Enables multi-line simple directives
 					continue;
 			}
 		}
 	}
 }
 
-void ConfigParser::state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator& it) {
+void ConfigParser::state_simpledirective(t_block_directive				   **context,
+										 std::vector<std::string>::iterator& it,
+										 std::vector<std::string>		   & file) {
 	t_simple_directive	  tmp;
 	std::string::iterator str_i = (*it).begin();
 	std::string			 *field = &(tmp.name);
@@ -41,6 +43,10 @@ void ConfigParser::state_simpledirective(t_block_directive **context, std::vecto
 		}
 	}
 	tmp.params = trimLeadingWhiteSpace(tmp.params);
+	if ((tmp.params).empty()) {
+		std::string reason = "No parameters for directive \"" + tmp.name + "\"";
+		throw_config_error(file, it, reason);
+	}
 	(*context)->simple_directives.push_back(tmp);
 	return;
 }
@@ -62,8 +68,7 @@ void ConfigParser::state_openblock(t_block_directive **context, std::vector<std:
 	(*context) = &((*context)->block_directives.back());
 }
 
-void ConfigParser::state_closeblock(t_block_directive **context, std::vector<std::string>::iterator& it) {
+void ConfigParser::state_closeblock(t_block_directive **context) {
 	if ((*context)->parent_context != NULL)
 		(*context) = (*context)->parent_context;
-	(void)it;
 }
