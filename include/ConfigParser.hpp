@@ -30,6 +30,9 @@ struct s_block_directive {
 		std::vector<t_simple_directive> simple_directives;
 		std::vector<t_block_directive>	block_directives;
 		t_block_directive			   *parent_context;
+		std::vector<t_block_directive*> fetch_matching_blocks(std::string blocks_to_fetch);
+		private:
+		void recurse_blocks(std::vector<t_block_directive*>& ret, std::string blocks_to_fetch);
 };
 
 class ConfigParser {
@@ -62,7 +65,7 @@ class ConfigParser {
 
 		char m_tokens[SIZE];
 
-	private: //  Debug printing
+	public: //  Debug printing
 		void debug_print();
 		void debug_print_simple(t_simple_directive s, std::string tabs);
 		void debug_print_block(t_block_directive b, std::string tabs);
