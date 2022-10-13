@@ -26,6 +26,8 @@ void Handler::reset() {
 void Handler::handle() {
 	int status = m_request.ProcessRequest();
 
+	std::cout << m_request << std::endl;
+
 	if (status != 200)
 		return sendFail(status, "Error processing request");
 
@@ -43,6 +45,8 @@ void Handler::handle() {
 }
 
 void Handler::handleGet() {
+
+	handleCGI("/usr/bin/perl", "printenv.pl");
 	m_response.m_statusCode = 200;
 	m_response.m_statusCode = handleGetWithStaticFile(m_request.getLocation());
 
@@ -138,6 +142,10 @@ int Handler::sendSingle(std::ifstream& infile) {
 #define CHUNK_MAX_LENGTH 1024
 #define CHUNK_SENDING_SIZE (CHUNK_MAX_LENGTH + 3 + 2 * 2)
 
+//  TODO: make it able to handle large files.
+//  We would achieve this by just doing this, except keeping track of the length, or possibly just keep the ifsteam,
+//  and if recv() fails, we go back to the poller. Wait for POLLOUT, and try again. Until it's finished.
+//  there would need to be a state flag, however.
 int Handler::sendChunked(std::ifstream& infile) {
 	m_response.addHeader("Transfer-Encoding", "chunked");
 

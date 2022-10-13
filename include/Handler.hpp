@@ -26,6 +26,7 @@ class Handler {
 		int	 transferFile(std::ifstream &infile);
 		int	 sendChunked(std::ifstream &infile);
 		int	 sendSingle(std::ifstream &infile);
+		int  handleCGI(const std::string& command, const std::string& filename);
 		void sendResponse();
 
 	private:
