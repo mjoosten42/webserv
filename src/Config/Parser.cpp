@@ -17,8 +17,7 @@ ConfigParser::ConfigParser() {
 
 bool ConfigParser::parse_config(const char *path) {
 	std::vector<std::string> config_file = readFile(path);
-	if (!(check_validity(config_file)))
-		fatal_perror("Invalid config file");
+	check_validity(config_file); //  Will throw exception incase of invalid config.
 	finite_state_machine(config_file);
 	debug_print(); //  If you want to see the parsed contents.
 	return (true);

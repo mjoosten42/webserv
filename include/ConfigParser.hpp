@@ -34,7 +34,6 @@ struct s_block_directive {
 class ConfigParser {
 	public:
 		ConfigParser();
-
 		bool					 parse_config(const char *path);
 		std::vector<std::string> readFile(const char *path);
 
@@ -42,9 +41,9 @@ class ConfigParser {
 		t_block_directive m_main_context;
 
 	private: //  Checking validity
-		bool check_validity(std::vector<std::string>& config);
+		void check_validity(std::vector<std::string>& config);
 		void discard_comments(std::vector<std::string>& config);
-		bool check_braces_error(std::vector<std::string>& config);
+		void check_braces_error(std::vector<std::string>& config);
 
 	private: //	Finite state machine
 		void finite_state_machine(std::vector<std::string>& file);
