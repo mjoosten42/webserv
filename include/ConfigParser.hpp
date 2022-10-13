@@ -48,9 +48,9 @@ class ConfigParser {
 
 	private: //	Finite state machine
 		void finite_state_machine(std::vector<std::string>& file);
-		void state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator it);
-		void state_openblock(t_block_directive **context, std::vector<std::string>::iterator it);
-		void state_closeblock(t_block_directive **context, std::vector<std::string>::iterator it);
+		void state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator& it);
+		void state_openblock(t_block_directive **context, std::vector<std::string>::iterator& it);
+		void state_closeblock(t_block_directive **context, std::vector<std::string>::iterator& it);
 
 		enum Token { SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
 

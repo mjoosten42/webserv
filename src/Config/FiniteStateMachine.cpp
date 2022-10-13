@@ -6,9 +6,8 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 	std::vector<std::string>::iterator it;
 
 	for (it = file.begin(); it != file.end(); ++it) {
-		//  *it		   = trimLeadingWhiteSpace(*it);
 		size_t pos = (*it).find_first_of(m_tokens, 0, SIZE);
-		if (pos != std::string::npos) {
+		if (!(*it).empty()) {
 			switch ((*it)[pos]) {
 				case (';'):
 					state_simpledirective(&context, it);
@@ -20,17 +19,18 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 					state_closeblock(&context, it);
 					break;
 				default:
+					state_simpledirective(&context, it); //  Enables multi-line simple directives
 					continue;
 			}
 		}
 	}
 }
 
-void ConfigParser::state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator it) {
+void ConfigParser::state_simpledirective(t_block_directive **context, std::vector<std::string>::iterator& it) {
 	t_simple_directive	  tmp;
 	std::string::iterator str_i = (*it).begin();
 	std::string			 *field = &(tmp.name);
-	while (*str_i != m_tokens[SEMICOLON]) {
+	while (*str_i != m_tokens[SEMICOLON] && str_i != (*it).end()) {
 		if (std::isspace(*str_i) && field == &(tmp.name))
 			field = &(tmp.params);
 		*field = *field + *str_i;
@@ -45,7 +45,7 @@ void ConfigParser::state_simpledirective(t_block_directive **context, std::vecto
 	return;
 }
 
-void ConfigParser::state_openblock(t_block_directive **context, std::vector<std::string>::iterator it) {
+void ConfigParser::state_openblock(t_block_directive **context, std::vector<std::string>::iterator& it) {
 	t_block_directive tmp;
 	tmp.parent_context = *context;
 	std::string::iterator str_i;
@@ -53,11 +53,10 @@ void ConfigParser::state_openblock(t_block_directive **context, std::vector<std:
 		tmp.name = tmp.name + *str_i;
 	(*context)->block_directives.push_back(tmp);
 	(*context) = &((*context)->block_directives.back());
-	++it;
 }
 
-void ConfigParser::state_closeblock(t_block_directive **context, std::vector<std::string>::iterator it) {
+void ConfigParser::state_closeblock(t_block_directive **context, std::vector<std::string>::iterator& it) {
 	if ((*context)->parent_context != NULL)
 		(*context) = (*context)->parent_context;
-	++it;
+	(void)it;
 }
