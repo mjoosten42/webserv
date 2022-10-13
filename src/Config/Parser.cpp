@@ -1,9 +1,7 @@
 #include "ConfigParser.hpp"
 #include "utils.hpp"
 
-//  TODO: Reject invalid config files
-//  Split into separate files
-//  Make handler functions that return specific parts of the config e.g. all the servers.
+//  TODO: Make handler functions that return specific parts of the config e.g. all the servers.
 
 ConfigParser::ConfigParser() {
 	m_main_context.name			  = "main";
