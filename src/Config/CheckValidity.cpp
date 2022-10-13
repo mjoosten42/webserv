@@ -5,12 +5,6 @@
 #include <string>
 #include <vector>
 
-//  Parsing validity steps:
-//  discard comments first (PARSING SIMPLIFICATION) //DONE
-//  then check whether bracers are properly paired (INVALID_BRACES) //DONE
-//  check whether no text between ';' and '}' or EOF (MISSING SEMICOLON) // DONE
-//  finally check whether every simple directive has name and params (MISSING ARGS) // DONE : Handled in FSM
-
 void ConfigParser::check_validity(std::vector<std::string>& config) {
 	discard_comments(config);
 	check_braces_error(config);
