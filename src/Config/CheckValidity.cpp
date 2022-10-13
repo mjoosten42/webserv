@@ -14,6 +14,7 @@
 void ConfigParser::check_validity(std::vector<std::string>& config) {
 	discard_comments(config);
 	check_braces_error(config);
+	check_semicolon_error(config);
 
 	return;
 }
@@ -44,6 +45,48 @@ void ConfigParser::check_braces_error(std::vector<std::string>& config) {
 		msg					   = msg + " for opening brace on line " + error_line;
 		msg					   = msg + "\nLINE " + error_line + ": " + *file_it;
 		throw(std::invalid_argument(msg));
+	}
+	return;
+}
+
+void ConfigParser::check_semicolon_error(std::vector<std::string>& config) {
+	std::vector<std::string>::iterator			   file_it;
+	std::stack<std::vector<std::string>::iterator> missing_semicolon;
+
+	for (file_it = config.begin(); file_it != config.end(); ++file_it) {
+		*file_it = trimLeadingWhiteSpace(*file_it);
+		if (!(*file_it).empty()) { //  Might be superfluous
+			size_t pos = (*file_it).find_first_of(m_tokens, 0, SIZE);
+			switch ((*file_it)[pos]) {
+				case (';'):
+					while (!missing_semicolon.empty())
+						missing_semicolon.pop();
+					break;
+				case ('{'):
+					if (!missing_semicolon.empty()) {
+						file_it				   = missing_semicolon.top();
+						std::string error_line = toString(static_cast<int>(file_it - config.begin() + 1));
+						std::string msg		   = "\nERROR: Invalid Config - No closing semicolon";
+						msg					   = msg + " for statement on line " + error_line;
+						msg					   = msg + "\nLINE " + error_line + ": " + *file_it;
+						throw(std::invalid_argument(msg));
+					}
+					break;
+				case ('}'):
+					if (!missing_semicolon.empty()) {
+						file_it				   = missing_semicolon.top();
+						std::string error_line = toString(static_cast<int>(file_it - config.begin() + 1));
+						std::string msg		   = "\nERROR: Invalid Config - No closing semicolon";
+						msg					   = msg + " for statement on line " + error_line;
+						msg					   = msg + "\nLINE " + error_line + ": " + *file_it;
+						throw(std::invalid_argument(msg));
+					}
+					break;
+				default:
+					missing_semicolon.push(file_it);
+					continue;
+			}
+		}
 	}
 	return;
 }

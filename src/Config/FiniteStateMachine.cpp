@@ -6,7 +6,7 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 	std::vector<std::string>::iterator it;
 
 	for (it = file.begin(); it != file.end(); ++it) {
-		*it		   = trimLeadingWhiteSpace(*it);
+		//  *it		   = trimLeadingWhiteSpace(*it);
 		size_t pos = (*it).find_first_of(m_tokens, 0, SIZE);
 		if (pos != std::string::npos) {
 			switch ((*it)[pos]) {
