@@ -4,7 +4,6 @@
 //  TODO: Reject invalid config files
 //  Split into separate files
 //  Make handler functions that return specific parts of the config e.g. all the servers.
-//	Handle escape characters in parsing
 
 ConfigParser::ConfigParser() {
 	m_main_context.name			  = "main";
