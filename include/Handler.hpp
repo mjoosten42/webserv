@@ -23,9 +23,9 @@ class Handler {
 	private:
 		void handleGet();
 		int	 handleGetWithStaticFile(const std::string &filename);
-		int	 transferFile(std::ifstream &infile);
-		int	 sendChunked(std::ifstream &infile);
-		int	 sendSingle(std::ifstream &infile);
+		int	 transferFile(int readfd);
+		int	 sendChunked(int readfd);
+		int	 sendSingle(int readfd);
 		void sendResponse();
 
 	private:

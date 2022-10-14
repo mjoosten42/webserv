@@ -6,6 +6,7 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
+#include <fcntl.h> // open
 #include <fstream>
 #include <iostream> // TODO: remove
 #include <sstream>
@@ -51,18 +52,22 @@ void Handler::handleGet() {
 }
 
 int Handler::handleGetWithStaticFile(const std::string& filename) {
-	std::ifstream infile("." + filename, std::ios::in | std::ios::binary); //  TODO: remove dot
 
-	if (!infile.is_open()) {
+	//  TODO: nonblock?
+	//  TODO: remove dot
+	int readfd = open(("." + filename).c_str(), O_RDONLY);
+	if (readfd == -1) {
+		//  TODO: correct error codes
 		if (errno == EACCES)
 			return 403;
+		perror("open");
 		return 404;
 	}
 
 	m_response.addHeader("Connection", "Keep-Alive");
 	m_response.addHeader("Content-Type", MIME::fromFileName(filename));
 
-	return transferFile(infile);
+	return transferFile(readfd);
 }
 
 void Handler::sendFail(int code, const std::string& msg) {
@@ -100,31 +105,32 @@ void Handler::sendResponse() {
 
 #define FILE_BUF_SIZE (4096 - 1024)
 
-int Handler::transferFile(std::ifstream& infile) {
-	int			   ret;
-	std::streampos begin = infile.tellg();
-	infile.seekg(0, std::ios::end);
-	std::streampos end = infile.tellg();
-	infile.seekg(0, std::ios::beg);
+int Handler::transferFile(int readfd) {
+	int ret;
 
-	if (end - begin > FILE_BUF_SIZE) {
+	//  get file size
+	off_t size = lseek(readfd, 0, SEEK_END);
+	if (size == -1)
+		size = std::numeric_limits<off_t>().max();
+	lseek(readfd, 0, SEEK_SET); //  set back to start
+
+	if (size > FILE_BUF_SIZE) {
 		//  send multichunked
-		ret = sendChunked(infile);
+		ret = sendChunked(readfd);
 	} else {
 		//  send in single buf.
-		ret = sendSingle(infile);
+		ret = sendSingle(readfd);
 	}
-	infile.close();
+	close(readfd);
 	return ret;
 }
 
-int Handler::sendSingle(std::ifstream& infile) {
+int Handler::sendSingle(int readfd) {
 	static char buf[FILE_BUF_SIZE + 1];
 
-	infile.read(buf, FILE_BUF_SIZE);
-	if (infile.bad()) {
+	if (read(readfd, buf, FILE_BUF_SIZE) == -1) {
 		std::cerr << "Reading infile failed!\n";
-		return 404;
+		return 500;
 	}
 	m_response.m_statusCode = 200;
 	m_response.addToBody(buf);
@@ -138,7 +144,7 @@ int Handler::sendSingle(std::ifstream& infile) {
 #define CHUNK_MAX_LENGTH 1024
 #define CHUNK_SENDING_SIZE (CHUNK_MAX_LENGTH + 3 + 2 * 2)
 
-int Handler::sendChunked(std::ifstream& infile) {
+int Handler::sendChunked(int readfd) {
 	m_response.addHeader("Transfer-Encoding", "chunked");
 
 	std::string response = m_response.getResponseAsString() + CRLF;
@@ -146,19 +152,19 @@ int Handler::sendChunked(std::ifstream& infile) {
 		fatal_perror("send"); //  TODO: remove those!!
 
 	static char buf[CHUNK_SENDING_SIZE];
-	size_t		size;
+	ssize_t		size;
 	size_t		buf_offset;
 
 	while (true) {
-		infile.read(buf + 5, CHUNK_MAX_LENGTH);
 
-		if (infile.bad()) {
+		size = read(readfd, buf + 5, CHUNK_MAX_LENGTH);
+
+		if (size == -1) {
 			std::cerr << "Reading infile failed!\n";
-			return 404;
+			return 500;
 		}
 
 		//  if we have reached EOF, then we finish the multichunked response with empty data.
-		size = infile.gcount();
 		if (size == 0) {
 			const std::string end = "0\r\n\r\n";
 			if (send(m_fd, end.c_str(), end.length(), 0) == -1)
