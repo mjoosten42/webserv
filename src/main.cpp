@@ -15,10 +15,10 @@ int main(int argc, char **argv) {
 	
 	// EXAMPLE OF HOW TO FETCH BLOCK DIRECTIVES FROM THE CONFIG STRUCT
 	std::vector<Server> servers;
-	std::vector<t_block_directive*> all_servers;
+	std::vector<t_block_directive*> server_config_blocks;
 	std::vector<t_block_directive*>::iterator it;
-	all_servers = config.m_main_context.fetch_matching_blocks("server");
-	for (it = all_servers.begin(); it != all_servers.end(); ++it){
+	server_config_blocks = config.m_main_context.fetch_matching_blocks("server");
+	for (it = server_config_blocks.begin(); it != server_config_blocks.end(); ++it){
 		std::string listen_port = (**it).fetch_simple("listen");
 		if (!listen_port.empty())
 			servers.push_back(stoi(listen_port));
