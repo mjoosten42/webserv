@@ -17,18 +17,18 @@ int main(int argc, char **argv) {
 	std::vector<Server> servers;
 	std::vector<t_block_directive*> all_servers;
 	all_servers = config.m_main_context.fetch_matching_blocks("server");
-	int i = 0;
+	int i = 2;
 	std::vector<t_block_directive*>::iterator it;
 	for (it = all_servers.begin(); it != all_servers.end(); ++it){
-		int port = stoi((**it).fetch_simple("listen"));
-		servers.push_back(port);
+		std::string listen_port = (**it).fetch_simple("listen");
+		if (!listen_port.empty())
+			servers.push_back(stoi(listen_port));
+		else
+			print("FAILED TO START, NO LISTEN PORT SPECIFIED");
 		++i;
 		print("Server number " + toString(i) + ":");
 		config.debug_print_block(**it, "");
 	}
-
-
-	// servers.push_back(8080);
 
 	Poller poller(servers.begin(), servers.end());
 
