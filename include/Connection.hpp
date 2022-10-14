@@ -11,8 +11,8 @@ class Connection {
 		Connection();
 		Connection(int fd, const Server *server);
 
-		void receiveFromClient();
-		void sendToClient();
+		void receiveFromClient(short& events);
+		void sendToClient(short& events);
 
 	private:
 		int					 m_fd;

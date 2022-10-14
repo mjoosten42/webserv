@@ -73,4 +73,7 @@ void transformBeginEnd(T& container, F operation) {
 	std::transform(container.begin(), container.end(), container.begin(), operation);
 }
 
-std::string getReventsAsString(short revents);
+std::string getEventsAsString(short revents);
+
+void	setFlag(short& events, int flag);
+void	unsetFlag(short& events, int flag);

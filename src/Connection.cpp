@@ -14,26 +14,29 @@ Connection::Connection(int m_fd, const Server *server): m_fd(m_fd), m_server(ser
 	(void)m_server;
 }
 
-//  Tell a connection that it can receive data.
+//  Tell a request that it can receive data.
 //  Read it, and add it to the first request (FIFO)
 //  Once a request has been processed, create a response and pop the request
-void Connection::receiveFromClient() {
+//  Return true if POLLOUT needs to be set
+void Connection::receiveFromClient(short& events) {
 	static char buf[BUFSIZE + 1];
-	ssize_t		recv_len = recv(m_fd, buf, BUFSIZE, 0);
+	ssize_t		bytes_received = recv(m_fd, buf, BUFSIZE, 0);
 
-	switch (recv_len) {
+	std::cout << "Received: " << bytes_received << "\n";
+	switch (bytes_received) {
 		case -1:
 			if (errno != ECONNRESET && errno != ETIMEDOUT)
 				fatal_perror("recv");
 			std::cerr << RED "INFO: Connection reset or timeout\n" DEFAULT;
 		case 0:
-			return;
+			unsetFlag(events, POLLOUT);
+			break;
 		default:
-			buf[recv_len] = 0;
+			buf[bytes_received] = 0;
 
-			std::cout << RED "----START BUF" << std::string(80, '-') << DEFAULT << std::endl;
-			std::cout << buf << std::endl;
-			std::cout << RED "----END BUF" << std::string(80, '-') << DEFAULT << std::endl;
+			std::cout << RED "----START BUF" << std::string(40, '-') << DEFAULT << std::endl;
+			std::cout << buf;
+			std::cout << RED "----END BUF" << std::string(40, '-') << DEFAULT << std::endl;
 
 			//  Add a new request if none exist;
 			if (m_requests.empty())
@@ -41,26 +44,36 @@ void Connection::receiveFromClient() {
 
 			Request& request = m_requests.front();
 			request.add(buf);
-			if (recv_len != BUFSIZE)
-				request.ProcessRequest();
-
-			//  TMP
+		
+			if (bytes_received == BUFSIZE)
+				return unsetFlag(events, POLLOUT);
+			
+			request.ProcessRequest();
+			m_requests.pop();
 			m_responses.push(Response());
 			m_responses.front().m_statusCode = 200;
+			setFlag(events, POLLOUT);
 	}
 }
 
-void Connection::sendToClient() {
+//  Send data back to a client
+//  This should only be called if POLLOUT is set
+//  Return true if POLLOUT needs to be set again
+void Connection::sendToClient(short& events) {
 	Response  & response   = m_responses.front();
 	std::string str		   = response.getResponseAsString();
 	ssize_t		bytes_send = send(m_fd, str.c_str(), str.length(), 0);
 
+	std::cout << "Send: " << bytes_send << "\n";
 	switch (bytes_send) {
 		case -1:
 			fatal_perror("send");
 		default:
-			std::cout << str.length() << std::endl;
-			if (str.length() != BUFSIZE)
+			if (str.length() > BUFSIZE)
+				setFlag(events, POLLOUT);
+			else {
 				m_responses.pop();
+				unsetFlag(events, POLLOUT);
+			}
 	}
 }

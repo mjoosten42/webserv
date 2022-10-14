@@ -28,16 +28,24 @@ std::string getStringMapAsString(const std::map<std::string, std::string>& map) 
 	return strings;
 }
 
-std::string getReventsAsString(short revents) {
+std::string getEventsAsString(short revents) {
 	std::string events;
 
 	if (revents & POLLIN)
-		events += "POLLIN | ";
+		events += "IN  | ";
 	if (revents & POLLOUT)
-		events += "POLLOUT | ";
+		events += "OUT | ";
 	if (revents & POLLHUP)
-		events += "POLLHUP | ";
+		events += "HUP | ";
 	if (revents & POLLNVAL)
-		events += "POLLNVAL";
+		events += "NVAL";
 	return events;
+}
+
+void	setFlag(short& events, int flag) {
+	events |= flag;
+}
+
+void	unsetFlag(short& events, int flag) {
+	events &= ~flag;
 }
