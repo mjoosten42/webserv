@@ -27,6 +27,8 @@ void Handler::reset() {
 void Handler::handle() {
 	int status = m_request.ProcessRequest();
 
+	std::cout << m_request << std::endl;
+
 	if (status != 200)
 		return sendFail(status, "Error processing request");
 
@@ -43,7 +45,11 @@ void Handler::handle() {
 	}
 }
 
+int handleCGI(const std::string& command, const std::string& filename);
+
 void Handler::handleGet() {
+
+	handleCGI("/usr/bin/perl", "printenv.pl");
 	m_response.m_statusCode = 200;
 	m_response.m_statusCode = handleGetWithStaticFile(m_request.getLocation());
 
