@@ -15,8 +15,6 @@ struct Popen {
 		}
 };
 
-//  TODO: envp map
-
 static void closePipe(int *pfds)
 {
 	close(pfds[0]);
@@ -71,9 +69,9 @@ Popen my_popen(const std::string& path, const std::string& filename, const Envir
 	} else if (popen.pid == 0) {
 		close(serverToCgi[1]);
 		close(cgiToServer[0]);
-		if (my_exec(serverToCgi[0], cgiToServer[1], path, filename, em.toCharpp()) == false)
-		{
+		if (my_exec(serverToCgi[0], cgiToServer[1], path, filename, em.toCharpp()) == false) {
 			exit(EXIT_FAILURE);
+		}
 	} else {
 		close(serverToCgi[0]);
 		close(cgiToServer[1]);

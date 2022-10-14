@@ -4,6 +4,7 @@ SOURCES = \
 	src/Config/DebugPrint.cpp \
 	src/Config/FiniteStateMachine.cpp \
 	src/Config/Parser.cpp \
+	src/EnvironmentMap.cpp \
 	src/Handler.cpp \
 	src/HTTP.cpp \
 	src/main.cpp \
