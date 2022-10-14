@@ -6,15 +6,14 @@ void ConfigParser::debug_print() {
 }
 
 void ConfigParser::debug_print_simple(t_simple_directive s, std::string tabs) {
-	std::cout << tabs << "Name: |" << s.name << "| Params: |" << s.params << "|;" << std::endl;
+	std::cout << tabs << s.name << "	" << s.params << ";" << std::endl;
 }
 
 void ConfigParser::debug_print_block(t_block_directive b, std::string tabs) {
 	if (b.additional_params.empty())
 		std::cout << tabs << b.name << ":" << std::endl << tabs << "{" << std::endl;
 	else
-		std::cout << tabs << b.name << " -|" << b.additional_params << "|-"
-				  << ":" << std::endl
+		std::cout << tabs << b.name << " " << b.additional_params << ":" << std::endl
 				  << tabs << "{" << std::endl;
 	tabs = tabs + "   ";
 
