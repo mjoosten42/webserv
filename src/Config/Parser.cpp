@@ -16,7 +16,7 @@ bool ConfigParser::parse_config(const char *path) {
 	std::vector<std::string> config_file = readFile(path);
 	check_validity(config_file); //  Will throw exception incase of invalid config.
 	finite_state_machine(config_file);
-	debug_print(); //  If you want to see the parsed contents.
+	// debug_print(); //  If you want to see the parsed contents.
 	return (true);
 }
 
@@ -31,4 +31,24 @@ std::vector<std::string> ConfigParser::readFile(const char *path) {
 		}
 	}
 	return (ret);
+}
+
+// Returns a vector of pointers to all t_block_directives who's name matches 'blocks_to_fetch'.
+// Only searches the context of the t_block_directive object this function was called on and its sub directives.
+std::vector<t_block_directive*> s_block_directive::fetch_matching_blocks(std::string blocks_to_fetch)
+{
+	std::vector<t_block_directive*> ret;
+	recurse_blocks(ret, blocks_to_fetch);
+	return (ret);
+}
+
+void s_block_directive::recurse_blocks(std::vector<t_block_directive*>& ret, std::string blocks_to_fetch)
+{
+	std::vector<t_block_directive>::iterator it_b;
+	for (it_b = this->block_directives.begin(); it_b != this->block_directives.end(); ++it_b){
+		if ((*it_b).name.compare(blocks_to_fetch) == 0)
+			ret.push_back(&(*it_b));
+		(*it_b).recurse_blocks(ret, blocks_to_fetch);
+	}
+	return;
 }
