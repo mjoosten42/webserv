@@ -14,19 +14,21 @@ int main(int argc, char **argv) {
 		config.parse_config("nginx.conf");
 	
 	// EXAMPLE OF HOW TO FETCH BLOCK DIRECTIVES FROM THE CONFIG STRUCT
+	std::vector<Server> servers;
 	std::vector<t_block_directive*> all_servers;
 	all_servers = config.m_main_context.fetch_matching_blocks("server");
 	int i = 0;
 	std::vector<t_block_directive*>::iterator it;
 	for (it = all_servers.begin(); it != all_servers.end(); ++it){
+		int port = stoi((**it).fetch_simple("listen"));
+		servers.push_back(port);
 		++i;
 		print("Server number " + toString(i) + ":");
 		config.debug_print_block(**it, "");
 	}
 
-	std::vector<Server> servers;
 
-	servers.push_back(8080);
+	// servers.push_back(8080);
 
 	Poller poller(servers.begin(), servers.end());
 
