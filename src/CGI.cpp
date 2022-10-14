@@ -18,6 +18,12 @@ struct Popen
 
 // TODO: envp map
 
+static void closePipe(int *pfds)
+{
+	close(pfds[0]);
+	close(pfds[1]);
+}
+
 bool my_exec(int infd, int outfd, const std::string& path, const std::string& filename, const char **envp)
 {
 	close(STDIN_FILENO);
@@ -61,8 +67,7 @@ Popen my_popen(const std::string& path, const std::string& filename, const char 
 	}
 	else if (pipe(cgiToServer) == -1)
 	{
-		close(serverToCgi[0]);
-		close(serverToCgi[1]);
+		closePipe(serverToCgi);
 		return popen;
 	}
 
@@ -72,10 +77,8 @@ Popen my_popen(const std::string& path, const std::string& filename, const char 
 	popen.pid = fork();
 	if (popen.pid == -1)
 	{
-		close(serverToCgi[0]);
-		close(serverToCgi[1]);
-		close(cgiToServer[0]);
-		close(cgiToServer[1]);
+		closePipe(serverToCgi);
+		closePipe(cgiToServer);
 		return popen;
 	}
 	else if (popen.pid == 0)
@@ -97,6 +100,7 @@ Popen my_popen(const std::string& path, const std::string& filename, const char 
 	return popen;
 }
 
+// TODO: handle like a "downloaded" file
 int Handler::handleCGI(const std::string& command, const std::string& filename)
 {
 	extern char**environ;
