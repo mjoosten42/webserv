@@ -25,15 +25,16 @@ typedef struct s_simple_directive {
 typedef struct s_block_directive t_block_directive;
 
 struct s_block_directive {
-		std::string						name;
-		std::string						additional_params;
-		std::vector<t_simple_directive> simple_directives;
-		std::vector<t_block_directive>	block_directives;
-		t_block_directive			   *parent_context;
-		std::vector<t_block_directive*> fetch_matching_blocks(std::string blocks_to_fetch);
-		std::string	fetch_simple(std::string key);
-		private:
-		void recurse_blocks(std::vector<t_block_directive*>& ret, std::string blocks_to_fetch);
+		std::string						 name;
+		std::string						 additional_params;
+		std::vector<t_simple_directive>	 simple_directives;
+		std::vector<t_block_directive>	 block_directives;
+		t_block_directive				*parent_context;
+		std::vector<t_block_directive *> fetch_matching_blocks(std::string blocks_to_fetch);
+		std::string						 fetch_simple(std::string key);
+
+	private:
+		void recurse_blocks(std::vector<t_block_directive *>& ret, std::string blocks_to_fetch);
 };
 
 class ConfigParser {

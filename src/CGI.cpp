@@ -97,7 +97,7 @@ Popen my_popen(const std::string& path, const std::string& filename, const char 
 	return popen;
 }
 
-int Handler::handleCGI(const std::string& command, const std::string& filename)
+int handleCGI(const std::string& command, const std::string& filename)
 {
 	extern char**environ;
 	Popen pop = my_popen(command, filename, const_cast<const char**>(environ));

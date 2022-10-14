@@ -45,6 +45,8 @@ void Handler::handle() {
 	}
 }
 
+int handleCGI(const std::string& command, const std::string& filename);
+
 void Handler::handleGet() {
 
 	handleCGI("/usr/bin/perl", "printenv.pl");

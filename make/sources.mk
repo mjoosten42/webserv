@@ -1,4 +1,5 @@
 SOURCES = \
+	src/CGI.cpp \
 	src/Config/CheckValidity.cpp \
 	src/Config/DebugPrint.cpp \
 	src/Config/FiniteStateMachine.cpp \
