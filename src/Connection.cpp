@@ -14,10 +14,8 @@ Connection::Connection(int m_fd, const Server *server): m_fd(m_fd), m_server(ser
 	(void)m_server;
 }
 
-//  Tell a request that it can receive data.
-//  Read it, and add it to the first request (FIFO)
+//  Read new data, and add it to the first request (FIFO)
 //  Once a request has been processed, create a response and pop the request
-//  Return true if POLLOUT needs to be set
 void Connection::receiveFromClient(short& events) {
 	static char buf[BUFSIZE + 1];
 	ssize_t		bytes_received = recv(m_fd, buf, BUFSIZE, 0);
@@ -58,7 +56,6 @@ void Connection::receiveFromClient(short& events) {
 
 //  Send data back to a client
 //  This should only be called if POLLOUT is set
-//  Return true if POLLOUT needs to be set again
 void Connection::sendToClient(short& events) {
 	Response  & response   = m_responses.front();
 	std::string str		   = response.getResponseAsString();
