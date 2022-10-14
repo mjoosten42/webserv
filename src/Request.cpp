@@ -53,9 +53,7 @@ int Request::parseStartLine() {
 	}
 	//  parse query string and location
 	size_t questionMarkPos = m_location.find('?');
-	if (questionMarkPos == std::string::npos) {
-		m_queryString = "";
-	} else {
+	if (questionMarkPos != std::string::npos) {
 		m_queryString = m_location.substr(questionMarkPos + 1, std::string::npos);
 		m_location	  = m_location.substr(0, questionMarkPos);
 	}
