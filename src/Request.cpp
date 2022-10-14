@@ -51,6 +51,14 @@ int Request::parseStartLine() {
 		std::cerr << "Empty location: { " << line.str() << " }\n";
 		return 400;
 	}
+	//  parse query string and location
+	size_t questionMarkPos = m_location.find('?');
+	if (questionMarkPos == std::string::npos) {
+		m_queryString = "";
+	} else {
+		m_queryString = m_location.substr(questionMarkPos + 1, std::string::npos);
+		m_location	  = m_location.substr(0, questionMarkPos);
+	}
 
 	word.clear();
 	line >> word;
@@ -133,6 +141,10 @@ const std::string& Request::getLocation() const {
 	return m_location;
 }
 
+const std::string& Request::getQueryString() const {
+	return m_queryString;
+}
+
 methods Request::getMethod() const {
 	return m_method;
 }
@@ -150,6 +162,7 @@ void Request::reset() {
 
 std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << RED << "Location: " << DEFAULT << request.getLocation() << std::endl;
+	os << RED << "Query string: " << DEFAULT << request.getQueryString() << std::endl;
 	os << RED << "Method: " << DEFAULT << request.getMethodAsString() << std::endl;
 	os << RED << "Headers: {\n" << DEFAULT << getStringMapAsString(request.getHeaders()) << RED << "}\n";
 	os << RED << "Body: " << DEFAULT << request.getBody();

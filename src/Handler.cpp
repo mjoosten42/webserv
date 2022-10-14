@@ -141,7 +141,7 @@ int Handler::sendSingle(std::ifstream& infile) {
 int Handler::sendChunked(std::ifstream& infile) {
 	m_response.addHeader("Transfer-Encoding", "chunked");
 
-	std::string response = m_response.getResponseAsString();
+	std::string response = m_response.getResponseAsString() + CRLF;
 	if (send(m_fd, response.c_str(), response.length(), 0) == -1)
 		fatal_perror("send"); //  TODO: remove those!!
 

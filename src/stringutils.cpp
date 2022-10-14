@@ -20,3 +20,12 @@ std::string trimLeadingWhiteSpace(const std::string& s) {
 		ret = s.substr(start);
 	return (ret);
 }
+
+std::string trimTrailingWhiteSpace(const std::string& s) {
+	const std::string whitespaceChars = " \n\r\t\f\v";
+	size_t			  end			  = s.find_last_not_of(whitespaceChars);
+	std::string		  ret			  = "";
+	if (end != std::string::npos)
+		ret = s.substr(0, end + 1);
+	return (ret);
+}
