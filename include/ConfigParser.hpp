@@ -31,6 +31,7 @@ struct s_block_directive {
 		std::vector<t_block_directive>	block_directives;
 		t_block_directive			   *parent_context;
 		std::vector<t_block_directive*> fetch_matching_blocks(std::string blocks_to_fetch);
+		std::string	fetch_simple(std::string key);
 		private:
 		void recurse_blocks(std::vector<t_block_directive*>& ret, std::string blocks_to_fetch);
 };
