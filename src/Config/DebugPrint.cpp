@@ -11,10 +11,10 @@ void ConfigParser::debug_print_simple(t_simple_directive s, std::string tabs) {
 
 void ConfigParser::debug_print_block(t_block_directive b, std::string tabs) {
 	if (b.additional_params.empty())
-		std::cout << tabs << b.name << ":" << std::endl << tabs << "{" << std::endl;
+		std::cout << tabs << b.name << "{" << std::endl << tabs;
 	else
-		std::cout << tabs << b.name << " " << b.additional_params << ":" << std::endl
-				  << tabs << "{" << std::endl;
+		std::cout << tabs << b.name << " " << b.additional_params << "{" << std::endl
+				  << tabs;
 	tabs = tabs + "   ";
 
 	std::vector<t_simple_directive>::iterator it_s;
