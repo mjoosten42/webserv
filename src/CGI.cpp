@@ -1,6 +1,7 @@
 #include "Handler.hpp"
 #include "Request.hpp"
 #include "utils.hpp"
+#include "EnvironmentMap.hpp"
 
 struct Popen
 {
@@ -24,7 +25,7 @@ static void closePipe(int *pfds)
 	close(pfds[1]);
 }
 
-bool my_exec(int infd, int outfd, const std::string& path, const std::string& filename, const char **envp)
+bool my_exec(int infd, int outfd, const std::string& path, const std::string& filename, char **envp)
 {
 	close(STDIN_FILENO);
 	if (dup(infd) == -1)
@@ -54,7 +55,7 @@ bool my_exec(int infd, int outfd, const std::string& path, const std::string& fi
 }
 
 
-Popen my_popen(const std::string& path, const std::string& filename, const char **envp)
+Popen my_popen(const std::string& path, const std::string& filename, const EnvironmentMap& em)
 {
 	Popen popen;
 	int serverToCgi[2];
@@ -85,7 +86,7 @@ Popen my_popen(const std::string& path, const std::string& filename, const char 
 	{
 		close(serverToCgi[1]);
 		close(cgiToServer[0]);
-		if (my_exec(serverToCgi[0], cgiToServer[1], path, filename, envp) == false)
+		if (my_exec(serverToCgi[0], cgiToServer[1], path, filename, em.toCharpp()) == false)
 		{
 			exit(EXIT_FAILURE);
 		}
@@ -103,8 +104,17 @@ Popen my_popen(const std::string& path, const std::string& filename, const char 
 // TODO: handle like a "downloaded" file
 int Handler::handleCGI(const std::string& command, const std::string& filename)
 {
-	extern char**environ;
-	Popen pop = my_popen(command, filename, const_cast<const char**>(environ));
+	EnvironmentMap em;
+	em.initFromEnviron();
+
+	// TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
+	em["SERVER_SOFTWARE"] = "TODO";
+	em["SERVER_NAME"] = "ALSO TODO";
+	em["REQUEST_METHOD"] = m_request.getMethodAsString();
+	em["PATH_INFO"] = m_request.getLocation();
+	em["QUERY_STRING"] = m_request.getQueryString();
+
+	Popen pop = my_popen(command, filename, em);
 
 	if (pop.status != 200)
 	{
