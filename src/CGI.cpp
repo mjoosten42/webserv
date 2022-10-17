@@ -33,7 +33,7 @@ bool my_exec(int infd, int outfd, const std::string& path, const std::string& fi
 		return false;
 	close(outfd);
 
-	const char *args[] = { path.c_str(), filename.c_str(), nullptr };
+	const char *args[] = { path.c_str(), filename.c_str(), NULL };
 
 	if (execve(path.c_str(), const_cast<char *const *>(args), const_cast<char *const *>(envp)) == -1)
 		return false;
