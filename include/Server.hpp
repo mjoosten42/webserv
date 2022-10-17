@@ -5,9 +5,12 @@
 #include <string>
 #include <vector>
 
+class Server;
+
 class Location {
 	public:
 		Location();
+		Location(t_block_directive *constructor_specs, Server *parent);
 
 		std::string m_location;
 		int			m_client_max_body_size;
@@ -18,8 +21,6 @@ class Location {
 };
 
 //  https://nginx.org/en/docs/http/ngx_http_core_module.html
-
-//  typedef struct s_block_directive t_block_directive;
 
 class Server {
 	public:

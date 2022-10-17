@@ -18,6 +18,18 @@ Location::Location() {
 	m_root				   = "html";
 }
 
+//TODO: Implement properly
+Location::Location(t_block_directive *constructor_specs, Server *parent) {
+	(void)constructor_specs;
+	(void)parent;
+	m_location			   = "/";
+	m_client_max_body_size = -1;
+	m_limit_except		   = "";
+	m_redirect			   = "";
+	m_auto_index		   = false;
+	m_root				   = "html";
+}
+
 Server::Server(): m_fd(-1) {
 	m_host			  = "localhost";
 	m_port			  = 8080;
@@ -55,10 +67,12 @@ Server::Server(t_block_directive *constructor_specs) {
 		m_error_page = val_from_config; //  TODO: Check if error page is valid.
 
 	//  ADD LOCATION BLOCKS, IF PRESENT //
-	Location location = {
-		"/", -1, "", "", false, "html"
-	}; //  TODO: handle location blocks with location block constructor too.
-	m_locations.push_back(location);
+	std::vector<t_block_directive *> location_config_blocks;
+	location_config_blocks = constructor_specs->fetch_matching_blocks("location");
+
+	std::vector<t_block_directive *>::iterator it;
+	for (it = location_config_blocks.begin(); it != location_config_blocks.end(); ++it)
+		m_locations.push_back(Location(*it, this));
 
 	//  SET UP SOCKET //
 
