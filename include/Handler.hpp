@@ -3,33 +3,29 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
-#include "shared_fd.hpp"
+
+#include <string>
 
 class Handler {
 	public:
-		Handler();
-		Handler(int fd, const Server *server);
+		Handler(Request& request, Response& response, const Server *server);
 
-		void reset();
+		void clear();
 		void handle();
 
-	public:
-		Request	 m_request;
-		Response m_response;
+	private:
+		Request & m_request;
+		Response& m_response;
 
 		void sendFail(int code, const std::string& msg);
 		void sendMoved(const std::string& location);
-
-	private:
 		void handleGet();
-		int	 handleCGI(const std::string& command, const std::string& filename);
+		int	 handleCGI(const std::string &command, const std::string &filename);
 		int	 handleGetWithStaticFile(const std::string &filename);
-		int	 transferFile(int readfd);
-		int	 sendChunked(int readfd);
-		int	 sendSingle(int readfd);
-		void sendResponse();
+		int	 transferFile(int fd);
+		int	 sendSingle(int fd);
+		int	 sendChunked(int fd);
 
 	private:
-		shared_fd	  m_fd;
 		const Server *m_server;
 };

@@ -3,7 +3,7 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
-//  #define DEFAULT_MIME_TYPE "application/octet-stream"
+//#define DEFAULT_MIME_TYPE "application/octet-stream"
 #define DEFAULT_MIME_TYPE "text/plain"
 
 typedef struct s_entry {

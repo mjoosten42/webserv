@@ -1,5 +1,6 @@
 #include "Response.hpp"
 
+#include "defines.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
 
@@ -26,8 +27,8 @@ const static int statusMessagesSize	 = sizeof(statusMessages) / sizeof(*statusMe
 
 Response::Response(): HTTP() {}
 
-void Response::reset() {
-	HTTP::reset();
+void Response::clear() {
+	HTTP::clear();
 	m_statusCode = 0;
 }
 
@@ -45,18 +46,13 @@ std::string Response::getStatusLine() const {
 
 //  Returns the response as a string to send over a socket. When there is a body present,
 //  the body is amended automatically and Content-Length is calculated.
-std::string Response::getResponseAsString() {
+std::string Response::getResponseAsString() const {
 	std::string response;
 
 	response += getStatusLine();
-	if (m_body.length() > 0) {
-		addHeader("Content-Length", toString(m_body.length()));
-		response += getHeadersAsString();
-		response += CRLF;
-		response += getBody();
-	} else {
-		response += getHeadersAsString();
-	}
+	response += getHeadersAsString();
+	response += CRLF;
+	response += getBody();
 
 	return (response);
 }
@@ -68,16 +64,4 @@ std::string Response::getHeadersAsString() const {
 	for (it = m_headers.begin(); it != m_headers.end(); it++)
 		headers += it->first + ": " + it->second + CRLF;
 	return headers;
-}
-
-void Response::addToBody(const std::string& str) {
-	m_body += str + CRLF;
-}
-
-void Response::addHeader(const std::string& field, const std::string& value) {
-	m_headers[field] = value;
-}
-
-const std::string& Response::getBody() const {
-	return m_body;
 }

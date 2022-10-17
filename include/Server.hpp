@@ -1,6 +1,5 @@
 #pragma once
 
-#include "shared_fd.hpp"
 #include "ConfigParser.hpp"
 
 #include <string>
@@ -19,7 +18,7 @@ class Location {
 
 //  https://nginx.org/en/docs/http/ngx_http_core_module.html
 
-// typedef struct s_block_directive t_block_directive;
+//  typedef struct s_block_directive t_block_directive;
 
 class Server {
 	public:
@@ -30,7 +29,7 @@ class Server {
 		int getFD() const;
 
 	private:
-		shared_fd			  m_fd;
+		int					  m_fd;
 		std::vector<Location> m_locations;
 
 		//  Config

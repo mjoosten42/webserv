@@ -9,19 +9,17 @@ class Response: public HTTP {
 	public:
 		Response();
 
-		std::string		   getStatusLine() const;
-		std::string		   getStatusMessage() const;
-		std::string		   getResponseAsString(void);
-		const std::string& getBody() const;
+		std::string getStatusLine() const;
+		std::string getStatusMessage() const;
+		std::string getResponseAsString(void) const;
 
-		void addToBody(const std::string& str);
-		void addHeader(const std::string& field, const std::string& value);
-
-		void reset();
+		void clear();
 
 	private:
 		std::string getHeadersAsString() const;
 
 	public:
 		int m_statusCode;
+
+		enum state { PROCESSING, WRITING, DONE } m_state;
 };

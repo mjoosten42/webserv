@@ -1,6 +1,7 @@
 #include "Request.hpp"
 
 #include "HTTP.hpp"
+#include "defines.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
 
@@ -15,10 +16,19 @@ bool	isHttpVersion(const std::string	  &str);
 bool	isSupportedMethod(methods method);
 methods parseMethod(const std::string& str);
 
-Request::Request(): m_pos(0) {}
+Request::Request(): m_pos(0), m_state(READING) {}
 
 void Request::add(const char *str) {
 	m_total += str;
+}
+
+void Request::clear() {
+	HTTP::clear();
+	m_location.clear();
+	m_queryString.clear();
+	m_method = static_cast<methods>(-1);
+	m_total.clear();
+	m_pos = 0;
 }
 
 int Request::ProcessRequest() {
@@ -31,6 +41,8 @@ int Request::ProcessRequest() {
 
 	m_total.erase(0, m_pos); //  Cut off start-line and headers, leaving only the body
 	m_total.swap(m_body);	 //  No copying needed
+
+	m_state = DONE;
 
 	return 200;
 }
@@ -148,14 +160,16 @@ methods Request::getMethod() const {
 }
 
 std::string Request::getMethodAsString() const {
-	return methodStrings[m_method];
-}
-
-void Request::reset() {
-	HTTP::reset();
-	m_total.clear();
-	m_location.clear();
-	m_pos = 0;
+	switch (m_method) {
+		case GET:
+			return "GET";
+		case POST:
+			return "POST";
+		case DELETE:
+			return "DELETE";
+		default:
+			return "NONE";
+	}
 }
 
 std::ostream& operator<<(std::ostream& os, const Request& request) {

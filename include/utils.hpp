@@ -7,13 +7,6 @@
 #include <sys/poll.h>
 #include <vector>
 
-//  Terminal colors
-#define RED "\033[0;31m"
-#define DEFAULT "\033[0m"
-
-//  TODO: move to defines.hpp?
-#define CRLF "\r\n"
-
 template <typename T>
 void print(const T& value) {
 	std::cout << value << "\n";
@@ -63,9 +56,10 @@ std::string getPollFdsAsString(InputIt first, InputIt last) {
 	for (; first != last; first++) {
 		PollFds += toString(first->fd);
 		if (first + 1 != last)
-			PollFds += ", ";
+			PollFds += ",";
+		PollFds += " ";
 	}
-	PollFds += " }\n";
+	PollFds += "}\n";
 	return PollFds;
 }
 
@@ -78,3 +72,8 @@ template <class T, typename F>
 void transformBeginEnd(T& container, F operation) {
 	std::transform(container.begin(), container.end(), container.begin(), operation);
 }
+
+std::string getEventsAsString(short revents);
+
+void setFlag(short& events, int flag);
+void unsetFlag(short& events, int flag);

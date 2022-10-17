@@ -2,23 +2,22 @@
 
 #include <map>
 
-class EnvironmentMap
-{
-public:
-	EnvironmentMap();
-	~EnvironmentMap();
+class EnvironmentMap {
+	public:
+		EnvironmentMap();
+		~EnvironmentMap();
 
-	EnvironmentMap(const EnvironmentMap& other);
-	EnvironmentMap& operator=(const EnvironmentMap& rhs);
+		EnvironmentMap(const EnvironmentMap& other);
+		EnvironmentMap& operator=(const EnvironmentMap& rhs);
 
-	void initFromEnviron();
+		void initFromEnviron();
 
-	std::string& operator[](const std::string& key);
+		std::string& operator[](const std::string& key);
 
-	char **toCharpp() const;
+		char **toCharpp() const;
 
-private:
-	std::map<std::string, std::string> m_map;
+	private:
+		std::map<std::string, std::string> m_map;
 };
 
-// std::ostream& operator<<(std::ostream& os, const EnvironmentMap& em);
+//  std::ostream& operator<<(std::ostream& os, const EnvironmentMap& em);

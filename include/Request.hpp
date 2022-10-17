@@ -12,15 +12,13 @@ class Request: public HTTP {
 		Request();
 
 		void add(const char *str);
-		void reset();
 		int	 ProcessRequest();
+		void clear();
 
 		const std::string& getLocation() const;
 		const std::string& getQueryString() const;
 		methods			   getMethod() const;
 		std::string		   getMethodAsString() const;
-
-		void printMethod() const; //  TODO: remove
 
 	private:
 		int			parseStartLine();
@@ -34,6 +32,8 @@ class Request: public HTTP {
 		methods		m_method;	   //  GET, POST, etc.
 		std::string m_total;
 		std::size_t m_pos;
+
+		enum state { READING, PROCESSING, DONE } m_state;
 };
 
 std::ostream& operator<<(std::ostream& os, const Request& request);

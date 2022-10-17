@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Handler.hpp"
+#include "Connection.hpp"
 #include "Server.hpp"
 
 #include <map>
-#include <poll.h>
+#include <sys/poll.h>
 #include <vector>
 
 class Poller {
@@ -23,10 +23,9 @@ class Poller {
 	private:
 		void acceptClient(int fd);
 		void removeClient(int fd);
-		bool receiveFromClient(int fd);
 
 	private:
-		std::vector<pollfd>	   m_pollfds;  //  the array of pollfd structs
-		std::map<int, Server>  m_servers;  //  map server fd with corresponding server
-		std::map<int, Handler> m_handlers; //  map client fd to its handler
+		std::vector<pollfd>		  m_pollfds;	 //  the array of pollfd structs
+		std::map<int, Server>	  m_servers;	 //  map server fd with corresponding server
+		std::map<int, Connection> m_connections; //  map client fd to its handler
 };
