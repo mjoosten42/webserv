@@ -8,19 +8,22 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 	for (it = file.begin(); it != file.end(); ++it) {
 		size_t pos = (*it).find_first_of(m_tokens, 0, SIZE);
 		if (!(*it).empty()) {
-			switch ((*it)[pos]) {
-				case (';'):
-					state_simpledirective(&context, it, file);
-					break;
-				case ('{'):
-					state_openblock(&context, it);
-					break;
-				case ('}'):
-					state_closeblock(&context);
-					break;
-				default:
-					state_simpledirective(&context, it, file); //  Enables multi-line simple directives
-					continue;
+			if (pos == std::string::npos)
+				state_simpledirective(&context, it, file); //  Enables multi-line simple directives
+			else {
+				switch ((*it)[pos]) {
+					case (';'):
+						state_simpledirective(&context, it, file);
+						break;
+					case ('{'):
+						state_openblock(&context, it);
+						break;
+					case ('}'):
+						state_closeblock(&context);
+						break;
+					default:
+						continue;
+				}
 			}
 		}
 	}

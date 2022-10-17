@@ -40,27 +40,31 @@ void ConfigParser::check_semicolon_error(std::vector<std::string>& config) {
 	for (file_it = config.begin(); file_it != config.end(); ++file_it) {
 		*file_it   = trimLeadingWhiteSpace(*file_it);
 		size_t pos = (*file_it).find_first_of(m_tokens, 0, SIZE);
-		switch ((*file_it)[pos]) {
-			case (';'):
-				while (!missing_semicolon.empty())
-					missing_semicolon.pop();
-				break;
-			case ('{'):
-				if (!missing_semicolon.empty()) {
-					file_it = missing_semicolon.top();
-					throw_config_error(config, file_it, "No closing semicolon for statement");
+		if (!(*file_it).empty()) {
+			if (pos == std::string::npos)
+				missing_semicolon.push(file_it);
+			else {
+				switch ((*file_it)[pos]) {
+					case (';'):
+						while (!missing_semicolon.empty())
+							missing_semicolon.pop();
+						break;
+					case ('{'):
+						if (!missing_semicolon.empty()) {
+							file_it = missing_semicolon.top();
+							throw_config_error(config, file_it, "No closing semicolon for statement");
+						}
+						break;
+					case ('}'):
+						if (!missing_semicolon.empty()) {
+							file_it = missing_semicolon.top();
+							throw_config_error(config, file_it, "No closing semicolon for statement");
+						}
+						break;
+					default:
+						continue;
 				}
-				break;
-			case ('}'):
-				if (!missing_semicolon.empty()) {
-					file_it = missing_semicolon.top();
-					throw_config_error(config, file_it, "No closing semicolon for statement");
-				}
-				break;
-			default:
-				if (!(*file_it).empty())
-					missing_semicolon.push(file_it);
-				continue;
+			}
 		}
 	}
 	return;
