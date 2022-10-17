@@ -35,9 +35,8 @@ bool my_exec(int infd, int outfd, const std::string& path, const std::string& fi
 
 	const char *args[] = { path.c_str(), filename.c_str(), NULL };
 
-	if (execve(path.c_str(), const_cast<char *const *>(args), const_cast<char *const *>(envp)) == -1)
-		return false;
-	return true; //  lol never reached
+	execve(path.c_str(), const_cast<char *const *>(args), const_cast<char *const *>(envp));
+	return false;
 }
 
 Popen my_popen(const std::string& path, const std::string& filename, const EnvironmentMap& em) {
@@ -98,7 +97,7 @@ int Handler::handleCGI(const std::string& command, const std::string& filename) 
 
 	read(pop.readfd, buf, BUF_LEN - 1);
 	buf[BUF_LEN - 1] = 0;
-	print(buf);
+	//  print(buf);
 
 	pop.closeFDs();
 	return pop.status;

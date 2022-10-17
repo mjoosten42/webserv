@@ -77,3 +77,12 @@ std::string getEventsAsString(short revents);
 
 void setFlag(short& events, int flag);
 void unsetFlag(short& events, int flag);
+
+template <typename T>
+T stringToIntegral(const std::string& number) {
+	std::stringstream ss(number);
+	T				  value;
+
+	ss >> value;
+	return value;
+}

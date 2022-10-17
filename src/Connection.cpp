@@ -24,9 +24,7 @@ void Connection::receiveFromClient(short& events) {
 	std::cout << "Received: " << bytes_received << "\n";
 	switch (bytes_received) {
 		case -1:
-			if (errno != ECONNRESET && errno != ETIMEDOUT)
-				fatal_perror("recv");
-			std::cerr << RED "INFO: Connection reset or timeout\n" DEFAULT;
+			fatal_perror("recv");
 		case 0:
 			unsetFlag(events, POLLOUT);
 			break;
@@ -34,14 +32,12 @@ void Connection::receiveFromClient(short& events) {
 			buf[bytes_received] = 0;
 
 			std::cout << RED "----START BUF" << std::string(40, '-') << DEFAULT << std::endl;
-			std::cout << buf;
+			std::cout << buf << std::endl;
 			std::cout << RED "----END BUF" << std::string(40, '-') << DEFAULT << std::endl;
 
 			m_request.add(buf);
 
-			if (bytes_received != BUFSIZE) {
-				m_request.ProcessRequest();
-				std::cout << m_request << std::endl;
+			if (m_request.getState() == DONE) {
 				m_responses.push(Response());
 				Handler h(m_request, m_responses.back(), m_server);
 				h.handle();
