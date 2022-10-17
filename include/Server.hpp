@@ -23,7 +23,6 @@ class Location {
 class Server {
 	public:
 		Server();
-		Server(int port);
 		Server(t_block_directive *constructor_specs);
 
 		int getFD() const;

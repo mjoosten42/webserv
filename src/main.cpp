@@ -11,11 +11,7 @@ void launchServers(std::vector<Server>& servers, ConfigParser& config) {
 	server_config_blocks = config.m_main_context.fetch_matching_blocks("server");
 	std::vector<t_block_directive *>::iterator it;
 	for (it = server_config_blocks.begin(); it != server_config_blocks.end(); ++it) {
-		std::string listen_port = (**it).fetch_simple("listen");
-		if (!listen_port.empty())
-			servers.push_back(stoi(listen_port));
-		else
-			print("FAILED TO START, NO LISTEN PORT SPECIFIED");
+		servers.push_back(Server(*it));
 		config.debug_print_block(**it, "");
 	}
 	return;
