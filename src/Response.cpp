@@ -34,7 +34,7 @@ void Response::clear() {
 
 std::string Response::getStatusMessage() const {
 	const char *msg = binarySearchKeyValue(m_statusCode, statusMessages, statusMessagesSize);
-	if (msg != nullptr)
+	if (msg != NULL)
 		return msg;
 	std::cerr << "Status code not found: " << m_statusCode << std::endl;
 	exit(EXIT_FAILURE);

@@ -30,10 +30,12 @@ void Poller::start() {
 				for (size_t i = m_servers.size(); i < m_pollfds.size(); i++) {
 					Connection& conn = m_connections[m_pollfds[i].fd];
 
-					std::cout << RED << m_pollfds[i].fd << ": Events set: " << getEventsAsString(m_pollfds[i].events)
-							  << DEFAULT << std::endl;
-					std::cout << RED << m_pollfds[i].fd << ": Events get: " << getEventsAsString(m_pollfds[i].revents)
-							  << DEFAULT << std::endl;
+					//  std::cout << RED << m_pollfds[i].fd << ": Events set: " <<
+					//  getEventsAsString(m_pollfds[i].events)
+					//  		  << DEFAULT << std::endl;
+					//  std::cout << RED << m_pollfds[i].fd << ": Events get: " <<
+					//  getEventsAsString(m_pollfds[i].revents)
+					//  		  << DEFAULT << std::endl;
 
 					if (m_pollfds[i].revents & POLLHUP)
 						removeClient(i--);

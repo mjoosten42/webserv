@@ -12,14 +12,36 @@
 const static char *methodStrings[] = { "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH" };
 const static int   methodStringsSize = sizeof(methodStrings) / sizeof(*methodStrings);
 
-bool	isHttpVersion(const std::string	  &str);
-bool	isSupportedMethod(methods method);
-methods parseMethod(const std::string& str);
+bool		isHttpVersion(const std::string		  &str);
+bool		isSupportedMethod(methods method);
+methods		parseMethod(const std::string	 &str);
+bool		containsNewline(const std::string		&str);
+bool		containsDoubleNewline(const std::string		  &str);
+std::size_t findNewline(const std::string& str);
 
-Request::Request(): m_pos(0), m_state(READING) {}
+Request::Request(): m_state(STARTLINE), m_contentLength(0) {}
 
 void Request::add(const char *str) {
-	m_total += str;
+	m_saved += str;
+
+	switch (m_state) {
+		case STARTLINE:
+			if (!containsNewline(m_saved))
+				break;
+			if (parseStartLine(getNextLine()) != 200)
+				return;
+			m_state = HEADERS;
+		case HEADERS:
+			while (containsNewline(m_saved) && !containsDoubleNewline(m_saved))
+				parseHeader(getNextLine());
+			if (containsDoubleNewline(m_saved))
+				m_state = BODY;
+		case BODY:
+			m_saved += str;
+			m_state = DONE;
+		default:
+			break;
+	}
 }
 
 void Request::clear() {
@@ -27,57 +49,41 @@ void Request::clear() {
 	m_location.clear();
 	m_queryString.clear();
 	m_method = static_cast<methods>(-1);
-	m_total.clear();
-	m_pos = 0;
+	m_saved.clear();
+	m_state = STARTLINE;
 }
 
-int Request::ProcessRequest() {
-	int status;
-
-	if ((status = parseStartLine()) != 200)
-		return status;
-	if ((status = parseHeaders()) != 200)
-		return status;
-
-	m_total.erase(0, m_pos); //  Cut off start-line and headers, leaving only the body
-	m_total.swap(m_body);	 //  No copying needed
-
-	m_state = DONE;
-
-	return 200;
-}
-
-int Request::parseStartLine() {
-	std::istringstream line(getNextLine());
+int Request::parseStartLine(const std::string& line) {
+	std::istringstream ss(line);
 	std::string		   word;
 
-	line >> word;
+	ss >> word;
 	m_method = parseMethod(word);
 	if (m_method == static_cast<methods>(-1))
 		return 400;
 	if (!isSupportedMethod(m_method))
 		return 501;
 
-	line >> m_location;
+	ss >> m_location;
 	if (m_location.empty()) {
-		std::cerr << "Empty location: { " << line.str() << " }\n";
+		std::cerr << "Empty location: " << ss.str() << "\n";
 		return 400;
 	}
 	//  parse query string and location
 	size_t questionMarkPos = m_location.find('?');
 	if (questionMarkPos != std::string::npos) {
-		m_queryString = m_location.substr(questionMarkPos + 1, std::string::npos);
-		m_location	  = m_location.substr(0, questionMarkPos);
+		m_queryString = m_location.substr(questionMarkPos + 1);
+		m_location.erase(m_location.begin() + questionMarkPos);
 	}
 
 	word.clear();
-	line >> word;
+	ss >> word;
 	if (!isHttpVersion(word)) {
-		std::cerr << "Invalid HTTP version: { " << line.str() << " }\n";
+		std::cerr << "Invalid HTTP version: " << ss.str() << "\n";
 		return 400;
 	}
 	if (word != "HTTP/1.1") {
-		std::cerr << "HTTP 1.1 only: { " << line.str() << " }\n";
+		std::cerr << "HTTP 1.1 only: " << ss.str() << "\n";
 		return 505;
 	}
 
@@ -100,51 +106,36 @@ methods parseMethod(const std::string& str) {
 	return static_cast<methods>(-1);
 }
 
-int Request::parseHeaders() {
+int Request::parseHeader(const std::string& line) {
 	std::pair<std::map<std::string, std::string>::iterator, bool> insert;
 	std::pair<std::string, std::string>							  header;
-	std::istringstream											  line(getNextLine());
+	std::istringstream											  ss(line);
 
-	line >> header.first;
-	line >> header.second;
-	while ((header.first != CRLF || header.first != "\n") && !header.first.empty()) {
-		strToUpper(header.first);
-		if (header.first.back() != ':') {
-			std::cerr << "Header field must end in ':' : " << header.first << std::endl;
-			return 400;
-		}
-		header.first.pop_back();
-		insert = m_headers.insert(header);
-		if (!insert.second) {
-			std::cerr << "Duplicate headers: " << header.first << std::endl;
-			return 400;
-		}
-		line.clear();
-		line.str(getNextLine());
-		header.first.clear();
-		line >> header.first;
-		line >> header.second;
+	ss >> header.first;
+	ss >> header.second;
+	if (header.first.back() != ':') {
+		std::cerr << RED "Header field must end in ':' : " << line << DEFAULT << std::endl;
+		return 400;
 	}
-
+	header.first.pop_back();
+	insert = m_headers.insert(header);
+	if (!insert.second) {
+		std::cerr << RED "Duplicate headers: " << line << DEFAULT << std::endl;
+		return 400;
+	}
+	if (header.first == "Content-Length:")
+		m_contentLength = stringToIntegral<std::size_t>(header.first);
 	return 200;
 }
 
+//  Assumes ContainsNewline is called beforehand
 std::string Request::getNextLine() {
-	std::size_t pos = m_total.find_first_of(CRLF, m_pos); //  find index of next newline
-	if (pos == std::string::npos)						  //  EOF
-		return "";
-	std::string line = m_total.substr(m_pos, pos - m_pos); //  extract the substring between old newline and new newline
-	m_pos			 = pos + newLineLength(pos);		   //  update old newline, skipping \n or \r\n
-	return line;
-}
+	std::size_t pos			  = findNewline(m_saved);
+	std::string line		  = m_saved.substr(0, pos);
+	int			newlineLength = (m_saved[pos] == '\r') ? 2 : 1;
 
-std::size_t Request::newLineLength(std::size_t pos) const {
-	if (m_total[pos] == '\n')
-		return 1;
-	if (m_total[pos + 1] == '\n') //  m_total[pos] must be \r
-		return 2;
-	std::cerr << "Newline error at " << pos << ": " << m_total << std::endl; //  TODO: assert
-	return -1;
+	m_saved.erase(m_saved.begin(), m_saved.begin() + pos + newlineLength);
+	return line;
 }
 
 const std::string& Request::getLocation() const {
@@ -172,6 +163,10 @@ std::string Request::getMethodAsString() const {
 	}
 }
 
+state Request::getState() const {
+	return m_state;
+}
+
 std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << RED << "Location: " << DEFAULT << request.getLocation() << std::endl;
 	os << RED << "Query string: " << DEFAULT << request.getQueryString() << std::endl;
@@ -187,4 +182,19 @@ bool isHttpVersion(const std::string& str) {
 
 bool isSupportedMethod(methods method) {
 	return method == GET || method == POST || method == DELETE;
+}
+
+bool containsNewline(const std::string& str) {
+	return str.find("\r\n") != str.npos || str.find("\n") != str.npos;
+}
+
+bool containsDoubleNewline(const std::string& str) {
+	return str.find("\r\n\r\n") != str.npos || str.find("\n\r\n") != str.npos || str.find("\n\n") != str.npos;
+}
+
+std::size_t findNewline(const std::string& str) {
+	std::size_t pos = str.find("\r\n");
+	if (pos != str.npos)
+		return pos;
+	return str.find("\n");
 }

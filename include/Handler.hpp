@@ -23,8 +23,8 @@ class Handler {
 		int	 handleCGI(const std::string &command, const std::string &filename);
 		int	 handleGetWithStaticFile(const std::string &filename);
 		int	 transferFile(int fd);
-		int	 sendSingle(int fd);
 		int	 sendChunked(int fd);
+		int	 sendSingle(int fd);
 
 	private:
 		const Server *m_server;
