@@ -27,8 +27,8 @@ const static int statusMessagesSize	 = sizeof(statusMessages) / sizeof(*statusMe
 
 Response::Response(): HTTP() {}
 
-void Response::reset() {
-	HTTP::reset();
+void Response::clear() {
+	HTTP::clear();
 	m_statusCode = 0;
 }
 
@@ -46,10 +46,8 @@ std::string Response::getStatusLine() const {
 
 //  Returns the response as a string to send over a socket. When there is a body present,
 //  the body is amended automatically and Content-Length is calculated.
-std::string Response::getResponseAsString() {
+std::string Response::getResponseAsString() const {
 	std::string response;
-
-	addHeader("Content-Length", toString(m_body.length()));
 
 	response += getStatusLine();
 	response += getHeadersAsString();

@@ -42,10 +42,10 @@ std::string getEventsAsString(short revents) {
 	return events;
 }
 
-void	setFlag(short& events, int flag) {
+void setFlag(short& events, int flag) {
 	events |= flag;
 }
 
-void	unsetFlag(short& events, int flag) {
+void unsetFlag(short& events, int flag) {
 	events &= ~flag;
 }

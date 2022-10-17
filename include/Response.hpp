@@ -11,9 +11,9 @@ class Response: public HTTP {
 
 		std::string getStatusLine() const;
 		std::string getStatusMessage() const;
-		std::string getResponseAsString(void);
+		std::string getResponseAsString(void) const;
 
-		void reset();
+		void clear();
 
 	private:
 		std::string getHeadersAsString() const;

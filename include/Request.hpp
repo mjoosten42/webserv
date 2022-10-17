@@ -13,6 +13,7 @@ class Request: public HTTP {
 
 		void add(const char *str);
 		int	 ProcessRequest();
+		void clear();
 
 		const std::string& getLocation() const;
 		methods			   getMethod() const;

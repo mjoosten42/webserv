@@ -75,5 +75,5 @@ void transformBeginEnd(T& container, F operation) {
 
 std::string getEventsAsString(short revents);
 
-void	setFlag(short& events, int flag);
-void	unsetFlag(short& events, int flag);
+void setFlag(short& events, int flag);
+void unsetFlag(short& events, int flag);

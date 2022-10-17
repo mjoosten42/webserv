@@ -17,6 +17,6 @@ class Connection {
 	private:
 		int					 m_fd;
 		const Server		*m_server;
-		std::queue<Request>	 m_requests;
+		Request				 m_request;
 		std::queue<Response> m_responses;
 };

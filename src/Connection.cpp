@@ -1,5 +1,6 @@
 #include "Connection.hpp"
 
+#include "Handler.hpp"
 #include "Server.hpp"
 #include "defines.hpp"
 #include "utils.hpp"
@@ -36,21 +37,17 @@ void Connection::receiveFromClient(short& events) {
 			std::cout << buf;
 			std::cout << RED "----END BUF" << std::string(40, '-') << DEFAULT << std::endl;
 
-			//  Add a new request if none exist;
-			if (m_requests.empty())
-				m_requests.push(Request());
+			m_request.add(buf);
 
-			Request& request = m_requests.front();
-			request.add(buf);
-		
-			if (bytes_received == BUFSIZE)
-				return unsetFlag(events, POLLOUT);
-			
-			request.ProcessRequest();
-			m_requests.pop();
-			m_responses.push(Response());
-			m_responses.front().m_statusCode = 200;
-			setFlag(events, POLLOUT);
+			if (bytes_received != BUFSIZE) {
+				m_request.ProcessRequest();
+				std::cout << m_request << std::endl;
+				m_responses.push(Response());
+				Handler h(m_request, m_responses.back(), m_server);
+				h.handle();
+				m_request.clear();
+				setFlag(events, POLLOUT);
+			}
 	}
 }
 
@@ -66,11 +63,7 @@ void Connection::sendToClient(short& events) {
 		case -1:
 			fatal_perror("send");
 		default:
-			if (str.length() > BUFSIZE)
-				setFlag(events, POLLOUT);
-			else {
-				m_responses.pop();
-				unsetFlag(events, POLLOUT);
-			}
+			m_responses.pop();
+			unsetFlag(events, POLLOUT);
 	}
 }

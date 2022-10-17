@@ -13,7 +13,7 @@ class HTTP {
 		void addToBody(const std::string& str);
 		void addHeader(const std::string& field, const std::string& value);
 
-		void reset();
+		void clear();
 
 	protected:
 		std::map<std::string, std::string> m_headers;

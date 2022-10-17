@@ -22,6 +22,14 @@ void Request::add(const char *str) {
 	m_total += str;
 }
 
+void Request::clear() {
+	HTTP::clear();
+	m_location.clear();
+	m_method = static_cast<methods>(-1);
+	m_total.clear();
+	m_pos = 0;
+}
+
 int Request::ProcessRequest() {
 	int status;
 
@@ -137,7 +145,16 @@ const std::string& Request::getLocation() const {
 }
 
 std::string Request::getMethodAsString() const {
-	return methodStrings[m_method];
+	switch (m_method) {
+		case GET:
+			return "GET";
+		case POST:
+			return "POST";
+		case DELETE:
+			return "DELETE";
+		default:
+			return "NONE";
+	}
 }
 
 methods Request::getMethod() const {

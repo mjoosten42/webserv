@@ -6,7 +6,7 @@
 
 HTTP::HTTP() {}
 
-void HTTP::reset() {
+void HTTP::clear() {
 	m_headers.clear();
 	m_body.clear();
 }
