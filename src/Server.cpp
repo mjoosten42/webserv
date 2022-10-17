@@ -9,6 +9,15 @@
 #include <sys/socket.h>
 #include <unistd.h> // close
 
+Location::Location() {
+	m_location			   = "/";
+	m_client_max_body_size = -1;
+	m_limit_except		   = "";
+	m_redirect			   = "";
+	m_auto_index		   = false;
+	m_root				   = "html";
+}
+
 Server::Server(): m_fd(-1) {
 	m_host			  = "localhost";
 	m_port			  = 8080;
@@ -16,7 +25,7 @@ Server::Server(): m_fd(-1) {
 	m_root			  = "html";
 	m_error_page	  = "404.html";
 
-	Location location = { "/", -1, "", "", false, "html" };
+	Location location = Location();
 	m_locations.push_back(location);
 }
 

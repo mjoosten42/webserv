@@ -9,6 +9,7 @@
 void launchServers(std::vector<Server>& servers, ConfigParser& config) {
 	std::vector<t_block_directive *> server_config_blocks;
 	server_config_blocks = config.m_main_context.fetch_matching_blocks("server");
+
 	std::vector<t_block_directive *>::iterator it;
 	for (it = server_config_blocks.begin(); it != server_config_blocks.end(); ++it) {
 		servers.push_back(Server(*it));

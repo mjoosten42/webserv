@@ -7,8 +7,9 @@
 
 class Location {
 	public:
-		std::string m_location;
+		Location();
 
+		std::string m_location;
 		int			m_client_max_body_size;
 		std::string m_limit_except; //  IE only allow GET, POST
 		std::string m_redirect;		//  return 301 $URI
