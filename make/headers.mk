@@ -1,5 +1,6 @@
 HEADERS = \
 	include/ConfigParser.hpp \
+	include/EnvironmentMap.hpp \
 	include/Handler.hpp \
 	include/HTTP.hpp \
 	include/MIME.hpp \
