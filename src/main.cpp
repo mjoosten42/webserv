@@ -16,7 +16,7 @@ void launchServers(std::vector<Server>& servers, ConfigParser& config) {
 			servers.push_back(stoi(listen_port));
 		else
 			print("FAILED TO START, NO LISTEN PORT SPECIFIED");
-		//  config.debug_print_block(**it, "");
+		config.debug_print_block(**it, "");
 	}
 	return;
 }
