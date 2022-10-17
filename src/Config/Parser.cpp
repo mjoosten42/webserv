@@ -51,13 +51,33 @@ void s_block_directive::recurse_blocks(std::vector<t_block_directive *>& ret, st
 	return;
 }
 
-//  Returns params associated with the requested simple_directive, if it is present in the
-//  block_directive this method was called on. Otherwise returns empty string.
+//  Returns first params associated with the requested simple_directive, if it is present in the
+//  block_directive this method was called on.
+//	Otherwise returns empty string.
 std::string s_block_directive::fetch_simple(std::string key) {
 	std::string								  ret = "";
 	std::vector<t_simple_directive>::iterator it_s;
 	for (it_s = this->simple_directives.begin(); it_s != this->simple_directives.end(); ++it_s)
 		if ((*it_s).name.compare(key) == 0)
 			ret = (*it_s).params;
+	return (ret);
+}
+
+//  Returns first params associated with the requested simple_directive, if it is present in the
+//  block_directive this method was called on OR ANY OF THE BLOCK DIRECTIVES IT CONTAINS.
+//	Otherwise returns empty string.
+std::string s_block_directive::fetch_simple_recursive(std::string key) {
+	std::string								  ret = "";
+	std::vector<t_simple_directive>::iterator it_s;
+	for (it_s = this->simple_directives.begin(); it_s != this->simple_directives.end(); ++it_s)
+		if ((*it_s).name.compare(key) == 0)
+			return ((*it_s).params);
+
+	std::vector<t_block_directive>::iterator it_b;
+	for (it_b = this->block_directives.begin(); it_b != this->block_directives.end(); ++it_b) {
+		ret = it_b->fetch_simple_recursive(key);
+		if (!ret.empty())
+			return (ret);
+	}
 	return (ret);
 }
