@@ -2,9 +2,10 @@
 
 #include "Request.hpp"
 #include "Response.hpp"
-#include "Server.hpp"
 
 #include <queue>
+
+class Server;
 
 class Connection {
 	public:
@@ -16,7 +17,7 @@ class Connection {
 
 	private:
 		int					 m_fd;
-		const Server		*m_server;
+		const Server		 *m_server;
 		Request				 m_request;
 		std::queue<Response> m_responses;
 };

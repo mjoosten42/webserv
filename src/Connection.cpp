@@ -1,7 +1,5 @@
 #include "Connection.hpp"
 
-#include "Handler.hpp"
-#include "Server.hpp"
 #include "defines.hpp"
 #include "utils.hpp"
 
@@ -38,9 +36,7 @@ void Connection::receiveFromClient(short& events) {
 			m_request.add(buf);
 
 			if (m_request.getState() == DONE) {
-				m_responses.push(Response());
-				Handler h(m_request, m_responses.back(), m_server);
-				h.handle();
+				m_responses.push(Response(m_request, m_server));
 				m_request.clear();
 				setFlag(events, POLLOUT);
 			}
@@ -50,16 +46,24 @@ void Connection::receiveFromClient(short& events) {
 //  Send data back to a client
 //  This should only be called if POLLOUT is set
 void Connection::sendToClient(short& events) {
-	Response  & response   = m_responses.front();
-	std::string str		   = response.getResponseAsString();
+
+	Response& response = m_responses.front();
+
+	if (!response.isInitialized())
+		response.processNextChunk();
+	std::string str		   = response.getChunk();
 	ssize_t		bytes_send = send(m_fd, str.c_str(), str.length(), 0);
 
 	std::cout << "Send: " << bytes_send << "\n";
-	switch (bytes_send) {
-		case -1:
-			fatal_perror("send");
-		default:
+	if (bytes_send == -1) {
+		fatal_perror("send");
+	} else {
+		if (!response.isDone()) {
+			response.processNextChunk();
+		} else {
 			m_responses.pop();
-			unsetFlag(events, POLLOUT);
+			if (m_responses.size() == 0)
+				unsetFlag(events, POLLOUT);
+		}
 	}
 }

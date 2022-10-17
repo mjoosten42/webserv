@@ -1,5 +1,4 @@
 #include "EnvironmentMap.hpp"
-#include "Handler.hpp"
 #include "Request.hpp"
 #include "utils.hpp"
 
@@ -75,30 +74,30 @@ Popen my_popen(const std::string& path, const std::string& filename, const Envir
 }
 
 //  TODO: handle like a "downloaded" file
-int Handler::handleCGI(const std::string& command, const std::string& filename) {
-	EnvironmentMap em;
-	em.initFromEnviron();
+//  int Handler::handleCGI(const std::string& command, const std::string& filename) {
+//  	EnvironmentMap em;
+//  	em.initFromEnviron();
 
-	//  TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
-	em["SERVER_SOFTWARE"] = "TODO";
-	em["SERVER_NAME"]	  = "ALSO TODO";
-	em["REQUEST_METHOD"]  = m_request.getMethodAsString();
-	em["PATH_INFO"]		  = m_request.getLocation();
-	em["QUERY_STRING"]	  = m_request.getQueryString();
+//  	//  TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
+//  	em["SERVER_SOFTWARE"] = "TODO";
+//  	em["SERVER_NAME"]	  = "ALSO TODO";
+//  	em["REQUEST_METHOD"]  = m_request.getMethodAsString();
+//  	em["PATH_INFO"]		  = m_request.getLocation();
+//  	em["QUERY_STRING"]	  = m_request.getQueryString();
 
-	Popen pop			  = my_popen(command, filename, em);
+//  	Popen pop			  = my_popen(command, filename, em);
 
-	if (pop.status != 200)
-		return pop.status;
+//  	if (pop.status != 200)
+//  		return pop.status;
 
-#define BUF_LEN 4096
+//  #define BUF_LEN 4096
 
-	char buf[BUF_LEN];
+//  	char buf[BUF_LEN];
 
-	read(pop.readfd, buf, BUF_LEN - 1);
-	buf[BUF_LEN - 1] = 0;
-	//  print(buf);
+//  	read(pop.readfd, buf, BUF_LEN - 1);
+//  	buf[BUF_LEN - 1] = 0;
+//  	//  print(buf);
 
-	pop.closeFDs();
-	return pop.status;
-}
+//  	pop.closeFDs();
+//  	return pop.status;
+//  }

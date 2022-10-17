@@ -3,7 +3,6 @@ HEADERS = \
 	include/Connection.hpp \
 	include/defines.hpp \
 	include/EnvironmentMap.hpp \
-	include/Handler.hpp \
 	include/HTTP.hpp \
 	include/MIME.hpp \
 	include/Poller.hpp \

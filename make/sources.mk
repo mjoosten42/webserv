@@ -6,7 +6,6 @@ SOURCES = \
 	src/Config/Parser.cpp \
 	src/Connection.cpp \
 	src/EnvironmentMap.cpp \
-	src/Handler.cpp \
 	src/HTTP.cpp \
 	src/main.cpp \
 	src/MIME.cpp \
