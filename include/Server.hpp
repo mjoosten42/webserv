@@ -29,7 +29,7 @@ class Server {
 		int getFD() const;
 
 	private:
-		int					  m_fd;
+		int					  m_fd; //  Socket_fd
 		std::vector<Location> m_locations;
 
 		//  Config
