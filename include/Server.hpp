@@ -27,7 +27,8 @@ class Server {
 		Server();
 		Server(t_block_directive *constructor_specs);
 
-		int getFD() const;
+		int				   getFD() const;
+		const std::string& getName() const;
 
 	private:
 		int					  m_fd; //  Socket_fd

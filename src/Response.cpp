@@ -1,5 +1,6 @@
 #include "Response.hpp"
 
+#include "Server.hpp"
 #include "defines.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
@@ -80,4 +81,11 @@ std::string Response::getHeadersAsString() const {
 	for (it = m_headers.begin(); it != m_headers.end(); it++)
 		headers += it->first + ": " + it->second + CRLF;
 	return headers;
+}
+
+void Response::initDefaultHeaders() {
+
+	//  TODO
+	//  m_headers["Hostname"] = *m_request.getHeaders().find("Hostname");
+	m_headers["Server"] = m_server->getName();
 }

@@ -110,3 +110,7 @@ Server::Server(t_block_directive *constructor_specs) {
 int Server::getFD() const {
 	return m_fd;
 }
+
+const std::string& Server::getName() const {
+	return m_name;
+}

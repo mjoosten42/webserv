@@ -34,15 +34,6 @@ void Response::handle() {
 	}
 }
 
-void Response::initDefaultHeaders() {
-
-	//  TODO
-	//  m_headers["Hostname"] = *m_request.getHeaders().find("Hostname");
-	//  m_headers["Server"] = m_server-> TDO
-	m_headers["Server"] = "AMOGUS";
-	(void)m_server;
-}
-
 void Response::sendFail(int code, const std::string& msg) {
 	m_statusCode = code;
 
@@ -88,7 +79,7 @@ int Response::handleGetWithStaticFile() {
 
 	//  TODO: nonblock?
 	//  TODO: remove dot
-	m_readfd			 = open(filename.c_str(), O_RDONLY);
+	m_readfd = open(filename.c_str(), O_RDONLY);
 	if (m_readfd == -1) {
 		//  TODO: correct error codes
 		if (errno == EACCES)
@@ -136,8 +127,8 @@ int Response::getFirstChunk() {
 		//  send multichunked
 		m_headers["Transfer-Encoding"] = "Chunked";
 
-		m_chunk						   = getResponseAsString();
-		ret							   = 200;
+		m_chunk = getResponseAsString();
+		ret		= 200;
 
 	} else {
 		//  send in single buf.
