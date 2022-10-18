@@ -65,7 +65,7 @@ void Connection::sendToClient(short& events) {
 			response.processNextChunk();
 		} else {
 			m_responses.pop();
-			if (m_responses.size() == 0)
+			if (m_responses.empty())
 				unsetFlag(events, POLLOUT);
 		}
 	}
