@@ -26,7 +26,6 @@ void Connection::receiveFromClient(short& events) {
 		case -1:
 			fatal_perror("recv");
 		case 0:
-			unsetFlag(events, POLLOUT);
 			break;
 		default:
 			buf[bytes_received] = 0;
@@ -65,10 +64,9 @@ void Connection::sendToClient(short& events) {
 	} else {
 		if (!response.isDone()) {
 			response.processNextChunk();
+			setFlag(events, POLLOUT);
 		} else {
 			m_responses.pop();
-			if (m_responses.empty())
-				unsetFlag(events, POLLOUT);
 		}
 	}
 }

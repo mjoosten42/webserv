@@ -29,6 +29,7 @@ void Poller::start() {
 				for (size_t i = m_servers.size(); i < m_pollfds.size(); i++) {
 					Connection& conn = m_connections[m_pollfds[i].fd];
 
+					unsetFlag(m_pollfds[i].events, POLLOUT);
 					//  std::cout << RED << m_pollfds[i].fd << ": Events set: " <<
 					//  getEventsAsString(m_pollfds[i].events)
 					//  		  << DEFAULT << std::endl;
@@ -67,7 +68,7 @@ void Poller::acceptClient(int server_fd) {
 	m_pollfds.push_back(client);
 	m_connections[fd] = Connection(fd, server);
 
-	std::cout << "NEW CLIENT: " << fd << std::endl;
+	std::cout << RED "NEW CLIENT: " DEFAULT << fd << std::endl;
 }
 
 void Poller::removeClient(int i) {
@@ -79,5 +80,5 @@ void Poller::removeClient(int i) {
 	if (close(fd) == -1)
 		fatal_perror("close");
 
-	std::cout << "CLIENT " << fd << " LEFT\n";
+	std::cout << RED "CLIENT " DEFAULT << fd << RED " LEFT\n" DEFAULT;
 }
