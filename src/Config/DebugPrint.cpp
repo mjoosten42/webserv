@@ -1,5 +1,7 @@
 #include "ConfigParser.hpp"
 
+#include <iostream>
+
 void ConfigParser::debug_print() {
 	std::cout << "DEBUG PRINTING CONFIG FILE THAT HAS BEEN PARSED:" << std::endl;
 	debug_print_block(m_main_context, "");
