@@ -87,5 +87,7 @@ void Response::initDefaultHeaders() {
 
 	//  TODO
 	//  m_headers["Hostname"] = *m_request.getHeaders().find("Hostname");
-	m_headers["Server"] = m_server->getName();
+
+	if (!m_server->getName().empty())
+		m_headers["Server"] = m_server->getName();
 }
