@@ -36,11 +36,11 @@ class Server {
 
 		//  Config
 
-	private:
+	public:
 		std::string m_host; //  TODO: use inet_addr?
 		int			m_port;
 		std::string m_name;
 		std::string m_root;
 		std::string m_error_page;
-		//  int m_client_max_body_size;
+		int			m_client_max_body_size;
 };
