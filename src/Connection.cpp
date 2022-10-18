@@ -30,9 +30,9 @@ void Connection::receiveFromClient(short& events) {
 		default:
 			buf[bytes_received] = 0;
 
-			std::cout << RED "----START BUF" << std::string(40, '-') << DEFAULT << std::endl;
-			std::cout << buf << std::endl;
-			std::cout << RED "----END BUF" << std::string(40, '-') << DEFAULT << std::endl;
+			// std::cout << RED "----START BUF" << std::string(40, '-') << DEFAULT << std::endl;
+			// std::cout << buf << std::endl;
+			// std::cout << RED "----END BUF" << std::string(40, '-') << DEFAULT << std::endl;
 
 			m_request.add(buf);
 
@@ -56,6 +56,7 @@ void Connection::sendToClient(short& events) {
 	ssize_t		bytes_sent = send(m_fd, str.c_str(), str.length(), 0);
 
 	std::cout << "Send: " << bytes_sent << "\n";
+
 	if (bytes_sent == -1) {
 		fatal_perror("send");
 	} else if (bytes_sent < static_cast<ssize_t>(str.length())) {

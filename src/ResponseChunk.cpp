@@ -141,15 +141,15 @@ int Response::getFirstChunk() {
 
 int Response::addSingleFileToBody() {
 	static char buf[FILE_BUF_SIZE + 1];
-	ssize_t		bytesRead;
+	ssize_t		bytes_read;
 
-	bytesRead = read(m_readfd, buf, FILE_BUF_SIZE);
-	if (bytesRead == -1) {
+	bytes_read = read(m_readfd, buf, FILE_BUF_SIZE);
+	if (bytes_read == -1) {
 		std::cerr << "Reading infile fd " << m_readfd << " failed!\n";
 		return 500;
 	}
-	buf[bytesRead] = 0;
-	addToBody(buf);
+	buf[bytes_read] = 0;
+	addToBody(buf, bytes_read);
 
 	close(m_readfd);
 
