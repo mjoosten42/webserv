@@ -1,24 +1,10 @@
 #pragma once
 
 #include "ConfigParser.hpp"
+#include "Location.hpp"
 
 #include <string>
 #include <vector>
-
-class Server;
-
-class Location {
-	public:
-		Location();
-		Location(t_block_directive *constructor_specs, Server *parent);
-
-		std::string m_location;
-		int			m_client_max_body_size;
-		std::string m_limit_except; //  IE only allow GET, POST
-		std::string m_redirect;		//  return 301 $URI
-		bool		m_auto_index;
-		std::string m_root;
-};
 
 //  https://nginx.org/en/docs/http/ngx_http_core_module.html
 
@@ -38,8 +24,6 @@ class Server {
 	private:
 		int					  m_fd; //  Socket_fd
 		std::vector<Location> m_locations;
-
-		//  Config
 
 	public:
 		std::string m_host; //  TODO: use inet_addr?
