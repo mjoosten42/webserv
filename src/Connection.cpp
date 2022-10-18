@@ -7,6 +7,8 @@
 #include <sys/socket.h> //recv, send
 #include <unistd.h>		// close
 
+#define RECV_BUF_SIZE 2048
+
 Connection::Connection(): m_fd(-1), m_server(NULL) {}
 
 Connection::Connection(int m_fd, const Server *server): m_fd(m_fd), m_server(server) {
@@ -16,8 +18,8 @@ Connection::Connection(int m_fd, const Server *server): m_fd(m_fd), m_server(ser
 //  Read new data, and add it to the first request (FIFO)
 //  Once a request has been processed, create a response and pop the request
 void Connection::receiveFromClient(short& events) {
-	static char buf[BUFSIZE + 1];
-	ssize_t		bytes_received = recv(m_fd, buf, BUFSIZE, 0);
+	static char buf[RECV_BUF_SIZE + 1];
+	ssize_t		bytes_received = recv(m_fd, buf, RECV_BUF_SIZE, 0);
 
 	std::cout << "Received: " << bytes_received << "\n";
 	switch (bytes_received) {

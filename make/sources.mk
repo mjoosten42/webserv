@@ -12,6 +12,7 @@ SOURCES = \
 	src/Poller.cpp \
 	src/Request.cpp \
 	src/Response.cpp \
+	src/ResponseChunk.cpp \
 	src/Server.cpp \
 	src/stringutils.cpp \
 	src/utils.cpp \
