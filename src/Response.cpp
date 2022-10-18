@@ -67,6 +67,12 @@ const std::string& Response::getChunk() const {
 	return m_chunk;
 }
 
+//  this function removes bytesSent amount of bytes from the chunk. Used for instance when send() sent
+//  less bytes than the chunk's length.
+void Response::trimChunk(ssize_t bytesSent) {
+	m_chunk = m_chunk.substr(bytesSent, m_chunk.length());
+}
+
 bool Response::isInitialized() const {
 	return m_hasStartedSending;
 }

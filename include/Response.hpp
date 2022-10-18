@@ -13,6 +13,7 @@ class Response: public HTTP {
 		Response(Request request, const Server *server);
 
 		bool			   processNextChunk();
+		void			   trimChunk(ssize_t bytesSent);
 		const std::string& getChunk() const;
 		bool			   isInitialized() const;
 		bool			   isDone() const;
