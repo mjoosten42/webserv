@@ -18,7 +18,7 @@ Location::Location() {
 	m_root				   = "html";
 }
 
-//TODO: Implement properly
+//  TODO: Implement properly
 Location::Location(t_block_directive *constructor_specs, Server *parent) {
 	(void)constructor_specs;
 	(void)parent;
@@ -31,11 +31,11 @@ Location::Location(t_block_directive *constructor_specs, Server *parent) {
 }
 
 Server::Server(): m_fd(-1) {
-	m_host			  = "localhost";
-	m_port			  = 8080;
-	m_name			  = "webserv.com"; //  Nginx default = ""
-	m_root			  = "html";
-	m_error_page	  = "404.html";
+	m_host		 = "localhost";
+	m_port		 = 8080;
+	m_name		 = "webserv.com"; //  Nginx default = ""
+	m_root		 = "html";
+	m_error_page = "404.html";
 
 	Location location = Location();
 	m_locations.push_back(location);
@@ -78,11 +78,11 @@ Server::Server(t_block_directive *constructor_specs) {
 
 	//  Specify server socket info: IPv4 protocol family, port in correct
 	//	endianness, IP address
-	sockaddr_in server		= { 0, AF_INET, htons(m_port), { inet_addr(m_host.c_str()) }, { 0 } };
+	sockaddr_in server = { 0, AF_INET, htons(m_port), { inet_addr(m_host.c_str()) }, { 0 } };
 
 	//  Setup socket_fd: specify domain (IPv4), communication type, and
 	//	protocol (default for socket)
-	m_fd					= socket(AF_INET, SOCK_STREAM, 0);
+	m_fd = socket(AF_INET, SOCK_STREAM, 0);
 
 	//  On socket_fd, applied at socket level (SOL_SOCKET), set option
 	//  SO_REUSEADDR (allow bind() to reuse local addresses), to be enabled

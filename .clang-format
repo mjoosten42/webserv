@@ -13,7 +13,7 @@ IndentWidth: 4
 TabWidth: 4
 UseTab: Always
 
-AlignConsecutiveAssignments: AcrossEmptyLinesAndComments
+AlignConsecutiveAssignments: Consecutive
 AlignConsecutiveDeclarations: Consecutive
 AlignEscapedNewlines: Left
 

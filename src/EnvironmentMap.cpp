@@ -33,7 +33,7 @@ void EnvironmentMap::initFromEnviron() {
 		std::string key	  = entry.substr(0, eqpos);
 		std::string value = entry.substr(eqpos + 1, std::string::npos);
 
-		m_map[key]		  = value;
+		m_map[key] = value;
 	}
 }
 
@@ -46,7 +46,7 @@ char **EnvironmentMap::toCharpp() const {
 	size_t size = m_map.size();
 	char **ret	= new char *[size + 1];
 
-	size_t i	= 0;
+	size_t i = 0;
 
 	for (std::map<std::string, std::string>::const_iterator it = m_map.begin(); it != m_map.end(); it++, i++) {
 		std::string entry = it->first + "=" + it->second;

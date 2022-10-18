@@ -22,6 +22,7 @@ class Request: public HTTP {
 		methods			   getMethod() const;
 		std::string		   getMethodAsString() const;
 		state			   getState() const;
+		std::string		   getStateAsString() const;
 
 	private:
 		int			parseStartLine(const std::string		&line);

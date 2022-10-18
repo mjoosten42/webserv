@@ -54,7 +54,7 @@ Popen my_popen(const std::string& path, const std::string& filename, const Envir
 	popen.readfd  = cgiToServer[0];
 	popen.writefd = serverToCgi[1];
 
-	popen.pid	  = fork();
+	popen.pid = fork();
 	if (popen.pid == -1) {
 		closePipe(serverToCgi);
 		closePipe(cgiToServer);

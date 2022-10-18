@@ -22,26 +22,36 @@ std::size_t findNewline(const std::string& str);
 Request::Request(): m_state(STARTLINE), m_contentLength(0) {}
 
 void Request::add(const char *str) {
+	std::string line;
 	m_saved += str;
 
-	switch (m_state) {
-		case STARTLINE:
-			if (!containsNewline(m_saved))
-				break;
-			if (parseStartLine(getNextLine()) != 200)
-				return;
-			m_state = HEADERS;
-		case HEADERS:
-			while (containsNewline(m_saved) && !containsDoubleNewline(m_saved))
-				parseHeader(getNextLine());
-			if (containsDoubleNewline(m_saved))
-				m_state = BODY;
-		case BODY:
-			m_saved += str;
-			m_state = DONE;
-		default:
-			break;
+	if (m_state == DONE) {
+		std::cerr << "Adding to closed request\n";
+		clear();
 	}
+
+	while (m_state != BODY && containsNewline(m_saved)) {
+		line = getNextLine();
+		if (line.empty())
+			m_state = BODY;
+		switch (m_state) {
+			case STARTLINE:
+				if (parseStartLine(line) != 200)
+					return;
+				m_state = HEADERS;
+				break;
+			case HEADERS:
+				if (parseHeader(line) != 200)
+					return;
+			default:
+				break;
+		}
+	}
+
+	if (m_contentLength == 0)
+		m_state = DONE;
+
+	std::cout << *this << std::endl;
 }
 
 void Request::clear() {
@@ -123,12 +133,13 @@ int Request::parseHeader(const std::string& line) {
 		std::cerr << RED "Duplicate headers: " << line << DEFAULT << std::endl;
 		return 400;
 	}
-	if (header.first == "Content-Length:")
-		m_contentLength = stringToIntegral<std::size_t>(header.first);
+	if (header.first == "Content-Length")
+		m_contentLength = stringToIntegral<std::size_t>(header.second);
 	return 200;
 }
 
 //  Assumes ContainsNewline is called beforehand
+//  Automatically erases line from saved data
 std::string Request::getNextLine() {
 	std::size_t pos			  = findNewline(m_saved);
 	std::string line		  = m_saved.substr(0, pos);
@@ -163,16 +174,30 @@ std::string Request::getMethodAsString() const {
 	}
 }
 
+std::string Request::getStateAsString() const {
+	switch (m_state) {
+		case STARTLINE:
+			return "STARTLINE";
+		case HEADERS:
+			return "HEADERS";
+		case BODY:
+			return "BODY";
+		default:
+			return "DONE";
+	}
+}
+
 state Request::getState() const {
 	return m_state;
 }
 
 std::ostream& operator<<(std::ostream& os, const Request& request) {
-	os << RED << "Location: " << DEFAULT << request.getLocation() << std::endl;
-	os << RED << "Query string: " << DEFAULT << request.getQueryString() << std::endl;
-	os << RED << "Method: " << DEFAULT << request.getMethodAsString() << std::endl;
-	os << RED << "Headers: {\n" << DEFAULT << getStringMapAsString(request.getHeaders()) << RED << "}\n";
-	os << RED << "Body: " << DEFAULT << request.getBody();
+	os << RED "Location: " DEFAULT << request.getLocation() << std::endl;
+	os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
+	os << RED "Method: " DEFAULT << request.getMethodAsString() << std::endl;
+	os << RED "Headers: {\n" DEFAULT << getStringMapAsString(request.getHeaders()) << RED << "}\n";
+	os << RED "Body: " DEFAULT << request.getBody() << std::endl;
+	os << RED "State: " DEFAULT << request.getStateAsString();
 	return os;
 }
 

@@ -360,7 +360,7 @@ const static t_entry entries[] = { { "*3gpp", "audio/3gpp" },
 								   { "yml", "text/yaml" },
 								   { "zip", "application/zip" } };
 
-const static int entriesSize   = sizeof(entries) / sizeof(*entries);
+const static int entriesSize = sizeof(entries) / sizeof(*entries);
 
 std::string MIME::fromFileName(const std::string& filename) {
 	size_t lastDotIndex = filename.find_last_of('.');
