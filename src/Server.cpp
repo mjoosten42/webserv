@@ -41,39 +41,7 @@ Server::Server(): m_fd(-1) {
 	m_locations.push_back(location);
 }
 
-Server::Server(t_block_directive *constructor_specs) {
-	//  INITIALISE MEMBER VARIABLES //
-	m_host = "127.0.0.1"; //	The only address we handle requests on is localhost
-
-	std::string val_from_config;
-	m_port			= 8000; //	Nginx default is 80 if super user, otherwise 8000
-	val_from_config = constructor_specs->fetch_simple("listen");
-	if (!val_from_config.empty())
-		m_port = stoi(val_from_config);
-
-	m_name			= ""; //  Nginx default: ""
-	val_from_config = constructor_specs->fetch_simple("server_name");
-	if (!val_from_config.empty())
-		m_name = val_from_config;
-
-	m_root			= "html"; //	Nginx default: "html"
-	val_from_config = constructor_specs->fetch_simple("root");
-	if (!val_from_config.empty())
-		m_root = val_from_config;
-
-	m_error_page	= "404.html"; //	Our default 404 error page
-	val_from_config = constructor_specs->fetch_simple("error_page");
-	if (!val_from_config.empty())
-		m_error_page = val_from_config; //  TODO: Check if error page is valid.
-
-	//  ADD LOCATION BLOCKS, IF PRESENT //
-	std::vector<t_block_directive *> location_config_blocks;
-	location_config_blocks = constructor_specs->fetch_matching_blocks("location");
-
-	std::vector<t_block_directive *>::iterator it;
-	for (it = location_config_blocks.begin(); it != location_config_blocks.end(); ++it)
-		m_locations.push_back(Location(*it, this));
-
+void Server::setupSocket() {
 	//  SET UP SOCKET //
 
 	//  Specify server socket info: IPv4 protocol family, port in correct
@@ -107,6 +75,67 @@ Server::Server(t_block_directive *constructor_specs) {
 	std::cout << " LISTENING ON " << m_port << DEFAULT "\n";
 }
 
+Server::Server(std::vector<Server>& servers, t_block_directive *constructor_specs) {
+	//  INITIALISE MEMBER VARIABLES //
+	m_host = "127.0.0.1"; //	The only address we handle requests on is localhost
+
+	std::string val_from_config;
+	m_port			= 8000; //	Nginx default is 80 if super user, otherwise 8000
+	val_from_config = constructor_specs->fetch_simple("listen");
+	if (!val_from_config.empty())
+		m_port = stoi(val_from_config);
+
+	m_name			= ""; //  Nginx default: ""
+	val_from_config = constructor_specs->fetch_simple("server_name");
+	if (!val_from_config.empty())
+		m_name = val_from_config;
+
+	m_root			= "html"; //	Nginx default: "html"
+	val_from_config = constructor_specs->fetch_simple("root");
+	if (!val_from_config.empty())
+		m_root = val_from_config;
+
+	m_error_page	= "404.html"; //	Our default 404 error page
+	val_from_config = constructor_specs->fetch_simple("error_page");
+	if (!val_from_config.empty())
+		m_error_page = val_from_config; //  TODO: Check if error page is valid.
+
+	//  ADD LOCATION BLOCKS, IF PRESENT //
+	std::vector<t_block_directive *> location_config_blocks;
+	location_config_blocks = constructor_specs->fetch_matching_blocks("location");
+
+	std::vector<t_block_directive *>::iterator it;
+	for (it = location_config_blocks.begin(); it != location_config_blocks.end(); ++it)
+		m_locations.push_back(Location(*it, this));
+
+	//  Check if other servers have the same hostname and port. Otherwise, create the socket.
+	//  NOOO! YOU CAN'T USE LOOPS DURING CONFIGURATION PARSING!! THEY'RE INEFFICIENT AND YOU SHOULD USE A MAP NOOOOOOO
+	for (std::vector<Server>::const_iterator it = servers.begin(); it != servers.end(); it++) {
+		if (it->getHost() == m_host && it->getPort() == m_port) {
+			m_fd = it->getFD();
+			return;
+		}
+	}
+	setupSocket();
+}
+
+#pragma region getters
+
 int Server::getFD() const {
 	return m_fd;
 }
+
+short Server::getPort() const {
+	return m_port;
+}
+
+//  returns the host of the server. That is, not the server name, but the listening address.
+const std::string& Server::getHost() const {
+	return m_host;
+}
+
+const std::string& Server::getName() const {
+	return m_name;
+}
+
+#pragma endregion

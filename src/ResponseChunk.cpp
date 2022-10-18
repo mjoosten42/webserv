@@ -34,15 +34,6 @@ void Response::handle() {
 	}
 }
 
-void Response::initDefaultHeaders() {
-
-	//  TODO
-	//  m_headers["Hostname"] = *m_request.getHeaders().find("Hostname");
-	//  m_headers["Server"] = m_server-> TDO
-	addHeader("Server", "AMOGUS");
-	(void)m_server;
-}
-
 void Response::sendFail(int code, const std::string& msg) {
 	m_statusCode = code;
 

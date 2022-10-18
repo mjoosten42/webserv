@@ -25,9 +25,15 @@ class Location {
 class Server {
 	public:
 		Server();
-		Server(t_block_directive *constructor_specs);
+		Server(std::vector<Server>& servers, t_block_directive *constructor_specs);
 
-		int getFD() const;
+		int				   getFD() const;
+		short			   getPort() const;
+		const std::string& getHost() const;
+		const std::string& getName() const;
+
+	private:
+		void setupSocket();
 
 	private:
 		int					  m_fd; //  Socket_fd
@@ -37,7 +43,7 @@ class Server {
 
 	private:
 		std::string m_host; //  TODO: use inet_addr?
-		int			m_port;
+		short		m_port;
 		std::string m_name;
 		std::string m_root;
 		std::string m_error_page;
