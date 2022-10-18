@@ -17,6 +17,8 @@ class Server {
 		short			   getPort() const;
 		const std::string& getHost() const;
 		const std::string& getName() const;
+		const std::string& getRoot() const;
+		const int& getCMB() const;
 
 	private:
 		void setupSocket();
@@ -25,7 +27,7 @@ class Server {
 		int					  m_fd; //  Socket_fd
 		std::vector<Location> m_locations;
 
-	public:
+	private:
 		std::string m_host; //  TODO: use inet_addr?
 		short		m_port;
 		std::string m_name;

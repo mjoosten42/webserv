@@ -18,7 +18,7 @@ Location::Location(t_block_directive *constructor_specs, Server *parent) {
 	if (!val_from_config.empty())
 		m_location = val_from_config;
 
-	m_client_max_body_size = parent->m_client_max_body_size;
+	m_client_max_body_size = parent->getCMB();
 	val_from_config		   = constructor_specs->fetch_simple("client_max_body_size");
 	if (!val_from_config.empty())
 		m_client_max_body_size = stoi(val_from_config);
@@ -35,7 +35,7 @@ Location::Location(t_block_directive *constructor_specs, Server *parent) {
 	if (!val_from_config.empty())
 		m_auto_index = (val_from_config.compare("on") == 0 ? true : false);
 
-	m_root			= parent->m_root;
+	m_root			= parent->getRoot();
 	val_from_config = constructor_specs->fetch_simple("root");
 	if (!val_from_config.empty())
 		m_root = val_from_config;

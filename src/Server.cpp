@@ -124,4 +124,12 @@ const std::string& Server::getName() const {
 	return m_name;
 }
 
+const std::string& Server::getRoot() const {
+	return m_root;
+}
+
+const int& Server::getCMB() const {
+	return m_client_max_body_size;
+}
+
 #pragma endregion
