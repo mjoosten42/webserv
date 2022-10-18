@@ -25,6 +25,10 @@ void HTTP::addToBody(const std::string& str) {
 	m_body += str + CRLF;
 }
 
+void HTTP::addToBody(const char *buf, std::size_t size) {
+	m_body.append(buf, size);
+}
+
 void HTTP::addHeader(const std::string& field, const std::string& value) {
 	m_headers[field] = value;
 }
