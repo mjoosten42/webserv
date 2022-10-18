@@ -24,6 +24,12 @@ const static Status statusMessages[] = { { 200, "OK" },
 
 const static int statusMessagesbytes_read = sizeof(statusMessages) / sizeof(*statusMessages);
 
+//  TO DETERMINE WHICH SERVER:
+//  in connection, a map of servers and hostnames. get the hostname from the request(as it is required),
+//  and just pass the correct server into the response. That's it.
+//  the hard part is the map and the socket creation(no duplicate sockets for same host/port)
+//  perhaps just loop over the survurs and check hostname/port?
+
 Response::Response():
 	HTTP(),
 	m_statusCode(-1),
@@ -66,7 +72,7 @@ std::string Response::getResponseAsString() {
 
 	if (m_body.length() > 0)
 		addHeader("Content-Length", toString(m_body.length()));
-	
+
 	response += getStatusLine();
 	response += getHeadersAsString();
 	response += CRLF;

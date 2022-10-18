@@ -79,7 +79,7 @@ void ConfigParser::discard_comments(std::vector<std::string>& config) {
 	}
 }
 
-void ConfigParser::throw_config_error(std::vector<std::string>			& config,
+void ConfigParser::throw_config_error(std::vector<std::string>		  & config,
 									  std::vector<std::string>::iterator& file_it,
 									  std::string						  reason) {
 	std::string error_line = toString(static_cast<int>(file_it - config.begin() + 1));

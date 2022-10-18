@@ -13,7 +13,7 @@ void Poller::start() {
 		//  std::cout << RED "Servers: " DEFAULT
 		//  		  << getPollFdsAsString(m_pollfds.begin(), m_pollfds.begin() + m_servers.size());
 		std::cout << RED "Clients: " DEFAULT
-				  << getPollFdsAsString(m_pollfds.begin() + m_servers.size(), m_pollfds.end());
+				  << getPollFdsAsString(m_pollfds.begin() + m_listeners.size(), m_pollfds.end());
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 
@@ -26,7 +26,7 @@ void Poller::start() {
 				break;
 			default:
 				//  loop over current clients to check if we can read or write
-				for (size_t i = m_servers.size(); i < m_pollfds.size(); i++) {
+				for (size_t i = m_listeners.size(); i < m_pollfds.size(); i++) {
 					Connection& conn = m_connections[m_pollfds[i].fd];
 
 					unsetFlag(m_pollfds[i].events, POLLOUT);
@@ -45,9 +45,9 @@ void Poller::start() {
 						conn.sendToClient(m_pollfds[i].events);
 				}
 
-				//  Loop over servers for new clients
+				//  Loop over the listening sockets for new clients
 				//  This is done after clients so new clients don't get polled immediately after accepting
-				for (size_t i = 0; i < m_servers.size(); i++)
+				for (size_t i = 0; i < m_listeners.size(); i++)
 					if (m_pollfds[i].revents & POLLIN)
 						acceptClient(m_pollfds[i].fd);
 		}
@@ -55,10 +55,10 @@ void Poller::start() {
 }
 
 //  accepts a new client
-void Poller::acceptClient(int server_fd) {
-	int			  fd	 = accept(server_fd, NULL, NULL);
-	pollfd		  client = { fd, POLLIN, 0 };
-	const Server *server = &m_servers[server_fd];
+void Poller::acceptClient(int listener_fd) {
+	int				fd		 = accept(listener_fd, NULL, NULL);
+	pollfd			client	 = { fd, POLLIN, 0 };
+	const Listener *listener = &m_listeners[listener_fd];
 
 	if (fd < 0)
 		fatal_perror("accept");
@@ -66,7 +66,7 @@ void Poller::acceptClient(int server_fd) {
 	set_fd_nonblocking(fd);
 
 	m_pollfds.push_back(client);
-	m_connections[fd] = Connection(fd, server);
+	m_connections[fd] = Connection(fd, listener);
 
 	std::cout << RED "NEW CLIENT: " DEFAULT << fd << std::endl;
 }

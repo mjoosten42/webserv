@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Connection.hpp"
-#include "Server.hpp"
+#include "Listener.hpp"
 
 #include <map>
 #include <sys/poll.h>
@@ -14,18 +14,18 @@ class Poller {
 			for (; first != last; first++) {
 				pollfd client = { first->getFD(), POLLIN, 0 };
 				m_pollfds.push_back(client);
-				m_servers[first->getFD()] = *first;
+				m_listeners[first->getFD()] = *first;
 			}
 		}
 
 		void start(); //  starts the polling.
 
 	private:
-		void acceptClient(int fd);
+		void acceptClient(int listener_fd);
 		void removeClient(int fd);
 
 	private:
 		std::vector<pollfd>		  m_pollfds;	 //  the array of pollfd structs
-		std::map<int, Server>	  m_servers;	 //  map server fd with corresponding server
+		std::map<int, Listener>	  m_listeners;	 //  map server fd with corresponding listener
 		std::map<int, Connection> m_connections; //  map client fd to its handler
 };

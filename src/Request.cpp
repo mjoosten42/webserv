@@ -12,11 +12,11 @@
 const static char *methodStrings[] = { "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH" };
 const static int   methodStringsSize = sizeof(methodStrings) / sizeof(*methodStrings);
 
-bool		isHttpVersion(const std::string		  &str);
+bool		isHttpVersion(const std::string	   &str);
 bool		isSupportedMethod(methods method);
 methods		parseMethod(const std::string	 &str);
-bool		containsNewline(const std::string		&str);
-bool		containsDoubleNewline(const std::string		  &str);
+bool		containsNewline(const std::string		 &str);
+bool		containsDoubleNewline(const std::string	   &str);
 std::size_t findNewline(const std::string& str);
 
 Request::Request(): m_state(STARTLINE), m_contentLength(0) {}

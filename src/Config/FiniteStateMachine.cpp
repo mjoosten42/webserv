@@ -31,10 +31,10 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 
 void ConfigParser::state_simpledirective(t_block_directive				   **context,
 										 std::vector<std::string>::iterator& it,
-										 std::vector<std::string>		   & file) {
+										 std::vector<std::string>			 & file) {
 	t_simple_directive	  tmp;
 	std::string::iterator str_i = (*it).begin();
-	std::string			 *field = &(tmp.name);
+	std::string			*field = &(tmp.name);
 	while (*str_i != m_tokens[SEMICOLON] && str_i != (*it).end()) {
 		if (std::isspace(*str_i) && field == &(tmp.name))
 			field = &(tmp.params);
@@ -57,7 +57,7 @@ void ConfigParser::state_simpledirective(t_block_directive				   **context,
 void ConfigParser::state_openblock(t_block_directive **context, std::vector<std::string>::iterator& it) {
 	t_block_directive	  tmp;
 	std::string::iterator str_i;
-	std::string			 *field = &(tmp.name);
+	std::string			*field = &(tmp.name);
 	tmp.parent_context			= *context;
 
 	for (str_i = (*it).begin(); str_i != (*it).end() && *str_i != m_tokens[OPEN_BRACE]; ++str_i) {

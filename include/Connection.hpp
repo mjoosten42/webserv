@@ -5,19 +5,19 @@
 
 #include <queue>
 
-class Server;
+class Listener;
 
 class Connection {
 	public:
 		Connection();
-		Connection(int fd, const Server *server);
+		Connection(int fd, const Listener *listener);
 
 		void receiveFromClient(short& events);
 		void sendToClient(short& events);
 
 	private:
 		int					 m_fd;
-		const Server		*m_server;
+		const Listener	   *m_listener;
 		Request				 m_request;
 		std::queue<Response> m_responses;
 };

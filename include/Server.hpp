@@ -8,23 +8,20 @@
 
 //  https://nginx.org/en/docs/http/ngx_http_core_module.html
 
+//  TODO: multiple hosts per server!
 class Server {
 	public:
 		Server();
-		Server(std::vector<Server>& servers, t_block_directive *constructor_specs);
+		Server(t_block_directive *constructor_specs);
 
-		int				   getFD() const;
-		short			   getPort() const;
-		const std::string& getHost() const;
 		const std::string& getName() const;
 		const std::string& getRoot() const;
+		const std::string& getHost() const;
+
 		const int& getCMB() const;
+		short	   getPort() const;
 
 	private:
-		void setupSocket();
-
-	private:
-		int					  m_fd; //  Socket_fd
 		std::vector<Location> m_locations;
 
 	private:
