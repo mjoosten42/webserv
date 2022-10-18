@@ -17,12 +17,12 @@ class Request: public HTTP {
 		int	 ProcessRequest();
 		void clear();
 
+		state			   getState() const;
+		methods			   getMethod() const;
 		const std::string& getLocation() const;
 		const std::string& getQueryString() const;
-		methods			   getMethod() const;
-		std::string		   getMethodAsString() const;
-		state			   getState() const;
 		std::string		   getStateAsString() const;
+		std::string		   getMethodAsString() const;
 
 	private:
 		int			parseStartLine(const std::string		&line);

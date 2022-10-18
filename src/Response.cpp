@@ -26,7 +26,7 @@ const static Status statusMessages[] = { { 200, "OK" },
 										 { 502, "Bad Gateway" },
 										 { 505, "HTTP Version Not Supported" } };
 
-const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMessages);
+const static int statusMessagesbytes_read = sizeof(statusMessages) / sizeof(*statusMessages);
 
 Response::Response():
 	HTTP(),
@@ -52,7 +52,7 @@ void Response::clear() {
 }
 
 std::string Response::getStatusMessage() const {
-	const char *msg = binarySearchKeyValue(m_statusCode, statusMessages, statusMessagesSize);
+	const char *msg = binarySearchKeyValue(m_statusCode, statusMessages, statusMessagesbytes_read);
 	if (msg != NULL)
 		return msg;
 	std::cerr << "Status code not found: " << m_statusCode << std::endl;
@@ -69,8 +69,8 @@ const std::string& Response::getChunk() const {
 
 //  this function removes bytesSent amount of bytes from the chunk. Used for instance when send() sent
 //  less bytes than the chunk's length.
-void Response::trimChunk(ssize_t bytesSent) {
-	m_chunk = m_chunk.substr(bytesSent, m_chunk.length());
+void Response::trimChunk(ssize_t bytes_sent) {
+	m_chunk = m_chunk.substr(bytes_sent, m_chunk.length());
 }
 
 bool Response::isInitialized() const {
@@ -164,20 +164,20 @@ int Response::handleGetWithStaticFile() {
 	return getFirstChunk();
 }
 
-#define FILE_BUF_SIZE (4096 - 1024)
+#define FILE_BUF_bytes_read (4096 - 1024)
 
 int Response::getFirstChunk() {
 
 	int ret;
 
-	//  get file size
+	//  get file bytes_read
 	//  TODO: don't do this for CGI pipes!
-	off_t size = lseek(m_readfd, 0, SEEK_END);
-	if (size == -1)
-		size = std::numeric_limits<off_t>().max();
+	off_t bytes_read = lseek(m_readfd, 0, SEEK_END);
+	if (bytes_read == -1)
+		bytes_read = std::numeric_limits<off_t>().max();
 	lseek(m_readfd, 0, SEEK_SET); //  set back to start
 
-	if (size > FILE_BUF_SIZE) {
+	if (bytes_read > FILE_BUF_bytes_read) {
 		//  send multichunked
 		m_headers["Transfer-Encoding"] = "Chunked";
 
@@ -194,15 +194,14 @@ int Response::getFirstChunk() {
 }
 
 int Response::addSingleFileToBody() {
-	static char buf[FILE_BUF_SIZE + 1];
-	ssize_t		bytesRead;
+	static char buf[FILE_BUF_bytes_read + 1];
+	ssize_t		bytes_read = read(m_readfd, buf, FILE_BUF_bytes_read);
 
-	bytesRead = read(m_readfd, buf, FILE_BUF_SIZE);
-	if (bytesRead == -1) {
+	if (bytes_read == -1) {
 		std::cerr << "Reading infile fd " << m_readfd << " failed!\n";
 		return 500;
 	}
-	buf[bytesRead] = 0;
+	buf[bytes_read] = 0;
 	addToBody(buf);
 
 	close(m_readfd);
@@ -248,12 +247,11 @@ std::string Response::getHeadersAsString() const {
 
 void Response::getNextChunk() {
 	static char buf[CHUNK_MAX_LENGTH];
-	ssize_t		size;
+	ssize_t		bytes_read = read(m_readfd, buf, CHUNK_MAX_LENGTH);
 
 	m_chunk.clear();
-	size = read(m_readfd, buf, CHUNK_MAX_LENGTH);
 
-	if (size == -1) {
+	if (bytes_read == -1) {
 		std::cerr << "Reading infile failed!\n";
 
 		//  TODO
@@ -263,7 +261,7 @@ void Response::getNextChunk() {
 	}
 
 	//  if we have reached EOF, then we finish the multichunked response with empty data.
-	if (size == 0) {
+	if (bytes_read == 0) {
 		m_chunk		   = "0\r\n\r\n";
 		m_isFinalChunk = true;
 		close(m_readfd);
@@ -275,10 +273,10 @@ void Response::getNextChunk() {
 		std::stringstream ss;
 
 		ss.seekp(std::ios::beg);
-		ss << std::hex << size;
+		ss << std::hex << bytes_read;
 
 		m_chunk = ss.str() + CRLF;
-		m_chunk.append(buf, size);
+		m_chunk.append(buf, bytes_read);
 		m_chunk += CRLF;
 	}
 }

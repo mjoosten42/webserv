@@ -35,7 +35,7 @@ void Connection::receiveFromClient(short& events) {
 
 			m_request.add(buf);
 
-			if (m_request.getState() == DONE) {
+			if (m_request.getState() == BODY) {
 				m_responses.push(Response(m_request, m_server));
 				m_request.clear();
 				setFlag(events, POLLOUT);

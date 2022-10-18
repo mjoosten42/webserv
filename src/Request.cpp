@@ -25,33 +25,32 @@ void Request::add(const char *str) {
 	std::string line;
 	m_saved += str;
 
-	if (m_state == DONE) {
-		std::cerr << "Adding to closed request\n";
-		clear();
-	}
-
-	while (m_state != BODY && containsNewline(m_saved)) {
-		line = getNextLine();
-		if (line.empty())
-			m_state = BODY;
-		switch (m_state) {
-			case STARTLINE:
-				if (parseStartLine(line) != 200)
-					return;
-				m_state = HEADERS;
+	switch (m_state) {
+		case STARTLINE:
+			if (!containsNewline(m_saved))
 				break;
-			case HEADERS:
+			if ((line = getNextLine()).empty()) {
+				m_state = BODY;
+				break;
+			}
+			if (parseStartLine(line) != 200)
+				return;
+			m_state = HEADERS;
+		case HEADERS:
+			while (containsNewline(m_saved)) {
+				if ((line = getNextLine()).empty()) {
+					m_state = BODY;
+					break;
+				}
 				if (parseHeader(line) != 200)
 					return;
-			default:
-				break;
-		}
+			}
+		case BODY:
+			break;
+		case DONE:
+			std::cerr << "Adding to closed request\n";
+			clear();
 	}
-
-	if (m_contentLength == 0)
-		m_state = DONE;
-
-	std::cout << *this << std::endl;
 }
 
 void Request::clear() {
