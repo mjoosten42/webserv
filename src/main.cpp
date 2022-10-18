@@ -12,7 +12,7 @@ void launchServers(std::vector<Server>& servers, ConfigParser& config) {
 
 	std::vector<t_block_directive *>::iterator it;
 	for (it = server_config_blocks.begin(); it != server_config_blocks.end(); ++it) {
-		servers.push_back(Server(*it));
+		servers.push_back(Server(servers, *it));
 		config.debug_print_block(**it, "");
 	}
 	return;

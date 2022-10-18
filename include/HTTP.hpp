@@ -10,8 +10,10 @@ class HTTP {
 		const std::string						& getBody() const;
 		const std::map<std::string, std::string>& getHeaders() const;
 
-		void addToBody(const std::string& str);
-		void addHeader(const std::string& field, const std::string& value);
+		void		addToBody(const std::string		  &str);
+		void		addHeader(const std::string		  &field, const std::string		&value);
+		bool		hasHeader(const std::string		  &field) const;
+		std::string getHeaderValue(const std::string& field);
 
 		void clear();
 

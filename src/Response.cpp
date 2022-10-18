@@ -64,9 +64,10 @@ std::string Response::getStatusLine() const {
 std::string Response::getResponseAsString() {
 	std::string response;
 
-	response += getStatusLine();
 	if (m_body.length() > 0)
 		addHeader("Content-Length", toString(m_body.length()));
+	
+	response += getStatusLine();
 	response += getHeadersAsString();
 	response += CRLF;
 	response += getBody();

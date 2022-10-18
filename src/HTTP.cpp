@@ -1,8 +1,10 @@
 #include "HTTP.hpp"
 
 #include "defines.hpp"
+#include "stringutils.hpp"
 
 #include <string>
+#include <utility>
 
 HTTP::HTTP() {}
 
@@ -25,4 +27,12 @@ void HTTP::addToBody(const std::string& str) {
 
 void HTTP::addHeader(const std::string& field, const std::string& value) {
 	m_headers[field] = value;
+}
+
+bool HTTP::hasHeader(const std::string& field) const {
+	return m_headers.find(field) != m_headers.end();
+}
+
+std::string HTTP::getHeaderValue(const std::string& field) {
+	return m_headers.find(field)->second;
 }
