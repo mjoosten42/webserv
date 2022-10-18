@@ -1,6 +1,8 @@
 #include "ConfigParser.hpp"
 #include "utils.hpp"
 
+#include <fstream>
+
 ConfigParser::ConfigParser() {
 	m_main_context.name			  = "main";
 	m_main_context.parent_context = NULL;
