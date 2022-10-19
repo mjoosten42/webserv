@@ -38,7 +38,7 @@ std::vector<std::string> stringSplit(const std::string& s)
 	size_t end = s.find_first_of(whitespaceChars);
 	while (end != std::string::npos)
 	{
-
+		(void)begin;
 	}
 	return(ret);
 }
