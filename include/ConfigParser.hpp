@@ -27,13 +27,14 @@ struct s_block_directive {
 		std::string						 additional_params;
 		std::vector<t_simple_directive>	 simple_directives;
 		std::vector<t_block_directive>	 block_directives;
-		t_block_directive				*parent_context;
-		std::vector<t_block_directive *> fetch_matching_blocks(std::string blocks_to_fetch);
-		std::string						 fetch_simple(std::string key);
-		std::string						 fetch_simple_recursive(std::string key);
+		t_block_directive				  *parent_context;
+		std::vector<t_block_directive *> fetch_matching_blocks(const std::string& blocks_to_fetch);
+		std::string						 fetch_simple(const std::string					   &key);
+		std::vector<std::string>		 fetch_simple_all(const std::string		   &key);
+		std::string						 fetch_simple_recursive(const std::string					 &key);
 
 	private:
-		void recurse_blocks(std::vector<t_block_directive *>& ret, std::string blocks_to_fetch);
+		void recurse_blocks(std::vector<t_block_directive *>& ret, const std::string& blocks_to_fetch);
 };
 
 class ConfigParser {
@@ -50,7 +51,7 @@ class ConfigParser {
 		void discard_comments(std::vector<std::string>& config);
 		void check_braces_error(std::vector<std::string>& config);
 		void check_semicolon_error(std::vector<std::string>& config);
-		void throw_config_error(std::vector<std::string>		  & config,
+		void throw_config_error(std::vector<std::string>			& config,
 								std::vector<std::string>::iterator& file_it,
 								std::string							reason);
 
@@ -60,7 +61,7 @@ class ConfigParser {
 		void state_closeblock(t_block_directive **context);
 		void state_simpledirective(t_block_directive				 **context,
 								   std::vector<std::string>::iterator& it,
-								   std::vector<std::string>			 & file);
+								   std::vector<std::string>		   & file);
 
 		enum Token { SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
 
