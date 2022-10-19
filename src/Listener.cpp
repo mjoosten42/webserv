@@ -60,7 +60,7 @@ void Listener::setupSocket() {
 	if (listen(m_fd, SOMAXCONN) < 0)
 		fatal_perror("listen");
 
-	std::cout << RED "SERVER " << m_fd;
+	std::cout << RED "\"LISTENER\" " << m_fd;
 	std::cout << " LISTENING ON " << m_listenAddr << ":" << m_port << DEFAULT "\n";
 }
 

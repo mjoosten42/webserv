@@ -6,6 +6,7 @@
 
 class Server;
 
+// This class is basically a 'socket' class that can associate multiple servers with the same socket
 class Listener {
 	public:
 		Listener();
@@ -24,7 +25,7 @@ class Listener {
 
 	private:
 		int									  m_fd;
-		std::string							  m_listenAddr;
+		std::string							  m_listenAddr; // aka Host
 		short								  m_port;
 		std::vector<const Server *>			  m_servers;
 		std::map<std::string, const Server *> m_hostToServer;
