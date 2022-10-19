@@ -10,13 +10,15 @@ class Server;
 class Response: public HTTP {
 	public:
 		Response();
-		Response(Request request, const Server *server);
 
 		bool			   processNextChunk();
 		void			   trimChunk(ssize_t bytesSent);
 		const std::string& getChunk() const;
 		bool			   isInitialized() const;
 		bool			   isDone() const;
+
+		Request& getRequest();
+		void	 addServer(const Server *server);
 
 		void clear();
 
@@ -31,6 +33,7 @@ class Response: public HTTP {
 
 		void handle();
 		void handleGet();
+		void handlePost();
 		int	 handleGetWithStaticFile();
 		void sendFail(int code, const std::string& msg);
 		void sendMoved(const std::string& location);

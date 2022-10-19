@@ -26,7 +26,7 @@ Server::Server(t_block_directive *constructor_specs) {
 	//  TODO: also parse that optionally from cfg
 
 	std::string val_from_config;
-	m_port			= 8000; //	Nginx default is 80 if super user, otherwise 8000
+	m_port			= 8080; //	Nginx default is 80 if super user, otherwise 8000
 	val_from_config = constructor_specs->fetch_simple("listen");
 	if (!val_from_config.empty())
 		m_port = stoi(val_from_config);

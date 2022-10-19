@@ -31,26 +31,15 @@ const static int statusMessagesbytes_read = sizeof(statusMessages) / sizeof(*sta
 //  perhaps just loop over the survurs and check hostname/port?
 
 Response::Response():
-	HTTP(),
-	m_statusCode(-1),
-	m_request(),
-	m_server(NULL),
-	m_readfd(-1),
-	m_hasStartedSending(false),
-	m_isFinalChunk(false) {}
-
-Response::Response(Request request, const Server *server):
-	HTTP(),
-	m_statusCode(-1),
-	m_request(request),
-	m_server(server),
-	m_readfd(-1),
-	m_hasStartedSending(false),
-	m_isFinalChunk(false) {}
+	HTTP(), m_statusCode(-1), m_server(NULL), m_readfd(-1), m_hasStartedSending(false), m_isFinalChunk(false) {}
 
 void Response::clear() {
 	HTTP::clear();
 	m_statusCode = 0;
+}
+
+void Response::addServer(const Server *server) {
+	m_server = server;
 }
 
 std::string Response::getStatusMessage() const {
@@ -97,4 +86,8 @@ void Response::initDefaultHeaders() {
 
 	if (!m_server->getName().empty())
 		addHeader("Server", m_server->getName());
+}
+
+Request& Response::getRequest() {
+	return m_request;
 }
