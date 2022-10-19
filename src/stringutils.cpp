@@ -34,11 +34,14 @@ std::vector<std::string> stringSplit(const std::string& s)
 {
 	std::vector<std::string> ret;
 	const std::string whitespaceChars = " \n\r\t\f\v";
+
 	size_t begin = 0;
-	size_t end = s.find_first_of(whitespaceChars);
+	size_t end = 0;
 	while (end != std::string::npos)
 	{
-		(void)begin;
+		end = s.substr(begin).find_first_of(whitespaceChars);
+		ret.push_back(s.substr(begin, end));
+		begin = s.substr(end).find_first_not_of(whitespaceChars); 
 	}
 	return(ret);
 }
