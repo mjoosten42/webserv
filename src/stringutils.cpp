@@ -39,9 +39,10 @@ std::vector<std::string> stringSplit(const std::string& s)
 	size_t end = 0;
 	while (end != std::string::npos)
 	{
-		end = s.substr(begin).find_first_of(whitespaceChars);
-		ret.push_back(s.substr(begin, end));
-		begin = s.substr(end).find_first_not_of(whitespaceChars); 
+		begin = s.find_first_not_of(whitespaceChars, end);
+		end = s.find_first_of(whitespaceChars, begin);
+		if (begin != std::string::npos)
+			ret.push_back(s.substr(begin, end - begin));
 	}
 	return(ret);
 }

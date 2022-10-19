@@ -7,6 +7,7 @@ void		strToLower(std::string		 &str);
 void		strToUpper(std::string		 &str);
 std::string trimLeadingWhiteSpace(const std::string& s);
 std::string trimTrailingWhiteSpace(const std::string& s);
+std::vector<std::string> stringSplit(const std::string& s);
 
 //  TODO: performance?
 template <typename T>
