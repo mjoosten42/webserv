@@ -10,8 +10,8 @@
 void Poller::start() {
 	std::cout << RED "\n----STARTING LOOP----\n" DEFAULT;
 	while (true) {
-		//  std::cout << RED "Servers: " DEFAULT
-		//  		  << getPollFdsAsString(m_pollfds.begin(), m_pollfds.begin() + m_servers.size());
+		//  std::cout << RED "Listeners: " DEFAULT
+		//  		  << getPollFdsAsString(m_pollfds.begin(), m_pollfds.begin() + m_listeners.size());
 		std::cout << std::endl << RED "Clients: " DEFAULT
 				  << getPollFdsAsString(m_pollfds.begin() + m_listeners.size(), m_pollfds.end());
 
@@ -47,7 +47,6 @@ void Poller::start() {
 				}
 
 				//  Loop over the listening sockets for new clients
-				//  This is done after clients so new clients don't get polled immediately after accepting
 				for (size_t i = 0; i < m_listeners.size(); i++)
 					if (m_pollfds[i].revents & POLLIN)
 						acceptClient(m_pollfds[i].fd);

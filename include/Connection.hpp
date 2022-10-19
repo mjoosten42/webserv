@@ -16,8 +16,10 @@ class Connection {
 		void sendToClient(short& events);
 
 	private:
+		Response& getLastResponse();
+
+	private:
 		int					 m_fd;
-		const Listener	   *m_listener;
-		Request				 m_request;
+		const Listener		*m_listener;
 		std::queue<Response> m_responses;
 };

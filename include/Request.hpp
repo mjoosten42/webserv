@@ -17,16 +17,19 @@ class Request: public HTTP {
 		int	 ProcessRequest();
 		void clear();
 
-		state			   getState() const;
-		methods			   getMethod() const;
+		const std::string& getHost() const;
+		const state		 & getState() const;
+		const methods	 & getMethod() const;
 		const std::string& getLocation() const;
 		const std::string& getQueryString() const;
-		std::string		   getStateAsString() const;
-		std::string		   getMethodAsString() const;
+
+		std::string getStateAsString() const;
+		std::string getMethodAsString() const;
 
 	private:
 		int			parseStartLine(const std::string		&line);
 		int			parseHeader(const std::string		 &line);
+		void		checkSpecialHeaders(const std::pair<std::string, std::string>		&header);
 		std::string getNextLine();
 		std::size_t newLineLength(std::size_t pos) const;
 
@@ -37,6 +40,7 @@ class Request: public HTTP {
 		state		m_state;
 		std::string m_saved;
 		std::size_t m_contentLength;
+		std::string m_host;
 };
 
 std::ostream& operator<<(std::ostream& os, const Request& request);

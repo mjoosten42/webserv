@@ -29,20 +29,20 @@ void Connection::receiveFromClient(short& events) {
 		default:
 			buf[bytes_received] = 0;
 
-			//  std::cout << RED "----START BUF" << std::string(40, '-') << DEFAULT << std::endl;
-			//  std::cout << buf << std::endl;
-			//  std::cout << RED "----END BUF" << std::string(40, '-') << DEFAULT << std::endl;
+			std::cout << RED "----START BUF" << std::string(40, '-') << DEFAULT << std::endl;
+			std::cout << buf << std::endl;
+			std::cout << RED "----END BUF" << std::string(40, '-') << DEFAULT << std::endl;
 
-			m_request.add(buf);
+			Response& response = getLastResponse();
+			Request & request  = response.getRequest();
 
-			if (m_request.getState() == BODY) {
-				//  TODO: fix this hideous line of code.
-				//  request should have a "host" field, and it should be stripped of any ports, as they are implied.
-				m_responses.push(Response(m_request,
-										  m_listener->getServerByHost(m_request.getHeaderValue("Host").substr(
-											  0, m_request.getHeaderValue("Host").find(':')))));
-				m_request.clear();
-				setFlag(events, POLLOUT);
+			request.add(buf);
+
+			if (request.getState() == BODY) {
+				std::cout << request << std::endl;
+				response.addServer(m_listener->getServerByHost(request.getHost()));
+				response.processNextChunk();
+				setFlag(events, POLLOUT); // TODO
 			}
 	}
 }
@@ -50,11 +50,7 @@ void Connection::receiveFromClient(short& events) {
 //  Send data back to a client
 //  This should only be called if POLLOUT is set
 void Connection::sendToClient(short& events) {
-
-	Response& response = m_responses.front();
-
-	if (!response.isInitialized())
-		response.processNextChunk();
+	Response  & response   = m_responses.front();
 	std::string str		   = response.getChunk();
 	ssize_t		bytes_sent = send(m_fd, str.c_str(), str.length(), 0);
 
@@ -72,4 +68,10 @@ void Connection::sendToClient(short& events) {
 			m_responses.pop();
 		}
 	}
+}
+
+Response& Connection::getLastResponse() {
+	if (m_responses.empty())
+		m_responses.push(Response());
+	return m_responses.back();
 }

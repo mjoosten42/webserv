@@ -12,11 +12,11 @@
 const static char *methodStrings[] = { "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH" };
 const static int   methodStringsSize = sizeof(methodStrings) / sizeof(*methodStrings);
 
-bool		isHttpVersion(const std::string	   &str);
+bool		isHttpVersion(const std::string		  &str);
 bool		isSupportedMethod(methods method);
 methods		parseMethod(const std::string	 &str);
-bool		containsNewline(const std::string		 &str);
-bool		containsDoubleNewline(const std::string	   &str);
+bool		containsNewline(const std::string		&str);
+bool		containsDoubleNewline(const std::string		  &str);
 std::size_t findNewline(const std::string& str);
 
 Request::Request(): m_state(STARTLINE), m_contentLength(0) {}
@@ -29,14 +29,19 @@ void Request::add(const char *str) {
 		switch (m_state) {
 			case STARTLINE:
 				if ((line = getNextLine()).empty()) {
-					m_state = BODY;
-					break;
+					std::cerr << "Missing startline\n";
+					return;
 				}
 				if (parseStartLine(line) != 200)
 					return;
 				m_state = HEADERS;
+				break;
 			case HEADERS:
 				if ((line = getNextLine()).empty()) {
+					if (!hasHeader("Host")) {
+						std::cerr << "Missing host header\n";
+						return;
+					}
 					m_state = BODY;
 					break;
 				}
@@ -135,9 +140,15 @@ int Request::parseHeader(const std::string& line) {
 		std::cerr << RED "Duplicate headers: " << line << DEFAULT << std::endl;
 		return 400;
 	}
+	checkSpecialHeaders(header);
+	return 200;
+}
+
+void Request::checkSpecialHeaders(const std::pair<std::string, std::string>& header) {
 	if (header.first == "Content-Length")
 		m_contentLength = stringToIntegral<std::size_t>(header.second);
-	return 200;
+	if (header.first == "Host")
+		m_host = header.second.substr(0, header.second.find(':'));
 }
 
 //  Assumes ContainsNewline is called beforehand
@@ -159,8 +170,16 @@ const std::string& Request::getQueryString() const {
 	return m_queryString;
 }
 
-methods Request::getMethod() const {
+const methods& Request::getMethod() const {
 	return m_method;
+}
+
+const state& Request::getState() const {
+	return m_state;
+}
+
+const std::string& Request::getHost() const {
+	return m_host;
 }
 
 std::string Request::getMethodAsString() const {
@@ -189,17 +208,14 @@ std::string Request::getStateAsString() const {
 	}
 }
 
-state Request::getState() const {
-	return m_state;
-}
-
 std::ostream& operator<<(std::ostream& os, const Request& request) {
+	os << RED "State: " DEFAULT << request.getStateAsString() << std::endl;
+	os << RED "Method: " DEFAULT << request.getMethodAsString() << std::endl;
 	os << RED "Location: " DEFAULT << request.getLocation() << std::endl;
 	os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
-	os << RED "Method: " DEFAULT << request.getMethodAsString() << std::endl;
 	os << RED "Headers: {\n" DEFAULT << getStringMapAsString(request.getHeaders()) << RED << "}\n";
-	os << RED "Body: " DEFAULT << request.getBody() << std::endl;
-	os << RED "State: " DEFAULT << request.getStateAsString();
+	os << RED "Host: " DEFAULT << request.getHost() << std::endl;
+	os << RED "Body: " DEFAULT << request.getBody();
 	return os;
 }
 

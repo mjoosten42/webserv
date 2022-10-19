@@ -68,12 +68,12 @@ void		fatal_perror(const char *msg);
 void		set_fd_nonblocking(const int fd);
 
 //  does std::transform on the entire container from beginning to end
-template <class T, typename F>
-void transformBeginEnd(T& container, F operation) {
+template <class C, typename F>
+void transformBeginEnd(C& container, F operation) {
 	std::transform(container.begin(), container.end(), container.begin(), operation);
 }
 
-std::string getEventsAsString(short revents);
+std::string getEventsAsString(short events);
 
 void setFlag(short& events, int flag);
 void unsetFlag(short& events, int flag);

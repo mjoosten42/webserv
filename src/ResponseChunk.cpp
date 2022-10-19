@@ -26,6 +26,7 @@ void Response::handle() {
 			handleGet();
 			break;
 		case POST:
+			handlePost();
 			break;
 		case DELETE:
 			break;
@@ -72,6 +73,8 @@ void Response::handleGet() {
 	if (m_statusCode != 200)
 		sendFail(m_statusCode, "Page is venting");
 }
+
+void Response::handlePost() {}
 
 int Response::handleGetWithStaticFile() {
 

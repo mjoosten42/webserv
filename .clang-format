@@ -92,7 +92,7 @@ SpaceInEmptyParentheses: false
 SpacesInAngles: Never
 SpacesInConditionalStatement: false
 SpacesInLineCommentPrefix:
-  Minimum: 2
+  Minimum: 1
   Maximum: -1
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
