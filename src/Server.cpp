@@ -1,6 +1,7 @@
 #include "Server.hpp"
 
 #include "defines.hpp"
+#include "stringutils.hpp"
 #include "utils.hpp"
 
 #include <arpa/inet.h>
@@ -31,8 +32,15 @@ Server::Server(t_block_directive *constructor_specs) {
 	if (!val_from_config.empty())
 		m_port = stoi(val_from_config);
 
-	m_name			= ""; //  Nginx default: ""
-	val_from_config = constructor_specs->fetch_simple("server_name");
+	std::string name = ""; //  Nginx default: ""
+	val_from_config	 = constructor_specs->fetch_simple("server_name");
+	if (!val_from_config.empty())
+		name = val_from_config;
+
+	m_names = stringSplit(name);
+
+	m_name			= "Amogus";
+	val_from_config = constructor_specs->fetch_simple("server");
 	if (!val_from_config.empty())
 		m_name = val_from_config;
 
@@ -76,6 +84,10 @@ const std::string& Server::getRoot() const {
 //  TODO: fix confusing name
 const std::string& Server::getName() const {
 	return m_name;
+}
+
+const std::vector<std::string>& Server::getNames() const {
+	return m_names;
 }
 
 short Server::getPort() const {

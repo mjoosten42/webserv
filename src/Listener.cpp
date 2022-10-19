@@ -19,7 +19,11 @@ Listener::~Listener() {}
 void Listener::addServer(const Server *server) {
 	m_servers.push_back(server);
 
-	m_hostToServer[server->getName()] = server;
+	const std::vector<std::string>& names = server->getNames();
+
+	std::vector<std::string>::const_iterator it;
+	for (it = names.begin(); it != names.end(); it++)
+		m_hostToServer[*it] = server;
 }
 
 const Server *Listener::getServerByHost(const std::string& host) const {
