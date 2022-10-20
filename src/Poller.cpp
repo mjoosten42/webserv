@@ -12,7 +12,8 @@ void Poller::start() {
 	while (true) {
 		//  std::cout << RED "Listeners: " DEFAULT
 		//  		  << getPollFdsAsString(m_pollfds.begin(), m_pollfds.begin() + m_listeners.size());
-		std::cout << std::endl << RED "Clients: " DEFAULT
+		std::cout << std::endl
+				  << RED "Clients: " DEFAULT
 				  << getPollFdsAsString(m_pollfds.begin() + m_listeners.size(), m_pollfds.end());
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
@@ -21,7 +22,7 @@ void Poller::start() {
 			case -1:
 				fatal_perror("poll");
 				break;
-			case 0:	// QUESTION: Does this ever happen? How does the blocking status of fds cause this?
+			case 0: // QUESTION: Does this ever happen? How does the blocking status of fds cause this?
 				std::cerr << "Fds should be blocking: " << getPollFdsAsString(m_pollfds.begin(), m_pollfds.end())
 						  << std::endl;
 				break;
