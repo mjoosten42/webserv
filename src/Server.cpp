@@ -5,17 +5,18 @@
 #include "utils.hpp"
 
 #include <arpa/inet.h>
+#include <fcntl.h> // for serving error files
 #include <iostream>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h> // close
 
 Server::Server() {
-	m_host		 = "localhost";
-	m_port		 = 8080;
-	m_name		 = "webserv.com"; //  Nginx default = ""
-	m_root		 = "html";
-	m_error_page = "404.html";
+	m_host					= "localhost";
+	m_port					= 8080;
+	m_name					= "webserv.com"; //  Nginx default = ""
+	m_root					= "html";
+	m_error_page[ERROR_404] = "404.html";
 
 	Location location = Location();
 	m_locations.push_back(location);
@@ -49,10 +50,29 @@ Server::Server(t_block_directive *constructor_specs) {
 	if (!val_from_config.empty())
 		m_root = val_from_config;
 
-	m_error_page	= "404.html"; //	Our default 404 error page
-	val_from_config = constructor_specs->fetch_simple("error_page");
-	if (!val_from_config.empty())
-		m_error_page = val_from_config; //  TODO: Check if error page is valid.
+	m_error_page[ERROR_404] = "404.html"; //	Our default 404 error page
+
+	val_from_config								= constructor_specs->fetch_simple("error_page");
+	std::vector<std::string>		   pages	= stringSplit(val_from_config);
+	std::vector<std::string>::iterator error_it = pages.begin();
+	while (error_it != pages.end()) {
+		error_it++;
+		if (error_it == pages.end())
+			break;
+		int test = open((*error_it).c_str(), O_RDONLY);
+		if (test == -1)
+			break;
+		close(test);
+		test = stoi(*(error_it - 1));
+		switch (test) {
+			case (404):
+				m_error_page[ERROR_404] = *error_it;
+				break;
+			default:
+				break;
+		}
+		error_it++;
+	}
 
 	//  Default value for Nginx, if set to 0 means don't check.
 	//  "Setting size to 0 disables checking of client request body size."
