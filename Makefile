@@ -8,6 +8,8 @@ SRC_DIR = src
 INC_DIR = include
 OBJ_DIR = obj
 
+TEST_NAME = test_bin
+
 SOURCES =
 include make/sources.mk
 HEADERS =
@@ -31,7 +33,7 @@ INCLUDE = -I $(INC_DIR)
 all: $(NAME)
 
 $(NAME): $(OBJECTS)
-	$(CXX) $(CXX_FLAGS) $(OBJECTS) -o $(NAME)
+	$(CXX) $(CXX_FLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
 	@mkdir -p $(@D)
@@ -41,10 +43,10 @@ $(OBJ_DIR):
 	mkdir -p $@
 
 clean:
-	$(RM) -r $(OBJ_DIR)
+	$(RM) -r $(OBJ_DIR) $(TEST_OBJ_DIR)
 
 fclean: clean
-	$(RM) $(NAME)
+	$(RM) $(NAME) $(TEST_NAME)
 
 re:
 	make fclean
@@ -64,6 +66,32 @@ print:
 format: files
 	clang-format -i $(SOURCES) $(HEADERS)
 
-.PHONY: all clean fclean re run files print format
+
+# ============================= #
+# 			testing				#
+# ============================= #
+
+TEST_CXXFLAGS = -std=c++14 -Wall -Wextra
+TEST_DIR = test
+TEST_OBJ_DIR = $(TEST_DIR)/obj_test
+
+TEST_SRCS=$(notdir $(wildcard $(TEST_DIR)/*.cpp))
+TEST_HEADERS=$(wildcard $(TEST_DIR)/*.hpp)
+TEST_OBJ=$(TEST_SRCS:%.cpp=$(TEST_OBJ_DIR)/%.o)
+OBJ_WITHOUT_MAIN = $(filter-out $(OBJ_DIR)/$(SRC_DIR)/main.o, $(OBJECTS))
+
+$(TEST_NAME): $(TEST_OBJ) $(OBJ_WITHOUT_MAIN)
+	$(CXX) $(TEST_CXXFLAGS) -o $@ $^
+
+$(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp $(TEST_HEADERS) | $(TEST_OBJ_DIR)
+	$(CXX) -c $(TEST_CXXFLAGS) -I $(INC_DIR) -I $(TEST_DIR) -o $@ $<
+
+$(TEST_OBJ_DIR):
+	mkdir $@
+
+test: $(TEST_NAME)
+	./$(TEST_NAME)
+
+.PHONY: all clean fclean re run files print format test test_exe
 
 -include $(OBJECTS:.o=.d)
