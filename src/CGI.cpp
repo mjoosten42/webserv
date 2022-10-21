@@ -75,6 +75,7 @@ CGI& CGI::operator=(const CGI& other) {
 	std::cerr << "**** CGI = OPERATOR CALLED, SHOULD NOT BE CALLED!\n";
 	m_response = other.m_response;
 	popen	   = other.popen;
+	exit(EXIT_FAILURE);
 	return *this;
 }
 
@@ -82,16 +83,18 @@ CGI& CGI::operator=(const CGI& other) {
 //  TODO: handle like a "downloaded" file
 int CGI::start(const std::string& command, const std::string& filename) {
 
-	Request		 & req = m_response.getRequest();
+	Request	   & req = m_response.getRequest();
 	EnvironmentMap em;
 	em.initFromEnviron();
 
 	//  TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
-	em["SERVER_SOFTWARE"] = m_response.getServer()->getName();
-	em["SERVER_NAME"]	  = req.getHost();
-	em["REQUEST_METHOD"]  = req.getMethodAsString();
-	em["PATH_INFO"]		  = req.getLocation();
-	em["QUERY_STRING"]	  = req.getQueryString();
+	// em["SERVER_SOFTWARE"] = m_response.getServer()->getName();
+	// std::cerr << m_response.getServer()->getName() << "\n";
+	// TODO: debug this. for some reason request is garbage?????
+	em["SERVER_NAME"]	 = req.getHost();
+	em["REQUEST_METHOD"] = req.getMethodAsString();
+	em["PATH_INFO"]		 = req.getLocation();
+	em["QUERY_STRING"]	 = req.getQueryString();
 
 	return popen.my_popen(command, filename, em);
 }

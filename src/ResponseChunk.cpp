@@ -12,6 +12,7 @@
 #define CHUNK_MAX_LENGTH (1024)		//  the desired max length of a HTTP/1.1 Chunked response chunk.
 
 void Response::processRequest() {
+	checkWhetherCGI();
 	switch (m_request.getMethod()) {
 		case GET:
 			handleGet();
@@ -26,22 +27,11 @@ void Response::processRequest() {
 	}
 }
 
-void Response::checkWetherCGI() {
+void Response::checkWhetherCGI() {
 	// TODO
 	m_isCGI = strEndsWith(m_request.getLocation(), ".php");
 	// std::cout << "doing CGI: " << m_isCGI << "\n";
 }
-
-// bool Response::processNextChunk() {
-// 	if (!m_hasStartedSending) {
-// 		checkWetherCGI();
-// 		handle();
-// 		m_hasStartedSending = true;
-// 	} else {
-// 		getNextChunk();
-// 	}
-// 	return m_isFinalChunk;
-// }
 
 void Response::sendFail(int code, const std::string& msg) {
 	m_statusCode = code;
@@ -80,6 +70,8 @@ void Response::handleGet() {
 
 		m_headers["Transfer-Encoding"] = "Chunked";
 		m_readfd					   = m_cgi.popen.readfd;
+
+		getFirstCGIChunk();
 	} else {
 		m_statusCode = handleGetWithStaticFile();
 	}
@@ -174,60 +166,60 @@ int Response::addSingleFileToBody() {
 }
 
 void Response::getFirstCGIChunk() {
-	// readBlockFromFile();
-	size_t loc = m_chunk.find_first_of("\n\n"); // end of the headers
+
+	// TODO: fix this. It'll hang on read. Besides, we shouldn't read at this point.
+	std::string block = readBlockFromFile();
+
+	// TODO: fix newlines, might be CRLF
+	size_t loc = block.find_first_of("\n\n"); // end of the headers
 	if (loc == std::string::npos) {
 		sendFail(501, "Could not find headers in CGI response");
 		return;
 	}
 
-	std::string headers = m_chunk.substr(0, loc + 2);
-	m_chunk				= m_chunk.substr(loc + 2);
-	wrapChunkInChunkedEncoding();
-	m_chunk = headers + m_chunk;
-}
-
-// void Response::getNextChunk() {
-
-// 	readBlockFromFile();
-// 	wrapChunkInChunkedEncoding();
-// }
-
-void Response::wrapChunkInChunkedEncoding() {
-	// TODO: it might be slow to prepend the chunk with the size and CRLF. The old implementation is faster, but this
-	// one is more modular.
-	std::stringstream ss;
-
-	ss.seekp(std::ios::beg);
-	ss << std::hex << m_chunk.length();
-	m_chunk = ss.str() + CRLF + m_chunk + CRLF;
+	std::string headers = block.substr(0, loc + 2);
+	block				= block.substr(loc + 2);
+	m_chunk				= headers + wrapStringInChunkedEncoding(block);
 }
 
 std::string& Response::getNextChunk() {
-	static char buf[CHUNK_MAX_LENGTH];
-	ssize_t		bytes_read;
 
 	if (m_isFinalChunk)
 		return m_chunk;
 
-	bytes_read = read(m_readfd, buf, CHUNK_MAX_LENGTH - m_chunk.size()); // Read as much space as available
-	switch (bytes_read) {
-		case -1:
-			perror("open");
-			m_isFinalChunk = true;
-			close(m_readfd);
-			break;
-		case 0:
-			m_chunk		   = "0" CRLF CRLF;
-			m_isFinalChunk = true;
-			close(m_readfd);
-			break;
-		default:
-			m_chunk += toHex(bytes_read) + CRLF;
-			m_chunk.append(buf, bytes_read);
-			m_chunk += CRLF;
-			break;
-	}
-
+	std::string block = readBlockFromFile();
+	m_chunk += wrapStringInChunkedEncoding(block);
 	return m_chunk;
+}
+
+std::string& Response::wrapStringInChunkedEncoding(std::string& str) {
+	// TODO: it might be slow to prepend the chunk with the size and CRLF. The old implementation is faster, but this
+	// one is more modular.
+	str = toHex(str.length()) + CRLF + str + CRLF;
+	return str;
+}
+
+// this reads CHUNK_MAX_LENGTH - m_chunk.size() from a file and returns it.
+// It has to be modified before put into a chunked response.
+std::string Response::readBlockFromFile() {
+	static char buf[CHUNK_MAX_LENGTH];
+	std::string ret;
+	ssize_t		size;
+
+	size = read(m_readfd, buf, CHUNK_MAX_LENGTH - m_chunk.size());
+
+	if (size <= 0) {
+		//  TODO: error message and response and such.
+		if (size == -1) {
+			perror("read");
+			std::cerr << "Reading infile failed!\n";
+		}
+
+		// size == 0, we reached EOF
+		m_isFinalChunk = true;
+		close(m_readfd);
+	} else {
+		ret.append(buf, size);
+	}
+	return ret;
 }
