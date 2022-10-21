@@ -3,6 +3,10 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
+#include <string>
+
+namespace MIME {
+
 //#define DEFAULT_MIME_TYPE "application/octet-stream"
 #define DEFAULT_MIME_TYPE "text/plain"
 
@@ -11,7 +15,7 @@ typedef struct s_entry {
 		const char *value;
 } t_entry;
 
-//  soucre: https://github.com/lasselukkari/MimeTypes/blob/7ee73f229e8dc04bc653559b45c0659efae854e7/MimeTypes.cpp
+//  source: https://github.com/lasselukkari/MimeTypes/blob/7ee73f229e8dc04bc653559b45c0659efae854e7/MimeTypes.cpp
 const static t_entry entries[] = { { "*3gpp", "audio/3gpp" },
 								   { "*jpm", "video/jpm" },
 								   { "*mp3", "audio/mp3" },
@@ -362,16 +366,27 @@ const static t_entry entries[] = { { "*3gpp", "audio/3gpp" },
 
 const static int entriesSize = sizeof(entries) / sizeof(*entries);
 
-std::string MIME::fromFileName(const std::string& filename) {
-	size_t lastDotIndex = filename.find_last_of('.');
-	if (lastDotIndex == std::string::npos)
-		return DEFAULT_MIME_TYPE; //  IDEA: maybe determine from content?
+std::string fromFileName(const std::string& filename) {
+	std::string extension = getExtension(filename);
 
-	std::string extension = filename.substr(lastDotIndex + 1);
-	strToLower(extension); //  WHY DOESN'T HAVE CPP HAVE A TOLOWER FUNCTION FOR A STRING?!?!
+	if (extension.empty())
+		return DEFAULT_MIME_TYPE;
 
 	const char *result = binarySearchKeyValue(extension, entries, entriesSize);
 	if (result == NULL)
 		return DEFAULT_MIME_TYPE;
 	return result;
 }
+
+std::string getExtension(const std::string& filename) {
+	size_t		dot = filename.find_last_of('.');
+	std::string extension;
+
+	if (dot != filename.npos) {
+		extension = filename.substr(dot + 1);
+		strToLower(extension);
+	}
+	return extension;
+}
+
+} // namespace MIME

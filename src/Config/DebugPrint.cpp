@@ -25,4 +25,5 @@ void ConfigParser::debug_print_block(t_block_directive b, std::string tabs) {
 	for (it_b = b.block_directives.begin(); it_b != b.block_directives.end(); ++it_b)
 		debug_print_block(*it_b, tabs + "\t");
 	std::cout << tabs << "}" << std::endl;
+	std::cout << std::endl;
 }

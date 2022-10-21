@@ -64,7 +64,7 @@ IndentPPDirectives: AfterHash
 IndentWrappedFunctionNames: true
 
 MaxEmptyLinesToKeep: 1
-NamespaceIndentation: All
+NamespaceIndentation: None
 PPIndentWidth: -1
 PackConstructorInitializers: NextLine
 

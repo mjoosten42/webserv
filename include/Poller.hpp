@@ -28,4 +28,5 @@ class Poller {
 		std::vector<pollfd>		  m_pollfds;	 //  the array of pollfd structs
 		std::map<int, Listener>	  m_listeners;	 //  map server fd with corresponding listener
 		std::map<int, Connection> m_connections; //  map client fd to its handler
+												 // std::map<int, CGI>		m_cgis;
 };

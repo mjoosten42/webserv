@@ -21,14 +21,17 @@ class Request: public HTTP {
 		const methods	 & getMethod() const;
 		const std::string& getLocation() const;
 		const std::string& getQueryString() const;
+		int				   getContentLength() const;
 
 		std::string getStateAsString() const;
 		std::string getMethodAsString() const;
 
 	private:
+		void clear();
+		int	 parse();
 		int	 parseStartLine(const std::string &line);
 		int	 parseHeader(const std::string &line);
-		void checkSpecialHeaders(const std::pair<std::string, std::string>& header);
+		int	 checkSpecialHeaders();
 
 		std::string getNextLine();
 

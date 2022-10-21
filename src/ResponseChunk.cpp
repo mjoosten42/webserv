@@ -1,5 +1,6 @@
 #include "MIME.hpp"
 #include "Response.hpp"
+#include "Server.hpp"
 #include "defines.hpp"
 #include "stringutils.hpp"
 
@@ -10,17 +11,7 @@
 #define FILE_BUF_SIZE (4096 - 1024) //  the max size of a file we want to load into a buffer in one time.
 #define CHUNK_MAX_LENGTH (1024)		//  the desired max length of a HTTP/1.1 Chunked response chunk.
 
-bool Response::processNextChunk() {
-	if (!m_hasStartedSending) {
-		handle();
-		m_hasStartedSending = true;
-	} else {
-		getNextChunk();
-	}
-	return m_isFinalChunk;
-}
-
-void Response::handle() {
+void Response::processRequest() {
 	switch (m_request.getMethod()) {
 		case GET:
 			handleGet();
@@ -31,7 +22,7 @@ void Response::handle() {
 		case DELETE:
 			break;
 		default:
-			std::cerr << "Error: method is NONE\n";
+			std::cerr << "Invalid method\n";
 	}
 }
 
@@ -91,28 +82,21 @@ void Response::handlePost() {
 }
 
 int Response::handleGetWithStaticFile() {
+	std::string filename = m_server->getRoot() + m_request.getLocation();
 
-	std::string filename = "." + m_request.getLocation();
-
-	//  TODO: nonblock?
-	//  TODO: remove dot
 	m_readfd = open(filename.c_str(), O_RDONLY);
 	if (m_readfd == -1) {
-		//  TODO: correct error codes
+		std::cerr << filename << std::endl;
 		if (errno == EACCES)
 			return 403;
 		perror("open");
 		return 404;
 	}
 
-	m_headers["Connection"]	  = "Keep-Alive";
-	m_headers["Content-Type"] = MIME::fromFileName(filename);
+	addHeader("Connection", "Keep-Alive");
+	addHeader("Content-Type", MIME::fromFileName(filename));
 
 	return getFirstChunk();
-}
-
-const std::string& Response::getChunk() const {
-	return m_chunk;
 }
 
 //  this function removes bytesSent amount of bytes from the chunk. Used for instance when send() sent
@@ -121,34 +105,27 @@ void Response::trimChunk(ssize_t bytesSent) {
 	m_chunk = m_chunk.substr(bytesSent, m_chunk.length());
 }
 
-bool Response::isInitialized() const {
-	return m_hasStartedSending;
-}
-
 bool Response::isDone() const {
 	return m_isFinalChunk;
 }
 
 int Response::getFirstChunk() {
-
-	int ret;
+	off_t size = lseek(m_readfd, 0, SEEK_END);
+	int	  ret;
 
 	//  get file size
 	//  TODO: don't do this for CGI pipes!
-	off_t size = lseek(m_readfd, 0, SEEK_END);
 	if (size == -1)
 		size = std::numeric_limits<off_t>().max();
 	lseek(m_readfd, 0, SEEK_SET); //  set back to start
 
-	if (size > FILE_BUF_SIZE) {
-		//  send multichunked
-		m_headers["Transfer-Encoding"] = "Chunked";
+	if (size > FILE_BUF_SIZE) { //  send multichunked
+		addHeader("Transfer-Encoding", "Chunked");
 
 		m_chunk = getResponseAsString();
 		ret		= 200;
 
-	} else {
-		//  send in single buf.
+	} else { //  send in single buf.
 		ret			   = addSingleFileToBody();
 		m_chunk		   = getResponseAsString();
 		m_isFinalChunk = true;
@@ -173,39 +150,31 @@ int Response::addSingleFileToBody() {
 	return 200;
 }
 
-void Response::getNextChunk() {
-	static char buf[CHUNK_MAX_LENGTH];
-	ssize_t		size;
+std::string& Response::getNextChunk() {
+	static char buf[3 + 2 + CHUNK_MAX_LENGTH + 2];
+	ssize_t		bytes_read;
 
-	m_chunk.clear();
-	size = read(m_readfd, buf, CHUNK_MAX_LENGTH);
+	if (m_isFinalChunk)
+		return m_chunk;
 
-	if (size == -1) {
-		std::cerr << "Reading infile failed!\n";
-
-		//  TODO
-		m_isFinalChunk = true;
-		close(m_readfd);
-		return;
+	bytes_read = read(m_readfd, buf, CHUNK_MAX_LENGTH - m_chunk.size()); // Read as much space as available
+	switch (bytes_read) {
+		case -1:
+			perror("open");
+			m_isFinalChunk = true;
+			close(m_readfd);
+			break;
+		case 0:
+			m_chunk		   = "0\r\n\r\n";
+			m_isFinalChunk = true;
+			close(m_readfd);
+			break;
+		default:
+			m_chunk += toHex(m_chunk.size()) + CRLF;
+			m_chunk.append(buf, bytes_read);
+			m_chunk += CRLF;
+			break;
 	}
 
-	//  if we have reached EOF, then we finish the multichunked response with empty data.
-	if (size == 0) {
-		m_chunk		   = "0\r\n\r\n";
-		m_isFinalChunk = true;
-		close(m_readfd);
-		return;
-	}
-
-	//  add the size of the chunk, and finish the buffer with CRLF
-	{
-		std::stringstream ss;
-
-		ss.seekp(std::ios::beg);
-		ss << std::hex << size;
-
-		m_chunk = ss.str() + CRLF;
-		m_chunk.append(buf, size);
-		m_chunk += CRLF;
-	}
+	return m_chunk;
 }

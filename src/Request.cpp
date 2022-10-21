@@ -21,50 +21,71 @@ std::size_t findNewline(const std::string& str);
 
 Request::Request(): m_state(STARTLINE), m_contentLength(0) {}
 
-// Body isn't being added
 void Request::add(const char *str) {
-	std::string line;
 	m_saved += str;
 
-	while (containsNewline(m_saved)) {
-		switch (m_state) {
-			case STARTLINE:
-				if ((line = getNextLine()).empty()) {
-					std::cerr << "Missing startline\n";
-					return;
-				}
-				if (parseStartLine(line) != 200)
-					return;
-				m_state = HEADERS;
-				break;
-			case HEADERS:
-				if ((line = getNextLine()).empty()) {
-					if (!hasHeader("Host")) {
-						std::cerr << "Missing host header\n";
-						return;
-					}
-					m_state = BODY;
-					if (m_method == GET || m_method == HEAD ||
-						(hasHeader("Content-Length") &&
-						 stringToIntegral<std::size_t>(getHeaderValue("Content-Length")) == m_body.length()))
-						m_state = DONE;
-					break;
-				}
-				if (parseHeader(line) != 200)
-					return;
-				break;
-			case BODY:
-				addToBody(m_saved);
-				m_saved.clear();
-				return;
-			case DONE:
-				std::cerr << "Adding to closed request\n";
-		}
-	}
+	parse(); // TODO: return error
 }
 
 void Request::cut(ssize_t len) {
 	m_body.erase(0, len);
+}
+
+void Request::clear() {
+	HTTP::clear();
+	m_location.clear();
+	m_queryString.clear();
+	m_state = STARTLINE;
+	m_saved.clear();
+	m_contentLength = 0;
+	m_host.clear();
+}
+
+int Request::parse() {
+	std::string line;
+	int			status;
+	switch (m_state) {
+		case STARTLINE:
+			if (!containsNewline(m_saved))
+				break;
+			line = getNextLine();
+			if (line.empty()) {
+				std::cerr << "Missing startline\n";
+				return 400;
+			}
+			if ((status = parseStartLine(line)) != 200)
+				return status;
+			m_state = HEADERS;
+		case HEADERS:
+			while (true) {
+				if (!containsNewline(m_saved))
+					return 200;
+				line = getNextLine();
+				if (!line.empty()) {
+					parseHeader(line);
+					continue;
+				}
+				if ((status = checkSpecialHeaders()) != 200)
+					return status;
+				if (m_method == GET || m_method == HEAD ||
+					(hasHeader("Content-Length") &&
+					 stringToIntegral<std::size_t>(getHeaderValue("Content-Length")) == 0))
+					m_state = DONE;
+				else
+					m_state = BODY;
+				break;
+			}
+		case BODY:
+			addToBody(m_saved);
+			m_saved.clear();
+			if (hasHeader("Content-Length") &&
+				stringToIntegral<std::size_t>(getHeaderValue("Content-Length")) == m_body.length())
+				m_state = DONE;
+			break;
+		case DONE:
+			std::cerr << "Adding to DONE request\n"; // Shouldn't be reached
+	}
+	return 200;
 }
 
 int Request::parseStartLine(const std::string& line) {
@@ -101,10 +122,6 @@ int Request::parseStartLine(const std::string& line) {
 		return 505;
 	}
 
-	if (m_location == "/")
-		m_location += "html/";
-
-	//  M: this depends on server
 	//   serve index.html when the location ends with a /
 	if (m_location.back() == '/')
 		m_location += "index.html"; //  TODO: when index php, do just that instead etc.
@@ -137,15 +154,20 @@ int Request::parseHeader(const std::string& line) {
 		std::cerr << RED "Duplicate headers: " << line << DEFAULT << std::endl;
 		return 400;
 	}
-	checkSpecialHeaders(header);
 	return 200;
 }
 
-void Request::checkSpecialHeaders(const std::pair<std::string, std::string>& header) {
-	if (header.first == "Content-Length")
-		m_contentLength = stringToIntegral<std::size_t>(header.second);
-	if (header.first == "Host")
-		m_host = header.second.substr(0, header.second.find(':'));
+int Request::checkSpecialHeaders() {
+	if (hasHeader("Host")) {
+		std::string hostHeader = getHeaderValue("Host");
+		m_host				   = hostHeader.substr(0, hostHeader.find(':'));
+	} else {
+		std::cerr << "Missing host\n";
+		return 400;
+	}
+	if (hasHeader("Content-Length"))
+		m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("Content-Length"));
+	return 200;
 }
 
 //  Assumes ContainsNewline is called beforehand
@@ -153,9 +175,9 @@ void Request::checkSpecialHeaders(const std::pair<std::string, std::string>& hea
 std::string Request::getNextLine() {
 	std::size_t pos			  = findNewline(m_saved);
 	std::string line		  = m_saved.substr(0, pos);
-	int			newlineLength = (m_saved[pos] == '\r') ? 2 : 1;
+	int			newlineLength = (m_saved[pos] == '\r') ? 2 : 1; // "\r\n or \n"
 
-	m_saved.erase(m_saved.begin(), m_saved.begin() + pos + newlineLength);
+	m_saved.erase(0, pos + newlineLength);
 	return line;
 }
 
@@ -200,19 +222,27 @@ std::string Request::getStateAsString() const {
 			return "HEADERS";
 		case BODY:
 			return "BODY";
-		default:
+		case DONE:
 			return "DONE";
 	}
+}
+
+int Request::getContentLength() const {
+	return m_contentLength;
 }
 
 std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << RED "State: " DEFAULT << request.getStateAsString() << std::endl;
 	os << RED "Method: " DEFAULT << request.getMethodAsString() << std::endl;
 	os << RED "Location: " DEFAULT << request.getLocation() << std::endl;
-	os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
-	os << RED "Headers: {\n" DEFAULT << getStringMapAsString(request.getHeaders()) << RED << "}\n";
+	if (!request.getQueryString().empty())
+		os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
+	if (!request.getHeaders().empty())
+		os << RED "Headers: {\n" DEFAULT << getStringMapAsString(request.getHeaders()) << RED << "}\n";
 	os << RED "Host: " DEFAULT << request.getHost() << std::endl;
-	os << RED "Body: " DEFAULT << request.getBody();
+	os << RED "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
+	if (!request.getBody().empty())
+		os << RED "Body: " DEFAULT << request.getBody();
 	return os;
 }
 

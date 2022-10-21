@@ -11,6 +11,7 @@ struct Status {
 };
 
 const static Status statusMessages[] = { { 200, "OK" },
+										 { 201, "Created" },
 										 { 301, "Moved Permanently" },
 										 { 400, "Bad Request" },
 										 { 403, "Forbidden" },
@@ -31,7 +32,7 @@ const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMes
 //  perhaps just loop over the survurs and check hostname/port?
 
 Response::Response():
-	HTTP(), m_statusCode(200), m_server(NULL), m_readfd(-1), m_hasStartedSending(false), m_isFinalChunk(false) {}
+	HTTP(), m_statusCode(200), m_server(NULL), m_readfd(-1), m_isFinalChunk(false) {}
 
 void Response::clear() {
 	HTTP::clear();
