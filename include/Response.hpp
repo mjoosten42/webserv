@@ -50,5 +50,5 @@ class Response: public HTTP {
 		const Server *m_server;
 		int m_readfd; //  the fd of the file to read. The methods who return the chunks are responsible for closing the
 					  //  file in time.
-		bool m_isFinalChunk;	  //  true if every chunk has been read.
+		bool m_isFinalChunk; //  true if every chunk has been read.
 };

@@ -65,7 +65,7 @@ void Response::handleGet() {
 }
 
 void Response::handlePost() {
-	std::string filename = "." + m_request.getLocation();
+	std::string filename = m_server->getRoot() + m_request.getLocation();
 	ssize_t		bytes_written;
 
 	m_readfd = open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -86,7 +86,6 @@ int Response::handleGetWithStaticFile() {
 
 	m_readfd = open(filename.c_str(), O_RDONLY);
 	if (m_readfd == -1) {
-		std::cerr << filename << std::endl;
 		if (errno == EACCES)
 			return 403;
 		perror("open");
@@ -151,7 +150,7 @@ int Response::addSingleFileToBody() {
 }
 
 std::string& Response::getNextChunk() {
-	static char buf[3 + 2 + CHUNK_MAX_LENGTH + 2];
+	static char buf[CHUNK_MAX_LENGTH];
 	ssize_t		bytes_read;
 
 	if (m_isFinalChunk)
@@ -165,12 +164,12 @@ std::string& Response::getNextChunk() {
 			close(m_readfd);
 			break;
 		case 0:
-			m_chunk		   = "0\r\n\r\n";
+			m_chunk		   = "0" CRLF CRLF;
 			m_isFinalChunk = true;
 			close(m_readfd);
 			break;
 		default:
-			m_chunk += toHex(m_chunk.size()) + CRLF;
+			m_chunk += toHex(bytes_read) + CRLF;
 			m_chunk.append(buf, bytes_read);
 			m_chunk += CRLF;
 			break;

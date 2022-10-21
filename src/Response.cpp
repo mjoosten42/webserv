@@ -31,8 +31,7 @@ const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMes
 //  the hard part is the map and the socket creation(no duplicate sockets for same host/port)
 //  perhaps just loop over the survurs and check hostname/port?
 
-Response::Response():
-	HTTP(), m_statusCode(200), m_server(NULL), m_readfd(-1), m_isFinalChunk(false) {}
+Response::Response(): HTTP(), m_statusCode(200), m_server(NULL), m_readfd(-1), m_isFinalChunk(false) {}
 
 void Response::clear() {
 	HTTP::clear();

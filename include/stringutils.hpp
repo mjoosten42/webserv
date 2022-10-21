@@ -25,4 +25,3 @@ std::string toHex(const T& value) {
 	ss << std::hex << value;
 	return ss.str();
 }
-
