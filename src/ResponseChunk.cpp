@@ -26,6 +26,23 @@ void Response::processRequest() {
 	}
 }
 
+void Response::checkWetherCGI() {
+	// TODO
+	m_isCGI = strEndsWith(m_request.getLocation(), ".php");
+	// std::cout << "doing CGI: " << m_isCGI << "\n";
+}
+
+// bool Response::processNextChunk() {
+// 	if (!m_hasStartedSending) {
+// 		checkWetherCGI();
+// 		handle();
+// 		m_hasStartedSending = true;
+// 	} else {
+// 		getNextChunk();
+// 	}
+// 	return m_isFinalChunk;
+// }
+
 void Response::sendFail(int code, const std::string& msg) {
 	m_statusCode = code;
 
@@ -56,12 +73,19 @@ void Response::sendMoved(const std::string& location) {
 
 void Response::handleGet() {
 
-	//  handleCGI("/usr/bin/perl", "printenv.pl");
 	initDefaultHeaders();
-	m_statusCode = handleGetWithStaticFile();
+	if (m_isCGI) {
+		// TODO: parse from config
+		m_statusCode = m_cgi.start("/usr/bin/perl", "printenv.pl");
+
+		m_headers["Transfer-Encoding"] = "Chunked";
+		m_readfd					   = m_cgi.popen.readfd;
+	} else {
+		m_statusCode = handleGetWithStaticFile();
+	}
 
 	if (m_statusCode != 200)
-		sendFail(m_statusCode, "Page is venting");
+		sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting");
 }
 
 void Response::handlePost() {
@@ -147,6 +171,36 @@ int Response::addSingleFileToBody() {
 	close(m_readfd);
 
 	return 200;
+}
+
+void Response::getFirstCGIChunk() {
+	// readBlockFromFile();
+	size_t loc = m_chunk.find_first_of("\n\n"); // end of the headers
+	if (loc == std::string::npos) {
+		sendFail(501, "Could not find headers in CGI response");
+		return;
+	}
+
+	std::string headers = m_chunk.substr(0, loc + 2);
+	m_chunk				= m_chunk.substr(loc + 2);
+	wrapChunkInChunkedEncoding();
+	m_chunk = headers + m_chunk;
+}
+
+// void Response::getNextChunk() {
+
+// 	readBlockFromFile();
+// 	wrapChunkInChunkedEncoding();
+// }
+
+void Response::wrapChunkInChunkedEncoding() {
+	// TODO: it might be slow to prepend the chunk with the size and CRLF. The old implementation is faster, but this
+	// one is more modular.
+	std::stringstream ss;
+
+	ss.seekp(std::ios::beg);
+	ss << std::hex << m_chunk.length();
+	m_chunk = ss.str() + CRLF + m_chunk + CRLF;
 }
 
 std::string& Response::getNextChunk() {

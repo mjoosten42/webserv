@@ -1,27 +1,17 @@
+#include "CGI.hpp"
+
 #include "EnvironmentMap.hpp"
 #include "Request.hpp"
+#include "Response.hpp"
+#include "Server.hpp"
 #include "utils.hpp"
-
-#include <unistd.h>
-
-struct Popen {
-		pid_t pid;
-		int	  readfd;
-		int	  writefd;
-		int	  status;
-
-		void closeFDs() {
-			close(readfd);
-			close(writefd);
-		}
-};
 
 static void closePipe(int *pfds) {
 	close(pfds[0]);
 	close(pfds[1]);
 }
 
-bool my_exec(int infd, int outfd, const std::string& path, const std::string& filename, char **envp) {
+static bool my_exec(int infd, int outfd, const std::string& path, const std::string& filename, char **envp) {
 	close(STDIN_FILENO);
 	if (dup(infd) == -1)
 		return false;
@@ -38,28 +28,29 @@ bool my_exec(int infd, int outfd, const std::string& path, const std::string& fi
 	return false;
 }
 
-Popen my_popen(const std::string& path, const std::string& filename, const EnvironmentMap& em) {
-	Popen popen;
-	int	  serverToCgi[2];
-	int	  cgiToServer[2];
+// back to minishell ayy
+// TODO: gateway timeout
+int Popen::my_popen(const std::string& path, const std::string& filename, const EnvironmentMap& em) {
+	int serverToCgi[2];
+	int cgiToServer[2];
 
-	popen.status = 500;
+	status = 502; // 502 bad gateway
 	if (pipe(serverToCgi) == -1) {
-		return popen;
+		return status;
 	} else if (pipe(cgiToServer) == -1) {
 		closePipe(serverToCgi);
-		return popen;
+		return status;
 	}
 
-	popen.readfd  = cgiToServer[0];
-	popen.writefd = serverToCgi[1];
+	readfd	= cgiToServer[0];
+	writefd = serverToCgi[1];
 
-	popen.pid = fork();
-	if (popen.pid == -1) {
+	pid = fork();
+	if (pid == -1) {
 		closePipe(serverToCgi);
 		closePipe(cgiToServer);
-		return popen;
-	} else if (popen.pid == 0) {
+		return status;
+	} else if (pid == 0) {
 		close(serverToCgi[1]);
 		close(cgiToServer[0]);
 		if (my_exec(serverToCgi[0], cgiToServer[1], path, filename, em.toCharpp()) == false)
@@ -69,35 +60,38 @@ Popen my_popen(const std::string& path, const std::string& filename, const Envir
 		close(cgiToServer[1]);
 	}
 
-	popen.status = 200;
-	return popen;
+	status = 200;
+	return status;
 }
 
+CGI::CGI(Response& response): m_response(response) {}
+
+CGI::~CGI() {}
+
+#include <iostream>
+
+// THIS SHOULD NEVER BE USED!
+CGI& CGI::operator=(const CGI& other) {
+	std::cerr << "**** CGI = OPERATOR CALLED, SHOULD NOT BE CALLED!\n";
+	m_response = other.m_response;
+	popen	   = other.popen;
+	return *this;
+}
+
+// TODO: Set correct path
 //  TODO: handle like a "downloaded" file
-//  int Handler::handleCGI(const std::string& command, const std::string& filename) {
-//  	EnvironmentMap em;
-//  	em.initFromEnviron();
+int CGI::start(const std::string& command, const std::string& filename) {
 
-//  	//  TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
-//  	em["SERVER_SOFTWARE"] = "TODO";
-//  	em["SERVER_NAME"]	  = "ALSO TODO";
-//  	em["REQUEST_METHOD"]  = m_request.getMethodAsString();
-//  	em["PATH_INFO"]		  = m_request.getLocation();
-//  	em["QUERY_STRING"]	  = m_request.getQueryString();
+	Request		 & req = m_response.getRequest();
+	EnvironmentMap em;
+	em.initFromEnviron();
 
-//  	Popen pop			  = my_popen(command, filename, em);
+	//  TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
+	em["SERVER_SOFTWARE"] = m_response.getServer()->getName();
+	em["SERVER_NAME"]	  = req.getHost();
+	em["REQUEST_METHOD"]  = req.getMethodAsString();
+	em["PATH_INFO"]		  = req.getLocation();
+	em["QUERY_STRING"]	  = req.getQueryString();
 
-//  	if (pop.status != 200)
-//  		return pop.status;
-
-//  #define BUF_LEN 4096
-
-//  	char buf[BUF_LEN];
-
-//  	read(pop.readfd, buf, BUF_LEN - 1);
-//  	buf[BUF_LEN - 1] = 0;
-//  	//  print(buf);
-
-//  	pop.closeFDs();
-//  	return pop.status;
-//  }
+	return popen.my_popen(command, filename, em);
+}
