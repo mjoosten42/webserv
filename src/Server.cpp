@@ -16,6 +16,9 @@ Server::Server() {
 	m_port					= 8080;
 	m_name					= "webserv.com"; //  Nginx default = ""
 	m_root					= "html";
+	m_error_page.reserve(SIZE); //ARRAYS are C++11 for some reason, so we use a vector to do an array's job.
+	for (int i = 0; i < SIZE; i++)
+		m_error_page.push_back("");
 	m_error_page[ERROR_404] = "404.html";
 
 	Location location = Location();
@@ -50,6 +53,9 @@ Server::Server(t_block_directive *constructor_specs) {
 	if (!val_from_config.empty())
 		m_root = val_from_config;
 
+	m_error_page.reserve(SIZE); //ARRAYS are C++11 for some reason, so we use a vector to do an array's job.
+	for (int i = 0; i < SIZE; i++)
+		m_error_page.push_back("");
 	m_error_page[ERROR_404] = "404.html"; //	Our default 404 error page
 
 	val_from_config								= constructor_specs->fetch_simple("error_page");

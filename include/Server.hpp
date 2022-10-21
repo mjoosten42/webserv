@@ -31,6 +31,6 @@ class Server {
 		std::string					  m_name;  // the name of the server, as in the HTTP Server header. Ex. derp.
 		std::vector<std::string>	  m_names; // i.e. example.com www.example.com etc.
 		std::string					  m_root;
-		std::array<std::string, SIZE> m_error_page; // This is C++11 tho :( :( :(
+		std::vector<std::string> m_error_page;
 		int							  m_client_max_body_size;
 };
