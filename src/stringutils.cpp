@@ -29,3 +29,19 @@ std::string trimTrailingWhiteSpace(const std::string& s) {
 		ret = s.substr(0, end + 1);
 	return (ret);
 }
+
+// splits a string on whitespace chars.
+std::vector<std::string> stringSplit(const std::string& s) {
+	std::vector<std::string> ret;
+	const std::string		 whitespaceChars = " \n\r\t\f\v";
+
+	size_t begin = 0;
+	size_t end	 = 0;
+	while (end != std::string::npos) {
+		begin = s.find_first_not_of(whitespaceChars, end);
+		end	  = s.find_first_of(whitespaceChars, begin);
+		if (begin != std::string::npos)
+			ret.push_back(s.substr(begin, end - begin));
+	}
+	return (ret);
+}

@@ -8,11 +8,12 @@
 #include <unistd.h>		// close
 
 void Poller::start() {
+	std::cout << RED "\n----STARTING LOOP----\n" DEFAULT;
 	while (true) {
-		std::cout << RED "\n----STARTING LOOP----\n" DEFAULT;
 		//  std::cout << RED "Listeners: " DEFAULT
 		//  		  << getPollFdsAsString(m_pollfds.begin(), m_pollfds.begin() + m_listeners.size());
-		std::cout << RED "Clients: " DEFAULT
+		std::cout << std::endl
+				  << RED "Clients: " DEFAULT
 				  << getPollFdsAsString(m_pollfds.begin() + m_listeners.size(), m_pollfds.end());
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
@@ -20,7 +21,8 @@ void Poller::start() {
 		switch (poll_status) {
 			case -1:
 				fatal_perror("poll");
-			case 0:
+				break;
+			case 0: // QUESTION: Does this ever happen? How does the blocking status of fds cause this?
 				std::cerr << "Fds should be blocking: " << getPollFdsAsString(m_pollfds.begin(), m_pollfds.end())
 						  << std::endl;
 				break;
