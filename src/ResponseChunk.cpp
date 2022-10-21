@@ -10,8 +10,14 @@
 #define FILE_BUF_SIZE (4096 - 1024) //  the max size of a file we want to load into a buffer in one time.
 #define CHUNK_MAX_LENGTH (1024)		//  the desired max length of a HTTP/1.1 Chunked response chunk.
 
+void Response::checkWetherCGI() {
+	// TODO
+	m_isCGI = strEndsWith(m_request.getLocation(), ".php");
+}
+
 bool Response::processNextChunk() {
 	if (!m_hasStartedSending) {
+		checkWetherCGI();
 		handle();
 		m_hasStartedSending = true;
 	} else {

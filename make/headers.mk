@@ -1,4 +1,5 @@
 HEADERS = \
+	include/CGI.hpp \
 	include/ConfigParser.hpp \
 	include/Connection.hpp \
 	include/defines.hpp \
