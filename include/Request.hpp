@@ -14,8 +14,7 @@ class Request: public HTTP {
 		Request();
 
 		void add(const char *str);
-		int	 ProcessRequest();
-		void clear();
+		void cut(ssize_t len);
 
 		const std::string& getHost() const;
 		const state		 & getState() const;
@@ -27,11 +26,11 @@ class Request: public HTTP {
 		std::string getMethodAsString() const;
 
 	private:
-		int			parseStartLine(const std::string		&line);
-		int			parseHeader(const std::string		 &line);
-		void		checkSpecialHeaders(const std::pair<std::string, std::string>		&header);
+		int	 parseStartLine(const std::string &line);
+		int	 parseHeader(const std::string &line);
+		void checkSpecialHeaders(const std::pair<std::string, std::string>& header);
+
 		std::string getNextLine();
-		std::size_t newLineLength(std::size_t pos) const;
 
 	private:
 		std::string m_location;	   //  ex. /foo/bar.html

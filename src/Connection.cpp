@@ -14,8 +14,6 @@ Connection::Connection(): m_fd(-1), m_listener(NULL) {}
 
 Connection::Connection(int m_fd, const Listener *listener): m_fd(m_fd), m_listener(listener) {}
 
-//  Read new data, and add it to the first request (FIFO)
-//  Once a request has been processed, create a response and pop the request
 void Connection::receiveFromClient(short& events) {
 	static char buf[RECV_BUF_SIZE + 1];
 	ssize_t		bytes_received = recv(m_fd, buf, RECV_BUF_SIZE, 0);
@@ -38,7 +36,7 @@ void Connection::receiveFromClient(short& events) {
 
 			request.add(buf);
 
-			if (request.getState() == BODY) {
+			if (request.getState() >= BODY) { // TODO: == BODY
 				std::cout << request << std::endl;
 				response.addServer(m_listener->getServerByHost(request.getHost()));
 				response.processNextChunk();
@@ -71,7 +69,7 @@ void Connection::sendToClient(short& events) {
 }
 
 Response& Connection::getLastResponse() {
-	if (m_responses.empty())
+	if (m_responses.empty() || m_responses.back().getRequest().getState() == DONE)
 		m_responses.push(Response());
 	return m_responses.back();
 }

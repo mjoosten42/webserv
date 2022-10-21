@@ -12,15 +12,16 @@
 const static char *methodStrings[] = { "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH" };
 const static int   methodStringsSize = sizeof(methodStrings) / sizeof(*methodStrings);
 
-bool		isHttpVersion(const std::string		  &str);
-bool		isSupportedMethod(methods method);
+bool isHttpVersion(const std::string& str);
+bool isSupportedMethod(methods method);
+bool containsNewline(const std::string& str);
+
 methods		parseMethod(const std::string	 &str);
-bool		containsNewline(const std::string		&str);
-bool		containsDoubleNewline(const std::string		  &str);
 std::size_t findNewline(const std::string& str);
 
 Request::Request(): m_state(STARTLINE), m_contentLength(0) {}
 
+// Body isn't being added
 void Request::add(const char *str) {
 	std::string line;
 	m_saved += str;
@@ -43,31 +44,27 @@ void Request::add(const char *str) {
 						return;
 					}
 					m_state = BODY;
+					if (m_method == GET || m_method == HEAD ||
+						(hasHeader("Content-Length") &&
+						 stringToIntegral<std::size_t>(getHeaderValue("Content-Length")) == m_body.length()))
+						m_state = DONE;
 					break;
 				}
 				if (parseHeader(line) != 200)
 					return;
 				break;
 			case BODY:
-				if (m_method == GET || m_method == HEAD ||
-					(hasHeader("Content-Length") &&
-					 stringToIntegral<std::size_t>(getHeaderValue("Content-Length")) == m_saved.length()))
-					m_state = DONE;
+				addToBody(m_saved);
+				m_saved.clear();
 				return;
 			case DONE:
 				std::cerr << "Adding to closed request\n";
-				clear();
 		}
 	}
 }
 
-void Request::clear() {
-	HTTP::clear();
-	m_location.clear();
-	m_queryString.clear();
-	m_method = static_cast<methods>(-1);
-	m_saved.clear();
-	m_state = STARTLINE;
+void Request::cut(ssize_t len) {
+	m_body.erase(0, len);
 }
 
 int Request::parseStartLine(const std::string& line) {
@@ -229,10 +226,6 @@ bool isSupportedMethod(methods method) {
 
 bool containsNewline(const std::string& str) {
 	return str.find("\r\n") != str.npos || str.find("\n") != str.npos;
-}
-
-bool containsDoubleNewline(const std::string& str) {
-	return str.find("\r\n\r\n") != str.npos || str.find("\n\r\n") != str.npos || str.find("\n\n") != str.npos;
 }
 
 std::size_t findNewline(const std::string& str) {

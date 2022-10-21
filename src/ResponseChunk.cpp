@@ -67,14 +67,28 @@ void Response::handleGet() {
 
 	//  handleCGI("/usr/bin/perl", "printenv.pl");
 	initDefaultHeaders();
-	m_statusCode = 200;
 	m_statusCode = handleGetWithStaticFile();
 
 	if (m_statusCode != 200)
 		sendFail(m_statusCode, "Page is venting");
 }
 
-void Response::handlePost() {}
+void Response::handlePost() {
+	std::string filename = "." + m_request.getLocation();
+	ssize_t		bytes_written;
+
+	m_readfd = open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (m_readfd < 0)
+		perror("open");
+	bytes_written = write(m_readfd, m_request.getBody().c_str(), m_request.getBody().length());
+	close(m_readfd);
+
+	m_request.cut(bytes_written);
+	m_statusCode = 201;
+	addHeader("Location", filename);
+	m_chunk		   = getResponseAsString();
+	m_isFinalChunk = true;
+}
 
 int Response::handleGetWithStaticFile() {
 

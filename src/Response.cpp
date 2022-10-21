@@ -22,7 +22,7 @@ const static Status statusMessages[] = { { 200, "OK" },
 										 { 502, "Bad Gateway" },
 										 { 505, "HTTP Version Not Supported" } };
 
-const static int statusMessagesbytes_read = sizeof(statusMessages) / sizeof(*statusMessages);
+const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMessages);
 
 //  TO DETERMINE WHICH SERVER:
 //  in connection, a map of servers and hostnames. get the hostname from the request(as it is required),
@@ -31,7 +31,7 @@ const static int statusMessagesbytes_read = sizeof(statusMessages) / sizeof(*sta
 //  perhaps just loop over the survurs and check hostname/port?
 
 Response::Response():
-	HTTP(), m_statusCode(-1), m_server(NULL), m_readfd(-1), m_hasStartedSending(false), m_isFinalChunk(false) {}
+	HTTP(), m_statusCode(200), m_server(NULL), m_readfd(-1), m_hasStartedSending(false), m_isFinalChunk(false) {}
 
 void Response::clear() {
 	HTTP::clear();
@@ -43,7 +43,7 @@ void Response::addServer(const Server *server) {
 }
 
 std::string Response::getStatusMessage() const {
-	const char *msg = binarySearchKeyValue(m_statusCode, statusMessages, statusMessagesbytes_read);
+	const char *msg = binarySearchKeyValue(m_statusCode, statusMessages, statusMessagesSize);
 	if (msg != NULL)
 		return msg;
 	std::cerr << "Status code not found: " << m_statusCode << std::endl;
@@ -59,8 +59,7 @@ std::string Response::getStatusLine() const {
 std::string Response::getResponseAsString() {
 	std::string response;
 
-	if (m_body.length() > 0)
-		addHeader("Content-Length", toString(m_body.length()));
+	addHeader("Content-Length", toString(m_body.length()));
 
 	response += getStatusLine();
 	response += getHeadersAsString();
@@ -80,10 +79,7 @@ std::string Response::getHeadersAsString() const {
 }
 
 void Response::initDefaultHeaders() {
-
-	//  TODO
-	//  m_headers["Hostname"] = *m_request.getHeaders().find("Hostname");
-
+	addHeader("Hostname", m_request.getHost());
 	if (!m_server->getName().empty())
 		addHeader("Server", m_server->getName());
 }
