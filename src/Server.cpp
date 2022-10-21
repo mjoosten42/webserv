@@ -48,7 +48,7 @@ Server::Server(t_block_directive *constructor_specs) {
 	if (!val_from_config.empty())
 		m_name = val_from_config;
 
-	m_root			= "html"; //	Nginx default: "html"
+	m_root			= "./html"; //	Nginx default: "html" TODO: absolute
 	val_from_config = constructor_specs->fetch_simple("root");
 	if (!val_from_config.empty())
 		m_root = val_from_config;

@@ -21,9 +21,8 @@ const std::map<std::string, std::string>& HTTP::getHeaders() const {
 	return m_headers;
 }
 
-//  TODO WTF IS THIS NEWLINE
 void HTTP::addToBody(const std::string& str) {
-	m_body += str + CRLF;
+	m_body += str;
 }
 
 void HTTP::addToBody(const char *buf, std::size_t size) {

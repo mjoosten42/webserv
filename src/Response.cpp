@@ -11,6 +11,7 @@ struct Status {
 };
 
 const static Status statusMessages[] = { { 200, "OK" },
+										 { 201, "Created" },
 										 { 301, "Moved Permanently" },
 										 { 400, "Bad Request" },
 										 { 403, "Forbidden" },
@@ -36,8 +37,8 @@ Response::Response():
 	m_cgi(*this),
 	m_server(NULL),
 	m_readfd(-1),
-	m_hasStartedSending(false),
 	m_isFinalChunk(false),
+	m_hasStartedSending(false),
 	m_isCGI(false) {}
 
 void Response::clear() {

@@ -5,19 +5,25 @@
 
 void					 strToLower(std::string					   &str);
 void					 strToUpper(std::string					   &str);
-std::string				 trimLeadingWhiteSpace(const std::string				&s);
-std::string				 trimTrailingWhiteSpace(const std::string			 &s);
+std::string				 trimLeadingWhiteSpace(const std::string			 &s);
+std::string				 trimTrailingWhiteSpace(const std::string			  &s);
 std::vector<std::string> stringSplit(const std::string& s);
 
 bool strEndsWith(const std::string& str, const std::string& end);
 
 //  TODO: performance?
 template <typename T>
-std::string toString(const T& t) {
+std::string toString(const T& value) {
 	std::stringstream ss;
-	ss << t;
+	ss << value;
 	return ss.str();
 }
 
-//  TODO: stringstream stuff with to_string?
-//  http://cplusplus.bordoon.com/speeding_up_string_conversions.html
+template <typename T>
+std::string toHex(const T& value) {
+	std::stringstream ss;
+
+	ss.seekp(std::ios::beg);
+	ss << std::hex << value;
+	return ss.str();
+}

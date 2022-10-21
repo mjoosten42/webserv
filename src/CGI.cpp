@@ -74,7 +74,7 @@ CGI::~CGI() {}
 CGI& CGI::operator=(const CGI& other) {
 	std::cerr << "**** CGI = OPERATOR CALLED, SHOULD NOT BE CALLED!\n";
 	m_response = other.m_response;
-	m_popen	   = other.m_popen;
+	popen	   = other.popen;
 	return *this;
 }
 
@@ -82,7 +82,7 @@ CGI& CGI::operator=(const CGI& other) {
 //  TODO: handle like a "downloaded" file
 int CGI::start(const std::string& command, const std::string& filename) {
 
-	Request	   & req = m_response.getRequest();
+	Request		 & req = m_response.getRequest();
 	EnvironmentMap em;
 	em.initFromEnviron();
 
@@ -93,5 +93,5 @@ int CGI::start(const std::string& command, const std::string& filename) {
 	em["PATH_INFO"]		  = req.getLocation();
 	em["QUERY_STRING"]	  = req.getQueryString();
 
-	return m_popen.my_popen(command, filename, em);
+	return popen.my_popen(command, filename, em);
 }

@@ -1,15 +1,12 @@
-<style>
-
-.button {
-	text-align: center;
-}
-
-</style>
-
-<div class="button">
-	<button>
-		<form action="/postfile" method="POST">
-			<input type="submit" value="Post">
-		</form>
-	</button>
-</div>
+<!DOCTYPE html>
+<head>
+  <title>upload</title>
+</head>
+<body>
+  <form action="http://localhost:8080/postfile" method="post" enctype="multipart/form-data">
+  <p><input type="text" name="text" value="text default">
+  <p><input type="file" name="file">
+  <p><button type="submit">Submit</button>
+</form>
+</body>
+</html>
