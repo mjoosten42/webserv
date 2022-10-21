@@ -4,13 +4,14 @@
 #include "Location.hpp"
 
 #include <array>
+#include <map>
 #include <string>
 #include <vector>
 
 //  https://nginx.org/en/docs/http/ngx_http_core_module.html
 
 class Server {
-		enum { ERROR_404, SIZE };
+		enum error_pages { ERROR_404, SIZE };
 
 	public:
 		Server();
@@ -25,12 +26,12 @@ class Server {
 		short	   getPort() const;
 
 	private:
-		std::vector<Location>		  m_locations;
-		std::string					  m_host;  // the IP address this server listens on. TODO: use inet_addr?
-		short						  m_port;  // port the server listens on
-		std::string					  m_name;  // the name of the server, as in the HTTP Server header. Ex. derp.
-		std::vector<std::string>	  m_names; // i.e. example.com www.example.com etc.
-		std::string					  m_root;
-		std::vector<std::string> m_error_page;
-		int							  m_client_max_body_size;
+		std::vector<Location>	 m_locations;
+		std::string				 m_host;  // the IP address this server listens on. TODO: use inet_addr?
+		short					 m_port;  // port the server listens on
+		std::string				 m_name;  // the name of the server, as in the HTTP Server header. Ex. derp.
+		std::vector<std::string> m_names; // i.e. example.com www.example.com etc.
+		std::string				 m_root;
+		std::map<Server::error_pages, std::string> m_error_page;
+		int										   m_client_max_body_size;
 };
