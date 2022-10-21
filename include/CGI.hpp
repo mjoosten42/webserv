@@ -29,7 +29,9 @@ class CGI {
 		int start(const std::string& command, const std::string& filename);
 		// TODO: how to close readfd?
 
+	public:
+		Popen popen;
+
 	private:
-		Popen	  m_popen;
 		Response& m_response;
 };

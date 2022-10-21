@@ -44,7 +44,11 @@ class Response: public HTTP {
 
 		int	 getFirstChunk();
 		void getNextChunk();
+		void readBlockFromFile();
+		void wrapChunkInChunkedEncoding();
 		int	 addSingleFileToBody();
+
+		void getFirstCGIChunk();
 
 	public:
 		int m_statusCode;
