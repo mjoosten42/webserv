@@ -32,7 +32,7 @@ const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMes
 //  perhaps just loop over the survurs and check hostname/port?
 
 Response::Response():
-	HTTP(), m_statusCode(200), m_cgi(*this), m_server(NULL), m_readfd(-1), m_isFinalChunk(false), m_isCGI(false) {}
+	HTTP(), m_statusCode(200), m_server(NULL), m_readfd(-1), m_isFinalChunk(false), m_isCGI(false) {}
 
 void Response::clear() {
 	HTTP::clear();

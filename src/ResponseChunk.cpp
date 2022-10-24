@@ -66,7 +66,7 @@ void Response::handleGet() {
 	initDefaultHeaders();
 	if (m_isCGI) {
 		// TODO: parse from config
-		m_statusCode = m_cgi.start("/usr/bin/perl", "printenv.pl");
+		m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
 
 		m_headers["Transfer-Encoding"] = "Chunked";
 		m_readfd					   = m_cgi.popen.readfd;
