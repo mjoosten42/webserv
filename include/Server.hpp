@@ -11,8 +11,6 @@
 //  https://nginx.org/en/docs/http/ngx_http_core_module.html
 
 class Server {
-		enum error_pages { ERROR_404, SIZE };
-
 	public:
 		Server();
 		Server(t_block_directive *constructor_specs);
@@ -32,6 +30,6 @@ class Server {
 		std::string				 m_name;  // the name of the server, as in the HTTP Server header. Ex. derp.
 		std::vector<std::string> m_names; // i.e. example.com www.example.com etc.
 		std::string				 m_root;
-		std::map<Server::error_pages, std::string> m_error_page;
+		std::map<int, std::string> m_error_page;
 		int										   m_client_max_body_size;
 };
