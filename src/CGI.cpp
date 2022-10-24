@@ -48,17 +48,17 @@ int Popen::my_popen(const std::string& path, const std::string& filename, const 
 
 	pid = fork();
 	switch (pid) {
-		case -1:
+		case -1: // failure
 			closePipe(serverToCgi);
 			closePipe(cgiToServer);
 			return status;
-		case 0:
+		case 0: // child
 			close(serverToCgi[1]);
 			close(cgiToServer[0]);
 			if (my_exec(serverToCgi[0], cgiToServer[1], path, filename, em.toCharpp()) == false)
 				exit(EXIT_FAILURE);
 			break;
-		default:
+		default: // parent
 			close(serverToCgi[0]);
 			close(cgiToServer[1]);
 	}
@@ -91,12 +91,12 @@ int CGI::start(const Request& req, const Server *server, const std::string& comm
 	em["GATEWAY_INTERFACE"] = CGI_VERSION;
 	em["SERVER_SOFTWARE"]	= server->getName();
 	em["SERVER_NAME"]		= req.getHost();
-	em["SERVER_PORT"]		= toString(server->getPort()); // TODO: when multiple ports, it should be the listener's port.
-	em["SERVER_PROTOCOL"]	= HTTP_VERSION;
-	em["REQUEST_METHOD"]	= req.getMethodAsString();
-	em["PATH_INFO"]			= req.getLocation();
-	em["QUERY_STRING"]		= req.getQueryString();
-	em["SCRIPT_NAME"]		= filename;
+	em["SERVER_PORT"]	  = toString(server->getPort()); // TODO: when multiple ports, it should be the listener's port.
+	em["SERVER_PROTOCOL"] = HTTP_VERSION;
+	em["REQUEST_METHOD"]  = req.getMethodAsString();
+	em["PATH_INFO"]		  = req.getLocation();
+	em["QUERY_STRING"]	  = req.getQueryString();
+	em["SCRIPT_NAME"]	  = filename;
 
 	return popen.my_popen(command, filename, em);
 }

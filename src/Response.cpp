@@ -43,6 +43,7 @@ Response::Response():
 void Response::clear() {
 	HTTP::clear();
 	m_statusCode = 0;
+	m_headerEndFinder.reset();
 }
 
 void Response::addServer(const Server *server) {

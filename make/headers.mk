@@ -4,6 +4,7 @@ HEADERS = \
 	include/ConfigParser.hpp \
 	include/Connection.hpp \
 	include/defines.hpp \
+	include/EndOfHeaderFinder.hpp \
 	include/EnvironmentMap.hpp \
 	include/HTTP.hpp \
 	include/Listener.hpp \

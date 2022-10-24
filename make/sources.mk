@@ -7,6 +7,7 @@ SOURCES = \
 	src/Config/init.cpp \
 	src/Config/Parser.cpp \
 	src/Connection.cpp \
+	src/EndOfHeaderFinder.cpp \
 	src/EnvironmentMap.cpp \
 	src/HTTP.cpp \
 	src/Listener.cpp \
