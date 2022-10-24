@@ -16,7 +16,7 @@ Server::Server() {
 	m_port					= 8080;
 	m_name					= "webserv.com"; //  Nginx default = ""
 	m_root					= "html";
-	m_error_page[404] = "404.html";
+	// m_error_page[404] = "./html/404.html";
 
 	Location location = Location();
 	m_locations.push_back(location);
@@ -31,7 +31,7 @@ Server::Server(t_block_directive *constructor_specs) {
 	m_port			= 8080; //	Nginx default is 80 if super user, otherwise 8000
 	val_from_config = constructor_specs->fetch_simple("listen");
 	if (!val_from_config.empty())
-		m_port = stoi(val_from_config);
+		m_port = stoi(val_from_config); // TODO replace all stois
 
 	std::string name = ""; //  Nginx default: ""
 	val_from_config	 = constructor_specs->fetch_simple("server_name");
@@ -50,7 +50,7 @@ Server::Server(t_block_directive *constructor_specs) {
 	if (!val_from_config.empty())
 		m_root = val_from_config;
 
-	m_error_page[404] = "404.html"; //	Our default 404 error page
+	// m_error_page[404] = "./html/404.html"; //	Our default 404 error page
 
 	val_from_config								= constructor_specs->fetch_simple("error_page");
 	std::vector<std::string>		   pages	= stringSplit(val_from_config);
@@ -59,12 +59,17 @@ Server::Server(t_block_directive *constructor_specs) {
 		error_it++;
 		if (error_it == pages.end())
 			break;
-		int user_defined_page = open((*error_it).c_str(), O_RDONLY);
-		if (user_defined_page == -1)
-			break;
-		close(user_defined_page);
+		std::string full_path = m_root + "/" + *error_it;
+		// print("Checking user-defined error page: " + full_path);
+		int user_defined_page = open((full_path).c_str(), O_RDONLY);
+		if (user_defined_page == -1){
+			std::cerr << RED << "WARNING: The custom error pages have ";
+			std::cerr << "been incorrectly configured." << DEFAULT << std::endl;
+		}
+		else
+			close(user_defined_page);
 		user_defined_page = stoi(*(error_it - 1)); // TODO:: check this for non numeric values
-		m_error_page[user_defined_page] = *error_it;
+		m_error_page[user_defined_page] = full_path;
 		error_it++;
 	}
 
@@ -110,6 +115,10 @@ short Server::getPort() const {
 
 const int& Server::getCMB() const {
 	return m_client_max_body_size;
+}
+
+const std::map<int, std::string>& Server::getErrorPages() const {
+	return (m_error_page);
 }
 
 #pragma endregion

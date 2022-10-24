@@ -3,6 +3,7 @@
 #include "Server.hpp"
 #include "defines.hpp"
 #include "stringutils.hpp"
+#include "utils.hpp"
 
 #include <fcntl.h> // open
 #include <sys/socket.h>
@@ -35,7 +36,12 @@ void Response::checkWhetherCGI() {
 
 void Response::sendFail(int code, const std::string& msg) {
 	m_statusCode = code;
-
+	if (m_server->getErrorPages().find(code) != m_server->getErrorPages().end())
+	{
+		std::string file = m_server->getErrorPages().at(code);
+		handleGetWithStaticFile(file);
+		return;
+	}
 	initDefaultHeaders();
 	addHeader("Content-Type", "text/html");
 
@@ -97,8 +103,13 @@ void Response::handlePost() {
 	m_isFinalChunk = true;
 }
 
-int Response::handleGetWithStaticFile() {
+// TODO: Fix this. I added an ugly hacky param in case the file served is supposed ot be an error page.
+int Response::handleGetWithStaticFile(std::string file) {
 	std::string filename = m_server->getRoot() + m_request.getLocation();
+	if (!file.empty())
+		filename = file;
+		// filename = m_server->getRoot() + "/" + file;
+	print("Handle static: " + filename);
 
 	m_readfd = open(filename.c_str(), O_RDONLY);
 	if (m_readfd == -1) {
