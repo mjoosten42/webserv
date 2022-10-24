@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Listener.hpp"
 #include <string>
 #include <vector>
 
@@ -72,3 +73,6 @@ class ConfigParser {
 		void debug_print_simple(t_simple_directive s, std::string tabs);
 		void debug_print_block(t_block_directive b, std::string tabs);
 };
+
+// Initialising of Listeners based on config:
+void initFromConfig(ConfigParser& config, std::vector<Listener>& listeners);

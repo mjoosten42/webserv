@@ -4,6 +4,7 @@ SOURCES = \
 	src/Config/CheckValidity.cpp \
 	src/Config/DebugPrint.cpp \
 	src/Config/FiniteStateMachine.cpp \
+	src/Config/init.cpp \
 	src/Config/Parser.cpp \
 	src/Connection.cpp \
 	src/EnvironmentMap.cpp \
