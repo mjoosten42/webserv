@@ -58,7 +58,7 @@ std::string Response::getStatusMessage() const {
 }
 
 std::string Response::getStatusLine() const {
-	return "HTTP/1.1 " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
+	return std::string(HTTP_VERSION) + " " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
 }
 
 //  Returns the response as a string to send over a socket. When there is a body present,
