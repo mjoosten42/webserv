@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <head>
-  <title>upload</title>
+  <title>Upload a file</title>
 </head>
 <body>
-  <form action="http://localhost:8080/postfile" method="post" enctype="multipart/form-data">
-  <p><input type="text" name="text" value="text default">
-  <p><input type="file" name="file">
-  <p><button type="submit">Submit</button>
+  <form action="postfile" method="post" enctype="multipart/form-data">
+    <p><input type="file" name="file">
+    <p><button type="submit">Submit</button>
 </form>
 </body>
 </html>

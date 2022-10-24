@@ -14,9 +14,11 @@ class Response: public HTTP {
 
 		void		 processRequest();
 		void		 trimChunk(ssize_t bytesSent);
-		bool		 isInitialized() const;
-		bool		 isDone() const;
 		std::string& getNextChunk();
+
+		bool isDone() const;
+		bool isInitialized() const;
+		bool finishedProcessing() const;
 
 		Request		& getRequest();
 		const Server *getServer() const;
@@ -58,8 +60,6 @@ class Response: public HTTP {
 		const Server *m_server;
 		int m_readfd; //  the fd of the file to read. The methods who return the chunks are responsible for closing the
 					  //  file in time.
-		bool m_isFinalChunk;	  //  true if every chunk has been read.
-		bool m_hasStartedSending; //  if we have made the first chunk, this is true(i.e. we don't have to send the
-								  //  headers again)
+		bool m_isFinalChunk; //  true if every chunk has been read.
 		bool m_isCGI;
 };

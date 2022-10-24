@@ -45,15 +45,3 @@ std::vector<std::string> stringSplit(const std::string& s) {
 	}
 	return (ret);
 }
-
-// returns true when string ends with string end. When end is empty, also returns true.
-bool strEndsWith(const std::string& str, const std::string& end) {
-
-	std::string::const_reverse_iterator strIt = str.rbegin();
-	std::string::const_reverse_iterator endIt = end.rbegin();
-
-	for (; endIt != end.rend(); endIt++, strIt++)
-		if (strIt == str.rend() || *strIt != *endIt)
-			return false;
-	return true;
-}

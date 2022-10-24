@@ -25,7 +25,7 @@ void HTTP::addToBody(const std::string& str) {
 	m_body += str;
 }
 
-void HTTP::addToBody(const char *buf, std::size_t size) {
+void HTTP::addToBody(const char *buf, ssize_t size) {
 	m_body.append(buf, size);
 }
 

@@ -1,15 +1,13 @@
 #include "MIME.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
+#include "buffer.hpp"
 #include "defines.hpp"
 #include "stringutils.hpp"
 
 #include <fcntl.h> // open
 #include <sys/socket.h>
 #include <unistd.h> // lseek
-
-#define FILE_BUF_SIZE (4096 - 1024) //  the max size of a file we want to load into a buffer in one time.
-#define CHUNK_MAX_LENGTH (1024)		//  the desired max length of a HTTP/1.1 Chunked response chunk.
 
 void Response::processRequest() {
 	switch (m_request.getMethod()) {
@@ -28,7 +26,7 @@ void Response::processRequest() {
 
 void Response::checkWetherCGI() {
 	// TODO
-	m_isCGI = strEndsWith(m_request.getLocation(), ".php");
+	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php");
 	// std::cout << "doing CGI: " << m_isCGI << "\n";
 }
 
@@ -100,7 +98,7 @@ void Response::handlePost() {
 
 	m_request.cut(bytes_written);
 	m_statusCode = 201;
-	addHeader("Location", filename);
+	addHeader("Location", m_request.getLocation());
 	m_chunk		   = getResponseAsString();
 	m_isFinalChunk = true;
 }
@@ -112,11 +110,9 @@ int Response::handleGetWithStaticFile() {
 	if (m_readfd == -1) {
 		if (errno == EACCES)
 			return 403;
-		perror("open");
 		return 404;
 	}
 
-	addHeader("Connection", "Keep-Alive");
 	addHeader("Content-Type", MIME::fromFileName(filename));
 
 	return getFirstChunk();
@@ -125,7 +121,7 @@ int Response::handleGetWithStaticFile() {
 //  this function removes bytesSent amount of bytes from the chunk. Used for instance when send() sent
 //  less bytes than the chunk's length.
 void Response::trimChunk(ssize_t bytesSent) {
-	m_chunk = m_chunk.substr(bytesSent, m_chunk.length());
+	m_chunk.erase(0, bytesSent);
 }
 
 bool Response::isDone() const {
@@ -142,7 +138,7 @@ int Response::getFirstChunk() {
 		size = std::numeric_limits<off_t>().max();
 	lseek(m_readfd, 0, SEEK_SET); //  set back to start
 
-	if (size > FILE_BUF_SIZE) { //  send multichunked
+	if (size > BUFFER_SIZE) { //  send multichunked
 		addHeader("Transfer-Encoding", "Chunked");
 
 		m_chunk = getResponseAsString();
@@ -157,19 +153,17 @@ int Response::getFirstChunk() {
 }
 
 int Response::addSingleFileToBody() {
-	static char buf[FILE_BUF_SIZE + 1];
-	ssize_t		bytes_read;
+	ssize_t bytes_read = read(m_readfd, buf, BUFFER_SIZE);
 
-	bytes_read = read(m_readfd, buf, FILE_BUF_SIZE);
-	if (bytes_read == -1) {
-		std::cerr << "Reading infile fd " << m_readfd << " failed!\n";
-		return 500;
+	switch (bytes_read) {
+		case -1:
+			std::cerr << "Reading infile fd " << m_readfd << " failed!\n";
+			return 500;
+		default:
+			addToBody(buf, bytes_read);
 	}
-	buf[bytes_read] = 0;
-	addToBody(buf, bytes_read);
 
 	close(m_readfd);
-
 	return 200;
 }
 
@@ -196,21 +190,16 @@ void Response::getFirstCGIChunk() {
 void Response::wrapChunkInChunkedEncoding() {
 	// TODO: it might be slow to prepend the chunk with the size and CRLF. The old implementation is faster, but this
 	// one is more modular.
-	std::stringstream ss;
-
-	ss.seekp(std::ios::beg);
-	ss << std::hex << m_chunk.length();
-	m_chunk = ss.str() + CRLF + m_chunk + CRLF;
+	m_chunk.insert(0, toHex(m_chunk.length()) + CRLF);
+	m_chunk += CRLF;
+	std::cout << m_chunk << std::endl;
 }
 
 std::string& Response::getNextChunk() {
-	static char buf[CHUNK_MAX_LENGTH];
-	ssize_t		bytes_read;
-
-	if (m_isFinalChunk)
+	if (m_isFinalChunk || m_chunk.size() > BUFFER_SIZE)
 		return m_chunk;
 
-	bytes_read = read(m_readfd, buf, CHUNK_MAX_LENGTH - m_chunk.size()); // Read as much space as available
+	ssize_t bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size()); // Read as much data as available
 	switch (bytes_read) {
 		case -1:
 			perror("open");
