@@ -200,33 +200,6 @@ std::string Response::wrapStringInChunkedEncoding(std::string& str) {
 	return toHex(str.length()) + CRLF + str + CRLF;
 }
 
-// this reads CHUNK_MAX_LENGTH - m_chunk.size() from a file and returns it.
-// It has to be modified before put into a chunked response
-std::string& Response::getNextFileChunk() {
-	if (m_isFinalChunk || m_chunk.size() > BUFFER_SIZE)
-		return m_chunk;
-
-	ssize_t bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size()); // Read as much data as available
-	switch (bytes_read) {
-		case -1:
-			perror("read");
-			m_isFinalChunk = true;
-			close(m_readfd);
-			break;
-		case 0:
-			m_chunk		   = "0" CRLF CRLF;
-			m_isFinalChunk = true;
-			close(m_readfd);
-			break;
-		default:
-			m_chunk += toHex(bytes_read) + CRLF;
-			m_chunk.append(buf, bytes_read);
-			m_chunk += CRLF;
-			break;
-	}
-	return m_chunk;
-}
-
 std::string Response::readBlockFromFile() {
 	ssize_t bytes_read;
 
