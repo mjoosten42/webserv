@@ -35,8 +35,6 @@ class Response: public HTTP {
 
 		std::string getStatusLine() const;
 		std::string getStatusMessage() const;
-		std::string getHeadersAsString() const;
-		std::string getResponseHeadersAsString() const;
 		std::string getResponseAsString();
 
 		void handleGet();
@@ -50,7 +48,6 @@ class Response: public HTTP {
 
 		std::string	 readBlockFromFile();
 		void		 getCGIHeaderChunk();
-		std::string& getNextFileChunk();
 
 	public:
 		int m_statusCode;
