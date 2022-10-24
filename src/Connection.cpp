@@ -44,9 +44,9 @@ void Connection::receiveFromClient(short& events) {
 //  Send data back to a client
 //  This should only be called if POLLOUT is set
 void Connection::sendToClient(short& events) {
-	Response  & response   = m_responses.front();
-	std::string str		   = response.getNextChunk();
-	ssize_t		bytes_sent = send(m_fd, str.c_str(), str.length(), 0);
+	Response   & response	= m_responses.front();
+	std::string& str		= response.getNextChunk();
+	ssize_t		 bytes_sent = send(m_fd, str.c_str(), str.length(), 0);
 
 	std::cout << RED "Send: " DEFAULT << bytes_sent << std::endl;
 	switch (bytes_sent) {
