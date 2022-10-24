@@ -61,15 +61,6 @@ std::string Response::getStatusLine() const {
 	return "HTTP/1.1 " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
 }
 
-// returns a string with the status line and headers.
-std::string Response::getResponseHeadersAsString() const {
-	std::string response;
-
-	response += getStatusLine();
-	response += getHeadersAsString();
-	return response;
-}
-
 //  Returns the response as a string to send over a socket. When there is a body present,
 //  the body is amended automatically and Content-Length is calculated.
 std::string Response::getResponseAsString() {
@@ -78,20 +69,12 @@ std::string Response::getResponseAsString() {
 	if (!hasHeader("Transfer-Encoding"))
 		addHeader("Content-Length", toString(m_body.length()));
 
-	response += getResponseHeadersAsString();
+	response += getStatusLine();
+	response += getHeadersAsString();
 	response += CRLF;
 	response += getBody();
 
 	return (response);
-}
-
-std::string Response::getHeadersAsString() const {
-	std::map<std::string, std::string>::const_iterator it;
-	std::string										   headers;
-
-	for (it = m_headers.begin(); it != m_headers.end(); it++)
-		headers += it->first + ": " + it->second + CRLF;
-	return headers;
 }
 
 void Response::initDefaultHeaders() {

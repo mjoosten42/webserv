@@ -40,3 +40,12 @@ bool HTTP::hasHeader(const std::string& field) const {
 std::string HTTP::getHeaderValue(const std::string& field) {
 	return m_headers.find(field)->second;
 }
+
+std::string HTTP::getHeadersAsString() const {
+	std::map<std::string, std::string>::const_iterator it;
+	std::string										   headers;
+
+	for (it = m_headers.begin(); it != m_headers.end(); it++)
+		headers += it->first + ": " + it->second + CRLF;
+	return headers;
+}

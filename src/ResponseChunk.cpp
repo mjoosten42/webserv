@@ -77,7 +77,7 @@ void Response::handleGet() {
 		m_readfd					   = m_cgi.popen.readfd;
 		m_isCGIProcessingHeaders	   = true;
 
-		m_chunk = getResponseHeadersAsString();
+		m_chunk = getResponseAsString();
 
 	} else {
 		m_statusCode = handleGetWithStaticFile();
@@ -193,7 +193,7 @@ void Response::getCGIHeaderChunk() {
 
 std::string& Response::getNextChunk() {
 
-	if (m_isFinalChunk)
+	if (m_isFinalChunk || m_chunk.size() > BUFFER_SIZE)
 		return m_chunk;
 
 	if (m_isCGIProcessingHeaders) {
@@ -211,20 +211,17 @@ std::string Response::wrapStringInChunkedEncoding(std::string& str) {
 }
 
 std::string Response::readBlockFromFile() {
-	ssize_t bytes_read;
-
-	// if the chunk is already bigger than the max length, don't read.
-	if (m_chunk.size() >= BUFFER_SIZE)
-		return m_chunk;
-
-	bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
+	std::string	block;
+	ssize_t bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
 	switch (bytes_read) {
 		case -1:
 			perror("read");
 		case 0:
 			m_isFinalChunk = true;
 			close(m_readfd);
+			break ;
 		default:
-			return std::string(buf, bytes_read);
+			block.append(buf, bytes_read);
 	}
+	return block;
 }
