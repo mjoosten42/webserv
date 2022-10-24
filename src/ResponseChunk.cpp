@@ -77,7 +77,7 @@ void Response::handleGet() {
 		m_readfd					   = m_cgi.popen.readfd;
 		m_isCGIProcessingHeaders	   = true;
 
-		m_chunk = getResponseAsString();
+		m_chunk = getStatusLine() + getHeadersAsString();
 
 	} else {
 		m_statusCode = handleGetWithStaticFile();
