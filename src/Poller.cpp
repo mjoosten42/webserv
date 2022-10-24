@@ -76,7 +76,7 @@ void Poller::removeClient(int i) {
 	int fd = m_pollfds[i].fd;
 
 	m_pollfds.erase(m_pollfds.begin() + i); //  erase from pollfd vector
-	m_connections.erase(m_pollfds[i].fd);	//  erase from connection map
+	m_connections.erase(fd);				//  erase from connection map
 
 	if (close(fd) == -1)
 		fatal_perror("close");
