@@ -16,6 +16,7 @@ class HTTP {
 		bool hasHeader(const std::string& field) const;
 
 		std::string getHeaderValue(const std::string& field);
+		std::string getHeadersAsString() const;
 
 		void clear();
 

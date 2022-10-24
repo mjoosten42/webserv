@@ -1,4 +1,5 @@
 SOURCES = \
+	src/buf.cpp \
 	src/CGI.cpp \
 	src/Config/CheckValidity.cpp \
 	src/Config/DebugPrint.cpp \

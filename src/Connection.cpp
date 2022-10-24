@@ -46,7 +46,7 @@ void Connection::receiveFromClient(short& events) {
 void Connection::sendToClient(short& events) {
 	Response   & response	= m_responses.front();
 	std::string& str		= response.getNextChunk();
-	ssize_t		 bytes_sent = send(m_fd, str.c_str(), str.length(), 0);
+	ssize_t		 bytes_sent = send(m_fd, str.data(), str.length(), 0);
 
 	std::cout << RED "Send: " DEFAULT << bytes_sent << std::endl;
 	switch (bytes_sent) {

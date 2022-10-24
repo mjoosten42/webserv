@@ -39,7 +39,7 @@ void Response::sendFail(int code, const std::string& msg) {
 		handleGetWithStaticFile(file);
 		return;
 	}
-	initDefaultHeaders();
+	addDefaultHeaders();
 	addHeader("Content-Type", "text/html");
 
 	addToBody("<h1>" + toString(code) + " " + getStatusMessage() + "</h1>\r\n");
@@ -51,7 +51,7 @@ void Response::sendFail(int code, const std::string& msg) {
 
 void Response::sendMoved(const std::string& location) {
 	clear(); //  <!-- TODO, also add default server
-	initDefaultHeaders();
+	addDefaultHeaders();
 	m_statusCode			  = 301;
 	m_headers["Location"]	  = location;
 	m_headers["Connection"]	  = "Close";
@@ -66,7 +66,7 @@ void Response::sendMoved(const std::string& location) {
 
 void Response::handleGet() {
 
-	initDefaultHeaders();
+	addDefaultHeaders();
 	if (m_isCGI) {
 		// TODO: parse from config
 		m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
@@ -77,7 +77,7 @@ void Response::handleGet() {
 		m_readfd					   = m_cgi.popen.readfd;
 		m_isCGIProcessingHeaders	   = true;
 
-		m_chunk = getResponseHeadersAsString();
+		m_chunk = getStatusLine() + getHeadersAsString();
 
 	} else {
 		m_statusCode = handleGetWithStaticFile();
@@ -94,7 +94,7 @@ void Response::handlePost() {
 	m_readfd = open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (m_readfd < 0)
 		perror("open");
-	bytes_written = write(m_readfd, m_request.getBody().c_str(), m_request.getBody().length());
+	bytes_written = write(m_readfd, m_request.getBody().data(), m_request.getBody().length());
 	close(m_readfd);
 
 	m_request.cut(bytes_written);
@@ -164,12 +164,11 @@ int Response::addSingleFileToBody() {
 
 	switch (bytes_read) {
 		case -1:
-			std::cerr << "Reading infile fd " << m_readfd << " failed!\n";
+			perror("read");
 			return 500;
 		default:
 			addToBody(buf, bytes_read);
 	}
-
 	close(m_readfd);
 	return 200;
 }
@@ -180,20 +179,20 @@ void Response::getCGIHeaderChunk() {
 
 	// TODO: fix newlines, might be CRLF
 	// NOTE: WILL NOT WORK WITH BUFSIZE == 1
-	size_t loc = block.find_first_of("\n\n"); // end of the headers
-	if (loc == std::string::npos) {
+	size_t pos = block.find_first_of("\n\n"); // end of the headers
+	if (pos == std::string::npos) {
 		m_chunk += block;
 	} else {
 		m_isCGIProcessingHeaders = false;
-		std::string headers		 = block.substr(0, loc + 2);
-		block					 = block.substr(loc + 2);
+		std::string headers		 = block.substr(0, pos + 2);
+		block					 = block.substr(pos + 2);
 		m_chunk += headers + wrapStringInChunkedEncoding(block);
 	}
 }
 
 std::string& Response::getNextChunk() {
 
-	if (m_isFinalChunk)
+	if (m_isFinalChunk || m_chunk.size() > BUFFER_SIZE)
 		return m_chunk;
 
 	if (m_isCGIProcessingHeaders) {
@@ -210,48 +209,18 @@ std::string Response::wrapStringInChunkedEncoding(std::string& str) {
 	return toHex(str.length()) + CRLF + str + CRLF;
 }
 
-// this reads CHUNK_MAX_LENGTH - m_chunk.size() from a file and returns it.
-// It has to be modified before put into a chunked response
-std::string& Response::getNextFileChunk() {
-	if (m_isFinalChunk || m_chunk.size() > BUFFER_SIZE)
-		return m_chunk;
-
-	ssize_t bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size()); // Read as much data as available
-	switch (bytes_read) {
-		case -1:
-			perror("read");
-			m_isFinalChunk = true;
-			close(m_readfd);
-			break;
-		case 0:
-			m_chunk		   = "0" CRLF CRLF;
-			m_isFinalChunk = true;
-			close(m_readfd);
-			break;
-		default:
-			m_chunk += toHex(bytes_read) + CRLF;
-			m_chunk.append(buf, bytes_read);
-			m_chunk += CRLF;
-			break;
-	}
-	return m_chunk;
-}
-
 std::string Response::readBlockFromFile() {
-	ssize_t bytes_read;
-
-	// if the chunk is already bigger than the max length, don't read.
-	if (m_chunk.size() >= BUFFER_SIZE)
-		return m_chunk;
-
-	bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
+	std::string block;
+	ssize_t		bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
 	switch (bytes_read) {
 		case -1:
 			perror("read");
 		case 0:
 			m_isFinalChunk = true;
 			close(m_readfd);
+			break;
 		default:
-			return std::string(buf, bytes_read);
+			block.append(buf, bytes_read);
 	}
+	return block;
 }

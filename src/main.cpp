@@ -44,9 +44,6 @@ static void initListeners(ConfigParser& config, std::vector<Listener>& listeners
 	}
 }
 
-// Global buffer
-char buf[BUFFER_SIZE] = { 0 };
-
 int main(int argc, char *argv[]) {
 	ConfigParser config;
 	if (argc == 2)
