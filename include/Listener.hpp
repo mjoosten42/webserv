@@ -14,7 +14,7 @@ class Listener {
 		~Listener();
 
 		void		  addServer(const Server server);
-		const Server &getServerByHost(const std::string& host) const;
+		const Server& getServerByHost(const std::string& host) const;
 
 		int				   getFD() const;
 		short			   getPort() const;
@@ -27,6 +27,6 @@ class Listener {
 		int									  m_fd;
 		std::string							  m_listenAddr; // aka Host
 		short								  m_port;
-		std::vector<Server>			  m_servers;
-		std::map<std::string, const Server*> m_hostToServer;
+		std::vector<Server>					  m_servers;
+		std::map<std::string, const Server *> m_hostToServer;
 };

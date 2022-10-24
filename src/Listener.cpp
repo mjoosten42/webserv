@@ -28,7 +28,7 @@ void Listener::addServer(const Server server) {
 
 const Server& Listener::getServerByHost(const std::string& host) const {
 	//  try to find it. Otherwise, use the first server.
-	std::map<std::string, const Server*>::const_iterator it = m_hostToServer.find(host);
+	std::map<std::string, const Server *>::const_iterator it = m_hostToServer.find(host);
 	if (it != m_hostToServer.end())
 		return *(it->second);
 	return m_servers.front();
