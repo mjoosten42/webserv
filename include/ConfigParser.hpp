@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Listener.hpp"
 #include <string>
 #include <vector>
 
@@ -75,4 +74,5 @@ class ConfigParser {
 };
 
 // Initialising of Listeners based on config:
+class Listener;
 void initFromConfig(ConfigParser& config, std::vector<Listener>& listeners);
