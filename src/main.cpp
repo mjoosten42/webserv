@@ -43,9 +43,6 @@ static void initListeners(std::vector<Server>& servers, std::vector<Listener>& l
 	}
 }
 
-// Global buffer
-char buf[BUFFER_SIZE] = { 0 };
-
 int main(int argc, char *argv[]) {
 	ConfigParser config;
 	if (argc == 2)
