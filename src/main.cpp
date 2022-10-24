@@ -28,7 +28,8 @@ static Listener *getListenerByHostPort(std::vector<Listener>& listeners, const s
 	return NULL;
 }
 
-static void initListeners(std::vector<Server>& servers, std::vector<Listener>& listeners) {
+static void initListeners(ConfigParser& config, std::vector<Listener>& listeners) {
+	std::vector<Server> servers = initServers(config);
 
 	for (std::vector<Server>::const_iterator it = servers.begin(); it != servers.end(); it++) {
 
@@ -39,7 +40,7 @@ static void initListeners(std::vector<Server>& servers, std::vector<Listener>& l
 			listener = &listeners.back();
 		}
 
-		listener->addServer(&*it);
+		listener->addServer(*it);
 	}
 }
 
@@ -53,11 +54,8 @@ int main(int argc, char *argv[]) {
 	else
 		config.parse_config("default.conf");
 
-	//  Will be moved somewhere, don't know where would be nicest yet.
-	std::vector<Server> servers = initServers(config);
-
 	std::vector<Listener> listeners;
-	initListeners(servers, listeners);
+	initListeners(config, listeners);
 
 	Poller poller(listeners.begin(), listeners.end());
 
