@@ -16,7 +16,7 @@ Server::Server() {
 	m_port					= 8080;
 	m_name					= "webserv.com"; //  Nginx default = ""
 	m_root					= "html";
-	m_error_page[ERROR_404] = "404.html";
+	m_error_page[404] = "404.html";
 
 	Location location = Location();
 	m_locations.push_back(location);
@@ -50,7 +50,7 @@ Server::Server(t_block_directive *constructor_specs) {
 	if (!val_from_config.empty())
 		m_root = val_from_config;
 
-	m_error_page[ERROR_404] = "404.html"; //	Our default 404 error page
+	m_error_page[404] = "404.html"; //	Our default 404 error page
 
 	val_from_config								= constructor_specs->fetch_simple("error_page");
 	std::vector<std::string>		   pages	= stringSplit(val_from_config);
@@ -59,18 +59,12 @@ Server::Server(t_block_directive *constructor_specs) {
 		error_it++;
 		if (error_it == pages.end())
 			break;
-		int test = open((*error_it).c_str(), O_RDONLY);
-		if (test == -1)
+		int user_defined_page = open((*error_it).c_str(), O_RDONLY);
+		if (user_defined_page == -1)
 			break;
-		close(test);
-		test = stoi(*(error_it - 1));
-		switch (test) {
-			case (404):
-				m_error_page[ERROR_404] = *error_it;
-				break;
-			default:
-				break;
-		}
+		close(user_defined_page);
+		user_defined_page = stoi(*(error_it - 1)); // TODO:: check this for non numeric values
+		m_error_page[user_defined_page] = *error_it;
 		error_it++;
 	}
 
