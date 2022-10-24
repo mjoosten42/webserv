@@ -10,6 +10,7 @@
 #include <unistd.h> // lseek
 
 void Response::processRequest() {
+	checkWhetherCGI();
 	switch (m_request.getMethod()) {
 		case GET:
 			handleGet();
@@ -24,22 +25,11 @@ void Response::processRequest() {
 	}
 }
 
-void Response::checkWetherCGI() {
+void Response::checkWhetherCGI() {
 	// TODO
 	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php");
 	// std::cout << "doing CGI: " << m_isCGI << "\n";
 }
-
-// bool Response::processNextChunk() {
-// 	if (!m_hasStartedSending) {
-// 		checkWetherCGI();
-// 		handle();
-// 		m_hasStartedSending = true;
-// 	} else {
-// 		getNextChunk();
-// 	}
-// 	return m_isFinalChunk;
-// }
 
 void Response::sendFail(int code, const std::string& msg) {
 	m_statusCode = code;
@@ -74,10 +64,16 @@ void Response::handleGet() {
 	initDefaultHeaders();
 	if (m_isCGI) {
 		// TODO: parse from config
-		m_statusCode = m_cgi.start("/usr/bin/perl", "printenv.pl");
+		m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
+
+		// wait(nullptr);
 
 		m_headers["Transfer-Encoding"] = "Chunked";
 		m_readfd					   = m_cgi.popen.readfd;
+		m_isCGIProcessingHeaders	   = true;
+
+		m_chunk = getResponseHeadersAsString();
+
 	} else {
 		m_statusCode = handleGetWithStaticFile();
 	}
@@ -128,6 +124,7 @@ bool Response::isDone() const {
 	return m_isFinalChunk;
 }
 
+// gets the first chunk of a static file
 int Response::getFirstChunk() {
 	off_t size = lseek(m_readfd, 0, SEEK_END);
 	int	  ret;
@@ -167,42 +164,52 @@ int Response::addSingleFileToBody() {
 	return 200;
 }
 
-void Response::getFirstCGIChunk() {
-	// readBlockFromFile();
-	size_t loc = m_chunk.find_first_of("\n\n"); // end of the headers
+void Response::getCGIHeaderChunk() {
+
+	std::string block = readBlockFromFile();
+
+	// TODO: fix newlines, might be CRLF
+	// NOTE: WILL NOT WORK WITH BUFSIZE == 1
+	size_t loc = block.find_first_of("\n\n"); // end of the headers
 	if (loc == std::string::npos) {
-		sendFail(501, "Could not find headers in CGI response");
-		return;
+		m_chunk += block;
+	} else {
+		m_isCGIProcessingHeaders = false;
+		std::string headers		 = block.substr(0, loc + 2);
+		block					 = block.substr(loc + 2);
+		m_chunk += headers + wrapStringInChunkedEncoding(block);
 	}
-
-	std::string headers = m_chunk.substr(0, loc + 2);
-	m_chunk				= m_chunk.substr(loc + 2);
-	wrapChunkInChunkedEncoding();
-	m_chunk = headers + m_chunk;
-}
-
-// void Response::getNextChunk() {
-
-// 	readBlockFromFile();
-// 	wrapChunkInChunkedEncoding();
-// }
-
-void Response::wrapChunkInChunkedEncoding() {
-	// TODO: it might be slow to prepend the chunk with the size and CRLF. The old implementation is faster, but this
-	// one is more modular.
-	m_chunk.insert(0, toHex(m_chunk.length()) + CRLF);
-	m_chunk += CRLF;
-	std::cout << m_chunk << std::endl;
 }
 
 std::string& Response::getNextChunk() {
+
+	if (m_isFinalChunk)
+		return m_chunk;
+
+	if (m_isCGIProcessingHeaders) {
+		getCGIHeaderChunk();
+		return m_chunk;
+	}
+
+	std::string block = readBlockFromFile();
+	m_chunk += wrapStringInChunkedEncoding(block);
+	return m_chunk;
+}
+
+std::string Response::wrapStringInChunkedEncoding(std::string& str) {
+	return toHex(str.length()) + CRLF + str + CRLF;
+}
+
+// this reads CHUNK_MAX_LENGTH - m_chunk.size() from a file and returns it.
+// It has to be modified before put into a chunked response
+std::string& Response::getNextFileChunk() {
 	if (m_isFinalChunk || m_chunk.size() > BUFFER_SIZE)
 		return m_chunk;
 
 	ssize_t bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size()); // Read as much data as available
 	switch (bytes_read) {
 		case -1:
-			perror("open");
+			perror("read");
 			m_isFinalChunk = true;
 			close(m_readfd);
 			break;
@@ -217,6 +224,24 @@ std::string& Response::getNextChunk() {
 			m_chunk += CRLF;
 			break;
 	}
-
 	return m_chunk;
+}
+
+std::string Response::readBlockFromFile() {
+	ssize_t bytes_read;
+
+	// if the chunk is already bigger than the max length, don't read.
+	if (m_chunk.size() >= BUFFER_SIZE)
+		return m_chunk;
+
+	bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
+	switch (bytes_read) {
+		case -1:
+			perror("read");
+		case 0:
+			m_isFinalChunk = true;
+			close(m_readfd);
+		default:
+			return std::string(buf, bytes_read);
+	}
 }

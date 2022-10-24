@@ -88,6 +88,7 @@ int Request::parse() {
 	return 200;
 }
 
+// TODO: unit test this
 int Request::parseStartLine(const std::string& line) {
 	std::istringstream ss(line);
 	std::string		   word;
@@ -108,7 +109,7 @@ int Request::parseStartLine(const std::string& line) {
 	size_t questionMarkPos = m_location.find('?');
 	if (questionMarkPos != std::string::npos) {
 		m_queryString = m_location.substr(questionMarkPos + 1);
-		m_location.erase(m_location.begin() + questionMarkPos);
+		m_location.erase(m_location.begin() + questionMarkPos, m_location.end());
 	}
 
 	word.clear();

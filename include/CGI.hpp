@@ -3,8 +3,9 @@
 #include <string>
 #include <unistd.h> // pid_t, close, pipe, fork etc.
 
-class Response;
 class EnvironmentMap;
+class Request;
+class Server;
 
 struct Popen {
 		pid_t pid;
@@ -22,16 +23,16 @@ struct Popen {
 
 class CGI {
 	public:
-		CGI(Response& response);
+		CGI();
 		~CGI();
 		CGI& operator=(const CGI& other);
 
-		int start(const std::string& command, const std::string& filename);
+		int start(const Request	   & request,
+				  const Server		*server,
+				  const std::string& command,
+				  const std::string& filename);
 		// TODO: how to close readfd?
 
 	public:
 		Popen popen;
-
-	private:
-		Response& m_response;
 };

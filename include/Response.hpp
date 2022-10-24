@@ -27,13 +27,16 @@ class Response: public HTTP {
 		void clear();
 
 	private:
-		void checkWetherCGI();
+		static std::string wrapStringInChunkedEncoding(std::string& str);
+
+		void checkWhetherCGI();
 
 		void initDefaultHeaders();
 
 		std::string getStatusLine() const;
 		std::string getStatusMessage() const;
 		std::string getHeadersAsString() const;
+		std::string getResponseHeadersAsString() const;
 		std::string getResponseAsString();
 
 		void handleGet();
@@ -42,11 +45,12 @@ class Response: public HTTP {
 		void sendFail(int code, const std::string& msg);
 		void sendMoved(const std::string& location);
 
-		int	 getFirstChunk();
-		int	 addSingleFileToBody();
-		void wrapChunkInChunkedEncoding();
+		int getFirstChunk();
+		int addSingleFileToBody();
 
-		void getFirstCGIChunk();
+		std::string	 readBlockFromFile();
+		void		 getCGIHeaderChunk();
+		std::string& getNextFileChunk();
 
 	public:
 		int m_statusCode;
@@ -60,6 +64,8 @@ class Response: public HTTP {
 		const Server *m_server;
 		int m_readfd; //  the fd of the file to read. The methods who return the chunks are responsible for closing the
 					  //  file in time.
-		bool m_isFinalChunk; //  true if every chunk has been read.
-		bool m_isCGI;
+		bool m_isFinalChunk;		   //  true if every chunk has been read.
+		bool m_isCGI;				   // true if it is a CGI request, as filled in by checkWetherCGI()
+		bool m_isCGIProcessingHeaders; // true if it is still parsing the headers back from the CGI and not yet in CGI
+									   // chunked sending mode.
 };
