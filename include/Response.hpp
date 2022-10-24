@@ -41,7 +41,7 @@ class Response: public HTTP {
 
 		void handleGet();
 		void handlePost();
-		int	 handleGetWithStaticFile();
+		int	 handleGetWithStaticFile(std::string file = "");
 		void sendFail(int code, const std::string& msg);
 		void sendMoved(const std::string& location);
 
