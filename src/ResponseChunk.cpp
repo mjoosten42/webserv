@@ -68,10 +68,14 @@ void Response::handleGet() {
 		// TODO: parse from config
 		m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
 
+		// wait(nullptr);
+
 		m_headers["Transfer-Encoding"] = "Chunked";
 		m_readfd					   = m_cgi.popen.readfd;
+		m_isCGIProcessingHeaders	   = true;
 
-		getFirstCGIChunk();
+		m_chunk = getResponseHeadersAsString();
+
 	} else {
 		m_statusCode = handleGetWithStaticFile();
 	}
@@ -124,6 +128,7 @@ bool Response::isDone() const {
 	return m_isFinalChunk;
 }
 
+// gets the first chunk of a static file
 int Response::getFirstChunk() {
 	off_t size = lseek(m_readfd, 0, SEEK_END);
 	int	  ret;
@@ -165,27 +170,31 @@ int Response::addSingleFileToBody() {
 	return 200;
 }
 
-void Response::getFirstCGIChunk() {
+void Response::getCGIHeaderChunk() {
 
-	// TODO: fix this. It'll hang on read. Besides, we shouldn't read at this point.
 	std::string block = readBlockFromFile();
 
 	// TODO: fix newlines, might be CRLF
+	// NOTE: WILL NOT WORK WITH BUFSIZE == 1
 	size_t loc = block.find_first_of("\n\n"); // end of the headers
 	if (loc == std::string::npos) {
-		sendFail(501, "Could not find headers in CGI response");
-		return;
+		m_chunk += block;
+	} else {
+		m_isCGIProcessingHeaders = false;
+		std::string headers		 = block.substr(0, loc + 2);
+		block					 = block.substr(loc + 2);
+		m_chunk += headers + wrapStringInChunkedEncoding(block);
 	}
-
-	std::string headers = block.substr(0, loc + 2);
-	block				= block.substr(loc + 2);
-	m_chunk				= headers + wrapStringInChunkedEncoding(block);
 }
 
 std::string& Response::getNextChunk() {
 
 	if (m_isFinalChunk)
 		return m_chunk;
+	else if (m_isCGIProcessingHeaders) {
+		getCGIHeaderChunk();
+		return m_chunk;
+	}
 
 	std::string block = readBlockFromFile();
 	m_chunk += wrapStringInChunkedEncoding(block);
@@ -206,6 +215,9 @@ std::string Response::readBlockFromFile() {
 	std::string ret;
 	ssize_t		size;
 
+	// if the chunk is already bigger than the max length, don't read.
+	if (m_chunk.size() >= CHUNK_MAX_LENGTH)
+		return ret;
 	size = read(m_readfd, buf, CHUNK_MAX_LENGTH - m_chunk.size());
 
 	if (size <= 0) {

@@ -27,7 +27,10 @@ class CGI {
 		~CGI();
 		CGI& operator=(const CGI& other);
 
-		int start(const Request& request, const Server* server, const std::string& command, const std::string& filename);
+		int start(const Request	   & request,
+				  const Server	   *server,
+				  const std::string& command,
+				  const std::string& filename);
 		// TODO: how to close readfd?
 
 	public:

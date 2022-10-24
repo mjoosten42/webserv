@@ -73,24 +73,24 @@ CGI::~CGI() {}
 // THIS SHOULD NEVER BE USED!
 CGI& CGI::operator=(const CGI& other) {
 	std::cerr << "**** CGI = OPERATOR CALLED, SHOULD NOT BE CALLED!\n";
-	popen	   = other.popen;
+	popen = other.popen;
 	exit(EXIT_FAILURE);
 	return *this;
 }
 
 // TODO: Set correct path
 //  TODO: handle like a "downloaded" file
-int CGI::start(const Request& req, const Server* server, const std::string& command, const std::string& filename) {
+int CGI::start(const Request& req, const Server *server, const std::string& command, const std::string& filename) {
 
 	EnvironmentMap em;
 	em.initFromEnviron();
 
 	//  TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
 	em["SERVER_SOFTWARE"] = server->getName();
-	em["SERVER_NAME"]	 = req.getHost();
-	em["REQUEST_METHOD"] = req.getMethodAsString();
-	em["PATH_INFO"]		 = req.getLocation();
-	em["QUERY_STRING"]	 = req.getQueryString();
+	em["SERVER_NAME"]	  = req.getHost();
+	em["REQUEST_METHOD"]  = req.getMethodAsString();
+	em["PATH_INFO"]		  = req.getLocation();
+	em["QUERY_STRING"]	  = req.getQueryString();
 
 	return popen.my_popen(command, filename, em);
 }
