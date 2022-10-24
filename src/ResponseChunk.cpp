@@ -211,15 +211,15 @@ std::string Response::wrapStringInChunkedEncoding(std::string& str) {
 }
 
 std::string Response::readBlockFromFile() {
-	std::string	block;
-	ssize_t bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
+	std::string block;
+	ssize_t		bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
 	switch (bytes_read) {
 		case -1:
 			perror("read");
 		case 0:
 			m_isFinalChunk = true;
 			close(m_readfd);
-			break ;
+			break;
 		default:
 			block.append(buf, bytes_read);
 	}
