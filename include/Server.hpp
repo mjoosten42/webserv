@@ -20,8 +20,8 @@ class Server {
 		const std::string			  & getHost() const;
 		const std::vector<std::string>& getNames() const;
 
-		const int& getCMB() const;
-		short	   getPort() const;
+		const int						& getCMB() const;
+		short							  getPort() const;
 		const std::map<int, std::string>& getErrorPages() const;
 
 	private:

@@ -34,8 +34,7 @@ void Response::checkWhetherCGI() {
 
 void Response::sendFail(int code, const std::string& msg) {
 	m_statusCode = code;
-	if (m_server->getErrorPages().find(code) != m_server->getErrorPages().end())
-	{
+	if (m_server->getErrorPages().find(code) != m_server->getErrorPages().end()) {
 		std::string file = m_server->getErrorPages().at(code);
 		handleGetWithStaticFile(file);
 		return;
@@ -110,7 +109,7 @@ int Response::handleGetWithStaticFile(std::string file) {
 	std::string filename = m_server->getRoot() + m_request.getLocation();
 	if (!file.empty())
 		filename = file;
-		// filename = m_server->getRoot() + "/" + file;
+	// filename = m_server->getRoot() + "/" + file;
 	print("Handle static: " + filename);
 
 	m_readfd = open(filename.c_str(), O_RDONLY);

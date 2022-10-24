@@ -12,10 +12,10 @@
 #include <unistd.h> // close
 
 Server::Server() {
-	m_host					= "localhost";
-	m_port					= 8080;
-	m_name					= "webserv.com"; //  Nginx default = ""
-	m_root					= "html";
+	m_host = "localhost";
+	m_port = 8080;
+	m_name = "webserv.com"; //  Nginx default = ""
+	m_root = "html";
 	// m_error_page[404] = "./html/404.html";
 
 	Location location = Location();
@@ -62,13 +62,12 @@ Server::Server(t_block_directive *constructor_specs) {
 		std::string full_path = m_root + "/" + *error_it;
 		// print("Checking user-defined error page: " + full_path);
 		int user_defined_page = open((full_path).c_str(), O_RDONLY);
-		if (user_defined_page == -1){
+		if (user_defined_page == -1) {
 			std::cerr << RED << "WARNING: The custom error pages have ";
 			std::cerr << "been incorrectly configured." << DEFAULT << std::endl;
-		}
-		else
+		} else
 			close(user_defined_page);
-		user_defined_page = stoi(*(error_it - 1)); // TODO:: check this for non numeric values
+		user_defined_page				= stoi(*(error_it - 1)); // TODO:: check this for non numeric values
 		m_error_page[user_defined_page] = full_path;
 		error_it++;
 	}
