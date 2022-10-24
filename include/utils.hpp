@@ -83,6 +83,8 @@ T stringToIntegral(const std::string& number) {
 	std::stringstream ss(number);
 	T				  value;
 
+	if (number.empty())
+		return T();
 	ss >> value;
 	return value;
 }

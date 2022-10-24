@@ -32,7 +32,13 @@ const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMes
 //  perhaps just loop over the survurs and check hostname/port?
 
 Response::Response():
-	HTTP(), m_statusCode(200), m_cgi(*this), m_server(NULL), m_readfd(-1), m_isFinalChunk(false), m_isCGI(false) {}
+	HTTP(),
+	m_statusCode(200),
+	m_server(NULL),
+	m_readfd(-1),
+	m_isFinalChunk(false),
+	m_isCGI(false),
+	m_isCGIProcessingHeaders(false) {}
 
 void Response::clear() {
 	HTTP::clear();
@@ -55,15 +61,24 @@ std::string Response::getStatusLine() const {
 	return "HTTP/1.1 " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
 }
 
+// returns a string with the status line and headers.
+std::string Response::getResponseHeadersAsString() const {
+	std::string response;
+
+	response += getStatusLine();
+	response += getHeadersAsString();
+	return response;
+}
+
 //  Returns the response as a string to send over a socket. When there is a body present,
 //  the body is amended automatically and Content-Length is calculated.
 std::string Response::getResponseAsString() {
 	std::string response;
 
-	addHeader("Content-Length", toString(m_body.length()));
+	if (!hasHeader("Transfer-Encoding"))
+		addHeader("Content-Length", toString(m_body.length()));
 
-	response += getStatusLine();
-	response += getHeadersAsString();
+	response += getResponseHeadersAsString();
 	response += CRLF;
 	response += getBody();
 

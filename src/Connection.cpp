@@ -1,6 +1,7 @@
 #include "Connection.hpp"
 
 #include "Listener.hpp"
+#include "buffer.hpp"
 #include "defines.hpp"
 #include "utils.hpp"
 
@@ -8,25 +9,20 @@
 #include <sys/socket.h> //recv, send
 #include <unistd.h>		// close
 
-#define RECV_BUF_SIZE 2048
-
 Connection::Connection(): m_fd(-1), m_listener(NULL) {}
 
 Connection::Connection(int m_fd, const Listener *listener): m_fd(m_fd), m_listener(listener) {}
 
 void Connection::receiveFromClient(short& events) {
-	static char buf[RECV_BUF_SIZE + 1];
-	ssize_t		bytes_received = recv(m_fd, buf, RECV_BUF_SIZE, 0);
+	ssize_t bytes_received = recv(m_fd, buf, BUFFER_SIZE, 0);
 
-	std::cout << "Received: " << bytes_received << "\n";
+	std::cout << RED "Received: " DEFAULT << bytes_received << std::endl;
 	switch (bytes_received) {
 		case -1:
 			fatal_perror("recv");
 		case 0:
 			break;
 		default:
-			buf[bytes_received] = 0;
-
 			std::cout << RED "----START BUF" << std::string(40, '-') << DEFAULT << std::endl;
 			std::cout << buf << std::endl;
 			std::cout << RED "----END BUF" << std::string(40, '-') << DEFAULT << std::endl;
@@ -34,7 +30,7 @@ void Connection::receiveFromClient(short& events) {
 			Response& response = getLastResponse();
 			Request & request  = response.getRequest();
 
-			request.add(buf);
+			request.append(buf, bytes_received);
 
 			if (request.getState() >= BODY) { // TODO: == BODY
 				std::cout << request << std::endl;
@@ -48,11 +44,11 @@ void Connection::receiveFromClient(short& events) {
 //  Send data back to a client
 //  This should only be called if POLLOUT is set
 void Connection::sendToClient(short& events) {
-	Response  & response   = m_responses.front();
-	std::string str		   = response.getNextChunk();
-	ssize_t		bytes_sent = send(m_fd, str.c_str(), str.length(), 0);
+	Response   & response	= m_responses.front();
+	std::string& str		= response.getNextChunk();
+	ssize_t		 bytes_sent = send(m_fd, str.c_str(), str.length(), 0);
 
-	std::cout << "Send: " << bytes_sent << "\n";
+	std::cout << RED "Send: " DEFAULT << bytes_sent << std::endl;
 	switch (bytes_sent) {
 		case -1:
 			fatal_perror("send"); // TODO

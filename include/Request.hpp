@@ -13,7 +13,7 @@ class Request: public HTTP {
 	public:
 		Request();
 
-		void add(const char *str);
+		void append(const char *buf, ssize_t size);
 		void cut(ssize_t len);
 
 		const std::string& getHost() const;

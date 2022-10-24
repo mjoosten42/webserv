@@ -1,6 +1,8 @@
 #include "ConfigParser.hpp"
 #include "Poller.hpp"
 #include "Server.hpp"
+#include "buffer.hpp"
+#include "defines.hpp"
 #include "utils.hpp"
 
 #include <vector>
@@ -41,14 +43,18 @@ static void initListeners(std::vector<Server>& servers, std::vector<Listener>& l
 	}
 }
 
+// Global buffer
+char buf[BUFFER_SIZE] = { 0 };
+
 int main(int argc, char *argv[]) {
 	ConfigParser config;
 	if (argc == 2)
 		config.parse_config(argv[1]);
 	else
 		config.parse_config("default.conf");
-	std::vector<Server> servers =
-		initServers(config); //  Will be moved somewhere, don't know where would be nicest yet.
+
+	//  Will be moved somewhere, don't know where would be nicest yet.
+	std::vector<Server> servers = initServers(config);
 
 	std::vector<Listener> listeners;
 	initListeners(servers, listeners);

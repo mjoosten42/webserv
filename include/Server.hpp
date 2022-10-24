@@ -25,12 +25,12 @@ class Server {
 		const std::map<int, std::string>& getErrorPages() const;
 
 	private:
-		std::vector<Location>	 m_locations;
-		std::string				 m_host;  // the IP address this server listens on. TODO: use inet_addr?
-		short					 m_port;  // port the server listens on
-		std::string				 m_name;  // the name of the server, as in the HTTP Server header. Ex. derp.
-		std::vector<std::string> m_names; // i.e. example.com www.example.com etc.
-		std::string				 m_root;
+		std::vector<Location>	   m_locations;
+		std::string				   m_host;	// the IP address this server listens on. TODO: use inet_addr?
+		short					   m_port;	// port the server listens on
+		std::string				   m_name;	// the name of the server, as in the HTTP Server header. Ex. derp.
+		std::vector<std::string>   m_names; // i.e. example.com www.example.com etc.
+		std::string				   m_root;
 		std::map<int, std::string> m_error_page;
-		int										   m_client_max_body_size;
+		int						   m_client_max_body_size;
 };

@@ -46,25 +46,26 @@ int Popen::my_popen(const std::string& path, const std::string& filename, const 
 	writefd = serverToCgi[1];
 
 	pid = fork();
-	if (pid == -1) {
-		closePipe(serverToCgi);
-		closePipe(cgiToServer);
-		return status;
-	} else if (pid == 0) {
-		close(serverToCgi[1]);
-		close(cgiToServer[0]);
-		if (my_exec(serverToCgi[0], cgiToServer[1], path, filename, em.toCharpp()) == false)
-			exit(EXIT_FAILURE);
-	} else {
-		close(serverToCgi[0]);
-		close(cgiToServer[1]);
+	switch (pid) {
+		case -1:
+			closePipe(serverToCgi);
+			closePipe(cgiToServer);
+			return status;
+		case 0:
+			close(serverToCgi[1]);
+			close(cgiToServer[0]);
+			if (my_exec(serverToCgi[0], cgiToServer[1], path, filename, em.toCharpp()) == false)
+				exit(EXIT_FAILURE);
+			break;
+		default:
+			close(serverToCgi[0]);
+			close(cgiToServer[1]);
 	}
 
-	status = 200;
-	return status;
+	return 200;
 }
 
-CGI::CGI(Response& response): m_response(response) {}
+CGI::CGI() {}
 
 CGI::~CGI() {}
 
@@ -73,28 +74,24 @@ CGI::~CGI() {}
 // THIS SHOULD NEVER BE USED!
 CGI& CGI::operator=(const CGI& other) {
 	std::cerr << "**** CGI = OPERATOR CALLED, SHOULD NOT BE CALLED!\n";
-	m_response = other.m_response;
-	popen	   = other.popen;
+	popen = other.popen;
 	exit(EXIT_FAILURE);
 	return *this;
 }
 
 // TODO: Set correct path
 //  TODO: handle like a "downloaded" file
-int CGI::start(const std::string& command, const std::string& filename) {
+int CGI::start(const Request& req, const Server *server, const std::string& command, const std::string& filename) {
 
-	Request	   & req = m_response.getRequest();
 	EnvironmentMap em;
 	em.initFromEnviron();
 
 	//  TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
-	// em["SERVER_SOFTWARE"] = m_response.getServer()->getName();
-	// std::cerr << m_response.getServer()->getName() << "\n";
-	// TODO: debug this. for some reason request is garbage?????
-	em["SERVER_NAME"]	 = req.getHost();
-	em["REQUEST_METHOD"] = req.getMethodAsString();
-	em["PATH_INFO"]		 = req.getLocation();
-	em["QUERY_STRING"]	 = req.getQueryString();
+	em["SERVER_SOFTWARE"] = server->getName();
+	em["SERVER_NAME"]	  = req.getHost();
+	em["REQUEST_METHOD"]  = req.getMethodAsString();
+	em["PATH_INFO"]		  = req.getLocation();
+	em["QUERY_STRING"]	  = req.getQueryString();
 
 	return popen.my_popen(command, filename, em);
 }

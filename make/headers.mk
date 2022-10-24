@@ -1,4 +1,5 @@
 HEADERS = \
+	include/buffer.hpp \
 	include/CGI.hpp \
 	include/ConfigParser.hpp \
 	include/Connection.hpp \

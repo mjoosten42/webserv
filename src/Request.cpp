@@ -21,8 +21,8 @@ std::size_t findNewline(const std::string& str);
 
 Request::Request(): m_state(STARTLINE), m_contentLength(0) {}
 
-void Request::add(const char *str) {
-	m_saved += str;
+void Request::append(const char *buf, ssize_t size) {
+	m_saved.append(buf, size);
 
 	parse(); // TODO: return error
 }
@@ -238,8 +238,8 @@ std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << RED "Location: " DEFAULT << request.getLocation() << std::endl;
 	if (!request.getQueryString().empty())
 		os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
-	if (!request.getHeaders().empty())
-		os << RED "Headers: {\n" DEFAULT << getStringMapAsString(request.getHeaders()) << RED << "}\n";
+	// if (!request.getHeaders().empty())
+	// 	os << RED "Headers: {\n" DEFAULT << getStringMapAsString(request.getHeaders()) << RED << "}\n";
 	os << RED "Host: " DEFAULT << request.getHost() << std::endl;
 	os << RED "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
 	if (!request.getBody().empty())

@@ -43,12 +43,12 @@ std::string& EnvironmentMap::operator[](const std::string& key) {
 
 //  returns a freeable null-terminated array of c strings to be used with execve().
 char **EnvironmentMap::toCharpp() const {
-	size_t size = m_map.size();
-	char **ret	= new char *[size + 1];
+	std::map<std::string, std::string>::const_iterator it;
+	char											 **ret = new char *[m_map.size() + 1];
 
 	size_t i = 0;
 
-	for (std::map<std::string, std::string>::const_iterator it = m_map.begin(); it != m_map.end(); it++, i++) {
+	for (it = m_map.begin(); it != m_map.end(); it++, i++) {
 		std::string entry = it->first + "=" + it->second;
 		ret[i]			  = strdup(entry.c_str());
 	}
