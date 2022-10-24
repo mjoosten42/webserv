@@ -39,7 +39,7 @@ void Response::sendFail(int code, const std::string& msg) {
 		handleGetWithStaticFile(file);
 		return;
 	}
-	initDefaultHeaders();
+	addDefaultHeaders();
 	addHeader("Content-Type", "text/html");
 
 	addToBody("<h1>" + toString(code) + " " + getStatusMessage() + "</h1>\r\n");
@@ -51,7 +51,7 @@ void Response::sendFail(int code, const std::string& msg) {
 
 void Response::sendMoved(const std::string& location) {
 	clear(); //  <!-- TODO, also add default server
-	initDefaultHeaders();
+	addDefaultHeaders();
 	m_statusCode			  = 301;
 	m_headers["Location"]	  = location;
 	m_headers["Connection"]	  = "Close";
@@ -66,7 +66,7 @@ void Response::sendMoved(const std::string& location) {
 
 void Response::handleGet() {
 
-	initDefaultHeaders();
+	addDefaultHeaders();
 	if (m_isCGI) {
 		// TODO: parse from config
 		m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
@@ -94,7 +94,7 @@ void Response::handlePost() {
 	m_readfd = open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (m_readfd < 0)
 		perror("open");
-	bytes_written = write(m_readfd, m_request.getBody().c_str(), m_request.getBody().length());
+	bytes_written = write(m_readfd, m_request.getBody().data(), m_request.getBody().length());
 	close(m_readfd);
 
 	m_request.cut(bytes_written);
@@ -164,12 +164,11 @@ int Response::addSingleFileToBody() {
 
 	switch (bytes_read) {
 		case -1:
-			std::cerr << "Reading infile fd " << m_readfd << " failed!\n";
+			perror("read");
 			return 500;
 		default:
 			addToBody(buf, bytes_read);
 	}
-
 	close(m_readfd);
 	return 200;
 }
@@ -180,13 +179,13 @@ void Response::getCGIHeaderChunk() {
 
 	// TODO: fix newlines, might be CRLF
 	// NOTE: WILL NOT WORK WITH BUFSIZE == 1
-	size_t loc = block.find_first_of("\n\n"); // end of the headers
-	if (loc == std::string::npos) {
+	size_t pos = block.find_first_of("\n\n"); // end of the headers
+	if (pos == std::string::npos) {
 		m_chunk += block;
 	} else {
 		m_isCGIProcessingHeaders = false;
-		std::string headers		 = block.substr(0, loc + 2);
-		block					 = block.substr(loc + 2);
+		std::string headers		 = block.substr(0, pos + 2);
+		block					 = block.substr(pos + 2);
 		m_chunk += headers + wrapStringInChunkedEncoding(block);
 	}
 }

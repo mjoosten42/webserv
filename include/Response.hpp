@@ -31,7 +31,7 @@ class Response: public HTTP {
 
 		void checkWhetherCGI();
 
-		void initDefaultHeaders();
+		void addDefaultHeaders();
 
 		std::string getStatusLine() const;
 		std::string getStatusMessage() const;
@@ -59,7 +59,7 @@ class Response: public HTTP {
 		Request		  m_request;
 		CGI			  m_cgi;
 		const Server *m_server;
-		int m_readfd; //  the fd of the file to read. The methods who return the chunks are responsible for closing the
+		int m_readfd; //  the fd of the file/pipe. The methods who return the chunks are responsible for closing the
 					  //  file in time.
 		bool m_isFinalChunk;		   //  true if every chunk has been read.
 		bool m_isCGI;				   // true if it is a CGI request, as filled in by checkWetherCGI()
