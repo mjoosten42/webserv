@@ -74,7 +74,7 @@ CGI::~CGI() {}
 
 // THIS SHOULD NEVER BE USED!
 CGI& CGI::operator=(const CGI& other) {
-	std::cerr << "**** CGI = OPERATOR CALLED, SHOULD NOT BE CALLED!\n";
+	LOG_ERR("**** CGI = OPERATOR CALLED, SHOULD NOT BE CALLED!");
 	popen = other.popen;
 	exit(EXIT_FAILURE);
 	return *this;

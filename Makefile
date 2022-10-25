@@ -21,7 +21,7 @@ DEBUG := 1
 SAN := 0
 
 ifeq ($(DEBUG), 1)
-	CXX_FLAGS += -g
+	CXX_FLAGS += -D DEBUG -g 
 endif
 
 ifeq ($(SAN), 1)
@@ -68,6 +68,7 @@ format: files
 
 siege: all
 	siege -R siege.conf
+
 
 .PHONY: all clean fclean re run files print format siege
 

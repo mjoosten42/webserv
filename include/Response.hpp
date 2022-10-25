@@ -21,7 +21,7 @@ class Response: public HTTP {
 		bool isInitialized() const;
 		bool finishedProcessing() const;
 
-		Request	   & getRequest();
+		Request		& getRequest();
 		const Server *getServer() const;
 		void		  addServer(const Server *server);
 

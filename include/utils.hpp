@@ -7,26 +7,6 @@
 #include <sys/poll.h>
 #include <vector>
 
-template <typename T>
-void print(const T& value) {
-	std::cout << value << "\n";
-}
-
-template <typename T, typename U>
-void printMap(const std::map<T, U>& map) {
-	typename std::map<T, U>::const_iterator it;
-	typename std::map<T, U>::const_iterator next;
-	std::cout << "Map: { ";
-	for (it = map.begin(); it != map.end(); ++it) {
-		std::cout << "{ " << it->first << " " << it->second << " } ";
-		next = it;
-		next++;
-		if (next != map.end())
-			std::cout << ", ";
-	}
-	std::cout << " }\n";
-}
-
 //  A binary search template. Key is the key you want to search.
 //  The entries is an array of structs with a key and value.
 //  Size is the length of the array.
@@ -59,7 +39,7 @@ std::string getPollFdsAsString(InputIt first, InputIt last) {
 			PollFds += ",";
 		PollFds += " ";
 	}
-	PollFds += "}\n";
+	PollFds += "}";
 	return PollFds;
 }
 

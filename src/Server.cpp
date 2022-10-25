@@ -62,10 +62,9 @@ Server::Server(t_block_directive *constructor_specs) {
 		std::string full_path = m_root + "/" + *error_it;
 		// print("Checking user-defined error page: " + full_path);
 		int user_defined_page = open((full_path).c_str(), O_RDONLY);
-		if (user_defined_page == -1) {
-			std::cerr << RED << "WARNING: The custom error pages have ";
-			std::cerr << "been incorrectly configured." << DEFAULT << std::endl;
-		} else
+		if (user_defined_page == -1)
+			LOG_ERR(RED << "WARNING: The custom error pages have been incorrectly configured." << DEFAULT);
+		else
 			close(user_defined_page);
 		user_defined_page				= stoi(*(error_it - 1)); // TODO:: check this for non numeric values
 		m_error_page[user_defined_page] = full_path;

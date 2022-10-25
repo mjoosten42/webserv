@@ -50,7 +50,7 @@ int Request::parse() {
 				break;
 			line = getNextLine();
 			if (line.empty()) {
-				std::cerr << "Missing startline\n";
+				LOG_ERR("Missing startline");
 				return 400;
 			}
 			if ((status = parseStartLine(line)) != 200)
@@ -83,7 +83,7 @@ int Request::parse() {
 				m_state = DONE;
 			break;
 		case DONE:
-			std::cerr << "Adding to DONE request\n"; // Shouldn't be reached
+			LOG_ERR("Adding to DONE request"); // Shouldn't be reached
 	}
 	return 200;
 }
@@ -102,7 +102,7 @@ int Request::parseStartLine(const std::string& line) {
 
 	ss >> m_location;
 	if (m_location.empty()) {
-		std::cerr << "Empty location: " << ss.str() << "\n";
+		LOG_ERR("Empty location: " << ss.str());
 		return 400;
 	}
 	//  parse query string and location
@@ -115,11 +115,11 @@ int Request::parseStartLine(const std::string& line) {
 	word.clear();
 	ss >> word;
 	if (!isHttpVersion(word)) {
-		std::cerr << "Invalid HTTP version: " << ss.str() << "\n";
+		LOG_ERR("Invalid HTTP version: " << ss.str());
 		return 400;
 	}
 	if (word != HTTP_VERSION) {
-		std::cerr << HTTP_VERSION << " only: " << ss.str() << "\n";
+		LOG_ERR(HTTP_VERSION << " only: " << ss.str() << "\n");
 		return 505;
 	}
 
@@ -134,7 +134,7 @@ methods parseMethod(const std::string& str) {
 	for (int i = 0; i < methodStringsSize; i++)
 		if (str == methodStrings[i])
 			return static_cast<methods>(i);
-	std::cerr << "Incorrect method: " << str << std::endl;
+	LOG_ERR("Incorrect method: " << str);
 	return static_cast<methods>(-1);
 }
 
@@ -146,13 +146,13 @@ int Request::parseHeader(const std::string& line) {
 	ss >> header.first;
 	ss >> header.second;
 	if (header.first.back() != ':') {
-		std::cerr << RED "Header field must end in ':' : " << line << DEFAULT << std::endl;
+		LOG_ERR(RED "Header field must end in ':' : " << line << DEFAULT);
 		return 400;
 	}
 	header.first.pop_back();
 	insert = m_headers.insert(header);
 	if (!insert.second) {
-		std::cerr << RED "Duplicate headers: " << line << DEFAULT << std::endl;
+		LOG_ERR(RED "Duplicate headers: " << line << DEFAULT);
 		return 400;
 	}
 	return 200;
@@ -163,7 +163,7 @@ int Request::checkSpecialHeaders() {
 		std::string hostHeader = getHeaderValue("Host");
 		m_host				   = hostHeader.substr(0, hostHeader.find(':'));
 	} else {
-		std::cerr << "Missing host\n";
+		LOG_ERR("Missing host");
 		return 400;
 	}
 	if (hasHeader("Content-Length"))

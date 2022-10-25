@@ -22,7 +22,7 @@ void Response::processRequest() {
 		case DELETE:
 			break;
 		default:
-			std::cerr << "Invalid method\n";
+			LOG_ERR("Invalid method");
 	}
 }
 
@@ -30,7 +30,6 @@ void Response::setFlags() {
 	if (m_request.hasHeader("Connection"))
 		m_close = (m_request.getHeaderValue("Connection") == "close");
 	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php");
-	// std::cout << "doing CGI: " << m_isCGI << "\n";
 }
 
 void Response::sendFail(int code, const std::string& msg) {
@@ -111,7 +110,7 @@ int Response::handleGetWithStaticFile(std::string file) {
 	if (!file.empty())
 		filename = file;
 	// filename = m_server->getRoot() + "/" + file;
-	print("Handle static: " + filename);
+	LOG("Handle static: " + filename);
 
 	m_readfd = open(filename.c_str(), O_RDONLY);
 	if (m_readfd == -1) {

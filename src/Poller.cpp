@@ -8,22 +8,17 @@
 #include <unistd.h>		// close
 
 void Poller::start() {
-	std::cout << RED "\n----STARTING LOOP----\n" DEFAULT;
+	LOG(RED "\n----STARTING LOOP----\n" DEFAULT);
 	while (true) {
-		//  std::cout << RED "Listeners: " DEFAULT
-		//  		  << getPollFdsAsString(m_pollfds.begin(), m_pollfds.begin() + m_listeners.size());
-		std::cout << std::endl
-				  << RED "Clients: " DEFAULT
-				  << getPollFdsAsString(m_pollfds.begin() + m_listeners.size(), m_pollfds.end());
+		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(m_pollfds.begin() + m_listeners.size(), m_pollfds.end()));
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 
 		switch (poll_status) {
 			case -1:
 				fatal_perror("poll");
-			case 0: // QUESTION: Does this ever happen? How does the blocking status of fds cause this?
-				std::cerr << "Fds should be blocking: " << getPollFdsAsString(m_pollfds.begin(), m_pollfds.end())
-						  << std::endl;
+			case 0:
+				LOG_ERR("Poll returned 0");
 				break;
 			default:
 				//  loop over current clients to check if we can read or write
@@ -32,19 +27,16 @@ void Poller::start() {
 
 					unsetFlag(m_pollfds[i].events, POLLOUT);
 
-					// std::cout << RED "CLIENT: " DEFAULT << m_pollfds[i].fd << std::endl;
-					// std::cout << RED << m_pollfds[i].fd << ": Events set: " << getEventsAsString(m_pollfds[i].events)
-					// 		  << DEFAULT << std::endl;
-					// std::cout << RED << m_pollfds[i].fd << ": Events get: " <<
-					// getEventsAsString(m_pollfds[i].revents)
-					// 		  << DEFAULT << std::endl;
+					LOG(RED "CLIENT: " DEFAULT << m_pollfds[i].fd);
+					LOG(m_pollfds[i].fd << RED ": Events set: " << getEventsAsString(m_pollfds[i].events) << DEFAULT);
+					LOG(m_pollfds[i].fd << RED ": Events get: " << getEventsAsString(m_pollfds[i].revents) << DEFAULT);
 
 					if (m_pollfds[i].revents & POLLHUP)
 						removeClient(i--);
 					if (m_pollfds[i].revents & POLLIN)
 						conn.receiveFromClient(m_pollfds[i].events);
 					if (m_pollfds[i].revents & POLLOUT)
-						if (conn.sendToClient(m_pollfds[i].events))
+						if (conn.sendToClient(m_pollfds[i].events)) // returns true if clients wants close
 							removeClient(i--);
 				}
 
@@ -70,7 +62,7 @@ void Poller::acceptClient(int listener_fd) {
 	m_pollfds.push_back(client);
 	m_connections[fd] = Connection(fd, listener);
 
-	std::cout << RED "NEW CLIENT: " DEFAULT << fd << std::endl;
+	LOG(RED "NEW CLIENT: " DEFAULT << fd);
 }
 
 void Poller::removeClient(int i) {
@@ -82,5 +74,5 @@ void Poller::removeClient(int i) {
 	if (close(fd) == -1)
 		fatal_perror("close");
 
-	std::cout << RED "CLIENT " DEFAULT << fd << RED " LEFT\n" DEFAULT;
+	LOG(RED "CLIENT " DEFAULT << fd << RED " LEFT" DEFAULT);
 }

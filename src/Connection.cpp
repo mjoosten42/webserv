@@ -16,16 +16,16 @@ Connection::Connection(int m_fd, const Listener *listener): m_fd(m_fd), m_listen
 void Connection::receiveFromClient(short& events) {
 	ssize_t bytes_received = recv(m_fd, buf, BUFFER_SIZE, 0);
 
-	std::cout << RED "Received: " DEFAULT << bytes_received << std::endl;
+	LOG(RED "Received: " DEFAULT << bytes_received);
 	switch (bytes_received) {
 		case -1:
 			fatal_perror("recv");
 		case 0:
 			break;
 		default:
-			std::cout << RED "----START BUF" << std::string(40, '-') << DEFAULT << std::endl;
-			std::cout << std::string(buf, bytes_received) << std::endl;
-			std::cout << RED "----END BUF" << std::string(40, '-') << DEFAULT << std::endl;
+			LOG(RED "----START BUF" << std::string(40, '-') << DEFAULT);
+			LOG(std::string(buf, bytes_received));
+			LOG(RED "----END BUF" << std::string(40, '-') << DEFAULT);
 
 			Response& response = getLastResponse();
 			Request & request  = response.getRequest();
@@ -33,7 +33,7 @@ void Connection::receiveFromClient(short& events) {
 			request.append(buf, bytes_received);
 
 			if (request.getState() >= BODY) { // TODO: == BODY
-				std::cout << request << std::endl;
+				LOG(request);
 				response.addServer(&(m_listener->getServerByHost(request.getHost())));
 				response.processRequest();
 				setFlag(events, POLLOUT); // TODO
@@ -49,7 +49,7 @@ bool Connection::sendToClient(short& events) {
 	ssize_t		 bytes_sent	 = send(m_fd, str.data(), str.length(), 0);
 	bool		 shouldClose = false;
 
-	std::cout << RED "Send: " DEFAULT << bytes_sent << std::endl;
+	LOG(RED "Send: " DEFAULT << bytes_sent);
 	switch (bytes_sent) {
 		case -1:
 			fatal_perror("send"); // TODO

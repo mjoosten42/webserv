@@ -1,5 +1,7 @@
 #include "EnvironmentMap.hpp"
 
+#include "defines.hpp"
+
 #include <iostream>
 #include <string.h> // strdup(sighs...)
 #include <string>
@@ -27,7 +29,7 @@ void EnvironmentMap::initFromEnviron() {
 		std::string entry(*envp);
 		size_t		eqpos = entry.find('=');
 		if (eqpos == std::string::npos) {
-			std::cerr << "WTF? Environ entry doesn't contain a '='.\n";
+			LOG_ERR("WTF? Environ entry doesn't contain a '='.");
 			continue;
 		}
 		std::string key	  = entry.substr(0, eqpos);

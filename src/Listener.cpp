@@ -64,8 +64,7 @@ void Listener::setupSocket() {
 	if (listen(m_fd, SOMAXCONN) < 0)
 		fatal_perror("listen");
 
-	std::cout << RED "\"LISTENER\" " << m_fd;
-	std::cout << " LISTENING ON " << m_listenAddr << ":" << m_port << DEFAULT "\n";
+	LOG(RED "LISTENER " DEFAULT << m_fd << RED " LISTENING ON " DEFAULT << m_listenAddr << ":" << m_port);
 }
 
 #pragma region getters
