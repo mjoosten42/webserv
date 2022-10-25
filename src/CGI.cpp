@@ -30,7 +30,6 @@ static bool my_exec(int infd, int outfd, const std::string& path, const std::str
 }
 
 // back to minishell ayy
-// TODO: gateway timeout
 int Popen::my_popen(const std::string& path, const std::string& filename, const EnvironmentMap& em) {
 	int serverToCgi[2];
 	int cgiToServer[2];
@@ -45,6 +44,9 @@ int Popen::my_popen(const std::string& path, const std::string& filename, const 
 
 	readfd	= cgiToServer[0];
 	writefd = serverToCgi[1];
+
+	set_fd_nonblocking(readfd);
+	set_fd_nonblocking(writefd);
 
 	pid = fork();
 	switch (pid) {
@@ -81,7 +83,8 @@ CGI& CGI::operator=(const CGI& other) {
 }
 
 // TODO: Set correct path
-//  TODO: handle like a "downloaded" file
+// TODO: when execution fails, close the pipe or something.
+// TODO: gateway timeout
 int CGI::start(const Request& req, const Server *server, const std::string& command, const std::string& filename) {
 
 	EnvironmentMap em;

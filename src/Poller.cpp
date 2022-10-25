@@ -111,9 +111,11 @@ void Poller::removeReadfd(int readfd) {
 	m_readfds.erase(readfd);
 }
 
+// TODO: siege with 25 clients doing index.php fails here.
 pollfd& Poller::getPollfd(int fd) {
 	for (size_t i = 0; i < m_pollfds.size(); i++)
 		if (m_pollfds[i].fd == fd)
 			return m_pollfds[i];
+	std::cerr << "ERROR: pollfd " << fd << " not found!\n";
 	exit(EXIT_FAILURE);
 }

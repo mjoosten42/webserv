@@ -36,8 +36,11 @@ int Connection::receiveFromClient(short& events) {
 				LOG(request);
 				response.addServer(&(m_listener->getServerByHost(request.getHost())));
 				response.processRequest();
-				setFlag(events, POLLOUT); // TODO
-				return response.getReadFD();
+				
+				int readfd = response.getReadFD();
+				if (readfd == -1)
+					setFlag(events, POLLOUT);
+				return readfd;
 			}
 	}
 	return -1;
@@ -45,6 +48,8 @@ int Connection::receiveFromClient(short& events) {
 
 //  Send data back to a client
 //  This should only be called if POLLOUT is set
+// TODO: when send() doesn't send the entire chunk and response.isDone(), the function fails.
+// when fixing, it should bear in mind that the readfd should still be removed and POLLOUT is set!
 std::pair<bool, int> Connection::sendToClient(short& events) {
 	Response   & response	 = m_responses.front();
 	std::string& str		 = response.getNextChunk();

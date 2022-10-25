@@ -71,8 +71,6 @@ void Response::handleGet() {
 		// TODO: parse from config
 		m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
 
-		// wait(nullptr);
-
 		m_headers["Transfer-Encoding"] = "Chunked";
 		m_readfd					   = m_cgi.popen.readfd;
 		m_isCGIProcessingHeaders	   = true;
@@ -140,7 +138,6 @@ int Response::getFirstChunk() {
 	int	  ret;
 
 	//  get file size
-	//  TODO: don't do this for CGI pipes!
 	if (size == -1)
 		size = std::numeric_limits<off_t>().max();
 	lseek(m_readfd, 0, SEEK_SET); //  set back to start
@@ -170,6 +167,7 @@ int Response::addSingleFileToBody() {
 			addToBody(buf, bytes_read);
 	}
 	close(m_readfd);
+	m_readfd = -1;
 	return 200;
 }
 
