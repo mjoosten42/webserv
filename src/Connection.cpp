@@ -44,7 +44,7 @@ void Connection::receiveFromClient(short& events) {
 //  Send data back to a client
 //  This should only be called if POLLOUT is set
 bool Connection::sendToClient(short& events) {
-	Response   & response	 = m_responses.front();
+	Response	& response	 = m_responses.front();
 	std::string& str		 = response.getNextChunk();
 	ssize_t		 bytes_sent	 = send(m_fd, str.data(), str.length(), 0);
 	bool		 shouldClose = false;
@@ -55,9 +55,10 @@ bool Connection::sendToClient(short& events) {
 			fatal_perror("send"); // TODO
 		default:
 			response.trimChunk(bytes_sent);
-			if (!response.isDone())
-				setFlag(events, POLLOUT);
-			else {
+			if (!response.isDone()) {
+				if (!response.readfdNeedsPoll())
+					setFlag(events, POLLOUT);
+			} else {
 				shouldClose = response.shouldClose();
 				m_responses.pop();
 			}

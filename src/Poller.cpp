@@ -26,11 +26,22 @@ void Poller::start() {
 						  << std::endl;
 				break;
 			default:
-				//  loop over current clients to check if we can read or write
-				for (size_t i = m_listeners.size(); i < m_pollfds.size(); i++) {
-					Connection& conn = m_connections[m_pollfds[i].fd];
-
+				// TODO: this is an ugly structure
+				// unset all connecton pollouts
+				for (size_t i = m_listeners.size(); i < m_pollfds.size() - m_readfds.size(); i++)
 					unsetFlag(m_pollfds[i].events, POLLOUT);
+
+				// loop over readfds
+				for (size_t i = m_pollfds.size() - m_readfds.size(); i < m_pollfds.size(); i++) {
+					if (m_pollfds[i].revents & POLLIN) {
+						// does this dereference work?
+						setFlag(*m_readfds[m_pollfds[i].fd], POLLOUT);
+					}
+				}
+
+				//  loop over current clients to check if we can read or write
+				for (size_t i = m_listeners.size(); i < m_pollfds.size() - m_readfds.size(); i++) {
+					Connection& conn = m_connections[m_pollfds[i].fd];
 
 					// std::cout << RED "CLIENT: " DEFAULT << m_pollfds[i].fd << std::endl;
 					// std::cout << RED << m_pollfds[i].fd << ": Events set: " << getEventsAsString(m_pollfds[i].events)
@@ -83,4 +94,20 @@ void Poller::removeClient(int i) {
 		fatal_perror("close");
 
 	std::cout << RED "CLIENT " DEFAULT << fd << RED " LEFT\n" DEFAULT;
+}
+
+void Poller::addReadfd(int readfd, short *events) {
+	pollfd pfd		  = { readfd, POLLIN, 0 };
+	m_readfds[readfd] = events;
+	m_pollfds.push_back(pfd);
+}
+
+void Poller::removeReadfd(int readfd) {
+	for (size_t i = m_pollfds.size() - m_readfds.size(); i < m_pollfds.size(); i++) {
+		if (m_pollfds[i].fd == readfd) {
+			m_pollfds.erase(m_pollfds.begin() + i);
+			break;
+		}
+	}
+	m_readfds.erase(readfd);
 }
