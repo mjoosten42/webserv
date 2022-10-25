@@ -29,6 +29,7 @@ class Response: public HTTP {
 		bool shouldClose() const;
 
 		void clear();
+		int	 getReadFD() const;
 
 	private:
 		static std::string wrapStringInChunkedEncoding(std::string& str);

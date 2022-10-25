@@ -13,7 +13,7 @@ Connection::Connection(): m_fd(-1), m_listener(NULL) {}
 
 Connection::Connection(int m_fd, const Listener *listener): m_fd(m_fd), m_listener(listener) {}
 
-void Connection::receiveFromClient(short& events) {
+int Connection::receiveFromClient(short& events) {
 	ssize_t bytes_received = recv(m_fd, buf, BUFFER_SIZE, 0);
 
 	LOG(RED "Received: " DEFAULT << bytes_received);
@@ -37,13 +37,15 @@ void Connection::receiveFromClient(short& events) {
 				response.addServer(&(m_listener->getServerByHost(request.getHost())));
 				response.processRequest();
 				setFlag(events, POLLOUT); // TODO
+				return response.getReadFD();
 			}
 	}
+	return -1;
 }
 
 //  Send data back to a client
 //  This should only be called if POLLOUT is set
-bool Connection::sendToClient(short& events) {
+std::pair<bool, int> Connection::sendToClient(short& events) {
 	Response   & response	 = m_responses.front();
 	std::string& str		 = response.getNextChunk();
 	ssize_t		 bytes_sent	 = send(m_fd, str.data(), str.length(), 0);
@@ -61,9 +63,10 @@ bool Connection::sendToClient(short& events) {
 			} else {
 				shouldClose = response.shouldClose();
 				m_responses.pop();
+				return std::make_pair(shouldClose, response.getReadFD());
 			}
 	}
-	return shouldClose;
+	return std::make_pair(shouldClose, -1);
 }
 
 Response& Connection::getLastResponse() {

@@ -21,19 +21,13 @@ void Poller::start() {
 				LOG_ERR("Poll returned 0");
 				break;
 			default:
+				//  Loop over the listening sockets for new clients
+				for (size_t i = 0; i < m_listeners.size(); i++)
+					if (m_pollfds[i].revents & POLLIN)
+						acceptClient(m_pollfds[i].fd);
+
 				// TODO: this is an ugly structure
 				// unset all connecton pollouts
-				for (size_t i = m_listeners.size(); i < m_pollfds.size() - m_readfds.size(); i++)
-					unsetFlag(m_pollfds[i].events, POLLOUT);
-
-				// loop over readfds
-				for (size_t i = m_pollfds.size() - m_readfds.size(); i < m_pollfds.size(); i++) {
-					if (m_pollfds[i].revents & POLLIN) {
-						// does this dereference work?
-						setFlag(*m_readfds[m_pollfds[i].fd], POLLOUT);
-					}
-				}
-
 				//  loop over current clients to check if we can read or write
 				for (size_t i = m_listeners.size(); i < m_pollfds.size() - m_readfds.size(); i++) {
 					Connection& conn = m_connections[m_pollfds[i].fd];
@@ -46,17 +40,28 @@ void Poller::start() {
 
 					if (m_pollfds[i].revents & POLLHUP)
 						removeClient(i--);
-					if (m_pollfds[i].revents & POLLIN)
-						conn.receiveFromClient(m_pollfds[i].events);
-					if (m_pollfds[i].revents & POLLOUT)
-						if (conn.sendToClient(m_pollfds[i].events)) // returns true if clients wants close
+					if (m_pollfds[i].revents & POLLIN) {
+						int readfd = conn.receiveFromClient(m_pollfds[i].events);
+						if (readfd != -1)
+							addReadfd(readfd, m_pollfds[i].fd);
+					}
+					if (m_pollfds[i].revents & POLLOUT) {
+						std::pair<bool, int>	ret = conn.sendToClient(m_pollfds[i].events);
+						if (ret.second != -1)
+							removeReadfd(ret.second);
+						if (ret.first) // returns true if clients wants close
 							removeClient(i--);
+					}
 				}
 
-				//  Loop over the listening sockets for new clients
-				for (size_t i = 0; i < m_listeners.size(); i++)
-					if (m_pollfds[i].revents & POLLIN)
-						acceptClient(m_pollfds[i].fd);
+				// loop over readfds
+				for (size_t i = m_pollfds.size() - m_readfds.size(); i < m_pollfds.size(); i++) {
+					if (m_pollfds[i].revents & POLLIN) {
+						int		clientfd = m_readfds[m_pollfds[i].fd];
+						pollfd& pollfd	 = getPollfd(clientfd);
+						setFlag(pollfd.events, POLLOUT);
+					}
+				}
 		}
 	}
 }
@@ -72,7 +77,7 @@ void Poller::acceptClient(int listener_fd) {
 
 	set_fd_nonblocking(fd);
 
-	m_pollfds.push_back(client);
+	m_pollfds.insert(m_pollfds.begin() + m_listeners.size() + m_connections.size(), client);
 	m_connections[fd] = Connection(fd, listener);
 
 	LOG(RED "NEW CLIENT: " DEFAULT << fd);
@@ -90,9 +95,9 @@ void Poller::removeClient(int i) {
 	LOG(RED "CLIENT " DEFAULT << fd << RED " LEFT" DEFAULT);
 }
 
-void Poller::addReadfd(int readfd, short *events) {
+void Poller::addReadfd(int readfd, int clientfd) {
 	pollfd pfd		  = { readfd, POLLIN, 0 };
-	m_readfds[readfd] = events;
+	m_readfds[readfd] = clientfd;
 	m_pollfds.push_back(pfd);
 }
 
@@ -104,4 +109,11 @@ void Poller::removeReadfd(int readfd) {
 		}
 	}
 	m_readfds.erase(readfd);
+}
+
+pollfd& Poller::getPollfd(int fd) {
+	for (size_t i = 0; i < m_pollfds.size(); i++)
+		if (m_pollfds[i].fd == fd)
+			return m_pollfds[i];
+	exit(EXIT_FAILURE);
 }

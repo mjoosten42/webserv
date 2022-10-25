@@ -100,3 +100,7 @@ bool Response::shouldClose() const {
 bool Response::readfdNeedsPoll() const {
 	return m_hasReadFDPoller;
 }
+
+int Response::getReadFD() const {
+	return m_readfd;
+}
