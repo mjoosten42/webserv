@@ -178,15 +178,13 @@ void Response::getCGIHeaderChunk() {
 
 	std::string block = readBlockFromFile();
 
-	// TODO: fix newlines, might be CRLF
-	// NOTE: WILL NOT WORK WITH BUFSIZE == 1
-	size_t pos = block.find_first_of("\n\n"); // end of the headers
+	size_t pos = m_headerEndFinder.find(block);
 	if (pos == std::string::npos) {
 		m_chunk += block;
 	} else {
 		m_isCGIProcessingHeaders = false;
-		std::string headers		 = block.substr(0, pos + 2);
-		block					 = block.substr(pos + 2);
+		std::string headers		 = block.substr(0, pos);
+		block					 = block.substr(pos);
 		m_chunk += headers + wrapStringInChunkedEncoding(block);
 	}
 }

@@ -118,8 +118,8 @@ int Request::parseStartLine(const std::string& line) {
 		std::cerr << "Invalid HTTP version: " << ss.str() << "\n";
 		return 400;
 	}
-	if (word != "HTTP/1.1") {
-		std::cerr << "HTTP 1.1 only: " << ss.str() << "\n";
+	if (word != HTTP_VERSION) {
+		std::cerr << HTTP_VERSION << " only: " << ss.str() << "\n";
 		return 505;
 	}
 

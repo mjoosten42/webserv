@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CGI.hpp"
+#include "EndOfHeaderFinder.hpp"
 #include "HTTP.hpp"
 #include "Request.hpp"
 
@@ -20,7 +21,7 @@ class Response: public HTTP {
 		bool isInitialized() const;
 		bool finishedProcessing() const;
 
-		Request		& getRequest();
+		Request	   & getRequest();
 		const Server *getServer() const;
 		void		  addServer(const Server *server);
 
@@ -55,10 +56,11 @@ class Response: public HTTP {
 		int m_statusCode;
 
 	private:
-		std::string	  m_chunk;
-		Request		  m_request;
-		CGI			  m_cgi;
-		const Server *m_server;
+		EndOfHeaderFinder m_headerEndFinder;
+		std::string		  m_chunk;
+		Request			  m_request;
+		CGI				  m_cgi;
+		const Server	 *m_server;
 		int m_readfd; //  the fd of the file/pipe. The methods who return the chunks are responsible for closing the
 					  //  file in time.
 		bool m_isFinalChunk;		   //  true if every chunk has been read.

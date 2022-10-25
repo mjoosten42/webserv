@@ -34,7 +34,7 @@ void Connection::receiveFromClient(short& events) {
 
 			if (request.getState() >= BODY) { // TODO: == BODY
 				std::cout << request << std::endl;
-				response.addServer(m_listener->getServerByHost(request.getHost()));
+				response.addServer(&(m_listener->getServerByHost(request.getHost())));
 				response.processRequest();
 				setFlag(events, POLLOUT); // TODO
 			}

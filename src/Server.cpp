@@ -40,7 +40,7 @@ Server::Server(t_block_directive *constructor_specs) {
 
 	m_names = stringSplit(name);
 
-	m_name			= "Amogus";
+	m_name			= "Amogus"; // TODO: Delete?
 	val_from_config = constructor_specs->fetch_simple("server");
 	if (!val_from_config.empty())
 		m_name = val_from_config;

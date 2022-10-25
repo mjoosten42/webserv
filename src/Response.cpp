@@ -43,6 +43,7 @@ Response::Response():
 void Response::clear() {
 	HTTP::clear();
 	m_statusCode = 0;
+	m_headerEndFinder.reset();
 }
 
 void Response::addServer(const Server *server) {
@@ -58,7 +59,7 @@ std::string Response::getStatusMessage() const {
 }
 
 std::string Response::getStatusLine() const {
-	return "HTTP/1.1 " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
+	return std::string(HTTP_VERSION) + " " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
 }
 
 //  Returns the response as a string to send over a socket. When there is a body present,
