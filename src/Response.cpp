@@ -38,7 +38,8 @@ Response::Response():
 	m_readfd(-1),
 	m_isFinalChunk(false),
 	m_isCGI(false),
-	m_isCGIProcessingHeaders(false) {}
+	m_isCGIProcessingHeaders(false),
+	m_hasReadFDPoller(false) {}
 
 void Response::clear() {
 	HTTP::clear();
@@ -94,4 +95,8 @@ const Server *Response::getServer() const {
 
 bool Response::shouldClose() const {
 	return m_close;
+}
+
+bool Response::readfdNeedsPoll() const {
+	return m_hasReadFDPoller;
 }

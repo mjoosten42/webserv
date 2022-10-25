@@ -20,6 +20,7 @@ class Response: public HTTP {
 		bool isDone() const;
 		bool isInitialized() const;
 		bool finishedProcessing() const;
+		bool readfdNeedsPoll() const;
 
 		Request		& getRequest();
 		const Server *getServer() const;
@@ -68,4 +69,5 @@ class Response: public HTTP {
 		bool m_isCGIProcessingHeaders; // true if it is still parsing the headers back from the CGI and not yet in CGI
 									   // chunked sending mode.
 		bool m_close;				   // Connection: close, close the connection after response is sent
+		bool m_hasReadFDPoller;		   // true if this response needs to poll the readfd before reading anything.
 };

@@ -21,8 +21,21 @@ void Poller::start() {
 				LOG_ERR("Poll returned 0");
 				break;
 			default:
+				// TODO: this is an ugly structure
+				// unset all connecton pollouts
+				for (size_t i = m_listeners.size(); i < m_pollfds.size() - m_readfds.size(); i++)
+					unsetFlag(m_pollfds[i].events, POLLOUT);
+
+				// loop over readfds
+				for (size_t i = m_pollfds.size() - m_readfds.size(); i < m_pollfds.size(); i++) {
+					if (m_pollfds[i].revents & POLLIN) {
+						// does this dereference work?
+						setFlag(*m_readfds[m_pollfds[i].fd], POLLOUT);
+					}
+				}
+
 				//  loop over current clients to check if we can read or write
-				for (size_t i = m_listeners.size(); i < m_pollfds.size(); i++) {
+				for (size_t i = m_listeners.size(); i < m_pollfds.size() - m_readfds.size(); i++) {
 					Connection& conn = m_connections[m_pollfds[i].fd];
 
 					unsetFlag(m_pollfds[i].events, POLLOUT);
@@ -75,4 +88,20 @@ void Poller::removeClient(int i) {
 		fatal_perror("close");
 
 	LOG(RED "CLIENT " DEFAULT << fd << RED " LEFT" DEFAULT);
+}
+
+void Poller::addReadfd(int readfd, short *events) {
+	pollfd pfd		  = { readfd, POLLIN, 0 };
+	m_readfds[readfd] = events;
+	m_pollfds.push_back(pfd);
+}
+
+void Poller::removeReadfd(int readfd) {
+	for (size_t i = m_pollfds.size() - m_readfds.size(); i < m_pollfds.size(); i++) {
+		if (m_pollfds[i].fd == readfd) {
+			m_pollfds.erase(m_pollfds.begin() + i);
+			break;
+		}
+	}
+	m_readfds.erase(readfd);
 }

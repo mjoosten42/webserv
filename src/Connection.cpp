@@ -55,9 +55,10 @@ bool Connection::sendToClient(short& events) {
 			fatal_perror("send"); // TODO
 		default:
 			response.trimChunk(bytes_sent);
-			if (!response.isDone())
-				setFlag(events, POLLOUT);
-			else {
+			if (!response.isDone()) {
+				if (!response.readfdNeedsPoll())
+					setFlag(events, POLLOUT);
+			} else {
 				shouldClose = response.shouldClose();
 				m_responses.pop();
 			}
