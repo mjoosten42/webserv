@@ -90,3 +90,7 @@ Request& Response::getRequest() {
 const Server *Response::getServer() const {
 	return m_server;
 }
+
+bool Response::shouldClose() const {
+	return m_close;
+}

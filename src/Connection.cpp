@@ -24,7 +24,7 @@ void Connection::receiveFromClient(short& events) {
 			break;
 		default:
 			std::cout << RED "----START BUF" << std::string(40, '-') << DEFAULT << std::endl;
-			std::cout << buf << std::endl;
+			std::cout << std::string(buf, bytes_received) << std::endl;
 			std::cout << RED "----END BUF" << std::string(40, '-') << DEFAULT << std::endl;
 
 			Response& response = getLastResponse();
@@ -43,10 +43,11 @@ void Connection::receiveFromClient(short& events) {
 
 //  Send data back to a client
 //  This should only be called if POLLOUT is set
-void Connection::sendToClient(short& events) {
-	Response   & response	= m_responses.front();
-	std::string& str		= response.getNextChunk();
-	ssize_t		 bytes_sent = send(m_fd, str.data(), str.length(), 0);
+bool Connection::sendToClient(short& events) {
+	Response   & response	 = m_responses.front();
+	std::string& str		 = response.getNextChunk();
+	ssize_t		 bytes_sent	 = send(m_fd, str.data(), str.length(), 0);
+	bool		 shouldClose = false;
 
 	std::cout << RED "Send: " DEFAULT << bytes_sent << std::endl;
 	switch (bytes_sent) {
@@ -56,9 +57,12 @@ void Connection::sendToClient(short& events) {
 			response.trimChunk(bytes_sent);
 			if (!response.isDone())
 				setFlag(events, POLLOUT);
-			else
+			else {
+				shouldClose = response.shouldClose();
 				m_responses.pop();
+			}
 	}
+	return shouldClose;
 }
 
 Response& Connection::getLastResponse() {

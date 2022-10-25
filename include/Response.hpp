@@ -24,12 +24,14 @@ class Response: public HTTP {
 		const Server *getServer() const;
 		void		  addServer(const Server *server);
 
+		bool shouldClose() const;
+
 		void clear();
 
 	private:
 		static std::string wrapStringInChunkedEncoding(std::string& str);
 
-		void checkWhetherCGI();
+		void setFlags();
 
 		void addDefaultHeaders();
 
@@ -52,8 +54,6 @@ class Response: public HTTP {
 	public:
 		int m_statusCode;
 
-		enum state { PROCESSING, WRITING, DONE } m_state;
-
 	private:
 		std::string	  m_chunk;
 		Request		  m_request;
@@ -65,4 +65,5 @@ class Response: public HTTP {
 		bool m_isCGI;				   // true if it is a CGI request, as filled in by checkWetherCGI()
 		bool m_isCGIProcessingHeaders; // true if it is still parsing the headers back from the CGI and not yet in CGI
 									   // chunked sending mode.
+		bool m_close;				   // Connection: close, close the connection after response is sent
 };

@@ -66,6 +66,10 @@ print:
 format: files
 	clang-format -i $(SOURCES) $(HEADERS)
 
+siege: all
+	siege -R siege.conf
+
+.PHONY: all clean fclean re run files print format siege
 
 # ============================= #
 # 			testing				#
@@ -92,6 +96,6 @@ $(TEST_OBJ_DIR):
 test: $(TEST_NAME)
 	./$(TEST_NAME)
 
-.PHONY: all clean fclean re run files print format test test_exe
+.PHONY: test test_exe
 
 -include $(OBJECTS:.o=.d)

@@ -11,7 +11,7 @@
 #include <unistd.h> // lseek
 
 void Response::processRequest() {
-	checkWhetherCGI();
+	setFlags();
 	switch (m_request.getMethod()) {
 		case GET:
 			handleGet();
@@ -26,8 +26,9 @@ void Response::processRequest() {
 	}
 }
 
-void Response::checkWhetherCGI() {
-	// TODO
+void Response::setFlags() {
+	if (m_request.hasHeader("Connection"))
+		m_close = (m_request.getHeaderValue("Connection") == "close");
 	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php");
 	// std::cout << "doing CGI: " << m_isCGI << "\n";
 }

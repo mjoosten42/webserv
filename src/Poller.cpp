@@ -21,7 +21,6 @@ void Poller::start() {
 		switch (poll_status) {
 			case -1:
 				fatal_perror("poll");
-				break;
 			case 0: // QUESTION: Does this ever happen? How does the blocking status of fds cause this?
 				std::cerr << "Fds should be blocking: " << getPollFdsAsString(m_pollfds.begin(), m_pollfds.end())
 						  << std::endl;
@@ -32,19 +31,21 @@ void Poller::start() {
 					Connection& conn = m_connections[m_pollfds[i].fd];
 
 					unsetFlag(m_pollfds[i].events, POLLOUT);
-					//  std::cout << RED << m_pollfds[i].fd << ": Events set: " <<
-					//  getEventsAsString(m_pollfds[i].events)
-					//  		  << DEFAULT << std::endl;
-					//  std::cout << RED << m_pollfds[i].fd << ": Events get: " <<
-					//  getEventsAsString(m_pollfds[i].revents)
-					//  		  << DEFAULT << std::endl;
+
+					// std::cout << RED "CLIENT: " DEFAULT << m_pollfds[i].fd << std::endl;
+					// std::cout << RED << m_pollfds[i].fd << ": Events set: " << getEventsAsString(m_pollfds[i].events)
+					// 		  << DEFAULT << std::endl;
+					// std::cout << RED << m_pollfds[i].fd << ": Events get: " <<
+					// getEventsAsString(m_pollfds[i].revents)
+					// 		  << DEFAULT << std::endl;
 
 					if (m_pollfds[i].revents & POLLHUP)
 						removeClient(i--);
 					if (m_pollfds[i].revents & POLLIN)
 						conn.receiveFromClient(m_pollfds[i].events);
 					if (m_pollfds[i].revents & POLLOUT)
-						conn.sendToClient(m_pollfds[i].events);
+						if (conn.sendToClient(m_pollfds[i].events))
+							removeClient(i--);
 				}
 
 				//  Loop over the listening sockets for new clients

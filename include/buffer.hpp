@@ -1,5 +1,5 @@
 #pragma once
 
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 0xFFF
 
 extern char buf[];
