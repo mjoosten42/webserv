@@ -10,7 +10,8 @@
 void Poller::start() {
 	LOG(RED "\n----STARTING LOOP----\n" DEFAULT);
 	while (true) {
-		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(m_pollfds.begin() + m_listeners.size(), m_pollfds.end()));
+		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(m_pollfds.begin() + m_listeners.size(), m_pollfds.end() - m_readfds.size()));
+		LOG(RED "readfds: " DEFAULT << getPollFdsAsString(m_pollfds.end() - m_readfds.size(), m_pollfds.end()));
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 
