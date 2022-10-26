@@ -23,9 +23,14 @@ class Poller {
 		void addReadfd(int readfd, int clientfd);
 		void removeReadfd(int readfd);
 
+		void pollfdEvent();
+
 	private:
 		void acceptClient(int listener_fd);
 		void removeClient(int fd);
+
+		size_t clientsIndex();
+		size_t readFdsIndex();
 
 		pollfd& getPollfd(int fd);
 

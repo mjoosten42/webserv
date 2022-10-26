@@ -18,6 +18,7 @@ SOURCES = \
 	src/Request.cpp \
 	src/Response.cpp \
 	src/ResponseChunk.cpp \
+	src/ResponseErrors.cpp \
 	src/Server.cpp \
 	src/stringutils.cpp \
 	src/utils.cpp \

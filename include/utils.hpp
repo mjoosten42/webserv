@@ -42,8 +42,8 @@ std::string getPollFdsAsString(InputIt first, InputIt last) {
 	return PollFds;
 }
 
-void		fatal_perror(const char *msg);
-void		set_fd_nonblocking(const int fd);
+void fatal_perror(const char *msg);
+void set_fd_nonblocking(const int fd);
 
 //  does std::transform on the entire container from beginning to end
 template <class C, typename F>

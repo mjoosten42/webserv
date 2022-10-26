@@ -9,6 +9,7 @@ HEADERS = \
 	include/HTTP.hpp \
 	include/Listener.hpp \
 	include/Location.hpp \
+	include/logger.hpp \
 	include/MIME.hpp \
 	include/Poller.hpp \
 	include/Request.hpp \

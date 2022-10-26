@@ -1,10 +1,9 @@
 #include "EnvironmentMap.hpp"
 
-#include "defines.hpp"
+#include "logger.hpp"
 
 #include <string.h> // strdup(sighs...)
 #include <string>
-#include "defines.hpp"
 
 EnvironmentMap::EnvironmentMap() {
 	m_map = std::map<std::string, std::string>();

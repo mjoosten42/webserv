@@ -4,7 +4,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
-#include "defines.hpp"
+#include "logger.hpp"
 #include "utils.hpp"
 
 static void closePipe(int *pfds) {

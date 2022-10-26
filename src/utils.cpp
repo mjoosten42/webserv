@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-#include <fcntl.h> // fcntl
+#include <fcntl.h>	// fcntl
 #include <stdio.h>	// perror
 #include <stdlib.h> // exit
 #include <string>
