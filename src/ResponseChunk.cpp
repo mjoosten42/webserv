@@ -40,7 +40,7 @@ void Response::handleGet() {
 		// TODO: parse from config
 		m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
 
-		m_headers["Transfer-Encoding"] = "Chunked";
+		addHeader("Transfer-Encoding", "Chunked");
 		m_readfd					   = m_cgi.popen.readfd;
 		m_isCGIProcessingHeaders	   = true;
 
@@ -164,6 +164,8 @@ std::string Response::encodeChunked(std::string& str) {
 std::string Response::readBlockFromFile() {
 	std::string block;
 	ssize_t		bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
+
+	LOG(RED "Read: " DEFAULT << bytes_read);
 	switch (bytes_read) {
 		case -1:
 			perror("read");
