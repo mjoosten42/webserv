@@ -1,4 +1,5 @@
 SOURCES = \
+	src/AutoIndex.cpp \
 	src/buf.cpp \
 	src/CGI.cpp \
 	src/Config/CheckValidity.cpp \

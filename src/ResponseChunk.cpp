@@ -6,6 +6,7 @@
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
+#include "AutoIndex.hpp"
 
 #include <fcntl.h> // open
 #include <sys/socket.h>
@@ -35,7 +36,6 @@ void Response::setFlags() {
 }
 
 void Response::handleGet() {
-
 	addDefaultHeaders();
 	if (m_isCGI) {
 		// TODO: parse from config
@@ -54,8 +54,40 @@ void Response::handleGet() {
 	}
 
 	if (m_statusCode != 200)
-		serveError(m_statusCode);
+		autoIndex();
+		// serveError(m_statusCode);
 	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting");
+}
+
+void Response::autoIndex() {
+	addDefaultHeaders();
+	m_statusCode = 200;
+	std::vector<std::string> content_paths;
+	recursivePathCount(m_server->getRoot(), content_paths);
+	std::vector<std::string>::iterator cp_it = content_paths.begin();
+	std::vector<std::string> content_names;
+	recursiveFileCount(m_server->getRoot(), content_names);
+	std::vector<std::string>::iterator cn_it = content_names.begin();
+
+	addHeader("Content-Type", "text/html");
+
+	addToBody("<h1> Index of directory: </h1>\r\n");		
+	for (; cp_it != content_paths.end(); cp_it++)
+	{
+		addToBody("<p><a href=\"/");
+		addToBody(*cp_it);
+		addToBody("\">");
+		unsigned int tabs = countAndTrimLeadingWhiteSpace(*cn_it);
+		for (unsigned int i = 0; i < tabs; i++)
+			addToBody("<ul>");
+		addToBody(*cn_it);
+		for (unsigned int i = 0; i < tabs; i++)
+			addToBody("</ul>");
+		addToBody("</a></p>\r\n");
+		cn_it++;
+	}
+	m_chunk		  = getResponseAsString();
+	m_doneReading = true;
 }
 
 // TODO: send to CGI

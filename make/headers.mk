@@ -1,4 +1,5 @@
 HEADERS = \
+	include/AutoIndex.hpp \
 	include/buffer.hpp \
 	include/CGI.hpp \
 	include/ConfigParser.hpp \
