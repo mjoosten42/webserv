@@ -21,6 +21,16 @@ std::string trimLeadingWhiteSpace(const std::string& s) {
 	return (ret);
 }
 
+unsigned int countAndTrimLeadingWhiteSpace(std::string& s) {
+	const std::string whitespaceChars = " \n\r\t\f\v";
+	size_t			  start			  = s.find_first_not_of(whitespaceChars);
+	if (start != std::string::npos){
+		s = s.substr(start);
+		return (start);
+	}
+	return(0);
+}
+
 std::string trimTrailingWhiteSpace(const std::string& s) {
 	const std::string whitespaceChars = " \n\r\t\f\v";
 	size_t			  end			  = s.find_last_not_of(whitespaceChars);
