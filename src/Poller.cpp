@@ -26,7 +26,7 @@ void Poller::start() {
 				for (size_t i = 0; i < m_listeners.size(); i++)
 					if (m_pollfds[i].revents & POLLIN)
 						acceptClient(m_pollfds[i].fd);
-				
+
 				//  loop over current clients to check if we can read or write
 				for (size_t i = m_listeners.size(); i < m_pollfds.size() - m_readfds.size(); i++) {
 					Connection& conn = m_connections[m_pollfds[i].fd];
