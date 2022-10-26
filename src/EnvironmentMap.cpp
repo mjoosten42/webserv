@@ -1,6 +1,6 @@
 #include "EnvironmentMap.hpp"
 
-#include "defines.hpp"
+#include "logger.hpp"
 
 #include <iostream>
 #include <string.h> // strdup(sighs...)

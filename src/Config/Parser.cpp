@@ -1,4 +1,5 @@
 #include "ConfigParser.hpp"
+#include "logger.hpp"
 #include "utils.hpp"
 
 #include <fstream>
@@ -16,7 +17,6 @@ bool ConfigParser::parse_config(const char *path) {
 	std::vector<std::string> config_file = readFile(path);
 	check_validity(config_file); //  Will throw exception incase of invalid config.
 	finite_state_machine(config_file);
-	//  debug_print(); //  If you want to see the parsed contents.
 	return (true);
 }
 

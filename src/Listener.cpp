@@ -2,6 +2,7 @@
 
 #include "Server.hpp"
 #include "defines.hpp"
+#include "logger.hpp"
 #include "utils.hpp"
 
 #include <arpa/inet.h>

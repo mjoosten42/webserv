@@ -68,9 +68,9 @@ class ConfigParser {
 		char m_tokens[SIZE];
 
 	public: //  Debug printing
-		void debug_print();
-		void debug_print_simple(t_simple_directive s, std::string tabs);
-		void debug_print_block(t_block_directive b, std::string tabs);
+		std::string getConfigAsString();
+		std::string getSimpleAsString(t_simple_directive s, std::string tabs);
+		std::string getBlockAsString(t_block_directive b, std::string tabs);
 };
 
 // Initialising of Listeners based on config:

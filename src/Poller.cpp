@@ -2,6 +2,7 @@
 
 #include "Server.hpp"
 #include "defines.hpp"
+#include "logger.hpp"
 #include "utils.hpp"
 
 #include <sys/socket.h> // accept
@@ -21,28 +22,20 @@ void Poller::start() {
 				LOG_ERR("Poll returned 0");
 				break;
 			default:
-				// TODO: this is an ugly structure
-				// unset all connecton pollouts
-				for (size_t i = m_listeners.size(); i < m_pollfds.size() - m_readfds.size(); i++)
-					unsetFlag(m_pollfds[i].events, POLLOUT);
-
-				// loop over readfds
-				for (size_t i = m_pollfds.size() - m_readfds.size(); i < m_pollfds.size(); i++) {
-					if (m_pollfds[i].revents & POLLIN) {
-						// does this dereference work?
-						setFlag(*m_readfds[m_pollfds[i].fd], POLLOUT);
-					}
-				}
-
+				//  Loop over the listening sockets for new clients
+				for (size_t i = 0; i < m_listeners.size(); i++)
+					if (m_pollfds[i].revents & POLLIN)
+						acceptClient(m_pollfds[i].fd);
+				
 				//  loop over current clients to check if we can read or write
 				for (size_t i = m_listeners.size(); i < m_pollfds.size() - m_readfds.size(); i++) {
 					Connection& conn = m_connections[m_pollfds[i].fd];
 
-					unsetFlag(m_pollfds[i].events, POLLOUT);
-
 					LOG(RED "CLIENT: " DEFAULT << m_pollfds[i].fd);
 					LOG(m_pollfds[i].fd << RED ": Events set: " << getEventsAsString(m_pollfds[i].events) << DEFAULT);
 					LOG(m_pollfds[i].fd << RED ": Events get: " << getEventsAsString(m_pollfds[i].revents) << DEFAULT);
+
+					unsetFlag(m_pollfds[i].events, POLLOUT);
 
 					if (m_pollfds[i].revents & POLLHUP)
 						removeClient(i--);
@@ -53,10 +46,10 @@ void Poller::start() {
 							removeClient(i--);
 				}
 
-				//  Loop over the listening sockets for new clients
-				for (size_t i = 0; i < m_listeners.size(); i++)
+				// loop over readfds
+				for (size_t i = m_pollfds.size() - m_readfds.size(); i < m_pollfds.size(); i++)
 					if (m_pollfds[i].revents & POLLIN)
-						acceptClient(m_pollfds[i].fd);
+						setFlag(*m_readfds[m_pollfds[i].fd], POLLOUT);
 		}
 	}
 }

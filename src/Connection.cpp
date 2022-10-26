@@ -3,6 +3,7 @@
 #include "Listener.hpp"
 #include "buffer.hpp"
 #include "defines.hpp"
+#include "logger.hpp"
 #include "utils.hpp"
 
 #include <queue>

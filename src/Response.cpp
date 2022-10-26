@@ -2,6 +2,7 @@
 
 #include "Server.hpp"
 #include "defines.hpp"
+#include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
 

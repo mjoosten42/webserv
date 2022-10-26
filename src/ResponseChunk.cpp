@@ -3,6 +3,7 @@
 #include "Server.hpp"
 #include "buffer.hpp"
 #include "defines.hpp"
+#include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
 
