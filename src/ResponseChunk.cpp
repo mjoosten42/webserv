@@ -6,6 +6,7 @@
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
+#include "AutoIndex.hpp"
 
 #include <fcntl.h> // open
 #include <sys/socket.h>
