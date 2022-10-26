@@ -29,19 +29,6 @@ const char *binarySearchKeyValue(Key key, Value entries[], int size) {
 	return NULL;
 }
 
-template <typename InputIt>
-std::string getPollFdsAsString(InputIt first, InputIt last) {
-	std::string PollFds = "{ ";
-	for (; first != last; first++) {
-		PollFds += toString(first->fd);
-		if (first + 1 != last)
-			PollFds += ",";
-		PollFds += " ";
-	}
-	PollFds += "}";
-	return PollFds;
-}
-
 void fatal_perror(const char *msg);
 void set_fd_nonblocking(const int fd);
 
