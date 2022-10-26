@@ -46,6 +46,7 @@ class Response: public HTTP {
 		int	 handleGetWithStaticFile(std::string file = ""); // TODO
 		void sendFail(int code, const std::string& msg);
 		void sendMoved(const std::string& location);
+		int	 serveError(int code);
 
 		int getFirstChunk();
 		int addSingleFileToBody();
