@@ -67,4 +67,6 @@ T stringToIntegral(const std::string& number) {
 	return value;
 }
 
-unsigned int recursiveFileCount(const std::string directory);
+unsigned int recursiveFileCount(const std::string		  directory,
+								std::vector<std::string>& file_structure,
+								std::string				  tabulation = "");
