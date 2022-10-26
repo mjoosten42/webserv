@@ -66,3 +66,5 @@ T stringToIntegral(const std::string& number) {
 	ss >> value;
 	return value;
 }
+
+unsigned int recursiveFileCount(const std::string directory);

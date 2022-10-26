@@ -1,5 +1,6 @@
 #include "utils.hpp"
 
+#include <dirent.h> //recursiveFileCount
 #include <fcntl.h>	// fcntl
 #include <stdio.h>	// perror
 #include <stdlib.h> // exit
@@ -47,4 +48,26 @@ void setFlag(short& events, int flag) {
 
 void unsetFlag(short& events, int flag) {
 	events &= ~flag;
+}
+
+// #include "logger.hpp"
+
+unsigned int recursiveFileCount(const std::string directory) {
+	DIR			*derp; // DirEctoRy Pointer
+	unsigned int ret = 0;
+
+	derp = opendir(directory.c_str());
+	if (derp == NULL)
+		return (ret);
+	struct dirent *contents;
+	while ((contents = readdir(derp)) != NULL){
+		if (strcmp(contents->d_name, ".") && strcmp(contents->d_name, "..")){
+			// LOG(contents->d_name);
+			ret++;
+			std::string next_dir = directory + "/" + contents->d_name;
+			ret = ret + recursiveFileCount(next_dir);
+		}
+	}
+	closedir(derp);
+	return (ret);
 }
