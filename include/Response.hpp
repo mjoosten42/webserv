@@ -32,7 +32,7 @@ class Response: public HTTP {
 		int	 getReadFD() const;
 
 	private:
-		static std::string wrapStringInChunkedEncoding(std::string& str);
+		static std::string encodeChunked(std::string& str);
 
 		void setFlags();
 
@@ -49,7 +49,6 @@ class Response: public HTTP {
 		void sendMoved(const std::string& location);
 
 		int getFirstChunk();
-		int addSingleFileToBody();
 
 		std::string readBlockFromFile();
 		void		getCGIHeaderChunk();
@@ -65,7 +64,8 @@ class Response: public HTTP {
 		const Server	 *m_server;
 		int m_readfd; //  the fd of the file/pipe. The methods who return the chunks are responsible for closing the
 					  //  file in time.
-		bool m_isFinalChunk;		   //  true if every chunk has been read.
+		bool m_doneReading; //  true if all data from readfd has been read.
+		bool m_isSmallFile;
 		bool m_isCGI;				   // true if it is a CGI request, as filled in by checkWetherCGI()
 		bool m_isCGIProcessingHeaders; // true if it is still parsing the headers back from the CGI and not yet in CGI
 									   // chunked sending mode.

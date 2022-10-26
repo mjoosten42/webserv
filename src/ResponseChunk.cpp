@@ -45,8 +45,8 @@ void Response::sendFail(int code, const std::string& msg) {
 	addToBody("<h1>" + toString(code) + " " + getStatusMessage() + "</h1>\r\n");
 	addToBody("<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n");
 
-	m_chunk		   = getResponseAsString();
-	m_isFinalChunk = true;
+	m_chunk		  = getResponseAsString();
+	m_doneReading = true;
 }
 
 void Response::sendMoved(const std::string& location) {
@@ -60,8 +60,8 @@ void Response::sendMoved(const std::string& location) {
 	addToBody("<h1>" + toString(m_statusCode) + " " + getStatusMessage() + "</h1>\r\n");
 	addToBody("<p>The resource has been moved to <a href=\"" + location + "\">" + location + "</a>.</p>");
 
-	m_chunk		   = getResponseAsString();
-	m_isFinalChunk = true;
+	m_chunk		  = getResponseAsString();
+	m_doneReading = true;
 }
 
 void Response::handleGet() {
@@ -87,6 +87,7 @@ void Response::handleGet() {
 		sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting");
 }
 
+// TODO: send to CGI
 void Response::handlePost() {
 	std::string filename = m_server->getRoot() + m_request.getLocation();
 	ssize_t		bytes_written;
@@ -100,8 +101,8 @@ void Response::handlePost() {
 	m_request.cut(bytes_written);
 	m_statusCode = 201;
 	addHeader("Location", m_request.getLocation());
-	m_chunk		   = getResponseAsString();
-	m_isFinalChunk = true;
+	m_chunk		  = getResponseAsString();
+	m_doneReading = true;
 }
 
 // TODO: Fix this. I added an ugly hacky param in case the file served is supposed ot be an error page.
@@ -124,52 +125,32 @@ int Response::handleGetWithStaticFile(std::string file) {
 	return getFirstChunk();
 }
 
-//  this function removes bytesSent amount of bytes from the chunk. Used for instance when send() sent
-//  less bytes than the chunk's length.
+//  this function removes bytesSent amount of bytes from the beginning of the chunk.
 void Response::trimChunk(ssize_t bytesSent) {
 	m_chunk.erase(0, bytesSent);
 }
 
 bool Response::isDone() const {
-	return m_isFinalChunk;
+	return m_doneReading && m_chunk.empty();
 }
 
 // gets the first chunk of a static file
 int Response::getFirstChunk() {
 	off_t size = lseek(m_readfd, 0, SEEK_END);
-	int	  ret;
 
 	//  get file size
 	if (size == -1)
 		size = std::numeric_limits<off_t>().max();
 	lseek(m_readfd, 0, SEEK_SET); //  set back to start
 
-	if (size > BUFFER_SIZE) { //  send multichunked
+	m_isSmallFile = (size < BUFFER_SIZE);
+
+	if (m_isSmallFile)
+		addHeader("Content-Length", toString(size));
+	else
 		addHeader("Transfer-Encoding", "Chunked");
 
-		m_chunk = getResponseAsString();
-		ret		= 200;
-
-	} else { //  send in single buf.
-		ret			   = addSingleFileToBody();
-		m_chunk		   = getResponseAsString();
-		m_isFinalChunk = true;
-	}
-	return ret;
-}
-
-int Response::addSingleFileToBody() {
-	ssize_t bytes_read = read(m_readfd, buf, BUFFER_SIZE);
-
-	switch (bytes_read) {
-		case -1:
-			perror("read");
-			return 500;
-		default:
-			addToBody(buf, bytes_read);
-	}
-	close(m_readfd);
-	m_readfd = -1;
+	m_chunk = getResponseAsString();
 	return 200;
 }
 
@@ -184,13 +165,13 @@ void Response::getCGIHeaderChunk() {
 		m_isCGIProcessingHeaders = false;
 		std::string headers		 = block.substr(0, pos);
 		block					 = block.substr(pos);
-		m_chunk += headers + wrapStringInChunkedEncoding(block);
+		m_chunk += headers + encodeChunked(block);
 	}
 }
 
 std::string& Response::getNextChunk() {
 
-	if (m_isFinalChunk || m_chunk.size() > BUFFER_SIZE)
+	if (m_doneReading || m_chunk.size() > BUFFER_SIZE)
 		return m_chunk;
 
 	if (m_isCGIProcessingHeaders) {
@@ -199,11 +180,14 @@ std::string& Response::getNextChunk() {
 	}
 
 	std::string block = readBlockFromFile();
-	m_chunk += wrapStringInChunkedEncoding(block);
+	if (m_isSmallFile)
+		m_chunk += block;
+	else
+		m_chunk += encodeChunked(block);
 	return m_chunk;
 }
 
-std::string Response::wrapStringInChunkedEncoding(std::string& str) {
+std::string Response::encodeChunked(std::string& str) {
 	return toHex(str.length()) + CRLF + str + CRLF;
 }
 
@@ -214,7 +198,7 @@ std::string Response::readBlockFromFile() {
 		case -1:
 			perror("read");
 		case 0:
-			m_isFinalChunk = true;
+			m_doneReading = true;
 			close(m_readfd);
 			break;
 		default:

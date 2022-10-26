@@ -72,8 +72,6 @@ CGI::CGI() {}
 
 CGI::~CGI() {}
 
-#include <iostream>
-
 // THIS SHOULD NEVER BE USED!
 CGI& CGI::operator=(const CGI& other) {
 	LOG_ERR("**** CGI = OPERATOR CALLED, SHOULD NOT BE CALLED!");

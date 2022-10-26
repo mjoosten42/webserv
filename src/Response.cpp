@@ -36,7 +36,8 @@ Response::Response():
 	m_statusCode(200),
 	m_server(NULL),
 	m_readfd(-1),
-	m_isFinalChunk(false),
+	m_doneReading(false),
+	m_isSmallFile(false),
 	m_isCGI(false),
 	m_isCGIProcessingHeaders(false),
 	m_hasReadFDPoller(false) {}
@@ -68,7 +69,7 @@ std::string Response::getStatusLine() const {
 std::string Response::getResponseAsString() {
 	std::string response;
 
-	if (!hasHeader("Transfer-Encoding"))
+	if (!hasHeader("Transfer-Encoding") && !hasHeader("Content-Length"))
 		addHeader("Content-Length", toString(m_body.length()));
 
 	response += getStatusLine();

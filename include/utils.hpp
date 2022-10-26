@@ -2,8 +2,7 @@
 
 #include "stringutils.hpp"
 
-#include <iostream>
-#include <map>
+#include <sstream>
 #include <sys/poll.h>
 #include <vector>
 
@@ -43,7 +42,6 @@ std::string getPollFdsAsString(InputIt first, InputIt last) {
 	return PollFds;
 }
 
-std::string getStringMapAsString(const std::map<std::string, std::string>& map);
 void		fatal_perror(const char *msg);
 void		set_fd_nonblocking(const int fd);
 

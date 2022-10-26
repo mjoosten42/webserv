@@ -2,9 +2,9 @@
 
 #include "defines.hpp"
 
-#include <iostream>
 #include <string.h> // strdup(sighs...)
 #include <string>
+#include "defines.hpp"
 
 EnvironmentMap::EnvironmentMap() {
 	m_map = std::map<std::string, std::string>();

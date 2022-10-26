@@ -1,7 +1,6 @@
 #include "utils.hpp"
 
 #include <fcntl.h> // fcntl
-#include <map>
 #include <stdio.h>	// perror
 #include <stdlib.h> // exit
 #include <string>
@@ -19,26 +18,26 @@ void set_fd_nonblocking(const int fd) {
 		fatal_perror("fcntl");
 }
 
-std::string getStringMapAsString(const std::map<std::string, std::string>& map) {
-	std::map<std::string, std::string>::const_iterator it = map.begin();
-	std::string										   strings;
-
-	for (; it != map.end(); ++it)
-		strings += "  " + it->first + ": " + it->second + "\n";
-	return strings;
-}
-
 std::string getEventsAsString(short revents) {
 	std::string events;
 
 	if (revents & POLLIN)
-		events += "IN  | ";
-	if (revents & POLLOUT)
-		events += "OUT | ";
-	if (revents & POLLHUP)
-		events += "HUP | ";
-	if (revents & POLLNVAL)
+		events += "IN";
+	if (revents & POLLOUT) {
+		if (!events.empty())
+			events += " | ";
+		events += "OUT";
+	}
+	if (revents & POLLHUP) {
+		if (!events.empty())
+			events += " | ";
+		events += "HUP";
+	}
+	if (revents & POLLNVAL) {
+		if (!events.empty())
+			events += " | ";
 		events += "NVAL";
+	}
 	return events;
 }
 

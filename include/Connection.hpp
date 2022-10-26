@@ -12,8 +12,8 @@ class Connection {
 		Connection();
 		Connection(int fd, const Listener *listener);
 
-		int	 receiveFromClient(short &events);
-		std::pair<bool, int>  sendToClient(short& events);
+		int					 receiveFromClient(short				 &events);
+		std::pair<bool, int> sendToClient(short& events);
 
 	private:
 		Response& getLastResponse();

@@ -10,7 +10,8 @@
 void Poller::start() {
 	LOG(RED "\n----STARTING LOOP----\n" DEFAULT);
 	while (true) {
-		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(m_pollfds.begin() + m_listeners.size(), m_pollfds.end() - m_readfds.size()));
+		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(m_pollfds.begin() + m_listeners.size(),
+														  m_pollfds.end() - m_readfds.size()));
 		LOG(RED "readfds: " DEFAULT << getPollFdsAsString(m_pollfds.end() - m_readfds.size(), m_pollfds.end()));
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
@@ -33,11 +34,11 @@ void Poller::start() {
 				for (size_t i = m_listeners.size(); i < m_pollfds.size() - m_readfds.size(); i++) {
 					Connection& conn = m_connections[m_pollfds[i].fd];
 
-					unsetFlag(m_pollfds[i].events, POLLOUT);
-
-					LOG(RED "CLIENT: " DEFAULT << m_pollfds[i].fd);
+					// LOG(RED "CLIENT: " DEFAULT << m_pollfds[i].fd);
 					LOG(m_pollfds[i].fd << RED ": Events set: " << getEventsAsString(m_pollfds[i].events) << DEFAULT);
 					LOG(m_pollfds[i].fd << RED ": Events get: " << getEventsAsString(m_pollfds[i].revents) << DEFAULT);
+
+					unsetFlag(m_pollfds[i].events, POLLOUT);
 
 					if (m_pollfds[i].revents & POLLHUP)
 						removeClient(i--);
@@ -47,7 +48,7 @@ void Poller::start() {
 							addReadfd(readfd, m_pollfds[i].fd);
 					}
 					if (m_pollfds[i].revents & POLLOUT) {
-						std::pair<bool, int>	ret = conn.sendToClient(m_pollfds[i].events);
+						std::pair<bool, int> ret = conn.sendToClient(m_pollfds[i].events);
 						if (ret.second != -1)
 							removeReadfd(ret.second);
 						if (ret.first) // returns true if clients wants close
