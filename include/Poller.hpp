@@ -24,16 +24,21 @@ class Poller {
 	private:
 		void pollfdEvent();
 
+		void pollIn(pollfd& pollfd);
+		void pollOut(pollfd& pollfd);
+		void pollHup(pollfd& pollfd);
+
 		void acceptClient(int listener_fd);
 		void removeClient(int index);
 
 		void addReadFd(int read_fd, int client_fd);
 		void removeReadFd(int read_fd);
 
-		int getClientFd(int read_fd);
+		int				 getClientFd(int read_fd);
 		std::vector<int> getReadFds(int client_fd);
 
 		pollfd& getPollfd(int fd);
+		size_t	getPollfdIndex(int fd);
 
 		size_t clientsIndex();
 		size_t readFdsIndex();
@@ -46,6 +51,4 @@ class Poller {
 		std::map<int, Listener>			  m_listeners;	 // map server fd with corresponding listener
 		std::map<int, Connection>		  m_connections; // map client fd to its handler
 		std::vector<std::pair<int, int> > m_readfds;	 // map readfds to clientfds.
-		// std::map<int, int>		  m_readfds;	 // map of pollfds that are waiting to receive data from a file/CGI.
-		// these would need to be reset.
 };

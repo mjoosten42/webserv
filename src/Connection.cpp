@@ -20,7 +20,7 @@ int Connection::receiveFromClient(short& events) {
 	LOG(RED "Received: " DEFAULT << bytes_received);
 	switch (bytes_received) {
 		case -1:
-			fatal_perror("recv");
+			perror("recv");
 		case 0:
 			break;
 		default:
@@ -34,14 +34,16 @@ int Connection::receiveFromClient(short& events) {
 			request.append(buf, bytes_received);
 
 			if (request.getState() >= BODY) { // TODO: == BODY
-				LOG(request);
-				response.addServer(&(m_listener->getServerByHost(request.getHost())));
-				response.processRequest();
+				if (!response.hasProcessedRequest()) {
+					LOG(request);
+					response.addServer(&(m_listener->getServerByHost(request.getHost())));
+					response.processRequest();
 
-				int readfd = response.getReadFD();
-				if (readfd == -1)
-					setFlag(events, POLLOUT);
-				return readfd;
+					int readfd = response.getReadFD();
+					if (readfd == -1)
+						setFlag(events, POLLOUT);
+					return readfd;
+				}
 			}
 	}
 	return -1;
@@ -63,14 +65,13 @@ std::pair<bool, int> Connection::sendToClient(short& events) {
 			fatal_perror("send"); // TODO
 		default:
 			response.trimChunk(bytes_sent);
-			if (!response.isDone()) {
-				if (!response.readfdNeedsPoll())
-					setFlag(events, POLLOUT);
-			} else {
+			if (response.isDone()) {
 				shouldClose = response.shouldClose();
 				m_responses.pop();
 				return std::make_pair(shouldClose, response.getReadFD());
 			}
+			if (!response.readfdNeedsPoll())
+				setFlag(events, POLLOUT);
 	}
 	return std::make_pair(shouldClose, -1);
 }
