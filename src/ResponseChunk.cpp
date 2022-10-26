@@ -1,5 +1,6 @@
 #include "MIME.hpp"
 #include "Response.hpp"
+#include "AutoIndex.hpp"
 #include "Server.hpp"
 #include "buffer.hpp"
 #include "defines.hpp"
