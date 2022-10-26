@@ -30,7 +30,8 @@ void Response::processRequest() {
 void Response::setFlags() {
 	if (m_request.hasHeader("Connection"))
 		m_close = (m_request.getHeaderValue("Connection") == "close");
-	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php");
+	m_isCGI			   = (MIME::getExtension(m_request.getLocation()) == "php");
+	m_processedRequest = true;
 }
 
 void Response::handleGet() {
@@ -41,8 +42,8 @@ void Response::handleGet() {
 		m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
 
 		addHeader("Transfer-Encoding", "Chunked");
-		m_readfd					   = m_cgi.popen.readfd;
-		m_isCGIProcessingHeaders	   = true;
+		m_readfd				 = m_cgi.popen.readfd;
+		m_isCGIProcessingHeaders = true;
 
 		close(m_cgi.popen.writefd); // close for now, we are not doing anything with it
 
@@ -60,16 +61,8 @@ void Response::handleGet() {
 // TODO: send to CGI
 void Response::handlePost() {
 	std::string filename = m_server->getRoot() + m_request.getLocation();
-	ssize_t		bytes_written;
 
-	m_readfd = open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (m_readfd < 0)
-		perror("open");
-	bytes_written = write(m_readfd, m_request.getBody().data(), m_request.getBody().length());
-	close(m_readfd);
-
-	m_request.cut(bytes_written);
-	m_statusCode = 201;
+	m_statusCode = 418;
 	addHeader("Location", m_request.getLocation());
 	m_chunk		  = getResponseAsString();
 	m_doneReading = true;

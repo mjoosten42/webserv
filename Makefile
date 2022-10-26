@@ -69,8 +69,10 @@ format: files
 siege: all
 	siege -R siege.conf
 
+lsof: all
+	lsof -c webserv | tail +8
 
-.PHONY: all clean fclean re run files print format siege
+.PHONY: all clean fclean re run files print format siege lsof
 
 # ============================= #
 # 			testing				#

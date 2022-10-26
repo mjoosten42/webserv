@@ -41,7 +41,8 @@ Response::Response():
 	m_isSmallFile(false),
 	m_isCGI(false),
 	m_isCGIProcessingHeaders(false),
-	m_hasReadFDPoller(false) {}
+	m_hasReadFDPoller(false),
+	m_processedRequest(false) {}
 
 void Response::clear() {
 	HTTP::clear();
@@ -105,4 +106,8 @@ bool Response::readfdNeedsPoll() const {
 
 int Response::getReadFD() const {
 	return m_readfd;
+}
+
+bool Response::hasProcessedRequest() const {
+	return m_processedRequest;
 }

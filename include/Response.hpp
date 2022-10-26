@@ -31,6 +31,8 @@ class Response: public HTTP {
 		void clear();
 		int	 getReadFD() const;
 
+		bool hasProcessedRequest() const;
+
 	private:
 		static std::string encodeChunked(std::string& str);
 
@@ -72,4 +74,5 @@ class Response: public HTTP {
 									   // chunked sending mode.
 		bool m_close;				   // Connection: close, close the connection after response is sent
 		bool m_hasReadFDPoller;		   // true if this response needs to poll the readfd before reading anything.
+		bool m_processedRequest;
 };
