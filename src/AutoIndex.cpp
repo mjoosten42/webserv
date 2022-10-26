@@ -1,6 +1,8 @@
 #include "AutoIndex.hpp"
 #include "stringutils.hpp"
 
+#include <dirent.h> // DIR *, opendir, closedir etc.
+
 // Returns the number of files and directories in the specified directory recursively.
 // Stores the names of all files and directories in a string vector it is passed as a param.
 // These stored names have leading tabs to indicate directory structure.
