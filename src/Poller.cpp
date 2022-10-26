@@ -39,23 +39,24 @@ void Poller::pollfdEvent() {
 
 	//  loop over current clients to check if we can read or write
 	for (size_t i = clientsIndex(); i < readFdsIndex(); i++) {
-		Connection& conn = m_connections[m_pollfds[i].fd];
+		pollfd	  & pollfd = m_pollfds[i];
+		Connection& conn   = m_connections[pollfd.fd];
 
-		LOG(RED "CLIENT: " DEFAULT << m_pollfds[i].fd);
-		LOG(m_pollfds[i].fd << RED ": Events set: " << getEventsAsString(m_pollfds[i].events) << DEFAULT);
-		LOG(m_pollfds[i].fd << RED ": Events get: " << getEventsAsString(m_pollfds[i].revents) << DEFAULT);
+		LOG(RED "CLIENT: " DEFAULT << pollfd.fd);
+		LOG(pollfd.fd << RED ": Events set: " << getEventsAsString(pollfd.events) << DEFAULT);
+		LOG(pollfd.fd << RED ": Events get: " << getEventsAsString(pollfd.revents) << DEFAULT);
 
-		unsetFlag(m_pollfds[i].events, POLLOUT);
+		unsetFlag(pollfd.events, POLLOUT);
 
-		if (m_pollfds[i].revents & POLLHUP)
+		if (pollfd.revents & POLLHUP)
 			removeClient(i--);
-		if (m_pollfds[i].revents & POLLIN) {
-			int readfd = conn.receiveFromClient(m_pollfds[i].events);
+		if (pollfd.revents & POLLIN) {
+			int readfd = conn.receiveFromClient(pollfd.events);
 			if (readfd != -1)
-				addReadfd(readfd, m_pollfds[i].fd);
+				addReadfd(readfd, pollfd.fd);
 		}
-		if (m_pollfds[i].revents & POLLOUT) {
-			std::pair<bool, int> ret = conn.sendToClient(m_pollfds[i].events);
+		if (pollfd.revents & POLLOUT) {
+			std::pair<bool, int> ret = conn.sendToClient(pollfd.events);
 			if (ret.second != -1)
 				removeReadfd(ret.second);
 			if (ret.first) // returns true if clients wants close
