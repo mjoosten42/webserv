@@ -14,6 +14,7 @@
 
 void Response::processRequest() {
 	setFlags();
+	addDefaultHeaders();
 	switch (m_request.getMethod()) {
 		case GET:
 			handleGet();
@@ -27,78 +28,56 @@ void Response::processRequest() {
 		default:
 			LOG_ERR("Invalid method");
 	}
+	if (!m_isCGI)
+		m_chunk = getResponseAsString();
 }
 
+// All bools are initialized to false
+// Set to true if needed
 void Response::setFlags() {
 	m_processedRequest = true;
-	if (m_request.hasHeader("Connection"))
-		if (m_request.getHeaderValue("Connection") == "close")
+	if (m_request.hasHeader("connection"))
+		if (m_request.getHeaderValue("connection") == "close")
 			m_close = true;
 	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php");
 }
 
 void Response::handleGet() {
-	LOG(RED "Get" DEFAULT);
-	addDefaultHeaders();
-	if (m_isCGI) {
-		// TODO: parse from config
-		m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
+	LOG(RED "Handle Get" DEFAULT);
 
-		addHeader("Transfer-Encoding", "Chunked");
-		m_readfd				 = m_cgi.popen.readfd;
-		m_isCGIProcessingHeaders = true;
-
-		close(m_cgi.popen.writefd); // close for now, we are not doing anything with it
-
-		m_chunk = getStatusLine() + getHeadersAsString();
-
-	} else {
+	if (m_isCGI)
+		handleGetCGI();
+	else
 		m_statusCode = handleGetWithFile();
-	}
 
 	if (m_statusCode != 200)
 		serveError(m_statusCode);
-	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting");
+	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting")
 }
 
 // TODO: send to CGI
 void Response::handlePost() {
 	std::string filename = m_server->getRoot() + m_request.getLocation();
 
-	LOG(RED "Post: " DEFAULT + filename);
-	m_statusCode = 418;
+	LOG(RED "Handle Post: " DEFAULT + filename);
+
 	addHeader("Location", m_request.getLocation());
-	m_chunk		  = getResponseAsString();
+	m_statusCode  = 418;
 	m_doneReading = true;
 }
 
-int Response::handleDelete() {
+void Response::handleDelete() {
 	std::string filename = m_server->getRoot() + m_request.getLocation();
 
-	m_doneReading = true;
-	addDefaultHeaders();
+	LOG(RED "Handle Delete: " DEFAULT + filename);
 
-	LOG(RED "Delete: " DEFAULT + filename);
 	if (unlink(filename.c_str()) == -1) {
-		LOG_ERR("Unlink(" << filename << "): " << strerror(errno));
+		LOG_ERR("Unlink: " << filename << ": " << strerror(errno));
 		if (errno == EACCES)
 			m_statusCode = 403;
-		m_statusCode = 404;
+		else
+			m_statusCode = 404;
 	}
-	m_chunk = getResponseAsString();
-	return 200;
-}
-
-int Response::autoIndex(std::string path_to_index) {
-	addDefaultHeaders();
-	m_statusCode = 200;
-
-	addHeader("Content-Type", "text/html");
-	addToBody(autoIndexHtml(path_to_index, m_server->getRoot()));
-
-	m_chunk		  = getResponseAsString();
-	m_doneReading = true;
-	return (200);
 }
 
 // TODO: Fix this. I added an ugly hacky param in case the file served is supposed ot be an error page.
@@ -120,18 +99,29 @@ int Response::handleGetWithFile(std::string file) {
 		if (errno == EACCES) // TODO: check if this is allowed? Subject says something about checking errno, not sure if
 							 // it applies here?
 			return 403;
-		else {
-			if (autoIndexInstead) {
-				return autoIndex(filename.substr(0, filename.find("index.html")));
-			} else {
-				return 404;
-			}
-		}
+		else if (autoIndexInstead)
+			return autoIndex(filename.substr(0, filename.find("index.html")));
+		else
+			return 404;
 	}
 
 	addHeader("Content-Type", MIME::fromFileName(filename));
 
 	return getFirstChunk();
+}
+
+void Response::handleGetCGI() {
+	LOG(RED "Handle CGI" DEFAULT);
+	// TODO: parse from config
+	m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
+
+	addHeader("Transfer-Encoding", "Chunked");
+	m_readfd					= m_cgi.popen.readfd;
+	m_CGI_DoneProcessingHeaders = false;
+
+	close(m_cgi.popen.writefd); // close for now, we are not doing anything with it
+
+	m_chunk = getStatusLine() + getHeadersAsString();
 }
 
 // this function removes bytesSent amount of bytes from the beginning of the chunk.
@@ -159,7 +149,6 @@ int Response::getFirstChunk() {
 	else
 		addHeader("Transfer-Encoding", "Chunked");
 
-	m_chunk = getResponseAsString();
 	return 200;
 }
 
@@ -171,10 +160,11 @@ void Response::getCGIHeaderChunk() {
 	if (pos == std::string::npos) {
 		m_chunk += block;
 	} else {
-		m_isCGIProcessingHeaders = false;
-		std::string headers		 = block.substr(0, pos);
-		block					 = block.substr(pos);
-		m_chunk += headers + encodeChunked(block);
+		m_CGI_DoneProcessingHeaders = true;
+		std::string headers			= block.substr(0, pos);
+		block						= block.substr(pos);
+		encodeChunked(block);
+		m_chunk += headers + block;
 	}
 }
 
@@ -183,21 +173,21 @@ std::string& Response::getNextChunk() {
 	if (m_doneReading || m_chunk.size() > BUFFER_SIZE)
 		return m_chunk;
 
-	if (m_isCGIProcessingHeaders) {
+	if (m_isCGI && !m_CGI_DoneProcessingHeaders) {
 		getCGIHeaderChunk();
 		return m_chunk;
 	}
 
 	std::string block = readBlockFromFile();
-	if (m_isSmallFile)
-		m_chunk += block;
-	else
-		m_chunk += encodeChunked(block);
+	if (!m_isSmallFile)
+		encodeChunked(block);
+	m_chunk += block;
 	return m_chunk;
 }
 
-std::string Response::encodeChunked(std::string& str) {
-	return toHex(str.length()) + CRLF + str + CRLF;
+void Response::encodeChunked(std::string& str) {
+	str.insert(0, toHex(str.length()) + CRLF);
+	str += CRLF;
 }
 
 std::string Response::readBlockFromFile() {
@@ -216,4 +206,12 @@ std::string Response::readBlockFromFile() {
 			block.append(buf, bytes_read);
 	}
 	return block;
+}
+
+int Response::autoIndex(std::string path_to_index) {
+	addHeader("Content-Type", "text/html");
+	addToBody(autoIndexHtml(path_to_index, m_server->getRoot()));
+
+	m_doneReading = true;
+	return 200;
 }

@@ -24,9 +24,9 @@ int Connection::receiveFromClient(short& events) {
 		case 0:
 			break;
 		default:
-			LOG(RED << std::string(winSize(), '-') << DEFAULT);
-			LOG(std::string(buf, bytes_received));
-			LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(std::string(buf, bytes_received));
+			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
 
 			Response& response = getLastResponse();
 			Request & request  = response.getRequest();
@@ -60,6 +60,11 @@ std::pair<bool, int> Connection::sendToClient(short& events) {
 	bool		 shouldClose = false;
 
 	LOG(RED "Send: " DEFAULT << bytes_sent);
+
+	// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+	// LOG(str.substr(0, bytes_sent));
+	// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+
 	switch (bytes_sent) {
 		case -1:
 			fatal_perror("send"); // TODO
@@ -70,7 +75,7 @@ std::pair<bool, int> Connection::sendToClient(short& events) {
 				m_responses.pop();
 				return std::make_pair(shouldClose, response.getReadFD());
 			}
-			if (!response.readfdNeedsPoll())
+			if (response.getReadFD() == -1)
 				setFlag(events, POLLOUT);
 	}
 	return std::make_pair(shouldClose, -1);

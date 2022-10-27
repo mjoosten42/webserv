@@ -1,12 +1,13 @@
 #include "utils.hpp"
+
 #include "logger.hpp"
 
 #include <fcntl.h>	// fcntl
 #include <stdio.h>	// perror
 #include <stdlib.h> // exit
 #include <string>
-#include <sys/stat.h> // stat
 #include <sys/ioctl.h> // ioctl
+#include <sys/stat.h>  // stat
 #include <vector>
 
 // perrors and exits.

@@ -68,7 +68,7 @@ int Request::parse() {
 				if ((status = checkSpecialHeaders()) != 200)
 					return status;
 				m_state = BODY;
-				if (hasHeader("Content-Length") && m_contentLength == 0)
+				if (hasHeader("content-length") && m_contentLength == 0)
 					m_state = DONE;
 				break;
 			}
@@ -119,13 +119,6 @@ int Request::parseStartLine(const std::string& line) {
 		return 505;
 	}
 
-	// TODO: REMOVE? This can break the auto-indexing feature, and is also already done in Response.
-	// Unless there is a reason to keep it I think we should delete it...
-	
-	// // serve index.html when the location ends with a /
-	// if (m_location.back() == '/')
-	// 	m_location += "index.html"; // TODO: when index php, do just that instead etc.
-
 	return 200;
 }
 
@@ -148,8 +141,9 @@ int Request::parseHeader(const std::string& line) {
 		LOG_ERR(RED "Header field must end in ':' : " << line << DEFAULT);
 		return 400;
 	}
+	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so tolower them.
 	header.first.pop_back();
-	if (header.first == "Content-Length")
+	if (header.first == "content-length")
 		m_contentLength = stringToIntegral<std::size_t>(header.second);
 	insert = m_headers.insert(header);
 	if (!insert.second) {
@@ -160,15 +154,15 @@ int Request::parseHeader(const std::string& line) {
 }
 
 int Request::checkSpecialHeaders() {
-	if (hasHeader("Host")) {
-		std::string hostHeader = getHeaderValue("Host");
+	if (hasHeader("host")) {
+		std::string hostHeader = getHeaderValue("host");
 		m_host				   = hostHeader.substr(0, hostHeader.find(':'));
 	} else {
 		LOG_ERR("Missing host");
 		return 400;
 	}
-	if (hasHeader("Content-Length"))
-		m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("Content-Length"));
+	if (hasHeader("content-length"))
+		m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("content-length"));
 	return 200;
 }
 

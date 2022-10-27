@@ -1,4 +1,5 @@
 #include "AutoIndex.hpp"
+
 #include "logger.hpp"
 #include "stringutils.hpp"
 

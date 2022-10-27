@@ -8,7 +8,7 @@ printenv — a CGI program that just prints its environment
 
 =cut
 
-sleep 5;
+sleep 1;
 
 print "Content-Type: text/plain\n\n";
 

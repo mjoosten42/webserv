@@ -23,8 +23,6 @@ struct Popen {
 
 class CGI {
 	public:
-		CGI();
-		~CGI();
 		CGI& operator=(const CGI& other);
 
 		int start(const Request	   & request,

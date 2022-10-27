@@ -40,7 +40,7 @@ Response::Response():
 	m_doneReading(false),
 	m_isSmallFile(false),
 	m_isCGI(false),
-	m_isCGIProcessingHeaders(false),
+	m_CGI_DoneProcessingHeaders(false),
 	m_hasReadFDPoller(false),
 	m_processedRequest(false) {}
 
@@ -83,7 +83,7 @@ std::string Response::getResponseAsString() {
 }
 
 void Response::addDefaultHeaders() {
-	addHeader("Hostname", m_request.getHost());
+	addHeader("Host", m_request.getHost());
 	if (!m_server->getServerSoftwareName().empty())
 		addHeader("Server", m_server->getServerSoftwareName());
 }

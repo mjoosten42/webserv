@@ -32,7 +32,7 @@ Server::Server() {
 
 // String
 static void overwriteIfSpecified(std::string		search,
-								 std::string		& field,
+								 std::string	  & field,
 								 std::string		defaultVal,
 								 t_block_directive *constructor_specs) {
 	field						= defaultVal;
@@ -45,7 +45,7 @@ static void overwriteIfSpecified(std::string		search,
 static void overwriteIfSpecified(std::string			   search,
 								 std::vector<std::string>& field,
 								 std::string			   defaultVal,
-								 t_block_directive		   *constructor_specs) {
+								 t_block_directive		  *constructor_specs) {
 	std::string content			= defaultVal;
 	std::string val_from_config = constructor_specs->fetch_simple(search);
 	if (!val_from_config.empty())
