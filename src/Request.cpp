@@ -123,6 +123,10 @@ int Request::parseStartLine(const std::string& line) {
 		return 505;
 	}
 
+	// serve index.html when the location ends with a /
+	if (m_location.back() == '/')
+		m_location += "index.html"; // TODO: when index php, do just that instead etc.
+
 	return 200;
 }
 

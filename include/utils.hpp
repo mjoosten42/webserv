@@ -53,5 +53,3 @@ T stringToIntegral(const std::string& number) {
 	ss >> value;
 	return value;
 }
-
-bool isDirectory(const char *path);
