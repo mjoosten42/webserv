@@ -1,6 +1,8 @@
 #include "AutoIndex.hpp"
 #include "stringutils.hpp"
 
+//TODO: Still need to fix the behaviour when a directory is selected in the auto indexing.
+
 // Returns the number of files and directories in the specified directory recursively.
 // Stores the names of all files and directories in a string vector it is passed as a param.
 // These stored names have leading tabs to indicate directory structure.
