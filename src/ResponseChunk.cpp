@@ -1,7 +1,6 @@
-#include "Response.hpp"
-
 #include "AutoIndex.hpp"
 #include "MIME.hpp"
+#include "Response.hpp"
 #include "Server.hpp"
 #include "buffer.hpp"
 #include "defines.hpp"
@@ -59,7 +58,6 @@ void Response::handleGet() {
 	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting");
 }
 
-
 // EXAMPLE USAGE ONLY:
 void Response::autoIndex() {
 	addDefaultHeaders();
@@ -67,7 +65,7 @@ void Response::autoIndex() {
 
 	addHeader("Content-Type", "text/html");
 	addToBody(autoIndexHtml(m_server->getRoot()));
-	
+
 	m_chunk		  = getResponseAsString();
 	m_doneReading = true;
 }

@@ -84,8 +84,8 @@ std::string Response::getResponseAsString() {
 
 void Response::addDefaultHeaders() {
 	addHeader("Hostname", m_request.getHost());
-	if (!m_server->getName().empty())
-		addHeader("Server", m_server->getName());
+	if (!m_server->getNames().empty())
+		addHeader("Server", *(m_server->getNames().begin()));
 }
 
 Request& Response::getRequest() {

@@ -1,7 +1,8 @@
 #include "AutoIndex.hpp"
+
 #include "stringutils.hpp"
 
-//TODO: Still need to fix the behaviour when a directory is selected in the auto indexing.
+// TODO: Still need to fix the behaviour when a directory is selected in the auto indexing.
 
 // Returns the number of files and directories in the specified directory recursively.
 // Stores the names of all files and directories in a string vector it is passed as a param.
@@ -38,7 +39,6 @@ unsigned int
 	if (derp == NULL)
 		return (ret);
 	struct dirent *contents;
-	// tabulation = tabulation + directory + "/";
 	while ((contents = readdir(derp)) != NULL) {
 		std::string name = contents->d_name;
 		if (name != "." && name != "..") {
@@ -54,8 +54,7 @@ unsigned int
 
 // Returns as a string the html body of a Response that indexes all files and sub directories of a given dir.
 // Params: the 'dir_path' passed must be a path relative to the server's root directory.
-std::string	autoIndexHtml(std::string dir_path)
-{
+std::string autoIndexHtml(std::string dir_path) {
 	std::vector<std::string> content_paths;
 	recursivePathCount(dir_path, content_paths);
 	std::vector<std::string>::iterator cp_it = content_paths.begin();
@@ -66,12 +65,11 @@ std::string	autoIndexHtml(std::string dir_path)
 
 	std::string ret;
 
-	ret = ret + "<h1> Index of directory: </h1>\r\n";		
-	for (; cp_it != content_paths.end(); cp_it++)
-	{
-		ret = ret + "<p><a href=\"/";
-		ret = ret + *cp_it;
-		ret = ret + "\">";
+	ret = ret + "<h1> Index of directory: </h1>\r\n";
+	for (; cp_it != content_paths.end(); cp_it++) {
+		ret				  = ret + "<p><a href=\"/";
+		ret				  = ret + *cp_it;
+		ret				  = ret + "\">";
 		unsigned int tabs = countAndTrimLeadingWhiteSpace(*cn_it);
 		for (unsigned int i = 0; i < tabs; i++)
 			ret = ret + "<ul>";
