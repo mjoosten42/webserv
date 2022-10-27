@@ -87,12 +87,9 @@ Server::Server(t_block_directive *constructor_specs) {
 	// TODO: also parse that optionally from cfg
 
 	std::string tmp = "/Users/" + std::string(getenv("USER")) + "/Desktop/";
-
-	if (std::string(getenv("USER")) == "jobvan-d")
-		tmp += "proj/webserv/html";
-
-	else
-		tmp += "webserv/html";
+	if (std::string(getenv("USER")) == "jobvan-d") // Lol
+		tmp += "proj/";
+	tmp += "webserv/html";
 
 	//	Nginx default is 80 if super user, otherwise 8000
 	overwriteIfSpecified("listen", m_port, 8000, constructor_specs);
@@ -134,6 +131,30 @@ Server::Server(t_block_directive *constructor_specs) {
 	std::vector<t_block_directive *>::iterator it;
 	for (it = location_config_blocks.begin(); it != location_config_blocks.end(); ++it)
 		m_locations.push_back(Location(*it, this));
+}
+
+const std::string Server::getRootForFile(const std::string file_to_find) const
+{
+	std::string test_path = m_root;
+	int test = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+	if (test != -1)
+	{
+		close(test);
+		return test_path;
+	}
+
+	std::vector<const Location>::iterator litty = m_locations.begin();
+	for(; litty != m_locations.end(); ++litty)
+	{
+		test_path = litty->m_root;
+		test = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+		if (test != -1)
+		{
+			close(test);
+			return test_path;
+		}
+	}
+	return("");
 }
 
 #pragma region getters

@@ -17,6 +17,11 @@ int main(int argc, char *argv[]) {
 	std::vector<Listener> listeners;
 	initFromConfig(config, listeners);
 
+	//DEBUG TESTS:
+	std::string test = (listeners.begin())->getServerByHost("amogus.localhst.co.uk").getRootForFile("amogus.jpg");	
+	LOG("Result:");
+	LOG(test);
+
 	Poller poller(listeners.begin(), listeners.end());
 
 	poller.start();
