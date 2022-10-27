@@ -15,6 +15,8 @@ class Server {
 		Server();
 		Server(t_block_directive *constructor_specs);
 
+		const std::string getRootForFile(const std::string file_to_find) const;
+
 		const std::string			 & getRoot() const;
 		const std::string			 & getHost() const;
 		const std::string			 & getServerSoftwareName() const;
