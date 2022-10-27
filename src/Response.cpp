@@ -71,8 +71,8 @@ std::string Response::getStatusLine() const {
 std::string Response::getResponseAsString() {
 	std::string response;
 
-	if (!hasHeader("Transfer-Encoding") && !hasHeader("Content-Length"))
-		addHeader("Content-Length", toString(m_body.length()));
+	if (!hasHeader("transfer-encoding") && !hasHeader("content-length"))
+		addHeader("content-length", toString(m_body.length()));
 
 	response += getStatusLine();
 	response += getHeadersAsString();
@@ -83,9 +83,9 @@ std::string Response::getResponseAsString() {
 }
 
 void Response::addDefaultHeaders() {
-	addHeader("Host", m_request.getHost());
+	addHeader("host", m_request.getHost());
 	if (!m_server->getServerSoftwareName().empty())
-		addHeader("Server", m_server->getServerSoftwareName());
+		addHeader("server", m_server->getServerSoftwareName());
 }
 
 Request& Response::getRequest() {
