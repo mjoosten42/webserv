@@ -53,16 +53,7 @@ void unsetFlag(short& events, int flag) {
 	events &= ~flag;
 }
 
-// returns true if path is a directory. False when not or stat errors.
-bool isDirectory(const char *path) {
-	struct stat s;
-	if (stat(path, &s) == -1) {
-		LOG_ERR("stat: " << strerror(errno));
-		return false;
-	}
-	return static_cast<bool>(S_ISDIR(s.st_mode));
-}
-
+// gets the width of the terminal window
 size_t winSize() {
 	struct winsize w;
 	ioctl(1, TIOCGWINSZ, &w);
