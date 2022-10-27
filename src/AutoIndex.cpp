@@ -1,5 +1,5 @@
 #include "AutoIndex.hpp"
-
+#include "logger.hpp"
 #include "stringutils.hpp"
 
 // TODO: Still need to fix the behaviour when a directory is selected in the auto indexing.
@@ -58,6 +58,7 @@ unsigned int
 std::string autoIndexHtml(std::string dir_path, std::string root) {
 	std::string relative_path = dir_path.substr(root.length());
 
+	LOG("AutoIndexing...");
 	std::vector<std::string> content_paths;
 	recursivePathCount(dir_path, content_paths);
 	std::vector<std::string>::iterator cp_it = content_paths.begin();

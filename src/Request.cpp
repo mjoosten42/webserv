@@ -119,9 +119,12 @@ int Request::parseStartLine(const std::string& line) {
 		return 505;
 	}
 
-	// serve index.html when the location ends with a /
-	if (m_location.back() == '/')
-		m_location += "index.html"; // TODO: when index php, do just that instead etc.
+	// TODO: REMOVE? This can break the auto-indexing feature, and is also already done in Response.
+	// Unless there is a reason to keep it I think we should delete it...
+	
+	// // serve index.html when the location ends with a /
+	// if (m_location.back() == '/')
+	// 	m_location += "index.html"; // TODO: when index php, do just that instead etc.
 
 	return 200;
 }
