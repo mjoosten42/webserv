@@ -90,7 +90,7 @@ int CGI::start(const Request& req, const Server *server, const std::string& comm
 
 	// TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
 	em["GATEWAY_INTERFACE"] = CGI_VERSION;
-	em["SERVER_SOFTWARE"]	= *(server->getNames().begin());
+	em["SERVER_SOFTWARE"]	= server->getServerSoftwareName();
 	em["SERVER_NAME"]		= req.getHost();
 	em["SERVER_PORT"]	  = toString(server->getPort()); // TODO: when multiple ports, it should be the listener's port.
 	em["SERVER_PROTOCOL"] = HTTP_VERSION;

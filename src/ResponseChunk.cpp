@@ -108,11 +108,6 @@ int Response::handleGetWithFile(std::string file) {
 	if (!file.empty())
 		filename = file;
 
-	// if file is a directory, append a /. It is tempting to first check if the file doesn't have an extention
-	// to prevent an unnecessary stat call, but this is wrong.
-	if (filename.back() != '/' && isDirectory(filename.c_str()))
-		filename += "/";
-
 	if (filename.back() == '/') {
 		filename += "index.html"; // TODO: get from config. This may also be a .php file for example.
 		autoIndexInstead = m_server->getAutoIndex();
@@ -125,10 +120,13 @@ int Response::handleGetWithFile(std::string file) {
 		if (errno == EACCES) // TODO: check if this is allowed? Subject says something about checking errno, not sure if
 							 // it applies here?
 			return 403;
-		else if (!autoIndexInstead)
-			return 404;
-		else
-			return autoIndex(filename.substr(0, filename.find("index.html")));
+		else {
+			if (autoIndexInstead) {
+				return autoIndex(filename.substr(0, filename.find("index.html")));
+			} else {
+				return 404;
+			}
+		}
 	}
 
 	addHeader("Content-Type", MIME::fromFileName(filename));

@@ -1,5 +1,7 @@
 #pragma once
 
+#define SERVER_SOFTWARE_DEFAULT_NAME "WebSus 0.1"
+
 // HTTP RFC newline
 #define CRLF "\r\n"
 

@@ -32,7 +32,7 @@ Server::Server() {
 
 // String
 static void overwriteIfSpecified(std::string		search,
-								 std::string	  & field,
+								 std::string		& field,
 								 std::string		defaultVal,
 								 t_block_directive *constructor_specs) {
 	field						= defaultVal;
@@ -45,7 +45,7 @@ static void overwriteIfSpecified(std::string		search,
 static void overwriteIfSpecified(std::string			   search,
 								 std::vector<std::string>& field,
 								 std::string			   defaultVal,
-								 t_block_directive		  *constructor_specs) {
+								 t_block_directive		   *constructor_specs) {
 	std::string content			= defaultVal;
 	std::string val_from_config = constructor_specs->fetch_simple(search);
 	if (!val_from_config.empty())
@@ -86,10 +86,19 @@ Server::Server(t_block_directive *constructor_specs) {
 	m_host = "127.0.0.1"; //	The only address we handle requests on is localhost
 	// TODO: also parse that optionally from cfg
 
-	std::string tmp = "/Users/" + std::string(getenv("USER")) + "/Desktop/webserv/html";
+	std::string tmp = "/Users/" + std::string(getenv("USER")) + "/Desktop/";
+
+	if (std::string(getenv("USER")) == "jobvan-d") {
+		tmp += "proj/webserv/html";
+	}
+	else {
+		tmp += "webserv/html";
+	}
 
 	//	Nginx default is 80 if super user, otherwise 8000
 	overwriteIfSpecified("listen", m_port, 8000, constructor_specs);
+
+	overwriteIfSpecified("server", m_server_software_name, SERVER_SOFTWARE_DEFAULT_NAME, constructor_specs);
 	//	Nginx default: ""
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
 	//	Nginx default: "html" TODO: absolute
@@ -137,6 +146,10 @@ const std::string& Server::getHost() const {
 
 const std::string& Server::getRoot() const {
 	return m_root;
+}
+
+const std::string& Server::getServerSoftwareName() const {
+	return m_server_software_name;
 }
 
 const std::vector<std::string>& Server::getNames() const {
