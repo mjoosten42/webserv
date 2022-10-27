@@ -1,6 +1,4 @@
 #include "utils.hpp"
-
-#include "sys/ioctl.h"
 #include "logger.hpp"
 
 #include <fcntl.h>	// fcntl
@@ -8,6 +6,7 @@
 #include <stdlib.h> // exit
 #include <string>
 #include <sys/stat.h> // stat
+#include <sys/ioctl.h> // ioctl
 #include <vector>
 
 // perrors and exits.
