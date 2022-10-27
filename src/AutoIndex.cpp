@@ -45,16 +45,19 @@ unsigned int
 			file_structure.push_back(tabulation + name);
 			ret++;
 			std::string next_dir = directory + "/" + name;
-			ret					 = ret + recursiveFileCount(next_dir, file_structure, tabulation + name + "/");
+			ret					 = ret + recursivePathCount(next_dir, file_structure, tabulation + name + "/");
 		}
 	}
 	closedir(derp);
 	return (ret);
 }
 
-// Returns as a string the html body of a Response that indexes all files and sub directories of a given dir.
-// Params: the 'dir_path' passed must be a path relative to the server's root directory.
-std::string autoIndexHtml(std::string dir_path) {
+//	Returns as a string the html body of a Response that indexes all files and sub directories of a given dir.
+//	Params: the 'dir_path' passed must be a path from, and including, the server's root directory.
+//	Params: the 'root' passed must be the root of the server that we are indexing relative to.
+std::string autoIndexHtml(std::string dir_path, std::string root) {
+	std::string relative_path = dir_path.substr(root.length());
+
 	std::vector<std::string> content_paths;
 	recursivePathCount(dir_path, content_paths);
 	std::vector<std::string>::iterator cp_it = content_paths.begin();
@@ -67,8 +70,8 @@ std::string autoIndexHtml(std::string dir_path) {
 
 	ret = ret + "<h1> Index of directory: </h1>\r\n";
 	for (; cp_it != content_paths.end(); cp_it++) {
-		ret				  = ret + "<p><a href=\"/";
-		ret				  = ret + *cp_it;
+		ret				  = ret + "<p><a href=\"";
+		ret				  = ret + relative_path + *cp_it;
 		ret				  = ret + "\">";
 		unsigned int tabs = countAndTrimLeadingWhiteSpace(*cn_it);
 		for (unsigned int i = 0; i < tabs; i++)

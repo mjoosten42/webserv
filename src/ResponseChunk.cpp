@@ -58,16 +58,16 @@ void Response::handleGet() {
 	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting");
 }
 
-// EXAMPLE USAGE ONLY:
-void Response::autoIndex() {
+int Response::autoIndex(std::string path_to_index) {
 	addDefaultHeaders();
 	m_statusCode = 200;
 
 	addHeader("Content-Type", "text/html");
-	addToBody(autoIndexHtml(m_server->getRoot()));
+	addToBody(autoIndexHtml(path_to_index, m_server->getRoot()));
 
 	m_chunk		  = getResponseAsString();
 	m_doneReading = true;
+	return (200);
 }
 
 // TODO: send to CGI
@@ -82,27 +82,32 @@ void Response::handlePost() {
 
 // TODO: Fix this. I added an ugly hacky param in case the file served is supposed ot be an error page.
 int Response::handleGetWithStaticFile(std::string file) {
-	std::string filename = m_server->getRoot() + m_request.getLocation();
+	bool		autoIndexInstead = false;
+	std::string filename		 = m_server->getRoot() + m_request.getLocation();
 	if (!file.empty())
 		filename = file;
 
 	// if file is a directory, append a /. It is tempting to first check if the file doesn't have an extention
 	// to prevent an unnecessary stat call, but this is wrong.
-	if (filename.back() != '/' && isDirectory(filename.c_str())) {
+	if (filename.back() != '/' && isDirectory(filename.c_str()))
 		filename += "/";
-	}
 
 	if (filename.back() == '/') {
 		filename += "index.html"; // TODO: get from config. This may also be a .php file for example.
+		autoIndexInstead = m_server->getAutoIndex();
 	}
 
 	LOG("Handle static: " + filename);
 
 	m_readfd = open(filename.c_str(), O_RDONLY);
 	if (m_readfd == -1) {
-		if (errno == EACCES)
+		if (errno == EACCES) // TODO: check if this is allowed? Subject says something about checking errno, not sure if
+							 // it applies here?
 			return 403;
-		return 404;
+		else if (!autoIndexInstead)
+			return 404;
+		else
+			return autoIndex(filename.substr(0, filename.find("index.html")));
 	}
 
 	addHeader("Content-Type", MIME::fromFileName(filename));

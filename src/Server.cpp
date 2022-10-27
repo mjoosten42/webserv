@@ -145,7 +145,11 @@ const int& Server::getCMB() const {
 }
 
 const std::map<int, std::string>& Server::getErrorPages() const {
-	return (m_error_page);
+	return m_error_page;
+}
+
+const bool& Server::getAutoIndex() const {
+	return m_autoindex;
 }
 
 #pragma endregion

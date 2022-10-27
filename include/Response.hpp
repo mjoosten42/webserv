@@ -50,7 +50,7 @@ class Response: public HTTP {
 		void sendFail(int code, const std::string& msg);
 		void sendMoved(const std::string& location);
 		int	 serveError(int code);
-		void autoIndex();
+		int	 autoIndex(std::string path_to_index);
 
 		int getFirstChunk();
 

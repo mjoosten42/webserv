@@ -22,6 +22,7 @@ class Server {
 		const int						& getCMB() const;
 		short							  getPort() const;
 		const std::map<int, std::string>& getErrorPages() const;
+		const bool						& getAutoIndex() const;
 
 	private:
 		std::vector<Location>	   m_locations;

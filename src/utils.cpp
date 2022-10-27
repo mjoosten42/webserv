@@ -1,13 +1,13 @@
 #include "utils.hpp"
+
 #include "logger.hpp"
 
 #include <fcntl.h>	// fcntl
 #include <stdio.h>	// perror
 #include <stdlib.h> // exit
 #include <string>
-#include <vector>
-
 #include <sys/stat.h> // stat
+#include <vector>
 
 // perrors and exits.
 void fatal_perror(const char *msg) {
@@ -56,7 +56,7 @@ void unsetFlag(short& events, int flag) {
 bool isDirectory(const char *path) {
 	struct stat s;
 	if (stat(path, &s) == -1) {
-		LOG_ERR("stat: " <<  strerror(errno));
+		LOG_ERR("stat: " << strerror(errno));
 		return false;
 	}
 	return static_cast<bool>(S_ISDIR(s.st_mode));
