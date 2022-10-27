@@ -5,6 +5,7 @@
 #include <stdlib.h> // exit
 #include <string>
 #include <vector>
+#include "sys/ioctl.h"
 
 // perrors and exits.
 void fatal_perror(const char *msg) {
@@ -47,4 +48,10 @@ void setFlag(short& events, int flag) {
 
 void unsetFlag(short& events, int flag) {
 	events &= ~flag;
+}
+
+size_t	winSize() {
+	struct winsize w;
+    ioctl(1, TIOCGWINSZ, &w);
+	return w.ws_col;
 }

@@ -1,4 +1,5 @@
 #include "AutoIndex.hpp"
+
 #include "stringutils.hpp"
 
 #include <dirent.h> // DIR *, opendir, closedir etc.
@@ -54,8 +55,7 @@ unsigned int
 
 // Returns as a string the html body of a Response that indexes all files and sub directories of a given dir.
 // Params: the 'dir_path' passed must be a path relative to the server's root directory.
-std::string	autoIndexHtml(std::string dir_path)
-{
+std::string autoIndexHtml(std::string dir_path) {
 	std::vector<std::string> content_paths;
 	recursivePathCount(dir_path, content_paths);
 	std::vector<std::string>::iterator cp_it = content_paths.begin();
@@ -66,12 +66,11 @@ std::string	autoIndexHtml(std::string dir_path)
 
 	std::string ret;
 
-	ret = ret + "<h1> Index of directory: </h1>\r\n";		
-	for (; cp_it != content_paths.end(); cp_it++)
-	{
-		ret = ret + "<p><a href=\"/";
-		ret = ret + *cp_it;
-		ret = ret + "\">";
+	ret = ret + "<h1> Index of directory: </h1>\r\n";
+	for (; cp_it != content_paths.end(); cp_it++) {
+		ret				  = ret + "<p><a href=\"/";
+		ret				  = ret + *cp_it;
+		ret				  = ret + "\">";
 		unsigned int tabs = countAndTrimLeadingWhiteSpace(*cn_it);
 		for (unsigned int i = 0; i < tabs; i++)
 			ret = ret + "<ul>";

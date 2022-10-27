@@ -1,7 +1,6 @@
-#include "Response.hpp"
-
 #include "AutoIndex.hpp"
 #include "MIME.hpp"
+#include "Response.hpp"
 #include "Server.hpp"
 #include "buffer.hpp"
 #include "defines.hpp"
@@ -23,6 +22,7 @@ void Response::processRequest() {
 			handlePost();
 			break;
 		case DELETE:
+			handleDelete();
 			break;
 		default:
 			LOG_ERR("Invalid method");
@@ -30,13 +30,15 @@ void Response::processRequest() {
 }
 
 void Response::setFlags() {
-	if (m_request.hasHeader("Connection"))
-		m_close = (m_request.getHeaderValue("Connection") == "close");
-	m_isCGI			   = (MIME::getExtension(m_request.getLocation()) == "php");
 	m_processedRequest = true;
+	if (m_request.hasHeader("Connection"))
+		if (m_request.getHeaderValue("Connection") == "close")
+			m_close = true;
+	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php");
 }
 
 void Response::handleGet() {
+	LOG(RED "Get" DEFAULT);
 	addDefaultHeaders();
 	if (m_isCGI) {
 		// TODO: parse from config
@@ -51,7 +53,7 @@ void Response::handleGet() {
 		m_chunk = getStatusLine() + getHeadersAsString();
 
 	} else {
-		m_statusCode = handleGetWithStaticFile();
+		m_statusCode = handleGetWithFile();
 	}
 
 	if (m_statusCode != 200)
@@ -59,6 +61,33 @@ void Response::handleGet() {
 	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting");
 }
 
+// TODO: send to CGI
+void Response::handlePost() {
+	std::string filename = m_server->getRoot() + m_request.getLocation();
+
+	LOG(RED "Post: " DEFAULT + filename);
+	m_statusCode = 418;
+	addHeader("Location", m_request.getLocation());
+	m_chunk		  = getResponseAsString();
+	m_doneReading = true;
+}
+
+int Response::handleDelete() {
+	std::string filename = m_server->getRoot() + m_request.getLocation();
+
+	m_doneReading = true;
+	addDefaultHeaders();
+
+	LOG(RED "Delete: " DEFAULT + filename);
+	if (unlink(filename.c_str()) == -1) {
+		LOG_ERR("Unlink(" << filename << "): " << strerror(errno));
+		if (errno == EACCES)
+			m_statusCode = 403;
+		m_statusCode = 404;
+	}
+	m_chunk = getResponseAsString();
+	return 200;
+}
 
 // EXAMPLE USAGE ONLY:
 void Response::autoIndex() {
@@ -67,28 +96,18 @@ void Response::autoIndex() {
 
 	addHeader("Content-Type", "text/html");
 	addToBody(autoIndexHtml(m_server->getRoot()));
-	
-	m_chunk		  = getResponseAsString();
-	m_doneReading = true;
-}
 
-// TODO: send to CGI
-void Response::handlePost() {
-	std::string filename = m_server->getRoot() + m_request.getLocation();
-
-	m_statusCode = 418;
-	addHeader("Location", m_request.getLocation());
 	m_chunk		  = getResponseAsString();
 	m_doneReading = true;
 }
 
 // TODO: Fix this. I added an ugly hacky param in case the file served is supposed ot be an error page.
-int Response::handleGetWithStaticFile(std::string file) {
+int Response::handleGetWithFile(std::string file) {
 	std::string filename = m_server->getRoot() + m_request.getLocation();
 	if (!file.empty())
 		filename = file;
 	// filename = m_server->getRoot() + "/" + file;
-	LOG("Handle static: " + filename);
+	LOG("Get: File: " + filename);
 
 	m_readfd = open(filename.c_str(), O_RDONLY);
 	if (m_readfd == -1) {

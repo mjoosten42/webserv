@@ -45,7 +45,9 @@ Server::Server(t_block_directive *constructor_specs) {
 	if (!val_from_config.empty())
 		m_name = val_from_config;
 
-	m_root			= "./html"; //	Nginx default: "html" TODO: absolute
+	m_root += "/Users/";
+	m_root += getenv("USER");
+	m_root += "/Desktop/webserv/html"; // TODO: remove
 	val_from_config = constructor_specs->fetch_simple("root");
 	if (!val_from_config.empty())
 		m_root = val_from_config;
@@ -61,7 +63,7 @@ Server::Server(t_block_directive *constructor_specs) {
 			break;
 		std::string full_path = m_root + "/" + *error_it;
 		// print("Checking user-defined error page: " + full_path);
-		int user_defined_page = open((full_path).c_str(), O_RDONLY);
+		int user_defined_page = open(full_path.c_str(), O_RDONLY);
 		if (user_defined_page == -1)
 			LOG_ERR(RED << "WARNING: The custom error pages have been incorrectly configured." << DEFAULT);
 		else

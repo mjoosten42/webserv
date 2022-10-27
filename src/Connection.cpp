@@ -24,9 +24,9 @@ int Connection::receiveFromClient(short& events) {
 		case 0:
 			break;
 		default:
-			LOG(RED "----START BUF" << std::string(40, '-') << DEFAULT);
+			LOG(RED << std::string(winSize(), '-') << DEFAULT);
 			LOG(std::string(buf, bytes_received));
-			LOG(RED "----END BUF" << std::string(40, '-') << DEFAULT);
+			LOG(RED << std::string(winSize(), '-') << DEFAULT);
 
 			Response& response = getLastResponse();
 			Request & request  = response.getRequest();

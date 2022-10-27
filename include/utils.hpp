@@ -53,3 +53,5 @@ T stringToIntegral(const std::string& number) {
 	ss >> value;
 	return value;
 }
+
+size_t	winSize();
