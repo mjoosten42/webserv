@@ -36,8 +36,8 @@ void Response::processRequest() {
 // Set to true if needed
 void Response::setFlags() {
 	m_processedRequest = true;
-	if (m_request.hasHeader("Connection"))
-		if (m_request.getHeaderValue("Connection") == "close")
+	if (m_request.hasHeader("connection"))
+		if (m_request.getHeaderValue("connection") == "close")
 			m_close = true;
 	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php");
 }

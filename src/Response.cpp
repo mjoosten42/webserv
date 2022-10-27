@@ -83,7 +83,7 @@ std::string Response::getResponseAsString() {
 }
 
 void Response::addDefaultHeaders() {
-	addHeader("Hostname", m_request.getHost());
+	addHeader("Host", m_request.getHost());
 	if (!m_server->getServerSoftwareName().empty())
 		addHeader("Server", m_server->getServerSoftwareName());
 }
