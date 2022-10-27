@@ -1,6 +1,8 @@
+#pragma once
+
+#include <dirent.h> // DIR *, opendir, closedir etc.
 #include <vector>
 #include <string>
-#include <dirent.h>
 
 unsigned int recursiveFileCount(const std::string		  directory,
 								std::vector<std::string>& file_structure,

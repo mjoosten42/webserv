@@ -16,11 +16,11 @@ EnvironmentMap::EnvironmentMap(const EnvironmentMap& other) {
 EnvironmentMap::~EnvironmentMap() {}
 
 EnvironmentMap& EnvironmentMap::operator=(const EnvironmentMap& rhs) {
-	m_map = rhs.m_map; //  is this a shallow copy?
+	m_map = rhs.m_map;
 	return *this;
 }
 
-//
+// fills the EnvironmentMap with the environ.
 void EnvironmentMap::initFromEnviron() {
 	extern char **environ;
 
