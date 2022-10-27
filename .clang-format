@@ -93,7 +93,7 @@ SpacesInAngles: Never
 SpacesInConditionalStatement: false
 SpacesInLineCommentPrefix:
   Minimum: 1
-  Maximum: -1
+  Maximum: 1
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: c++03 # c++98 not supported

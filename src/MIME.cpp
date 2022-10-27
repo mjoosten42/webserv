@@ -15,7 +15,7 @@ typedef struct s_entry {
 		const char *value;
 } t_entry;
 
-//  source: https://github.com/lasselukkari/MimeTypes/blob/7ee73f229e8dc04bc653559b45c0659efae854e7/MimeTypes.cpp
+// source: https://github.com/lasselukkari/MimeTypes/blob/7ee73f229e8dc04bc653559b45c0659efae854e7/MimeTypes.cpp
 const static t_entry entries[] = { { "*3gpp", "audio/3gpp" },
 								   { "*jpm", "video/jpm" },
 								   { "*mp3", "audio/mp3" },

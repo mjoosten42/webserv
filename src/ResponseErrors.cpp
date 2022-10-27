@@ -25,7 +25,7 @@ void Response::sendFail(int code, const std::string& msg) {
 }
 
 void Response::sendMoved(const std::string& location) {
-	clear(); //  <!-- TODO, also add default server
+	clear(); // <!-- TODO, also add default server
 	addDefaultHeaders();
 	m_statusCode			  = 301;
 	m_headers["Location"]	  = location;

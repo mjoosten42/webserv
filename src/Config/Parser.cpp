@@ -14,7 +14,7 @@ ConfigParser::ConfigParser() {
 
 bool ConfigParser::parse_config(const char *path) {
 	std::vector<std::string> config_file = readFile(path);
-	check_validity(config_file); //  Will throw exception incase of invalid config.
+	check_validity(config_file); // Will throw exception incase of invalid config.
 	finite_state_machine(config_file);
 	return (true);
 }
@@ -32,8 +32,8 @@ std::vector<std::string> ConfigParser::readFile(const char *path) {
 	return (ret);
 }
 
-//  Returns a vector of pointers to all t_block_directives who's name matches 'blocks_to_fetch'.
-//  Only searches the context of the t_block_directive object this function was called on and its sub directives.
+// Returns a vector of pointers to all t_block_directives who's name matches 'blocks_to_fetch'.
+// Only searches the context of the t_block_directive object this function was called on and its sub directives.
 std::vector<t_block_directive *> s_block_directive::fetch_matching_blocks(const std::string& blocks_to_fetch) {
 	std::vector<t_block_directive *> ret;
 	recurse_blocks(ret, blocks_to_fetch);
@@ -50,8 +50,8 @@ void s_block_directive::recurse_blocks(std::vector<t_block_directive *>& ret, co
 	return;
 }
 
-//  Returns first params associated with the requested simple_directive, if it is present in the
-//  block_directive this method was called on.
+// Returns first params associated with the requested simple_directive, if it is present in the
+// block_directive this method was called on.
 //	Otherwise returns empty string.
 std::string s_block_directive::fetch_simple(const std::string& key) {
 	std::vector<t_simple_directive>::iterator it_s;
@@ -61,8 +61,8 @@ std::string s_block_directive::fetch_simple(const std::string& key) {
 	return ("");
 }
 
-//  Returns a vector of params of all the instances of simple_directive with the given key.
-//  When nothing found, returns an empty vector.
+// Returns a vector of params of all the instances of simple_directive with the given key.
+// When nothing found, returns an empty vector.
 std::vector<std::string> s_block_directive::fetch_simple_all(const std::string& key) {
 	std::vector<std::string>				  ret;
 	std::vector<t_simple_directive>::iterator it_s;
@@ -72,8 +72,8 @@ std::vector<std::string> s_block_directive::fetch_simple_all(const std::string& 
 	return (ret);
 }
 
-//  Returns first params associated with the requested simple_directive, if it is present in the
-//  block_directive this method was called on OR ANY OF THE BLOCK DIRECTIVES IT CONTAINS.
+// Returns first params associated with the requested simple_directive, if it is present in the
+// block_directive this method was called on OR ANY OF THE BLOCK DIRECTIVES IT CONTAINS.
 //	Otherwise returns empty string.
 std::string s_block_directive::fetch_simple_recursive(const std::string& key) {
 	std::string								  ret = "";

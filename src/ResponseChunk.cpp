@@ -1,3 +1,4 @@
+#include "AutoIndex.hpp"
 #include "MIME.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
@@ -6,7 +7,6 @@
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
-#include "AutoIndex.hpp"
 
 #include <fcntl.h> // open
 #include <sys/socket.h>
@@ -55,7 +55,7 @@ void Response::handleGet() {
 
 	if (m_statusCode != 200)
 		autoIndex();
-		// serveError(m_statusCode);
+	// serveError(m_statusCode);
 	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting");
 }
 
@@ -65,15 +65,14 @@ void Response::autoIndex() {
 	std::vector<std::string> content_paths;
 	recursivePathCount(m_server->getRoot(), content_paths);
 	std::vector<std::string>::iterator cp_it = content_paths.begin();
-	std::vector<std::string> content_names;
+	std::vector<std::string>		   content_names;
 	recursiveFileCount(m_server->getRoot(), content_names);
 	std::vector<std::string>::iterator cn_it = content_names.begin();
 
 	addHeader("Content-Type", "text/html");
 
-	addToBody("<h1> Index of directory: </h1>\r\n");		
-	for (; cp_it != content_paths.end(); cp_it++)
-	{
+	addToBody("<h1> Index of directory: </h1>\r\n");
+	for (; cp_it != content_paths.end(); cp_it++) {
 		addToBody("<p><a href=\"/");
 		addToBody(*cp_it);
 		addToBody("\">");
@@ -120,7 +119,7 @@ int Response::handleGetWithStaticFile(std::string file) {
 	return getFirstChunk();
 }
 
-//  this function removes bytesSent amount of bytes from the beginning of the chunk.
+// this function removes bytesSent amount of bytes from the beginning of the chunk.
 void Response::trimChunk(ssize_t bytesSent) {
 	m_chunk.erase(0, bytesSent);
 }
@@ -133,10 +132,10 @@ bool Response::isDone() const {
 int Response::getFirstChunk() {
 	off_t size = lseek(m_readfd, 0, SEEK_END);
 
-	//  get file size
+	// get file size
 	if (size == -1)
 		size = std::numeric_limits<off_t>().max();
-	lseek(m_readfd, 0, SEEK_SET); //  set back to start
+	lseek(m_readfd, 0, SEEK_SET); // set back to start
 
 	m_isSmallFile = (size < BUFFER_SIZE);
 

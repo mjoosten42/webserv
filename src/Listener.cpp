@@ -28,7 +28,7 @@ void Listener::addServer(const Server server) {
 }
 
 const Server& Listener::getServerByHost(const std::string& host) const {
-	//  try to find it. Otherwise, use the first server.
+	// try to find it. Otherwise, use the first server.
 	std::map<std::string, const Server *>::const_iterator it = m_hostToServer.find(host);
 	if (it != m_hostToServer.end())
 		return *(it->second);
@@ -36,32 +36,32 @@ const Server& Listener::getServerByHost(const std::string& host) const {
 }
 
 void Listener::setupSocket() {
-	//  SET UP SOCKET //
+	// SET UP SOCKET //
 
-	//  Specify server socket info: IPv4 protocol family, port in correct
+	// Specify server socket info: IPv4 protocol family, port in correct
 	//	endianness, IP address
 	sockaddr_in server = { 0, AF_INET, htons(m_port), { inet_addr(m_listenAddr.c_str()) }, { 0 } };
 
-	//  Setup socket_fd: specify domain (IPv4), communication type, and
+	// Setup socket_fd: specify domain (IPv4), communication type, and
 	//	protocol (default for socket)
 	m_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_fd == -1)
 		fatal_perror("socket");
 
-	//  On socket_fd, applied at socket level (SOL_SOCKET), set option
-	//  SO_REUSEADDR (allow bind() to reuse local addresses), to be enabled
+	// On socket_fd, applied at socket level (SOL_SOCKET), set option
+	// SO_REUSEADDR (allow bind() to reuse local addresses), to be enabled
 	const socklen_t enabled = 1;
 	if (setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(enabled)) < 0)
 		fatal_perror("setsockopt");
 
 	set_fd_nonblocking(m_fd);
 
-	//  "Assign name to socket" = link socket_fd we configured to the server's
+	// "Assign name to socket" = link socket_fd we configured to the server's
 	//	socket information
 	if (bind(m_fd, reinterpret_cast<sockaddr *>(&server), sizeof(server)) < 0)
 		fatal_perror("bind");
 
-	//  Listens on socket, accepting at most 128 connections
+	// Listens on socket, accepting at most 128 connections
 	if (listen(m_fd, SOMAXCONN) < 0)
 		fatal_perror("listen");
 

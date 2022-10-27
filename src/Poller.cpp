@@ -31,35 +31,39 @@ void Poller::start() {
 
 void Poller::pollfdEvent() {
 
-	//  loop over current clients to check if we can read or write
+	// loop over current clients to check if we can read or write
 	for (size_t i = clientsIndex(); i < readFdsIndex(); i++) {
-		pollfd& pollfd = m_pollfds[i];
+		pollfd& client = m_pollfds[i];
 
-		LOG(pollfd.fd << RED " Set: " << getEventsAsString(pollfd.events) << DEFAULT);
-		LOG(pollfd.fd << RED " Get: " << getEventsAsString(pollfd.revents) << DEFAULT);
+		LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
+		LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
 
-		unsetFlag(pollfd.events, POLLOUT);
+		unsetFlag(client.events, POLLOUT);
 
-		if (pollfd.revents & POLLHUP) {
-			pollHup(pollfd);
+		if (client.revents & POLLHUP) {
+			pollHup(client);
 			continue;
 		}
-		if (pollfd.revents & POLLIN)
-			pollIn(pollfd);
-		if (pollfd.revents & POLLOUT)
-			pollOut(pollfd);
+		if (client.revents & POLLIN)
+			pollIn(client);
+		if (client.revents & POLLOUT)
+			pollOut(client);
 	}
 
-	// loop over readfds
+	// loop over readfds. If one has POLLIN, set POLLOUT on it's connection
 	for (size_t i = readFdsIndex(); i < m_pollfds.size(); i++) {
-		if (m_pollfds[i].revents & POLLIN) {
-			int		clientfd = getClientFd(m_pollfds[i].fd);
-			pollfd& pollfd	 = getPollfd(clientfd);
-			setFlag(pollfd.events, POLLOUT);
+		pollfd& source = m_pollfds[i];
+
+		LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
+		LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
+
+		if (source.revents & POLLIN) {
+			int client_fd = m_readfds.getClientFd(source.fd);
+			setFlag(find(client_fd)->events, POLLOUT);
 		}
 	}
 
-	//  Loop over the listening sockets for new clients
+	// Loop over the listening sockets for new clients
 	for (size_t i = 0; i < m_listeners.size(); i++)
 		if (m_pollfds[i].revents & POLLIN)
 			acceptClient(m_pollfds[i].fd);
@@ -67,38 +71,47 @@ void Poller::pollfdEvent() {
 
 // Let connection read new data
 // Add a readfd if asked
-void Poller::pollIn(pollfd& pollfd) {
-	Connection& conn   = m_connections[pollfd.fd];
-	int			readfd = conn.receiveFromClient(pollfd.events);
+void Poller::pollIn(pollfd& client) {
+	Connection& conn   = m_connections[client.fd];
+	int			readfd = conn.receiveFromClient(client.events);
 
-	if (readfd != -1)
-		addReadFd(readfd, pollfd.fd);
+	if (readfd != -1) { // A response wants to poll on a file/pipe
+		pollfd source = { readfd, POLLIN, 0 };
+
+		m_readfds.add(source, client.fd);
+		m_pollfds.push_back(source);
+	}
 }
 
 // Let connection send data
 // If response if done reading from its readfd, remove it
 // If response is done and wants to close the connection, remove the client
-void Poller::pollOut(pollfd& pollfd) {
-	Connection		   & conn = m_connections[pollfd.fd];
-	std::pair<bool, int> ret  = conn.sendToClient(pollfd.events);
+void Poller::pollOut(pollfd& client) {
+	Connection		   & conn = m_connections[client.fd];
+	std::pair<bool, int> ret  = conn.sendToClient(client.events);
 
-	if (ret.second != -1) // returns readfd to close
-		removeReadFd(ret.second);
+	if (ret.second != -1) { // returns readfd to close
+		m_readfds.remove(ret.second);
+		m_pollfds.erase(find(ret.second));
+	}
 	if (ret.first) // returns true if clients wants close
-		removeClient(pollfd.fd);
+		removeClient(client.fd);
 }
 
+// We close readfds here because if we received POLLHUP, it means the response hasn't had a chance to close
 // Close and remove all readfds connected to client
 // Close and remove client
-void Poller::pollHup(pollfd& pollfd) {
-	std::vector<int> readFds = getReadFds(pollfd.fd); // get readfds dependent on client fd
+void Poller::pollHup(pollfd& client) {
+	std::vector<int> readFds = m_readfds.getReadFds(client.fd); // get all readfds dependent on client fd
 
 	for (size_t i = 0; i < readFds.size(); i++) {
-		if (close(readFds[i]) == -1)
+		int read_fd = readFds[i];
+		if (close(read_fd) == -1)
 			fatal_perror("close");
-		removeReadFd(readFds[i]); // remove readfds
+		m_readfds.remove(read_fd);
+		m_pollfds.erase(find(read_fd));
 	}
-	removeClient(pollfd.fd);
+	removeClient(client.fd);
 }
 
 void Poller::acceptClient(int listener_fd) {
@@ -118,67 +131,13 @@ void Poller::acceptClient(int listener_fd) {
 }
 
 void Poller::removeClient(int client_fd) {
-	size_t index = getPollfdIndex(client_fd);
-
-	m_pollfds.erase(m_pollfds.begin() + index); //  erase from pollfd vector
-	m_connections.erase(client_fd);				//  erase from connection map
+	m_pollfds.erase(find(client_fd)); // erase from pollfd vector
+	m_connections.erase(client_fd);	  // erase from connection map
 
 	if (close(client_fd) == -1) // close connection
 		fatal_perror("close");
 
 	LOG(RED "CLIENT " DEFAULT << client_fd << RED " LEFT" DEFAULT);
-}
-
-void Poller::addReadFd(int read_fd, int client_fd) {
-	pollfd pollfd = { read_fd, POLLIN, 0 };
-
-	m_pollfds.push_back(pollfd); // Add to end
-	m_readfds.push_back(std::make_pair(read_fd, client_fd));
-}
-
-void Poller::removeReadFd(int read_fd) {
-	// Remove read_fd from pollfds
-	for (size_t i = readFdsIndex(); i < m_pollfds.size(); i++) {
-		if (m_pollfds[i].fd == read_fd) {
-			m_pollfds.erase(m_pollfds.begin() + i);
-			break;
-		}
-	}
-
-	// Remove read_fd from readFds
-	for (size_t i = 0; i < m_readfds.size(); i++) {
-		if (m_readfds[i].first == read_fd) {
-			m_readfds.erase(m_readfds.begin() + i);
-			break;
-		}
-	}
-}
-
-int Poller::getClientFd(int read_fd) {
-	for (size_t i = 0; i < m_readfds.size(); i++)
-		if (m_readfds[i].first == read_fd)
-			return m_readfds[i].second;
-	LOG_ERR("Client for readfd " << read_fd << " not found!");
-	LOG_ERR(getReadFdsAsString());
-	return -1;
-}
-
-std::vector<int> Poller::getReadFds(int client_fd) {
-	std::vector<int> fds;
-
-	for (size_t i = 0; i < m_readfds.size(); i++)
-		if (m_readfds[i].second == client_fd)
-			fds.push_back(m_readfds[i].first);
-	return fds;
-}
-
-pollfd& Poller::getPollfd(int fd) {
-	for (size_t i = 0; i < m_pollfds.size(); i++)
-		if (m_pollfds[i].fd == fd)
-			return m_pollfds[i];
-	LOG_ERR("pollfd " << fd << " not found!");
-	LOG_ERR(RED "Clients: " DEFAULT << getPollFdsAsString(0, m_pollfds.size()));
-	exit(EXIT_FAILURE);
 }
 
 size_t Poller::clientsIndex() {
@@ -187,6 +146,18 @@ size_t Poller::clientsIndex() {
 
 size_t Poller::readFdsIndex() {
 	return m_listeners.size() + m_connections.size();
+}
+
+std::vector<pollfd>::iterator Poller::find(int fd) {
+	std::vector<pollfd>::iterator it;
+
+	for (it = m_pollfds.begin(); it != m_pollfds.end(); it++)
+		if (it->fd == fd)
+			return it;
+	LOG_ERR("Fd not found in pollfds: " << fd);
+	LOG_ERR(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), readFdsIndex()));
+	LOG_ERR(RED "ReadFds: " DEFAULT << getPollFdsAsString(readFdsIndex(), m_pollfds.size()));
+	return m_pollfds.end();
 }
 
 std::string Poller::getPollFdsAsString(size_t first, size_t last) {
@@ -199,21 +170,4 @@ std::string Poller::getPollFdsAsString(size_t first, size_t last) {
 	}
 	PollFds += "}";
 	return PollFds;
-}
-
-std::string Poller::getReadFdsAsString() {
-	std::string str = "ReadFds: {";
-	for (size_t i = 0; i < m_readfds.size(); i++)
-		str += "\n\t{ " + toString(m_readfds[i].first) + ", " + toString(m_readfds[i].second) + " }";
-	str += "\n}";
-	return str;
-}
-
-size_t Poller::getPollfdIndex(int fd) {
-	for (size_t i = 0; i < m_pollfds.size(); i++)
-		if (fd == m_pollfds[i].fd)
-			return i;
-	LOG_ERR("pollfd " << fd << " not found!");
-	LOG_ERR(RED "Clients: " DEFAULT << getPollFdsAsString(0, m_pollfds.size()));
-	return -1;
 }

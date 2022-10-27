@@ -14,7 +14,7 @@
 Server::Server() {
 	m_host = "localhost";
 	m_port = 8080;
-	m_name = "webserv.com"; //  Nginx default = ""
+	m_name = "webserv.com"; // Nginx default = ""
 	m_root = "html";
 	// m_error_page[404] = "./html/404.html";
 
@@ -23,9 +23,9 @@ Server::Server() {
 }
 
 Server::Server(t_block_directive *constructor_specs) {
-	//  INITIALISE MEMBER VARIABLES //
+	// INITIALISE MEMBER VARIABLES //
 	m_host = "127.0.0.1"; //	The only address we handle requests on is localhost
-	//  TODO: also parse that optionally from cfg
+	// TODO: also parse that optionally from cfg
 
 	std::string val_from_config;
 	m_port			= 8080; //	Nginx default is 80 if super user, otherwise 8000
@@ -33,7 +33,7 @@ Server::Server(t_block_directive *constructor_specs) {
 	if (!val_from_config.empty())
 		m_port = stoi(val_from_config); // TODO replace all stois
 
-	std::string name = ""; //  Nginx default: ""
+	std::string name = ""; // Nginx default: ""
 	val_from_config	 = constructor_specs->fetch_simple("server_name");
 	if (!val_from_config.empty())
 		name = val_from_config;
@@ -71,14 +71,14 @@ Server::Server(t_block_directive *constructor_specs) {
 		error_it++;
 	}
 
-	//  Default value for Nginx, if set to 0 means don't check.
-	//  "Setting size to 0 disables checking of client request body size."
+	// Default value for Nginx, if set to 0 means don't check.
+	// "Setting size to 0 disables checking of client request body size."
 	m_client_max_body_size = 0;
 	val_from_config		   = constructor_specs->fetch_simple("client_max_body_size");
 	if (!val_from_config.empty())
 		m_client_max_body_size = stoi(val_from_config);
 
-	//  ADD LOCATION BLOCKS, IF PRESENT //
+	// ADD LOCATION BLOCKS, IF PRESENT //
 	std::vector<t_block_directive *> location_config_blocks;
 	location_config_blocks = constructor_specs->fetch_matching_blocks("location");
 
@@ -89,7 +89,7 @@ Server::Server(t_block_directive *constructor_specs) {
 
 #pragma region getters
 
-//  returns the host, i.e. the address which the server should listen on.
+// returns the host, i.e. the address which the server should listen on.
 const std::string& Server::getHost() const {
 	return m_host;
 }
@@ -98,7 +98,7 @@ const std::string& Server::getRoot() const {
 	return m_root;
 }
 
-//  TODO: fix confusing name
+// TODO: fix confusing name
 const std::string& Server::getName() const {
 	return m_name;
 }

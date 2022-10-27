@@ -20,4 +20,4 @@ class EnvironmentMap {
 		std::map<std::string, std::string> m_map;
 };
 
-//  std::ostream& operator<<(std::ostream& os, const EnvironmentMap& em);
+// std::ostream& operator<<(std::ostream& os, const EnvironmentMap& em);

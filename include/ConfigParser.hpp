@@ -3,17 +3,17 @@
 #include <string>
 #include <vector>
 
-//  http://nginx.org/en/docs/beginners_guide.html
+// http://nginx.org/en/docs/beginners_guide.html
 
-//  simple_directives -> name and parameters separated by spaces and ends with a semicolon (;).
-//  block_directives -> name and parameters separated by spaces and ends with a set of additional instructions
-//  surrounded by braces ({ and }).
+// simple_directives -> name and parameters separated by spaces and ends with a semicolon (;).
+// block_directives -> name and parameters separated by spaces and ends with a set of additional instructions
+// surrounded by braces ({ and }).
 
-//  contexts -> directive that can have other directives inside braces, (examples:
-//  events, http, server, and location).
+// contexts -> directive that can have other directives inside braces, (examples:
+// events, http, server, and location).
 
-//  main context -> Directives placed in the configuration file outside of any
-//  contexts are considered to be in the main context.
+// main context -> Directives placed in the configuration file outside of any
+// contexts are considered to be in the main context.
 
 typedef struct s_simple_directive {
 		std::string name;
@@ -46,7 +46,7 @@ class ConfigParser {
 	public:
 		t_block_directive m_main_context;
 
-	private: //  Checking validity
+	private: // Checking validity
 		void check_validity(std::vector<std::string>& config);
 		void discard_comments(std::vector<std::string>& config);
 		void check_braces_error(std::vector<std::string>& config);
@@ -67,7 +67,7 @@ class ConfigParser {
 
 		char m_tokens[SIZE];
 
-	public: //  Debug printing
+	public: // Debug printing
 		std::string getConfigAsString();
 		std::string getSimpleAsString(t_simple_directive s, std::string tabs);
 		std::string getBlockAsString(t_block_directive b, std::string tabs);

@@ -105,7 +105,7 @@ int Request::parseStartLine(const std::string& line) {
 		LOG_ERR("Empty location: " << ss.str());
 		return 400;
 	}
-	//  parse query string and location
+	// parse query string and location
 	size_t questionMarkPos = m_location.find('?');
 	if (questionMarkPos != std::string::npos) {
 		m_queryString = m_location.substr(questionMarkPos + 1);
@@ -123,9 +123,9 @@ int Request::parseStartLine(const std::string& line) {
 		return 505;
 	}
 
-	//   serve index.html when the location ends with a /
+	// serve index.html when the location ends with a /
 	if (m_location.back() == '/')
-		m_location += "index.html"; //  TODO: when index php, do just that instead etc.
+		m_location += "index.html"; // TODO: when index php, do just that instead etc.
 
 	return 200;
 }
@@ -171,8 +171,8 @@ int Request::checkSpecialHeaders() {
 	return 200;
 }
 
-//  Assumes ContainsNewline is called beforehand
-//  Automatically erases line from saved data
+// Assumes ContainsNewline is called beforehand
+// Automatically erases line from saved data
 std::string Request::getNextLine() {
 	std::size_t pos			  = findNewline(m_saved);
 	std::string line		  = m_saved.substr(0, pos);

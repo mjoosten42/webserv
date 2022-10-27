@@ -16,7 +16,7 @@ EnvironmentMap::EnvironmentMap(const EnvironmentMap& other) {
 EnvironmentMap::~EnvironmentMap() {}
 
 EnvironmentMap& EnvironmentMap::operator=(const EnvironmentMap& rhs) {
-	m_map = rhs.m_map; //  is this a shallow copy?
+	m_map = rhs.m_map; // is this a shallow copy?
 	return *this;
 }
 
@@ -42,7 +42,7 @@ std::string& EnvironmentMap::operator[](const std::string& key) {
 	return m_map[key];
 }
 
-//  returns a freeable null-terminated array of c strings to be used with execve().
+// returns a freeable null-terminated array of c strings to be used with execve().
 char **EnvironmentMap::toCharpp() const {
 	std::map<std::string, std::string>::const_iterator it;
 	char											 **ret = new char *[m_map.size() + 1];
