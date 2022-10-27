@@ -21,10 +21,11 @@ std::size_t findNewline(const std::string& str);
 
 Request::Request(): m_state(STARTLINE), m_contentLength(0) {}
 
-void Request::append(const char *buf, ssize_t size) {
+// TODO: Do something with return value, i.e. CHECK FOR ERRORS
+int Request::append(const char *buf, ssize_t size) {
 	m_saved.append(buf, size);
 
-	parse(); // TODO: return error
+	return parse();
 }
 
 void Request::cut(ssize_t len) {
