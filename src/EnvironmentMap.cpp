@@ -5,22 +5,7 @@
 #include <string.h> // strdup(sighs...)
 #include <string>
 
-EnvironmentMap::EnvironmentMap() {
-	m_map = std::map<std::string, std::string>();
-}
-
-EnvironmentMap::EnvironmentMap(const EnvironmentMap& other) {
-	*this = other;
-}
-
-EnvironmentMap::~EnvironmentMap() {}
-
-EnvironmentMap& EnvironmentMap::operator=(const EnvironmentMap& rhs) {
-	m_map = rhs.m_map; // is this a shallow copy?
-	return *this;
-}
-
-//
+// fills the EnvironmentMap with the environ.
 void EnvironmentMap::initFromEnviron() {
 	extern char **environ;
 

@@ -1,6 +1,7 @@
+#include "Response.hpp"
+
 #include "AutoIndex.hpp"
 #include "MIME.hpp"
-#include "Response.hpp"
 #include "Server.hpp"
 #include "buffer.hpp"
 #include "defines.hpp"
@@ -54,37 +55,19 @@ void Response::handleGet() {
 	}
 
 	if (m_statusCode != 200)
-		autoIndex();
-	// serveError(m_statusCode);
+		serveError(m_statusCode);
 	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting");
 }
 
+
+// EXAMPLE USAGE ONLY:
 void Response::autoIndex() {
 	addDefaultHeaders();
 	m_statusCode = 200;
-	std::vector<std::string> content_paths;
-	recursivePathCount(m_server->getRoot(), content_paths);
-	std::vector<std::string>::iterator cp_it = content_paths.begin();
-	std::vector<std::string>		   content_names;
-	recursiveFileCount(m_server->getRoot(), content_names);
-	std::vector<std::string>::iterator cn_it = content_names.begin();
 
 	addHeader("Content-Type", "text/html");
-
-	addToBody("<h1> Index of directory: </h1>\r\n");
-	for (; cp_it != content_paths.end(); cp_it++) {
-		addToBody("<p><a href=\"/");
-		addToBody(*cp_it);
-		addToBody("\">");
-		unsigned int tabs = countAndTrimLeadingWhiteSpace(*cn_it);
-		for (unsigned int i = 0; i < tabs; i++)
-			addToBody("<ul>");
-		addToBody(*cn_it);
-		for (unsigned int i = 0; i < tabs; i++)
-			addToBody("</ul>");
-		addToBody("</a></p>\r\n");
-		cn_it++;
-	}
+	addToBody(autoIndexHtml(m_server->getRoot()));
+	
 	m_chunk		  = getResponseAsString();
 	m_doneReading = true;
 }

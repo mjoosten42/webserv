@@ -4,12 +4,6 @@
 
 class EnvironmentMap {
 	public:
-		EnvironmentMap();
-		~EnvironmentMap();
-
-		EnvironmentMap(const EnvironmentMap& other);
-		EnvironmentMap& operator=(const EnvironmentMap& rhs);
-
 		void initFromEnviron();
 
 		std::string& operator[](const std::string& key);
