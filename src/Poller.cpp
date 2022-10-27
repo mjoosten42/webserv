@@ -15,7 +15,7 @@ void Poller::start() {
 	while (true) {
 
 		LOG(RED << std::string(winSize(), '#') << DEFAULT);
-	
+
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), readFdsIndex()));
 		LOG(RED "ReadFds: " DEFAULT << getPollFdsAsString(readFdsIndex(), m_pollfds.size()));
 
@@ -54,8 +54,8 @@ void Poller::pollfdEvent() {
 
 	// loop over readfds. If one has POLLIN, set POLLOUT on it's connection
 	for (size_t i = readFdsIndex(); i < m_pollfds.size(); i++) {
-		pollfd& source = m_pollfds[i];
-		int client_fd = m_readfds.getClientFd(source.fd);
+		pollfd& source	  = m_pollfds[i];
+		int		client_fd = m_readfds.getClientFd(source.fd);
 
 		// LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
 		LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
@@ -66,8 +66,7 @@ void Poller::pollfdEvent() {
 		if (source.revents & POLLIN) {
 			setFlag(find(client_fd)->events, POLLOUT);
 			unsetFlag(source.events, POLLIN);
-		}
-		else
+		} else
 			setFlag(source.events, POLLIN);
 	}
 

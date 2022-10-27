@@ -1,11 +1,13 @@
 #include "utils.hpp"
 
-#include "sys/ioctl.h"
+#include "logger.hpp"
 
 #include <fcntl.h>	// fcntl
 #include <stdio.h>	// perror
 #include <stdlib.h> // exit
 #include <string>
+#include <sys/ioctl.h> // ioctl
+#include <sys/stat.h>  // stat
 #include <vector>
 
 // perrors and exits.
@@ -51,6 +53,7 @@ void unsetFlag(short& events, int flag) {
 	events &= ~flag;
 }
 
+// gets the width of the terminal window
 size_t winSize() {
 	struct winsize w;
 	ioctl(1, TIOCGWINSZ, &w);

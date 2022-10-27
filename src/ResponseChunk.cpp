@@ -47,7 +47,7 @@ void Response::handleGet() {
 
 	if (m_isCGI)
 		handleGetCGI();
- 	else
+	else
 		m_statusCode = handleGetWithFile();
 
 	if (m_statusCode != 200)
@@ -62,7 +62,7 @@ void Response::handlePost() {
 	LOG(RED "Handle Post: " DEFAULT + filename);
 
 	addHeader("Location", m_request.getLocation());
-	m_statusCode = 418;
+	m_statusCode  = 418;
 	m_doneReading = true;
 }
 
@@ -78,22 +78,31 @@ void Response::handleDelete() {
 		else
 			m_statusCode = 404;
 	}
-	m_doneReading = true;
 }
 
 // TODO: Fix this. I added an ugly hacky param in case the file served is supposed ot be an error page.
 int Response::handleGetWithFile(std::string file) {
-	std::string filename = m_server->getRoot() + m_request.getLocation();
+	bool		autoIndexInstead = false;
+	std::string filename		 = m_server->getRoot() + m_request.getLocation();
 	if (!file.empty())
 		filename = file;
-	// filename = m_server->getRoot() + "/" + file;
+
+	if (filename.back() == '/') {
+		filename += "index.html"; // TODO: get from config. This may also be a .php file for example.
+		autoIndexInstead = m_server->getAutoIndex();
+	}
+
 	LOG("Get: File: " + filename);
 
 	m_readfd = open(filename.c_str(), O_RDONLY);
 	if (m_readfd == -1) {
-		if (errno == EACCES)
+		if (errno == EACCES) // TODO: check if this is allowed? Subject says something about checking errno, not sure if
+							 // it applies here?
 			return 403;
-		return 404;
+		else if (autoIndexInstead)
+			return autoIndex(filename.substr(0, filename.find("index.html")));
+		else
+			return 404;
 	}
 
 	addHeader("Content-Type", MIME::fromFileName(filename));
@@ -101,13 +110,13 @@ int Response::handleGetWithFile(std::string file) {
 	return getFirstChunk();
 }
 
-void	Response::handleGetCGI() {
+void Response::handleGetCGI() {
 	LOG(RED "Handle CGI" DEFAULT);
 	// TODO: parse from config
 	m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
 
 	addHeader("Transfer-Encoding", "Chunked");
-	m_readfd				 = m_cgi.popen.readfd;
+	m_readfd					= m_cgi.popen.readfd;
 	m_CGI_DoneProcessingHeaders = false;
 
 	close(m_cgi.popen.writefd); // close for now, we are not doing anything with it
@@ -152,8 +161,8 @@ void Response::getCGIHeaderChunk() {
 		m_chunk += block;
 	} else {
 		m_CGI_DoneProcessingHeaders = true;
-		std::string headers		 = block.substr(0, pos);
-		block					 = block.substr(pos);
+		std::string headers			= block.substr(0, pos);
+		block						= block.substr(pos);
 		encodeChunked(block);
 		m_chunk += headers + block;
 	}
@@ -199,12 +208,10 @@ std::string Response::readBlockFromFile() {
 	return block;
 }
 
-// EXAMPLE USAGE ONLY:
-void Response::autoIndex() {
-	m_statusCode = 200;
-
+int Response::autoIndex(std::string path_to_index) {
 	addHeader("Content-Type", "text/html");
-	addToBody(autoIndexHtml(m_server->getRoot()));
+	addToBody(autoIndexHtml(path_to_index, m_server->getRoot()));
 
 	m_doneReading = true;
+	return 200;
 }

@@ -77,7 +77,6 @@ std::pair<bool, int> Connection::sendToClient(short& events) {
 			}
 			if (response.getReadFD() == -1)
 				setFlag(events, POLLOUT);
-
 	}
 	return std::make_pair(shouldClose, -1);
 }
