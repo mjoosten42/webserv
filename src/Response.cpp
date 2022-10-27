@@ -40,7 +40,7 @@ Response::Response():
 	m_doneReading(false),
 	m_isSmallFile(false),
 	m_isCGI(false),
-	m_isCGIProcessingHeaders(false),
+	m_CGI_DoneProcessingHeaders(false),
 	m_hasReadFDPoller(false),
 	m_processedRequest(false) {}
 

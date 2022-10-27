@@ -13,6 +13,9 @@ void Poller::start() {
 	LOG(RED "\n----STARTING LOOP----\n" DEFAULT);
 
 	while (true) {
+
+		LOG(RED << std::string(winSize(), '#') << DEFAULT);
+	
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), readFdsIndex()));
 		LOG(RED "ReadFds: " DEFAULT << getPollFdsAsString(readFdsIndex(), m_pollfds.size()));
 
@@ -34,11 +37,10 @@ void Poller::pollfdEvent() {
 	// loop over current clients to check if we can read or write
 	for (size_t i = clientsIndex(); i < readFdsIndex(); i++) {
 		pollfd& client = m_pollfds[i];
+		unsetFlag(m_pollfds[i].events, POLLOUT);
 
 		// LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
-		// LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
-
-		unsetFlag(client.events, POLLOUT);
+		LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
 
 		if (client.revents & POLLHUP) {
 			pollHup(client);
@@ -53,14 +55,20 @@ void Poller::pollfdEvent() {
 	// loop over readfds. If one has POLLIN, set POLLOUT on it's connection
 	for (size_t i = readFdsIndex(); i < m_pollfds.size(); i++) {
 		pollfd& source = m_pollfds[i];
+		int client_fd = m_readfds.getClientFd(source.fd);
 
 		// LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
-		// LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
+		LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
 
+		// If source has POLLIN, set POLLOUT in client
+		// However, source will get POLLIN next loop because client will only read next loop, not this one
+		// To prevent resetting POLLOUT when the source is done, we unset POLLIN of source for one loop
 		if (source.revents & POLLIN) {
-			int client_fd = m_readfds.getClientFd(source.fd);
 			setFlag(find(client_fd)->events, POLLOUT);
+			unsetFlag(source.events, POLLIN);
 		}
+		else
+			setFlag(source.events, POLLIN);
 	}
 
 	// Loop over the listening sockets for new clients

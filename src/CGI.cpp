@@ -47,7 +47,7 @@ int Popen::my_popen(const std::string& path, const std::string& filename, const 
 
 	set_fd_nonblocking(readfd);
 	set_fd_nonblocking(writefd);
-
+	
 	pid = fork();
 	switch (pid) {
 		case -1: // failure
@@ -67,10 +67,6 @@ int Popen::my_popen(const std::string& path, const std::string& filename, const 
 
 	return 200;
 }
-
-CGI::CGI() {}
-
-CGI::~CGI() {}
 
 // THIS SHOULD NEVER BE USED!
 CGI& CGI::operator=(const CGI& other) {
