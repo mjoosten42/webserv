@@ -35,8 +35,8 @@ void Poller::pollfdEvent() {
 	for (size_t i = clientsIndex(); i < readFdsIndex(); i++) {
 		pollfd& client = m_pollfds[i];
 
-		LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
-		LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
+		// LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
+		// LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
 
 		unsetFlag(client.events, POLLOUT);
 
@@ -54,8 +54,8 @@ void Poller::pollfdEvent() {
 	for (size_t i = readFdsIndex(); i < m_pollfds.size(); i++) {
 		pollfd& source = m_pollfds[i];
 
-		LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
-		LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
+		// LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
+		// LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
 
 		if (source.revents & POLLIN) {
 			int client_fd = m_readfds.getClientFd(source.fd);

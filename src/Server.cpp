@@ -15,7 +15,12 @@ Server::Server() {
 	m_host = "localhost";
 	m_port = 8080;
 	m_names.push_back("webserv.com");
-	m_root				   = "html";
+
+	// TODO: remove
+	m_root += "/Users/";
+	m_root += getenv("USER");
+	m_root += "/Desktop/webserv/html";
+
 	m_client_max_body_size = 0;
 	m_autoindex			   = false;
 
@@ -81,12 +86,14 @@ Server::Server(t_block_directive *constructor_specs) {
 	m_host = "127.0.0.1"; //	The only address we handle requests on is localhost
 	// TODO: also parse that optionally from cfg
 
+	std::string tmp = "/Users/" + std::string(getenv("USER")) + "/Desktop/webserv/html";
+
 	//	Nginx default is 80 if super user, otherwise 8000
 	overwriteIfSpecified("listen", m_port, 8000, constructor_specs);
 	//	Nginx default: ""
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
 	//	Nginx default: "html" TODO: absolute
-	overwriteIfSpecified("root", m_root, "./html", constructor_specs);
+	overwriteIfSpecified("root", m_root, tmp, constructor_specs);
 	//	Nginx default: 0 (which means don't check)
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
 	//	Nginx default: false (serve 404 error when navigating ot directory without index.html)
@@ -102,7 +109,7 @@ Server::Server(t_block_directive *constructor_specs) {
 			break;
 		std::string full_path = m_root + "/" + *error_it;
 		// print("Checking user-defined error page: " + full_path);
-		int user_defined_page = open((full_path).c_str(), O_RDONLY);
+		int user_defined_page = open(full_path.c_str(), O_RDONLY);
 		if (user_defined_page == -1)
 			LOG_ERR(RED << "WARNING: The custom error pages have been incorrectly configured." << DEFAULT);
 		else

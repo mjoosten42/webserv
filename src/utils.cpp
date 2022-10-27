@@ -1,5 +1,6 @@
 #include "utils.hpp"
 
+#include "sys/ioctl.h"
 #include "logger.hpp"
 
 #include <fcntl.h>	// fcntl
@@ -60,4 +61,10 @@ bool isDirectory(const char *path) {
 		return false;
 	}
 	return static_cast<bool>(S_ISDIR(s.st_mode));
+}
+
+size_t winSize() {
+	struct winsize w;
+	ioctl(1, TIOCGWINSZ, &w);
+	return w.ws_col;
 }

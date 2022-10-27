@@ -67,23 +67,19 @@ int Request::parse() {
 				}
 				if ((status = checkSpecialHeaders()) != 200)
 					return status;
-				if (m_method == GET || m_method == HEAD ||
-					(hasHeader("Content-Length") &&
-					 stringToIntegral<std::size_t>(getHeaderValue("Content-Length")) == 0))
+				m_state = BODY;
+				if (hasHeader("Content-Length") && m_contentLength == 0)
 					m_state = DONE;
-				else
-					m_state = BODY;
 				break;
 			}
 		case BODY:
 			addToBody(m_saved);
 			m_saved.clear();
-			if (hasHeader("Content-Length") &&
-				stringToIntegral<std::size_t>(getHeaderValue("Content-Length")) == m_body.length())
+			if (m_contentLength == m_body.length())
 				m_state = DONE;
 			break;
 		case DONE:
-			LOG_ERR("Adding to DONE request"); // Shouldn't be reached
+			LOG_ERR("Appending to DONE request"); // Shouldn't be reached
 	}
 	return 200;
 }
@@ -123,6 +119,10 @@ int Request::parseStartLine(const std::string& line) {
 		return 505;
 	}
 
+	// serve index.html when the location ends with a /
+	if (m_location.back() == '/')
+		m_location += "index.html"; // TODO: when index php, do just that instead etc.
+
 	return 200;
 }
 
@@ -146,6 +146,8 @@ int Request::parseHeader(const std::string& line) {
 		return 400;
 	}
 	header.first.pop_back();
+	if (header.first == "Content-Length")
+		m_contentLength = stringToIntegral<std::size_t>(header.second);
 	insert = m_headers.insert(header);
 	if (!insert.second) {
 		LOG_ERR(RED "Duplicate headers: " << line << DEFAULT);

@@ -11,7 +11,7 @@ void Response::sendFail(int code, const std::string& msg) {
 	m_statusCode = code;
 	if (m_server->getErrorPages().find(code) != m_server->getErrorPages().end()) {
 		std::string file = m_server->getErrorPages().at(code);
-		handleGetWithStaticFile(file);
+		handleGetWithFile(file);
 		return;
 	}
 	addDefaultHeaders();

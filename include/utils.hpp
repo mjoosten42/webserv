@@ -55,3 +55,4 @@ T stringToIntegral(const std::string& number) {
 }
 
 bool isDirectory(const char *path);
+size_t winSize();
