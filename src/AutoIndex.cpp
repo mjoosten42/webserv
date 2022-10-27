@@ -2,7 +2,7 @@
 
 #include "stringutils.hpp"
 
-#include <dirent.h> // DIR *, opendir, closedir etc.
+// TODO: Still need to fix the behaviour when a directory is selected in the auto indexing.
 
 // Returns the number of files and directories in the specified directory recursively.
 // Stores the names of all files and directories in a string vector it is passed as a param.
@@ -39,7 +39,6 @@ unsigned int
 	if (derp == NULL)
 		return (ret);
 	struct dirent *contents;
-	// tabulation = tabulation + directory + "/";
 	while ((contents = readdir(derp)) != NULL) {
 		std::string name = contents->d_name;
 		if (name != "." && name != "..") {

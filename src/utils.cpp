@@ -1,11 +1,12 @@
 #include "utils.hpp"
 
+#include "sys/ioctl.h"
+
 #include <fcntl.h>	// fcntl
 #include <stdio.h>	// perror
 #include <stdlib.h> // exit
 #include <string>
 #include <vector>
-#include "sys/ioctl.h"
 
 // perrors and exits.
 void fatal_perror(const char *msg) {
@@ -37,7 +38,7 @@ std::string getEventsAsString(short revents) {
 	if (revents & POLLNVAL) {
 		if (!events.empty())
 			events += " | ";
-		events += "NVAL";
+		events += "NVAL"; // TODO: This is returned when client navigates to directory without trailing slash.
 	}
 	return events;
 }
@@ -50,8 +51,8 @@ void unsetFlag(short& events, int flag) {
 	events &= ~flag;
 }
 
-size_t	winSize() {
+size_t winSize() {
 	struct winsize w;
-    ioctl(1, TIOCGWINSZ, &w);
+	ioctl(1, TIOCGWINSZ, &w);
 	return w.ws_col;
 }

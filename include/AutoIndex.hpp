@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dirent.h>
+#include <dirent.h> // DIR *, opendir, closedir etc.
 #include <string>
 #include <vector>
 

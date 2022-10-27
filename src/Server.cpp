@@ -14,48 +14,94 @@
 Server::Server() {
 	m_host = "localhost";
 	m_port = 8080;
-	m_name = "webserv.com"; // Nginx default = ""
-	m_root = "html";
-	// m_error_page[404] = "./html/404.html";
+	m_names.push_back("webserv.com");
+
+	// TODO: remove
+	m_root += "/Users/";
+	m_root += getenv("USER");
+	m_root += "/Desktop/webserv/html";
+
+	m_client_max_body_size = 0;
+	m_autoindex			   = false;
 
 	Location location = Location();
 	m_locations.push_back(location);
 }
+
+#pragma region overwriteIfSpecified
+
+// String
+static void overwriteIfSpecified(std::string		search,
+								 std::string	  & field,
+								 std::string		defaultVal,
+								 t_block_directive *constructor_specs) {
+	field						= defaultVal;
+	std::string val_from_config = constructor_specs->fetch_simple(search);
+	if (!val_from_config.empty())
+		field = val_from_config;
+}
+
+// String vector
+static void overwriteIfSpecified(std::string			   search,
+								 std::vector<std::string>& field,
+								 std::string			   defaultVal,
+								 t_block_directive		  *constructor_specs) {
+	std::string content			= defaultVal;
+	std::string val_from_config = constructor_specs->fetch_simple(search);
+	if (!val_from_config.empty())
+		content = val_from_config;
+	field = stringSplit(content);
+}
+
+// Boolean
+static void overwriteIfSpecified(
+	std::string search, bool& field, bool defaultVal, std::string nonDefaultVal, t_block_directive *constructor_specs) {
+	field						= defaultVal;
+	std::string val_from_config = constructor_specs->fetch_simple(search);
+	if (!val_from_config.empty() && val_from_config == nonDefaultVal)
+		field = !defaultVal;
+}
+
+// Integer
+static void overwriteIfSpecified(std::string search, int& field, int defaultVal, t_block_directive *constructor_specs) {
+	field						= defaultVal;
+	std::string val_from_config = constructor_specs->fetch_simple(search);
+	if (!val_from_config.empty())
+		field = stoi(val_from_config); // TODO replace all stois
+}
+
+// Short
+static void
+	overwriteIfSpecified(std::string search, short& field, short defaultVal, t_block_directive *constructor_specs) {
+	field						= defaultVal;
+	std::string val_from_config = constructor_specs->fetch_simple(search);
+	if (!val_from_config.empty())
+		field = stoi(val_from_config); // TODO replace all stois
+}
+
+#pragma endregion
 
 Server::Server(t_block_directive *constructor_specs) {
 	// INITIALISE MEMBER VARIABLES //
 	m_host = "127.0.0.1"; //	The only address we handle requests on is localhost
 	// TODO: also parse that optionally from cfg
 
-	std::string val_from_config;
-	m_port			= 8080; //	Nginx default is 80 if super user, otherwise 8000
-	val_from_config = constructor_specs->fetch_simple("listen");
-	if (!val_from_config.empty())
-		m_port = stoi(val_from_config); // TODO replace all stois
+	std::string tmp = "/Users/" + std::string(getenv("USER")) + "/Desktop/webserv/html";
 
-	std::string name = ""; // Nginx default: ""
-	val_from_config	 = constructor_specs->fetch_simple("server_name");
-	if (!val_from_config.empty())
-		name = val_from_config;
+	//	Nginx default is 80 if super user, otherwise 8000
+	overwriteIfSpecified("listen", m_port, 8000, constructor_specs);
+	//	Nginx default: ""
+	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
+	//	Nginx default: "html" TODO: absolute
+	overwriteIfSpecified("root", m_root, tmp, constructor_specs);
+	//	Nginx default: 0 (which means don't check)
+	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
+	//	Nginx default: false (serve 404 error when navigating ot directory without index.html)
+	overwriteIfSpecified("autoindex", m_autoindex, false, "on", constructor_specs);
 
-	m_names = stringSplit(name);
-
-	m_name			= "Amogus"; // TODO: Delete?
-	val_from_config = constructor_specs->fetch_simple("server");
-	if (!val_from_config.empty())
-		m_name = val_from_config;
-
-	m_root += "/Users/";
-	m_root += getenv("USER");
-	m_root += "/Desktop/webserv/html"; // TODO: remove
-	val_from_config = constructor_specs->fetch_simple("root");
-	if (!val_from_config.empty())
-		m_root = val_from_config;
-
-	// m_error_page[404] = "./html/404.html"; //	Our default 404 error page
-
-	val_from_config								= constructor_specs->fetch_simple("error_page");
-	std::vector<std::string>		   pages	= stringSplit(val_from_config);
+	// Default error pages are built in, here the user can define their own.
+	std::vector<std::string> pages;
+	overwriteIfSpecified("error_page", pages, "", constructor_specs);
 	std::vector<std::string>::iterator error_it = pages.begin();
 	while (error_it != pages.end()) {
 		error_it++;
@@ -72,13 +118,6 @@ Server::Server(t_block_directive *constructor_specs) {
 		m_error_page[user_defined_page] = full_path;
 		error_it++;
 	}
-
-	// Default value for Nginx, if set to 0 means don't check.
-	// "Setting size to 0 disables checking of client request body size."
-	m_client_max_body_size = 0;
-	val_from_config		   = constructor_specs->fetch_simple("client_max_body_size");
-	if (!val_from_config.empty())
-		m_client_max_body_size = stoi(val_from_config);
 
 	// ADD LOCATION BLOCKS, IF PRESENT //
 	std::vector<t_block_directive *> location_config_blocks;
@@ -98,11 +137,6 @@ const std::string& Server::getHost() const {
 
 const std::string& Server::getRoot() const {
 	return m_root;
-}
-
-// TODO: fix confusing name
-const std::string& Server::getName() const {
-	return m_name;
 }
 
 const std::vector<std::string>& Server::getNames() const {

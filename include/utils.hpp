@@ -54,4 +54,4 @@ T stringToIntegral(const std::string& number) {
 	return value;
 }
 
-size_t	winSize();
+size_t winSize();
