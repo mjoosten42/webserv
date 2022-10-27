@@ -87,7 +87,17 @@ int Response::handleGetWithStaticFile(std::string file) {
 	std::string filename = m_server->getRoot() + m_request.getLocation();
 	if (!file.empty())
 		filename = file;
-	// filename = m_server->getRoot() + "/" + file;
+
+	// if file is a directory, append a /. It is tempting to first check if the file doesn't have an extention
+	// to prevent an unnecessary stat call, but this is wrong.
+	if (filename.back() != '/' && isDirectory(filename.c_str())) {
+		filename += "/";
+	}
+
+	if (filename.back() == '/') {
+		filename += "index.html"; // TODO: get from config. This may also be a .php file for example.
+	}
+
 	LOG("Handle static: " + filename);
 
 	m_readfd = open(filename.c_str(), O_RDONLY);
