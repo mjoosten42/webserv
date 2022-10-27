@@ -29,7 +29,7 @@ Location::Location(t_block_directive *constructor_specs, Server *parent) {
 	if (!val_from_config.empty())
 		m_limit_except = val_from_config;
 
-	m_redirect = ""; //  Not a standard Nginx config param
+	m_redirect = ""; // Not a standard Nginx config param
 
 	m_auto_index	= false;
 	val_from_config = constructor_specs->fetch_simple("autoindex");

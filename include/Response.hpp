@@ -50,7 +50,7 @@ class Response: public HTTP {
 		void sendFail(int code, const std::string& msg);
 		void sendMoved(const std::string& location);
 		int	 serveError(int code);
-		void	autoIndex();
+		void autoIndex();
 
 		int getFirstChunk();
 
@@ -66,9 +66,9 @@ class Response: public HTTP {
 		Request			  m_request;
 		CGI				  m_cgi;
 		const Server	 *m_server;
-		int m_readfd; //  the fd of the file/pipe. The methods who return the chunks are responsible for closing the
-					  //  file in time.
-		bool m_doneReading; //  true if all data from readfd has been read.
+		int m_readfd; // the fd of the file/pipe. The methods who return the chunks are responsible for closing the
+					  // file in time.
+		bool m_doneReading; // true if all data from readfd has been read.
 		bool m_isSmallFile;
 		bool m_isCGI;				   // true if it is a CGI request, as filled in by checkWetherCGI()
 		bool m_isCGIProcessingHeaders; // true if it is still parsing the headers back from the CGI and not yet in CGI

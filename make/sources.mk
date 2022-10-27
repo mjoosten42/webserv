@@ -16,6 +16,7 @@ SOURCES = \
 	src/main.cpp \
 	src/MIME.cpp \
 	src/Poller.cpp \
+	src/ReadFds.cpp \
 	src/Request.cpp \
 	src/Response.cpp \
 	src/ResponseChunk.cpp \

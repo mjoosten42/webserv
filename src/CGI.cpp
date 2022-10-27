@@ -88,7 +88,7 @@ int CGI::start(const Request& req, const Server *server, const std::string& comm
 	EnvironmentMap em;
 	em.initFromEnviron();
 
-	//  TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
+	// TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
 	em["GATEWAY_INTERFACE"] = CGI_VERSION;
 	em["SERVER_SOFTWARE"]	= server->getName();
 	em["SERVER_NAME"]		= req.getHost();

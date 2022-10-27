@@ -1,40 +1,38 @@
 #include "stringutils.hpp"
 
+#include "defines.hpp"
 #include "utils.hpp"
 
-//  converts an ASCII string to lowercase
+// converts an ASCII string to lowercase
 void strToLower(std::string& str) {
 	transformBeginEnd(str, ::tolower);
 }
 
-//  converts an ASCII string to uppercase
+// converts an ASCII string to uppercase
 void strToUpper(std::string& str) {
 	transformBeginEnd(str, ::toupper);
 }
 
 std::string trimLeadingWhiteSpace(const std::string& s) {
-	const std::string whitespaceChars = " \n\r\t\f\v";
-	size_t			  start			  = s.find_first_not_of(whitespaceChars);
-	std::string		  ret			  = "";
+	size_t		start = s.find_first_not_of(IFS);
+	std::string ret	  = "";
 	if (start != std::string::npos)
 		ret = s.substr(start);
 	return (ret);
 }
 
 unsigned int countAndTrimLeadingWhiteSpace(std::string& s) {
-	const std::string whitespaceChars = " \n\r\t\f\v";
-	size_t			  start			  = s.find_first_not_of(whitespaceChars);
-	if (start != std::string::npos){
+	size_t start = s.find_first_not_of(IFS);
+	if (start != std::string::npos) {
 		s = s.substr(start);
 		return (start);
 	}
-	return(0);
+	return (0);
 }
 
 std::string trimTrailingWhiteSpace(const std::string& s) {
-	const std::string whitespaceChars = " \n\r\t\f\v";
-	size_t			  end			  = s.find_last_not_of(whitespaceChars);
-	std::string		  ret			  = "";
+	size_t		end = s.find_last_not_of(IFS);
+	std::string ret = "";
 	if (end != std::string::npos)
 		ret = s.substr(0, end + 1);
 	return (ret);
@@ -43,7 +41,7 @@ std::string trimTrailingWhiteSpace(const std::string& s) {
 // splits a string on whitespace chars.
 std::vector<std::string> stringSplit(const std::string& s) {
 	std::vector<std::string> ret;
-	const std::string		 whitespaceChars = " \n\r\t\f\v";
+	const std::string		 whitespaceChars = IFS;
 
 	size_t begin = 0;
 	size_t end	 = 0;

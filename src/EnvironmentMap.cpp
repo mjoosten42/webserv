@@ -5,21 +5,6 @@
 #include <string.h> // strdup(sighs...)
 #include <string>
 
-EnvironmentMap::EnvironmentMap() {
-	m_map = std::map<std::string, std::string>();
-}
-
-EnvironmentMap::EnvironmentMap(const EnvironmentMap& other) {
-	*this = other;
-}
-
-EnvironmentMap::~EnvironmentMap() {}
-
-EnvironmentMap& EnvironmentMap::operator=(const EnvironmentMap& rhs) {
-	m_map = rhs.m_map;
-	return *this;
-}
-
 // fills the EnvironmentMap with the environ.
 void EnvironmentMap::initFromEnviron() {
 	extern char **environ;
@@ -42,7 +27,7 @@ std::string& EnvironmentMap::operator[](const std::string& key) {
 	return m_map[key];
 }
 
-//  returns a freeable null-terminated array of c strings to be used with execve().
+// returns a freeable null-terminated array of c strings to be used with execve().
 char **EnvironmentMap::toCharpp() const {
 	std::map<std::string, std::string>::const_iterator it;
 	char											 **ret = new char *[m_map.size() + 1];

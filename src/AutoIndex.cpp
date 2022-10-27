@@ -6,7 +6,8 @@
 // Returns the number of files and directories in the specified directory recursively.
 // Stores the names of all files and directories in a string vector it is passed as a param.
 // These stored names have leading tabs to indicate directory structure.
-unsigned int recursiveFileCount(const std::string directory, std::vector<std::string>& file_structure, std::string tabulation) {
+unsigned int
+	recursiveFileCount(const std::string directory, std::vector<std::string>& file_structure, std::string tabulation) {
 	DIR			*derp; // DirEctoRy Pointer
 	unsigned int ret = 0;
 
@@ -28,7 +29,8 @@ unsigned int recursiveFileCount(const std::string directory, std::vector<std::st
 }
 
 // Same as the above, except it saves a vector of paths relative to the site's root.
-unsigned int recursivePathCount(const std::string directory, std::vector<std::string>& file_structure, std::string tabulation) {
+unsigned int
+	recursivePathCount(const std::string directory, std::vector<std::string>& file_structure, std::string tabulation) {
 	DIR			*derp; // DirEctoRy Pointer
 	unsigned int ret = 0;
 

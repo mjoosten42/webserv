@@ -1,12 +1,13 @@
-#include "MIME.hpp"
 #include "Response.hpp"
+
+#include "AutoIndex.hpp"
+#include "MIME.hpp"
 #include "Server.hpp"
 #include "buffer.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
-#include "AutoIndex.hpp"
 
 #include <fcntl.h> // open
 #include <sys/socket.h>
@@ -101,7 +102,7 @@ int Response::handleGetWithStaticFile(std::string file) {
 	return getFirstChunk();
 }
 
-//  this function removes bytesSent amount of bytes from the beginning of the chunk.
+// this function removes bytesSent amount of bytes from the beginning of the chunk.
 void Response::trimChunk(ssize_t bytesSent) {
 	m_chunk.erase(0, bytesSent);
 }
@@ -114,10 +115,10 @@ bool Response::isDone() const {
 int Response::getFirstChunk() {
 	off_t size = lseek(m_readfd, 0, SEEK_END);
 
-	//  get file size
+	// get file size
 	if (size == -1)
 		size = std::numeric_limits<off_t>().max();
-	lseek(m_readfd, 0, SEEK_SET); //  set back to start
+	lseek(m_readfd, 0, SEEK_SET); // set back to start
 
 	m_isSmallFile = (size < BUFFER_SIZE);
 

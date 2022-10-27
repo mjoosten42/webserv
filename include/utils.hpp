@@ -6,9 +6,9 @@
 #include <sys/poll.h>
 #include <vector>
 
-//  A binary search template. Key is the key you want to search.
-//  The entries is an array of structs with a key and value.
-//  Size is the length of the array.
+// A binary search template. Key is the key you want to search.
+// The entries is an array of structs with a key and value.
+// Size is the length of the array.
 template <class Key, class Value>
 const char *binarySearchKeyValue(Key key, Value entries[], int size) {
 	int pivot = size / 2;
@@ -32,7 +32,7 @@ const char *binarySearchKeyValue(Key key, Value entries[], int size) {
 void fatal_perror(const char *msg);
 void set_fd_nonblocking(const int fd);
 
-//  does std::transform on the entire container from beginning to end
+// does std::transform on the entire container from beginning to end
 template <class C, typename F>
 void transformBeginEnd(C& container, F operation) {
 	std::transform(container.begin(), container.end(), container.begin(), operation);

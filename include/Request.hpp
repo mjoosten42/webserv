@@ -36,9 +36,9 @@ class Request: public HTTP {
 		std::string getNextLine();
 
 	private:
-		std::string m_location;	   //  ex. /foo/bar.html
-		std::string m_queryString; //  ex. amongus=sus&greeting=Good%20morning
-		methods		m_method;	   //  GET, POST, etc.
+		std::string m_location;	   // ex. /foo/bar.html
+		std::string m_queryString; // ex. amongus=sus&greeting=Good%20morning
+		methods		m_method;	   // GET, POST, etc.
 		state		m_state;
 		std::string m_saved;
 		std::size_t m_contentLength;

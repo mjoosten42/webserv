@@ -13,6 +13,7 @@ HEADERS = \
 	include/logger.hpp \
 	include/MIME.hpp \
 	include/Poller.hpp \
+	include/ReadFds.hpp \
 	include/Request.hpp \
 	include/Response.hpp \
 	include/Server.hpp \

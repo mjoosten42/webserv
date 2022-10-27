@@ -9,7 +9,7 @@ void ConfigParser::finite_state_machine(std::vector<std::string>& file) {
 		size_t pos = (*it).find_first_of(m_tokens, 0, SIZE);
 		if (!(*it).empty()) {
 			if (pos == std::string::npos)
-				state_simpledirective(&context, it, file); //  Enables multi-line simple directives
+				state_simpledirective(&context, it, file); // Enables multi-line simple directives
 			else {
 				switch ((*it)[pos]) {
 					case (';'):

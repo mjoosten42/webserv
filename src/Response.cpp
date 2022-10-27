@@ -26,11 +26,11 @@ const static Status statusMessages[] = { { 200, "OK" },
 
 const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMessages);
 
-//  TO DETERMINE WHICH SERVER:
-//  in connection, a map of servers and hostnames. get the hostname from the request(as it is required),
-//  and just pass the correct server into the response. That's it.
-//  the hard part is the map and the socket creation(no duplicate sockets for same host/port)
-//  perhaps just loop over the survurs and check hostname/port?
+// TO DETERMINE WHICH SERVER:
+// in connection, a map of servers and hostnames. get the hostname from the request(as it is required),
+// and just pass the correct server into the response. That's it.
+// the hard part is the map and the socket creation(no duplicate sockets for same host/port)
+// perhaps just loop over the survurs and check hostname/port?
 
 Response::Response():
 	HTTP(),
@@ -66,8 +66,8 @@ std::string Response::getStatusLine() const {
 	return std::string(HTTP_VERSION) + " " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
 }
 
-//  Returns the response as a string to send over a socket. When there is a body present,
-//  the body is amended automatically and Content-Length is calculated.
+// Returns the response as a string to send over a socket. When there is a body present,
+// the body is amended automatically and Content-Length is calculated.
 std::string Response::getResponseAsString() {
 	std::string response;
 
