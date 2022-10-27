@@ -86,7 +86,14 @@ Server::Server(t_block_directive *constructor_specs) {
 	m_host = "127.0.0.1"; //	The only address we handle requests on is localhost
 	// TODO: also parse that optionally from cfg
 
-	std::string tmp = "/Users/" + std::string(getenv("USER")) + "/Desktop/webserv/html";
+	std::string tmp = "/Users/" + std::string(getenv("USER")) + "/Desktop/";
+
+	if (std::string(getenv("USER")) == "jobvan-d") {
+		tmp += "proj/webserv/html";
+	}
+	else {
+		tmp += "webserv/html";
+	}
 
 	//	Nginx default is 80 if super user, otherwise 8000
 	overwriteIfSpecified("listen", m_port, 8000, constructor_specs);
