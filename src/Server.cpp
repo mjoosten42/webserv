@@ -93,7 +93,7 @@ Server::Server(t_block_directive *constructor_specs) {
 
 	//	Nginx default is 80 if super user, otherwise 8000
 	overwriteIfSpecified("listen", m_port, 8000, constructor_specs);
-
+	//	Not an Nginx config param
 	overwriteIfSpecified("server", m_server_software_name, SERVER_SOFTWARE_DEFAULT_NAME, constructor_specs);
 	//	Nginx default: ""
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
@@ -103,6 +103,8 @@ Server::Server(t_block_directive *constructor_specs) {
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
 	//	Nginx default: false (serve 404 error when navigating ot directory without index.html)
 	overwriteIfSpecified("autoindex", m_autoindex, false, "on", constructor_specs);
+	//	Not an Nginx config param (has FastCGI instead)
+	// overwriteIfSpecified("cgi", );
 
 	// Default error pages are built in, here the user can define their own.
 	std::vector<std::string> pages;
@@ -135,13 +137,8 @@ Server::Server(t_block_directive *constructor_specs) {
 
 const std::string Server::getRootForFile(const std::string file_to_find) const
 {
-	std::string test_path = m_root;
-	int test = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
-	if (test != -1)
-	{
-		close(test);
-		return test_path;
-	}
+	std::string test_path;
+	int test;
 
 	std::vector<const Location>::iterator litty = m_locations.begin();
 	for(; litty != m_locations.end(); ++litty)
@@ -153,6 +150,14 @@ const std::string Server::getRootForFile(const std::string file_to_find) const
 			close(test);
 			return test_path;
 		}
+	}
+
+	test_path = m_root;
+	test = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+	if (test != -1)
+	{
+		close(test);
+		return test_path;
 	}
 	return("");
 }
