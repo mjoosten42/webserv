@@ -110,19 +110,26 @@ int Response::handleGetWithFile(std::string file) {
 	return getFirstChunk();
 }
 
-void Response::handleGetCGI() {
+void Response::startCGIGeneric() {
 	LOG(RED "Handle CGI" DEFAULT);
 
 	// TODO: parse from config
 	m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
 
-	addHeader("Transfer-Encoding", "Chunked");
-	m_readfd					= m_cgi.popen.readfd;
-	m_CGI_DoneProcessingHeaders = false;
+	if (m_statusCode == 200) {
+		addHeader("Transfer-Encoding", "Chunked");
+		m_readfd					= m_cgi.popen.readfd;
+		m_CGI_DoneProcessingHeaders = false;
 
-	close(m_cgi.popen.writefd); // close for now, we are not doing anything with it
+		m_chunk = getStatusLine() + getHeadersAsString();
+	}
+}
 
-	m_chunk = getStatusLine() + getHeadersAsString();
+void Response::handleGetCGI() {
+
+	startCGIGeneric();
+	if (m_statusCode == 200)
+		close(m_cgi.popen.writefd); // close the writing pipe, we are not doing anything with it
 }
 
 // this function removes bytesSent amount of bytes from the beginning of the chunk.
