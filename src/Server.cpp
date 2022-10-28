@@ -103,8 +103,6 @@ Server::Server(t_block_directive *constructor_specs) {
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
 	//	Nginx default: false (serve 404 error when navigating ot directory without index.html)
 	overwriteIfSpecified("autoindex", m_autoindex, false, "on", constructor_specs);
-	//	Not an Nginx config param (has FastCGI instead)
-	// overwriteIfSpecified("cgi", );
 
 	// Default error pages are built in, here the user can define their own.
 	std::vector<std::string> pages;
@@ -124,6 +122,23 @@ Server::Server(t_block_directive *constructor_specs) {
 		m_error_page[user_defined_page] = full_path;
 		error_it++;
 	}
+
+	// Allows user to specify CGI to handle cgi-scripts
+	std::vector<std::string> cgi_specs;
+	overwriteIfSpecified("cgi", cgi_specs, "", constructor_specs);
+	std::vector<std::string>::iterator cgi_it = cgi_specs.begin();
+	while (cgi_it != cgi_specs.end()) {
+		cgi_it++;
+		if (cgi_it == cgi_specs.end())
+			break;
+		CGI_loc tmp;
+		tmp.cgi_path = *cgi_it;
+		tmp.cgi_type = *(cgi_it - 1);
+		m_cgis_available.push_back(tmp);
+		cgi_it++;
+	}
+	LOG("Server CGI:");
+	logVector(m_cgis_available);
 
 	// ADD LOCATION BLOCKS, IF PRESENT //
 	std::vector<t_block_directive *> location_config_blocks;
