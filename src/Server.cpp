@@ -141,12 +141,10 @@ const std::string Server::getRootForFile(const std::string file_to_find) const
 	int test;
 
 	std::vector<const Location>::iterator litty = m_locations.begin();
-	for(; litty != m_locations.end(); ++litty)
-	{
+	for (; litty != m_locations.end(); ++litty) {
 		test_path = litty->m_root;
-		test = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
-		if (test != -1)
-		{
+		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+		if (test != -1) {
 			close(test);
 			return test_path;
 		}

@@ -13,8 +13,9 @@ class Request: public HTTP {
 	public:
 		Request();
 
-		void append(const char *buf, ssize_t size);
+		int	 append(const char *buf, ssize_t size);
 		void cut(ssize_t len);
+		void clear();
 
 		const std::string& getHost() const;
 		const state		 & getState() const;
@@ -27,11 +28,10 @@ class Request: public HTTP {
 		std::string getMethodAsString() const;
 
 	private:
-		void clear();
-		int	 parse();
-		int	 parseStartLine(const std::string &line);
-		int	 parseHeader(const std::string &line);
-		int	 checkSpecialHeaders();
+		int parse();
+		int parseStartLine(const std::string& line);
+		int parseHeader(const std::string& line);
+		int checkSpecialHeaders();
 
 		std::string getNextLine();
 

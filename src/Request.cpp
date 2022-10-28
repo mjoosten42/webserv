@@ -21,10 +21,11 @@ std::size_t findNewline(const std::string& str);
 
 Request::Request(): m_state(STARTLINE), m_contentLength(0) {}
 
-void Request::append(const char *buf, ssize_t size) {
+// TODO: Do something with return value, i.e. CHECK FOR ERRORS
+int Request::append(const char *buf, ssize_t size) {
 	m_saved.append(buf, size);
 
-	parse(); // TODO: return error
+	return parse();
 }
 
 void Request::cut(ssize_t len) {
@@ -44,6 +45,7 @@ void Request::clear() {
 int Request::parse() {
 	std::string line;
 	int			status;
+
 	switch (m_state) {
 		case STARTLINE:
 			if (!containsNewline(m_saved))
@@ -68,7 +70,7 @@ int Request::parse() {
 				if ((status = checkSpecialHeaders()) != 200)
 					return status;
 				m_state = BODY;
-				if (hasHeader("content-length") && m_contentLength == 0)
+				if (hasHeader("Content-Length") && m_contentLength == 0)
 					m_state = DONE;
 				break;
 			}
@@ -143,8 +145,6 @@ int Request::parseHeader(const std::string& line) {
 	}
 	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so tolower them.
 	header.first.pop_back();
-	if (header.first == "content-length")
-		m_contentLength = stringToIntegral<std::size_t>(header.second);
 	insert = m_headers.insert(header);
 	if (!insert.second) {
 		LOG_ERR(RED "Duplicate headers: " << line << DEFAULT);
@@ -154,15 +154,15 @@ int Request::parseHeader(const std::string& line) {
 }
 
 int Request::checkSpecialHeaders() {
-	if (hasHeader("host")) {
-		std::string hostHeader = getHeaderValue("host");
+	if (hasHeader("Host")) {
+		std::string hostHeader = getHeaderValue("Host");
 		m_host				   = hostHeader.substr(0, hostHeader.find(':'));
 	} else {
 		LOG_ERR("Missing host");
 		return 400;
 	}
-	if (hasHeader("content-length"))
-		m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("content-length"));
+	if (hasHeader("Content-Length"))
+		m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("Content-Length"));
 	return 200;
 }
 

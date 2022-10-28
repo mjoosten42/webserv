@@ -49,7 +49,9 @@ class Response: public HTTP {
 		void handleDelete();
 
 		int	 handleGetWithFile(std::string file = ""); // TODO
+
 		void handleGetCGI();
+		void startCGIGeneric();
 
 		void sendFail(int code, const std::string& msg);
 		void sendMoved(const std::string& location);
