@@ -5,7 +5,7 @@
 #include "stringutils.hpp"
 
 std::ostream& operator<<(std::ostream& o, const CGI_loc& i) {
-	o << "Type: " << i.cgi_type << std::endl;
+	o << "Extension: " << i.cgi_ext << std::endl;
 	o << "Path: " << i.cgi_path << std::endl;
 	return (o);
 }
@@ -58,7 +58,7 @@ Location::Location(t_block_directive *constructor_specs, Server *parent) {
 			break;
 		CGI_loc tmp;
 		tmp.cgi_path = *cgi_it;
-		tmp.cgi_type = *(cgi_it - 1);
+		tmp.cgi_ext = *(cgi_it - 1);
 		m_cgis_available.push_back(tmp);
 		cgi_it++;
 	}

@@ -4,8 +4,8 @@
 class Server;
 
 struct CGI_loc {
-		std::string cgi_type; // e.g. PHP
-		std::string cgi_path; // e.g. /usr/bin/php
+		std::string cgi_ext; // e.g. .py
+		std::string cgi_path; // e.g. /usr/bin/python
 };
 
 #include <iostream>

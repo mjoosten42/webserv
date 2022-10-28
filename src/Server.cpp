@@ -123,7 +123,7 @@ Server::Server(t_block_directive *constructor_specs) {
 			break;
 		CGI_loc tmp;
 		tmp.cgi_path = *cgi_it;
-		tmp.cgi_type = *(cgi_it - 1);
+		tmp.cgi_ext = *(cgi_it - 1);
 		m_cgis_available.push_back(tmp);
 		cgi_it++;
 	}
