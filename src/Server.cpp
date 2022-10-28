@@ -114,9 +114,8 @@ Server::Server(t_block_directive *constructor_specs) {
 		error_it++;
 		if (error_it == pages.end())
 			break;
-		std::string full_path = m_root + "/" + *error_it;
-		// print("Checking user-defined error page: " + full_path);
-		int user_defined_page = open(full_path.c_str(), O_RDONLY);
+		std::string full_path		  = m_root + "/" + *error_it;
+		int			user_defined_page = open(full_path.c_str(), O_RDONLY);
 		if (user_defined_page == -1)
 			LOG_ERR(RED << "WARNING: The custom error pages have been incorrectly configured." << DEFAULT);
 		else
@@ -135,10 +134,9 @@ Server::Server(t_block_directive *constructor_specs) {
 		m_locations.push_back(Location(*it, this));
 }
 
-const std::string Server::getRootForFile(const std::string file_to_find) const
-{
+const std::string Server::getRootForFile(const std::string file_to_find) const {
 	std::string test_path;
-	int test;
+	int			test;
 
 	std::vector<const Location>::iterator litty = m_locations.begin();
 	for (; litty != m_locations.end(); ++litty) {
@@ -151,13 +149,12 @@ const std::string Server::getRootForFile(const std::string file_to_find) const
 	}
 
 	test_path = m_root;
-	test = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
-	if (test != -1)
-	{
+	test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+	if (test != -1) {
 		close(test);
 		return test_path;
 	}
-	return("");
+	return ("");
 }
 
 #pragma region getters

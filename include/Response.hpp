@@ -48,7 +48,7 @@ class Response: public HTTP {
 		void handlePost();
 		void handleDelete();
 
-		int	 handleGetWithFile(std::string file = ""); // TODO
+		int handleGetWithFile(std::string file = ""); // TODO
 
 		void handleGetCGI();
 		void startCGIGeneric();
