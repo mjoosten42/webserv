@@ -1,10 +1,10 @@
 #include "HTTP.hpp"
 
 #include "defines.hpp"
+#include "logger.hpp"
 #include "stringutils.hpp"
 
 #include <string>
-#include "logger.hpp"
 #include <utility>
 
 HTTP::HTTP() {}

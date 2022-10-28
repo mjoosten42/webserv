@@ -2,8 +2,8 @@
 #include "Poller.hpp"
 #include "Server.hpp"
 #include "logger.hpp"
-#include <iostream>
 
+#include <iostream>
 #include <vector>
 
 int main(int argc, const char *argv[]) {
@@ -20,7 +20,7 @@ int main(int argc, const char *argv[]) {
 	ConfigParser config;
 	try {
 		config.parse_config(argv[1]);
-	} catch(...) {
+	} catch (...) {
 		return EXIT_FAILURE;
 	}
 
