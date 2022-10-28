@@ -49,6 +49,7 @@ void Response::setFlags() {
 		if (m_request.getHeaderValue("Connection") == "close")
 			m_close = true;
 	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php"); // TODO: server
+	m_isChunked |= m_isCGI;
 }
 
 void Response::handleGet() {
