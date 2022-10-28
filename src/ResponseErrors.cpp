@@ -20,8 +20,10 @@ void Response::sendFail(int code, const std::string& msg) {
 
 	addHeader("Content-Type", "text/html");
 
-	addToBody("<h1>" + toString(code) + " " + getStatusMessage() + "</h1>\r\n");
-	addToBody("<p><b>" + msg + "</b></p>\r\n");
+	addToBody("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>");
+	addToBody("<title>" + toString(code) + " " + getStatusMessage() + "</title></head>");
+	addToBody("<body><h1>" + toString(code) + " " + getStatusMessage() + "</h1>\r\n");
+	addToBody("<p>oops something went wrong: <b>" + msg + "</b></p></body></html>\r\n");
 }
 
 void Response::sendMoved(const std::string& location) {

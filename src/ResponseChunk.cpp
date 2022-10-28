@@ -118,7 +118,7 @@ void Response::handleGetWithFile() {
 			createIndex(m_filename.substr(0, m_filename.find("index.html")));
 		else if (errno == ENOENT) {
 			m_statusCode = 404;
-		else
+		} else
 			m_statusCode = 500;
 		return;
 	}
@@ -211,6 +211,22 @@ void Response::getFirstChunk() {
 }
 
 void Response::getCGIHeaderChunk() {
+
+	// TODO: a bit hacky. Should this be done just the first time? also, it works for perl, but not PHP.
+	// clean up next monday.
+	if (m_cgi.didExit() > 0) {
+		close(m_cgi.popen.readfd);
+		close(m_cgi.popen.writefd);
+
+		m_statusCode = 502;
+		m_chunk.clear();
+		m_headers.clear();
+		addDefaultHeaders();
+		m_body.clear();
+		sendFail(502, "CGI BROKE 😂😂😂");
+		m_chunk = getResponseAsString();
+		return;
+	}
 
 	std::string block = readBlockFromFile();
 

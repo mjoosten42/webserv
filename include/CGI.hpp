@@ -25,6 +25,8 @@ class CGI {
 	public:
 		CGI& operator=(const CGI& other);
 
+		int	didExit();
+
 		int start(const Request	   & request,
 				  const Server		*server,
 				  const std::string& command,
