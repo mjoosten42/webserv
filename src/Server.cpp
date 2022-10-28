@@ -123,7 +123,7 @@ Server::Server(t_block_directive *constructor_specs) {
 			break;
 		CGI_loc tmp;
 		tmp.cgi_path = *cgi_it;
-		tmp.cgi_type = *(cgi_it - 1);
+		tmp.cgi_ext = *(cgi_it - 1);
 		m_cgis_available.push_back(tmp);
 		cgi_it++;
 	}
@@ -139,7 +139,7 @@ Server::Server(t_block_directive *constructor_specs) {
 		m_locations.push_back(Location(*it, this));
 }
 
-const std::string Server::getRootForFile(const std::string file_to_find) const {
+size_t Server::getLocationIndexForFile(const std::string file_to_find) const {
 	std::string test_path;
 	int			test;
 
@@ -149,15 +149,41 @@ const std::string Server::getRootForFile(const std::string file_to_find) const {
 		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
 		if (test != -1) {
 			close(test);
+			return litty - m_locations.begin();
+		}
+	}
+	return (-1); // Not present in any Location blocks, default to parent server settings.
+}
+
+const std::string Server::getRootForFile(const size_t loc_index, const std::string file_to_find) const {
+	std::string test_path;
+	int			test;
+	std::vector<const Location>::iterator litty = m_locations.begin();
+
+	if (loc_index != static_cast<size_t>(-1)){
+		litty += loc_index;
+		test_path = litty->m_root;
+		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+		if (test != -1) {
+			close(test);
 			return test_path;
 		}
 	}
-
-	test_path = m_root;
-	test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
-	if (test != -1) {
-		close(test);
-		return test_path;
+	else{
+		for (; litty != m_locations.end(); ++litty) {
+			test_path = litty->m_root;
+			test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+			if (test != -1) {
+				close(test);
+				return test_path;
+			}
+		}
+		test_path = m_root;
+		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+		if (test != -1) {
+			close(test);
+			return test_path;
+		}
 	}
 	return ("");
 }
