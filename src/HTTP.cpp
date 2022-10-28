@@ -51,22 +51,25 @@ void HTTP::addToBody(const char *buf, ssize_t size) {
 	m_body.append(buf, size);
 }
 
-// this function assumes the field does not contain any whitespace.
-// TODO: should we just remove the strtolower for performance reasons and just make it
-// mandatory to _always_ call it with lowercase?
-void HTTP::addHeader(std::string field, const std::string& value) {
-	strToLower(field);
-	m_headers[field] = value;
+void HTTP::addHeader(const std::string field, const std::string& value) {
+	std::string copy(field);
+
+	strToLower(copy);
+	m_headers[copy] = value;
 }
 
-// ALWAYS LOOK UP WITH LOWERCASE HEADER FIELDS
 bool HTTP::hasHeader(const std::string& field) const {
-	return m_headers.find(field) != m_headers.end();
+	std::string copy(field);
+
+	strToLower(copy);
+	return m_headers.find(copy) != m_headers.end();
 }
 
-// ALWAYS LOOK UP WITH LOWERCASE HEADER FIELDS
 std::string HTTP::getHeaderValue(const std::string& field) {
-	return m_headers.find(field)->second;
+	std::string copy(field);
+
+	strToLower(copy);
+	return m_headers.find(copy)->second;
 }
 
 std::string HTTP::getHeadersAsString() const {
@@ -74,6 +77,6 @@ std::string HTTP::getHeadersAsString() const {
 	std::string										   headers;
 
 	for (it = m_headers.begin(); it != m_headers.end(); it++)
-		headers += HTTP::capitalizeFieldPretty(it->first) + ": " + it->second + CRLF;
+		headers += capitalizeFieldPretty(it->first) + ": " + it->second + CRLF;
 	return headers;
 }

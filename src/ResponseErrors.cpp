@@ -15,7 +15,7 @@ void Response::sendFail(int code, const std::string& msg) {
 		return;
 	}
 	addDefaultHeaders();
-	addHeader("content-type", "text/html");
+	addHeader("Content-Type", "text/html");
 
 	addToBody("<h1>" + toString(code) + " " + getStatusMessage() + "</h1>\r\n");
 	addToBody("<p>something went wrong somewhere: <b>" + msg + "</b></p>\r\n");
@@ -25,15 +25,17 @@ void Response::sendFail(int code, const std::string& msg) {
 }
 
 void Response::sendMoved(const std::string& location) {
-	clear(); // <!-- TODO, also add default server
+	m_statusCode = 301;
+
+	// clear(); // <!-- TODO, also add default server
 	addDefaultHeaders();
-	m_statusCode			  = 301;
-	m_headers["location"]	  = location;
-	m_headers["connection"]	  = "Close";
-	m_headers["content-type"] = "text/html";
+	addHeader("Location", location);
+	addHeader("Connection", "Close");
+	addHeader("Content-Type", "text/html");
 
 	addToBody("<h1>" + toString(m_statusCode) + " " + getStatusMessage() + "</h1>\r\n");
 	addToBody("<p>The resource has been moved to <a href=\"" + location + "\">" + location + "</a>.</p>");
+
 
 	m_chunk		  = getResponseAsString();
 	m_doneReading = true;
