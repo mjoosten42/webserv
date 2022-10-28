@@ -8,6 +8,9 @@ struct CGI_loc {
 		std::string cgi_path; // e.g. /usr/bin/php
 };
 
+#include <iostream>
+std::ostream& operator<< (std::ostream& o, const CGI_loc & i);
+
 class Location {
 	public:
 		Location();

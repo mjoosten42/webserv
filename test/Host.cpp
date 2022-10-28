@@ -5,6 +5,7 @@
 #include "ConfigParser.hpp"
 #include "Server.hpp"
 
+// TODO: fix this test
 TEST_CASE( "Hosts", "[Server]" ) {
 	ConfigParser config;
 	config.parse_config("default.conf");

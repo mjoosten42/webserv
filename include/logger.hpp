@@ -11,3 +11,11 @@
 #	define LOG(x)
 #	define LOG_ERR(x)
 #endif
+
+template <typename T>  
+void	logVector(const std::vector<T> & vector) {
+	typename std::vector<T>::const_iterator it = vector.begin();
+	for (; it != vector.end(); ++it){
+		LOG(*it);
+	}
+}
