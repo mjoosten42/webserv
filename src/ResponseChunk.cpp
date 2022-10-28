@@ -62,13 +62,18 @@ void Response::handleGet() {
 
 // TODO: send to CGI
 void Response::handlePost() {
-	std::string filename = m_server->getRoot() + m_request.getLocation();
 
-	LOG(RED "Handle Post: " DEFAULT + filename);
+	if (m_isCGI) {
+		handlePostCGI();
+	} else {
+		std::string filename = m_server->getRoot() + m_request.getLocation();
 
-	addHeader("Location", m_request.getLocation());
-	m_statusCode  = 418;
-	m_doneReading = true;
+		LOG(RED "Handle Post: " DEFAULT + filename);
+
+		addHeader("Location", m_request.getLocation());
+		m_statusCode  = 418;
+		m_doneReading = true;
+	}
 }
 
 void Response::handleDelete() {
@@ -117,6 +122,13 @@ void Response::handleGetWithFile(std::string file) {
 }
 
 void Response::handleGetCGI() {
+
+	startCGIGeneric();
+	if (m_statusCode == 200)
+		close(m_cgi.popen.writefd); // close the writing pipe, we are not doing anything with it
+}
+
+void Response::startCGIGeneric() {
 	LOG(RED "Handle CGI" DEFAULT);
 
 	std::string filename = m_server->getRoot() + m_request.getLocation();
@@ -124,13 +136,46 @@ void Response::handleGetCGI() {
 	// TODO: parse from config
 	m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/php", filename);
 
-	addHeader("Transfer-Encoding", "Chunked");
-	m_readfd					= m_cgi.popen.readfd;
-	m_CGI_DoneProcessingHeaders = false;
+	if (m_statusCode == 200) {
+		addHeader("Transfer-Encoding", "Chunked");
+		m_readfd					= m_cgi.popen.readfd;
+		m_CGI_DoneProcessingHeaders = false;
 
-	close(m_cgi.popen.writefd); // close for now, we are not doing anything with it
+		m_chunk = getStatusLine() + getHeadersAsString();
+	}
+}
 
-	m_chunk = getStatusLine() + getHeadersAsString();
+void Response::appendBodyPiece(const std::string &str) {
+	// TODO: non-CGI
+	if (m_request.getMethod() != POST || !m_isCGI) {
+		ssize_t bytes_written = write(m_cgi.popen.writefd, str.c_str(), str.length());
+		if (bytes_written == -1) {
+			// TODO
+			perror("write");
+		} else if (bytes_written != static_cast<ssize_t>(str.length())) {
+			// TODO
+			LOG_ERR("bytes written appendbodypiece != str.length");
+		}
+		if (m_request.getState() == DONE && m_request.getBody().empty()) {
+			close(m_cgi.popen.writefd);
+		}
+	}
+}
+
+void Response::handlePostCGI() {
+
+	startCGIGeneric();
+	if (m_statusCode == 200) {
+		ssize_t bytes_written = write(m_cgi.popen.writefd, m_request.getBody().c_str(), m_request.getBody().length());
+		if (bytes_written == -1) {
+			// TODO
+			perror("write");
+		} else if (bytes_written != static_cast<ssize_t>(m_request.getBody().length())) {
+			// TODO
+			LOG_ERR("bytes written appendbodypiece != str.length");
+		}
+		close(m_cgi.popen.writefd);
+	}
 }
 
 // this function removes bytesSent amount of bytes from the beginning of the chunk.

@@ -19,6 +19,8 @@ class Response: public HTTP {
 		void		 trimChunk(ssize_t bytesSent);
 		std::string& getNextChunk();
 
+		void appendBodyPiece(const std::string &str);
+
 		bool isDone() const;
 		bool isInitialized() const;
 		bool readfdNeedsPoll() const;
@@ -42,7 +44,11 @@ class Response: public HTTP {
 		void handleDelete();
 
 		void handleGetWithFile(std::string file = ""); // TODO
+
 		void handleGetCGI();
+		void handlePostCGI();
+	
+		void startCGIGeneric();
 
 		void getFirstChunk();
 		void getCGIHeaderChunk();
