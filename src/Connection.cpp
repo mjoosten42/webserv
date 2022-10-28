@@ -31,7 +31,11 @@ int Connection::receiveFromClient(short& events) {
 			Response& response = getLastResponse();
 			Request & request  = response.getRequest();
 
-			request.append(buf, bytes_received);
+			try {
+				request.append(buf, bytes_received);
+			} catch (int error) {
+				response.m_statusCode = error;
+			}
 
 			if (request.getState() >= BODY) { // TODO: == BODY
 				if (!response.hasProcessedRequest()) {

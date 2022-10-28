@@ -17,6 +17,8 @@ include make/headers.mk
 
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 
+export MAKEFLAGS = "-j 8"
+
 DEBUG := 1
 SAN := 0
 

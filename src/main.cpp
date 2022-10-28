@@ -20,7 +20,8 @@ int main(int argc, const char *argv[]) {
 	ConfigParser config;
 	try {
 		config.parse_config(argv[1]);
-	} catch (...) {
+	} catch (std::exception& e) {
+		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
 
