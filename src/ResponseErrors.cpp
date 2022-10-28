@@ -9,7 +9,8 @@ void Response::serveError(const std::string& str) {
 void Response::sendFail(int code, const std::string& msg) {
 	if (m_server->getErrorPages().find(code) != m_server->getErrorPages().end()) {
 		std::string file = m_server->getErrorPages().at(code);
-		handleGetWithFile(file);
+		m_filename		 = file;
+		handleGetWithFile();
 		return;
 	}
 

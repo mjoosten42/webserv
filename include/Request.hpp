@@ -15,8 +15,9 @@ class Request: public HTTP {
 
 		void append(const char *buf, ssize_t size);
 		void cut(ssize_t len);
-		std::string takePiece();
 		void clear();
+
+		std::string takePiece();
 
 		const std::string& getHost() const;
 		const state		 & getState() const;

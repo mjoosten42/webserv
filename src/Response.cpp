@@ -13,6 +13,7 @@ struct Status {
 
 const static Status statusMessages[] = { { 200, "OK" },
 										 { 201, "Created" },
+										 { 204, "No Content" },
 										 { 301, "Moved Permanently" },
 										 { 400, "Bad Request" },
 										 { 403, "Forbidden" },
@@ -37,11 +38,11 @@ Response::Response():
 	m_statusCode(200),
 	m_server(NULL),
 	m_readfd(-1),
+	m_locationIndex(-1),
 	m_doneReading(false),
-	m_isSmallFile(false),
+	m_isChunked(false),
 	m_isCGI(false),
 	m_CGI_DoneProcessingHeaders(false),
-	m_hasReadFDPoller(false),
 	m_processedRequest(false) {}
 
 void Response::clear() {
@@ -52,6 +53,14 @@ void Response::clear() {
 
 void Response::addServer(const Server *server) {
 	m_server = server;
+}
+
+void Response::initialize() {
+	m_filename = m_server->getRoot() + m_request.getLocation();
+	// m_locationIndex = m_server.getLocationIndex(m_filename);
+
+	setFlags();
+	addDefaultHeaders();
 }
 
 std::string Response::getStatusMessage() const {
@@ -100,14 +109,14 @@ bool Response::shouldClose() const {
 	return m_close;
 }
 
-bool Response::readfdNeedsPoll() const {
-	return m_hasReadFDPoller;
-}
-
 int Response::getReadFD() const {
 	return m_readfd;
 }
 
 bool Response::hasProcessedRequest() const {
 	return m_processedRequest;
+}
+
+bool Response::needsReadFd() const {
+	return m_readfd != -1;
 }

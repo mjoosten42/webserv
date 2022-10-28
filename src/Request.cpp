@@ -1,6 +1,7 @@
 #include "Request.hpp"
 
 #include "HTTP.hpp"
+#include "buffer.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
@@ -31,8 +32,8 @@ void Request::append(const char *buf, ssize_t size) {
 }
 
 std::string Request::takePiece() {
-	std::string to_return = m_body.substr(BUFSIZ);
-	m_body.erase(0, BUFSIZ);
+	std::string to_return = m_body.substr(BUFFER_SIZE);
+	m_body.erase(0, BUFFER_SIZE);
 	return to_return;
 }
 

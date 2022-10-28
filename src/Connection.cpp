@@ -24,9 +24,9 @@ int Connection::receiveFromClient(short& events) {
 		case 0:
 			break;
 		default:
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-			// LOG(std::string(buf, bytes_received));
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			LOG(std::string(buf, bytes_received));
+			LOG(RED << std::string(winSize(), '-') << DEFAULT);
 
 			Response& response = getLastResponse();
 			Request & request  = response.getRequest();
@@ -37,17 +37,18 @@ int Connection::receiveFromClient(short& events) {
 				response.m_statusCode = error;
 			}
 
-			if (request.getState() >= BODY) { // TODO: == BODY
-				if (!response.hasProcessedRequest()) {
+			if (request.getState() >= BODY) {		   // BODY or DONE
+				if (!response.hasProcessedRequest()) { // Do once
 					LOG(request);
 					response.addServer(&(m_listener->getServerByHost(request.getHost())));
 					response.processRequest();
 
-					int readfd = response.getReadFD();
-					if (readfd == -1)
+					if (response.needsReadFd())
+						return response.getReadFD();
+					else
 						setFlag(events, POLLOUT);
-					return readfd;
-				}
+				} else
+					response.appendBodyPiece(request.getBody());
 			}
 	}
 	return -1;

@@ -8,13 +8,13 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
-#include <fcntl.h> // open
+#include <fcntl.h>	// open
+#include <stdlib.h> // realpath
 #include <sys/socket.h>
 #include <unistd.h> // lseek
 
 void Response::processRequest() {
-	setFlags();
-	addDefaultHeaders();
+	initialize();
 
 	if (m_statusCode == 200) {
 		switch (m_request.getMethod()) {
@@ -62,14 +62,11 @@ void Response::handleGet() {
 
 // TODO: send to CGI
 void Response::handlePost() {
+	LOG(RED "Handle Post: " DEFAULT + m_filename);
 
 	if (m_isCGI) {
 		handlePostCGI();
 	} else {
-		std::string filename = m_server->getRoot() + m_request.getLocation();
-
-		LOG(RED "Handle Post: " DEFAULT + filename);
-
 		addHeader("Location", m_request.getLocation());
 		m_statusCode  = 418;
 		m_doneReading = true;
@@ -77,46 +74,52 @@ void Response::handlePost() {
 }
 
 void Response::handleDelete() {
-	std::string filename = m_server->getRoot() + m_request.getLocation();
+	char absolute_path[PATH_MAX + 1];
 
-	LOG(RED "Handle Delete: " DEFAULT + filename);
+	m_doneReading = true;
 
-	if (unlink(filename.c_str()) == -1) {
-		LOG_ERR("Unlink: " << filename << ": " << strerror(errno));
+	LOG(RED "Handle Delete: " DEFAULT + m_filename);
+
+	if (!realpath(m_filename.c_str(), absolute_path)) {
+		LOG_ERR("realpath: " << m_filename << ": " << strerror(errno));
+		m_statusCode = 404;
+		return;
+	}
+
+	LOG("Absolute path: " << absolute_path);
+
+	if (unlink(absolute_path) == -1) {
+		LOG_ERR("unlink: " << absolute_path << ": " << strerror(errno));
 		if (errno == EACCES)
 			m_statusCode = 403;
 		else
 			m_statusCode = 404;
 	}
+
+	m_statusCode = 204;
 }
 
-// TODO: Fix this. I added an ugly hacky param in case the file served is supposed ot be an error page.
-void Response::handleGetWithFile(std::string file) {
-	std::string filename		 = m_server->getRoot() + m_request.getLocation();
-	bool		autoIndexInstead = false;
-	if (!file.empty())
-		filename = file;
+void Response::handleGetWithFile() {
+	bool autoIndex	 = m_server->getAutoIndex();
+	bool isDirectory = m_filename.back() == '/';
 
-	if (filename.back() == '/') {
-		filename += "index.html"; // TODO: get from config. This may also be a .php file for example.
-		autoIndexInstead = m_server->getAutoIndex();
-	}
+	LOG("Get: File: " + m_filename);
 
-	LOG("Get: File: " + filename);
+	if (isDirectory)
+		m_filename += "index.html"; // TODO: get from server
 
-	m_readfd = open(filename.c_str(), O_RDONLY);
+	m_readfd = open(m_filename.c_str(), O_RDONLY);
 	if (m_readfd == -1) {
-		if (errno == EACCES) // TODO: check if this is allowed? Subject says something about checking errno, not sure if
-							 // it applies here?
-			// M: We're not allowed to read/write without poll because EWOULDBLOCK/EAGAIN, but this is fine
+		if (errno == EACCES)
 			m_statusCode = 403;
-		else if (autoIndexInstead)
-			m_statusCode = autoIndex(filename.substr(0, filename.find("index.html")));
+		else if (isDirectory && autoIndex)
+			createIndex(m_filename.substr(0, m_filename.find("index.html")));
 		else
 			m_statusCode = 404;
+		return;
 	}
 
-	addHeader("Content-Type", MIME::fromFileName(filename));
+	addHeader("Content-Type", MIME::fromFileName(m_filename));
 
 	getFirstChunk();
 }
@@ -145,10 +148,10 @@ void Response::startCGIGeneric() {
 	}
 }
 
-void Response::appendBodyPiece(const std::string &str) {
+void Response::appendBodyPiece(const std::string& str) {
 	// TODO: non-CGI
 	if (m_request.getMethod() != POST || !m_isCGI) {
-		ssize_t bytes_written = write(m_cgi.popen.writefd, str.c_str(), str.length());
+		ssize_t bytes_written = write(m_cgi.popen.writefd, str.data(), str.length());
 		if (bytes_written == -1) {
 			// TODO
 			perror("write");
@@ -156,9 +159,8 @@ void Response::appendBodyPiece(const std::string &str) {
 			// TODO
 			LOG_ERR("bytes written appendbodypiece != str.length");
 		}
-		if (m_request.getState() == DONE && m_request.getBody().empty()) {
+		if (m_request.getState() == DONE && m_request.getBody().empty())
 			close(m_cgi.popen.writefd);
-		}
 	}
 }
 
@@ -166,7 +168,7 @@ void Response::handlePostCGI() {
 
 	startCGIGeneric();
 	if (m_statusCode == 200) {
-		ssize_t bytes_written = write(m_cgi.popen.writefd, m_request.getBody().c_str(), m_request.getBody().length());
+		ssize_t bytes_written = write(m_cgi.popen.writefd, m_request.getBody().data(), m_request.getBody().length());
 		if (bytes_written == -1) {
 			// TODO
 			perror("write");
@@ -178,9 +180,9 @@ void Response::handlePostCGI() {
 	}
 }
 
-// this function removes bytesSent amount of bytes from the beginning of the chunk.
-void Response::trimChunk(ssize_t bytesSent) {
-	m_chunk.erase(0, bytesSent);
+// this function removes bytes_sent amount of bytes from the beginning of the chunk.
+void Response::trimChunk(ssize_t bytes_sent) {
+	m_chunk.erase(0, bytes_sent);
 }
 
 bool Response::isDone() const {
@@ -196,12 +198,12 @@ void Response::getFirstChunk() {
 		size = std::numeric_limits<off_t>().max();
 	lseek(m_readfd, 0, SEEK_SET); // set back to start
 
-	m_isSmallFile = (size < BUFFER_SIZE);
+	m_isChunked = (size > BUFFER_SIZE);
 
-	if (m_isSmallFile)
-		addHeader("Content-Length", toString(size));
-	else
+	if (m_isChunked)
 		addHeader("Transfer-Encoding", "Chunked");
+	else
+		addHeader("Content-Length", toString(size));
 }
 
 void Response::getCGIHeaderChunk() {
@@ -231,7 +233,7 @@ std::string& Response::getNextChunk() {
 	}
 
 	std::string block = readBlockFromFile();
-	if (!m_isSmallFile)
+	if (m_isChunked)
 		encodeChunked(block);
 	m_chunk += block;
 	return m_chunk;
@@ -264,10 +266,10 @@ std::string Response::readBlockFromFile() {
 	return block;
 }
 
-int Response::autoIndex(std::string path_to_index) {
+void Response::createIndex(std::string path_to_index) {
 	addHeader("Content-Type", "text/html");
 	addToBody(autoIndexHtml(path_to_index, m_server->getRoot()));
 
 	m_doneReading = true;
-	return 200;
+	m_statusCode  = 200;
 }
