@@ -33,6 +33,10 @@ void Response::processRequest() {
 	} else
 		serveError(m_request.getErrorMsg());
 
+	if (m_statusCode != 200) {
+		serveError(getStatusMessage());
+	}
+
 	if (!m_isCGI)
 		m_chunk = getResponseAsString();
 }
@@ -55,9 +59,6 @@ void Response::handleGet() {
 	else
 		handleGetWithFile();
 
-	if (m_statusCode != 200)
-		serveError(getStatusMessage());
-	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting")
 }
 
 // TODO: send to CGI
@@ -114,8 +115,10 @@ void Response::handleGetWithFile() {
 			m_statusCode = 403;
 		else if (isDirectory && autoIndex)
 			createIndex(m_filename.substr(0, m_filename.find("index.html")));
-		else
+		else if (errno == ENOENT) {
 			m_statusCode = 404;
+		else
+			m_statusCode = 500;
 		return;
 	}
 

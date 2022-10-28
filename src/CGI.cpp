@@ -7,6 +7,8 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
+#include <fcntl.h> // open
+
 static void closePipe(int *pfds) {
 	close(pfds[0]);
 	close(pfds[1]);
@@ -79,9 +81,22 @@ CGI& CGI::operator=(const CGI& other) {
 // TODO: Set correct path
 // TODO: when execution fails, close the pipe or something.
 // TODO: gateway timeout
+// TODO: throw instead of return?
 int CGI::start(const Request& req, const Server *server, const std::string& command, const std::string& filename) {
 
 	EnvironmentMap em;
+
+	// check if file is openable beforehand.
+	if (access(filename.c_str(), F_OK)) {
+		if (errno == EACCES) {
+			return 403;
+		} else if (errno == ENOENT) {
+			return 404;
+		} else {
+			return 500;
+		}
+	}
+
 	em.initFromEnviron();
 
 	// TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
