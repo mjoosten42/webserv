@@ -2,27 +2,38 @@
 #include "Poller.hpp"
 #include "Server.hpp"
 #include "logger.hpp"
+#include <iostream>
 
 #include <vector>
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char *argv[]) {
+	switch (argc) {
+		case 1:
+			argv[1] = "default.conf";
+		case 2:
+			break;
+		default:
+			std::cerr << "usage: ./webserv [configuration file]\n";
+			return EXIT_FAILURE;
+	}
+
 	ConfigParser config;
-	if (argc == 2)
+	try {
 		config.parse_config(argv[1]);
-	else
-		config.parse_config("default.conf");
+	} catch(...) {
+		return EXIT_FAILURE;
+	}
 
 	LOG(config.getConfigAsString());
 
 	std::vector<Listener> listeners;
 	initFromConfig(config, listeners);
 
-	//DEBUG TESTS:
-	std::string test = (listeners.begin())->getServerByHost("amogus.localhst.co.uk").getRootForFile("amogus.jpg");	
+	// DEBUG TESTS:
+	std::string test = listeners.front().getServerByHost("amogus.localhst.co.uk").getRootForFile("amogus.jpg");
 	LOG("Result:");
 	LOG(test);
 
 	Poller poller(listeners.begin(), listeners.end());
-
 	poller.start();
 }
