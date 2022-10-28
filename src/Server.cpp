@@ -155,12 +155,13 @@ size_t Server::getLocationIndexForFile(const std::string file_to_find) const {
 	return (-1); // Not present in any Location blocks, default to parent server settings.
 }
 
-const std::string Server::getRootForFile(const std::string file_to_find) const {
+const std::string Server::getRootForFile(const size_t loc_index, const std::string file_to_find) const {
 	std::string test_path;
 	int			test;
-
 	std::vector<const Location>::iterator litty = m_locations.begin();
-	for (; litty != m_locations.end(); ++litty) {
+
+	if (loc_index != static_cast<size_t>(-1)){
+		litty += loc_index;
 		test_path = litty->m_root;
 		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
 		if (test != -1) {
@@ -168,12 +169,21 @@ const std::string Server::getRootForFile(const std::string file_to_find) const {
 			return test_path;
 		}
 	}
-
-	test_path = m_root;
-	test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
-	if (test != -1) {
-		close(test);
-		return test_path;
+	else{
+		for (; litty != m_locations.end(); ++litty) {
+			test_path = litty->m_root;
+			test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+			if (test != -1) {
+				close(test);
+				return test_path;
+			}
+		}
+		test_path = m_root;
+		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+		if (test != -1) {
+			close(test);
+			return test_path;
+		}
 	}
 	return ("");
 }

@@ -13,7 +13,7 @@ TEST_CASE( "Hosts", "[Server]" ) {
 	std::vector<Listener> listeners;
 	initFromConfig(config, listeners);
 
-	std::string test = listeners.front().getServerByHost("amogus.localhst.co.uk").getRootForFile("amogus.jpg");
+	std::string test = listeners.front().getServerByHost("amogus.localhst.co.uk").getRootForFile(0, "amogus.jpg");
 
 	REQUIRE( test == "html/img");
 }
