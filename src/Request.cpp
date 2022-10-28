@@ -28,6 +28,12 @@ int Request::append(const char *buf, ssize_t size) {
 	return parse();
 }
 
+std::string Request::takePiece() {
+	std::string to_return = m_body.substr(BUFSIZ);
+	m_body.erase(0, BUFSIZ);
+	return to_return;
+}
+
 void Request::cut(ssize_t len) {
 	m_body.erase(0, len);
 }

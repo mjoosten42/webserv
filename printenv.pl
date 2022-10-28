@@ -10,6 +10,20 @@ printenv — a CGI program that just prints its environment
 
 print "Content-Type: text/plain\n\n";
 
-for my $var ( sort keys %ENV ) {
-    printf "%s=\"%s\"\n", $var, $ENV{$var};
+#sleep(2);
+
+if ($ENV{"REQUEST_METHOD"} eq "POST") {
+
+    foreach my $line ( <STDIN> ) {
+        chomp( $line );
+        print "$line\n";
+    }
+
+} else {
+
+    for my $var ( sort keys %ENV ) {
+        printf "%s=\"%s\"\n", $var, $ENV{$var};
+    }
 }
+
+printf "done.\n"
