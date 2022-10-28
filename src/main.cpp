@@ -20,7 +20,8 @@ int main(int argc, const char *argv[]) {
 	ConfigParser config;
 	try {
 		config.parse_config(argv[1]);
-	} catch (...) {
+	} catch (std::exception& e) {
+		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -28,11 +29,6 @@ int main(int argc, const char *argv[]) {
 
 	std::vector<Listener> listeners;
 	initFromConfig(config, listeners);
-
-	// DEBUG TESTS:
-	std::string test = listeners.front().getServerByHost("amogus.localhst.co.uk").getRootForFile("amogus.jpg");
-	LOG("Result:");
-	LOG(test);
 
 	Poller poller(listeners.begin(), listeners.end());
 	poller.start();

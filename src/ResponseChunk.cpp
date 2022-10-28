@@ -15,19 +15,24 @@
 void Response::processRequest() {
 	setFlags();
 	addDefaultHeaders();
-	switch (m_request.getMethod()) {
-		case GET:
-			handleGet();
-			break;
-		case POST:
-			handlePost();
-			break;
-		case DELETE:
-			handleDelete();
-			break;
-		default:
-			LOG_ERR("Invalid method");
-	}
+
+	if (m_statusCode == 200) {
+		switch (m_request.getMethod()) {
+			case GET:
+				handleGet();
+				break;
+			case POST:
+				handlePost();
+				break;
+			case DELETE:
+				handleDelete();
+				break;
+			default:
+				LOG_ERR("Invalid method");
+		}
+	} else
+		serveError(m_request.getErrorMsg());
+
 	if (!m_isCGI)
 		m_chunk = getResponseAsString();
 }
@@ -48,10 +53,10 @@ void Response::handleGet() {
 	if (m_isCGI)
 		handleGetCGI();
 	else
-		m_statusCode = handleGetWithFile();
+		handleGetWithFile();
 
 	if (m_statusCode != 200)
-		serveError(m_statusCode);
+		serveError(getStatusMessage());
 	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting")
 }
 
@@ -81,9 +86,9 @@ void Response::handleDelete() {
 }
 
 // TODO: Fix this. I added an ugly hacky param in case the file served is supposed ot be an error page.
-int Response::handleGetWithFile(std::string file) {
-	bool		autoIndexInstead = false;
+void Response::handleGetWithFile(std::string file) {
 	std::string filename		 = m_server->getRoot() + m_request.getLocation();
+	bool		autoIndexInstead = false;
 	if (!file.empty())
 		filename = file;
 
@@ -98,23 +103,26 @@ int Response::handleGetWithFile(std::string file) {
 	if (m_readfd == -1) {
 		if (errno == EACCES) // TODO: check if this is allowed? Subject says something about checking errno, not sure if
 							 // it applies here?
-			return 403;
+			// M: We're not allowed to read/write without poll because EWOULDBLOCK/EAGAIN, but this is fine
+			m_statusCode = 403;
 		else if (autoIndexInstead)
-			return autoIndex(filename.substr(0, filename.find("index.html")));
+			m_statusCode = autoIndex(filename.substr(0, filename.find("index.html")));
 		else
-			return 404;
+			m_statusCode = 404;
 	}
 
 	addHeader("Content-Type", MIME::fromFileName(filename));
 
-	return getFirstChunk();
+	getFirstChunk();
 }
 
 void Response::handleGetCGI() {
 	LOG(RED "Handle CGI" DEFAULT);
 
+	std::string filename = m_server->getRoot() + m_request.getLocation();
+
 	// TODO: parse from config
-	m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
+	m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/php", filename);
 
 	addHeader("Transfer-Encoding", "Chunked");
 	m_readfd					= m_cgi.popen.readfd;
@@ -135,7 +143,7 @@ bool Response::isDone() const {
 }
 
 // gets the first chunk of a static file
-int Response::getFirstChunk() {
+void Response::getFirstChunk() {
 	off_t size = lseek(m_readfd, 0, SEEK_END);
 
 	// get file size
@@ -149,8 +157,6 @@ int Response::getFirstChunk() {
 		addHeader("Content-Length", toString(size));
 	else
 		addHeader("Transfer-Encoding", "Chunked");
-
-	return 200;
 }
 
 void Response::getCGIHeaderChunk() {
@@ -194,6 +200,10 @@ void Response::encodeChunked(std::string& str) {
 std::string Response::readBlockFromFile() {
 	std::string block;
 	ssize_t		bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
+
+	// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+	// LOG(std::string(buf, bytes_read));
+	// LOG(RED << std::string(winSize(), '-') << DEFAULT);
 
 	LOG(RED "Read: " DEFAULT << bytes_read);
 	switch (bytes_read) {

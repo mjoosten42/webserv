@@ -13,53 +13,52 @@ class Response: public HTTP {
 	public:
 		Response();
 
+		void clear();
+
 		void		 processRequest();
 		void		 trimChunk(ssize_t bytesSent);
 		std::string& getNextChunk();
 
 		bool isDone() const;
 		bool isInitialized() const;
-		bool finishedProcessing() const;
 		bool readfdNeedsPoll() const;
+		bool finishedProcessing() const;
+		bool hasProcessedRequest() const;
 
-		Request		& getRequest();
-		const Server *getServer() const;
-		void		  addServer(const Server *server);
+		void addServer(const Server *server);
 
 		bool shouldClose() const;
 
-		void clear();
-		int	 getReadFD() const;
-
-		bool hasProcessedRequest() const;
+		Request		& getRequest();
+		const Server *getServer() const;
+		int			  getReadFD() const;
 
 	private:
-		void encodeChunked(std::string& str);
-
 		void setFlags();
-
 		void addDefaultHeaders();
-
-		std::string getStatusLine() const;
-		std::string getStatusMessage() const;
-		std::string getResponseAsString();
 
 		void handleGet();
 		void handlePost();
 		void handleDelete();
 
-		int	 handleGetWithFile(std::string file = ""); // TODO
+		void handleGetWithFile(std::string file = ""); // TODO
 		void handleGetCGI();
 
-		void sendFail(int code, const std::string& msg);
-		void sendMoved(const std::string& location);
-		int	 serveError(int code);
-		int	 autoIndex(std::string path_to_index);
-
-		int getFirstChunk();
+		void getFirstChunk();
+		void getCGIHeaderChunk();
+		void encodeChunked(std::string& str);
 
 		std::string readBlockFromFile();
-		void		getCGIHeaderChunk();
+
+		void serveError(const std::string& str);
+		void sendFail(int code, const std::string& msg);
+		void sendMoved(const std::string& location);
+
+		int autoIndex(std::string path_to_index);
+
+		std::string getStatusLine() const;
+		std::string getStatusMessage() const;
+		std::string getResponseAsString();
 
 	public:
 		int m_statusCode;
