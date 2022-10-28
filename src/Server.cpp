@@ -149,6 +149,22 @@ Server::Server(t_block_directive *constructor_specs) {
 		m_locations.push_back(Location(*it, this));
 }
 
+size_t Server::getLocationIndexForFile(const std::string file_to_find) const {
+	std::string test_path;
+	int			test;
+
+	std::vector<const Location>::iterator litty = m_locations.begin();
+	for (; litty != m_locations.end(); ++litty) {
+		test_path = litty->m_root;
+		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
+		if (test != -1) {
+			close(test);
+			return litty - m_locations.begin();
+		}
+	}
+	return (-1); // Not present in any Location blocks, default to parent server settings.
+}
+
 const std::string Server::getRootForFile(const std::string file_to_find) const {
 	std::string test_path;
 	int			test;
