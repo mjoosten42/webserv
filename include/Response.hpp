@@ -19,7 +19,7 @@ class Response: public HTTP {
 		void		 trimChunk(ssize_t bytesSent);
 		std::string& getNextChunk();
 
-		void appendBodyPiece(const std::string &str);
+		void appendBodyPiece(const std::string& str);
 
 		bool isDone() const;
 		bool isInitialized() const;
@@ -47,7 +47,7 @@ class Response: public HTTP {
 
 		void handleGetCGI();
 		void handlePostCGI();
-	
+
 		void startCGIGeneric();
 
 		void getFirstChunk();

@@ -1,11 +1,10 @@
 #include "Location.hpp"
 
 #include "Server.hpp"
-#include "stringutils.hpp"
 #include "logger.hpp"
+#include "stringutils.hpp"
 
-std::ostream& operator<< (std::ostream& o, const CGI_loc & i)
-{
+std::ostream& operator<<(std::ostream& o, const CGI_loc& i) {
 	o << "Type: " << i.cgi_type << std::endl;
 	o << "Path: " << i.cgi_path << std::endl;
 	return (o);
@@ -51,8 +50,8 @@ Location::Location(t_block_directive *constructor_specs, Server *parent) {
 		m_root = val_from_config;
 
 	// Allows user to specify CGI to handle cgi-scripts
-	std::vector<std::string> cgi_specs = stringSplit(constructor_specs->fetch_simple("cgi"));
-	std::vector<std::string>::iterator cgi_it = cgi_specs.begin();
+	std::vector<std::string>		   cgi_specs = stringSplit(constructor_specs->fetch_simple("cgi"));
+	std::vector<std::string>::iterator cgi_it	 = cgi_specs.begin();
 	while (cgi_it != cgi_specs.end()) {
 		cgi_it++;
 		if (cgi_it == cgi_specs.end())

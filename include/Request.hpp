@@ -13,10 +13,10 @@ class Request: public HTTP {
 	public:
 		Request();
 
-		void append(const char *buf, ssize_t size);
-		void cut(ssize_t len);
+		void		append(const char *buf, ssize_t size);
+		void		cut(ssize_t len);
 		std::string takePiece();
-		void clear();
+		void		clear();
 
 		const std::string& getHost() const;
 		const state		 & getState() const;

@@ -145,7 +145,7 @@ void Response::startCGIGeneric() {
 	}
 }
 
-void Response::appendBodyPiece(const std::string &str) {
+void Response::appendBodyPiece(const std::string& str) {
 	// TODO: non-CGI
 	if (m_request.getMethod() != POST || !m_isCGI) {
 		ssize_t bytes_written = write(m_cgi.popen.writefd, str.c_str(), str.length());
@@ -156,9 +156,8 @@ void Response::appendBodyPiece(const std::string &str) {
 			// TODO
 			LOG_ERR("bytes written appendbodypiece != str.length");
 		}
-		if (m_request.getState() == DONE && m_request.getBody().empty()) {
+		if (m_request.getState() == DONE && m_request.getBody().empty())
 			close(m_cgi.popen.writefd);
-		}
 	}
 }
 
