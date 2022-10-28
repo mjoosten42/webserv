@@ -4,6 +4,7 @@
 #include "stringutils.hpp"
 
 #include <string>
+#include "logger.hpp"
 #include <utility>
 
 HTTP::HTTP() {}
@@ -27,13 +28,11 @@ std::string HTTP::capitalizeFieldPretty(std::string field) {
 	while (true) {
 
 		pos = field.find_first_of('-', pos);
-		if (pos == std::string::npos) {
+		if (pos == std::string::npos)
 			break;
-		}
 		pos++;
-		if (pos >= field.length()) {
+		if (pos >= field.length())
 			break;
-		}
 		field[pos] = std::toupper(field[pos]);
 	}
 	return field;
@@ -52,10 +51,13 @@ void HTTP::addToBody(const char *buf, ssize_t size) {
 }
 
 void HTTP::addHeader(const std::string field, const std::string& value) {
-	std::string copy(field);
+	std::pair<std::string, std::string> header = std::make_pair(field, value);
 
-	strToLower(copy);
-	m_headers[copy] = value;
+	strToLower(header.first);
+	if (!m_headers.insert(header).second) {
+		LOG_ERR("Overwriting Header: " << field);
+		LOG_ERR(getHeadersAsString());
+	}
 }
 
 bool HTTP::hasHeader(const std::string& field) const {

@@ -8,8 +8,6 @@ printenv — a CGI program that just prints its environment
 
 =cut
 
-sleep 1;
-
 print "Content-Type: text/plain\n\n";
 
 for my $var ( sort keys %ENV ) {

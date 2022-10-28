@@ -39,7 +39,7 @@ void Response::setFlags() {
 	if (m_request.hasHeader("Connection"))
 		if (m_request.getHeaderValue("Connection") == "close")
 			m_close = true;
-	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php"); //TODO: server
+	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php"); // TODO: server
 }
 
 void Response::handleGet() {
@@ -112,6 +112,7 @@ int Response::handleGetWithFile(std::string file) {
 
 void Response::handleGetCGI() {
 	LOG(RED "Handle CGI" DEFAULT);
+
 	// TODO: parse from config
 	m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", "printenv.pl");
 
