@@ -33,15 +33,19 @@ void Response::processRequest() {
 	} else
 		serveError(m_request.getErrorMsg());
 
+	if (m_statusCode != 200)
+		serveError(getStatusMessage());
+
 	if (!m_isCGI)
 		m_chunk = getResponseAsString();
 }
 
-// All bools are initialized to false
-// Set to true if needed
+// All bools are initialized to false in ctor
+// Set to true if applicable
 void Response::setFlags() {
 	m_processedRequest = true;
 	m_isCGI			   = (MIME::getExtension(m_request.getLocation()) == "php"); // TODO: server
+	m_isChunked |= m_isCGI;														 // CGI is always chunked
 }
 
 void Response::handleGet() {
@@ -51,10 +55,6 @@ void Response::handleGet() {
 		handleGetCGI();
 	else
 		handleGetWithFile();
-
-	if (m_statusCode != 200)
-		serveError(getStatusMessage());
-	// sendFail(m_statusCode, m_isCGI ? "CGI BROKE 😂😂😂" : "Page is venting")
 }
 
 // TODO: send to CGI
@@ -112,8 +112,10 @@ void Response::handleGetWithFile() {
 			m_statusCode = 403;
 		else if (isDirectory && autoIndex)
 			createIndex(m_filename.substr(0, m_filename.find("index.html")));
-		else
+		else if (errno == ENOENT)
 			m_statusCode = 404;
+		else
+			m_statusCode = 500;
 		return;
 	}
 
@@ -205,6 +207,22 @@ void Response::getFirstChunk() {
 }
 
 void Response::getCGIHeaderChunk() {
+
+	// TODO: a bit hacky. Should this be done just the first time? also, it works for perl, but not PHP.
+	// clean up next monday.
+	if (m_cgi.didExit() > 0) {
+		close(m_cgi.popen.readfd);
+		close(m_cgi.popen.writefd);
+
+		m_statusCode = 502;
+		m_chunk.clear();
+		m_headers.clear();
+		addDefaultHeaders();
+		m_body.clear();
+		sendFail(502, "CGI BROKE 😂😂😂");
+		m_chunk = getResponseAsString();
+		return;
+	}
 
 	std::string block = readBlockFromFile();
 

@@ -7,6 +7,9 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
+#include <fcntl.h>	  // open
+#include <sys/wait.h> // waitpid
+
 static void closePipe(int *pfds) {
 	close(pfds[0]);
 	close(pfds[1]);
@@ -76,12 +79,44 @@ CGI& CGI::operator=(const CGI& other) {
 	return *this;
 }
 
+// returns the status code when the child CGI process has exited. returns -1 on failure or when it hasn't exited yet.
+int CGI::didExit() {
+
+	int stat_loc = 0;
+
+	int status = waitpid(popen.pid, &stat_loc, WNOHANG);
+
+	if (status == -1) {
+		perror("waitpid");
+		return -1;
+	} else if (status == 0) {
+		return -1;
+	} else {
+		if (WIFEXITED(stat_loc))
+			return WEXITSTATUS(stat_loc);
+	}
+	return 0;
+}
+
 // TODO: Set correct path
 // TODO: when execution fails, close the pipe or something.
 // TODO: gateway timeout
+// TODO: throw instead of return?
 int CGI::start(const Request& req, const Server *server, const std::string& command, const std::string& filename) {
 
 	EnvironmentMap em;
+
+	// check if file is openable beforehand.
+	// if (access(filename.c_str(), F_OK)) {
+	// 	if (errno == EACCES) {
+	// 		return 403;
+	// 	} else if (errno == ENOENT) {
+	// 		return 404;
+	// 	} else {
+	// 		return 500;
+	// 	}
+	// }
+
 	em.initFromEnviron();
 
 	// TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
