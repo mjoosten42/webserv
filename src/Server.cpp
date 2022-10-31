@@ -139,17 +139,45 @@ Server::Server(t_block_directive *constructor_specs) {
 		m_locations.push_back(Location(*it, this));
 }
 
+// For clarity:
+//  -We use "Address" to refer to the way the user navigates the server, e.g.
+//  webserv.com/images/amogus.jpg
+//  -We use "Path" to refer the client-side storage of files, e.g.
+//  html/img/amogus.jpg
+//  This function tries to find the longest match between the user defined Address
+//  and the name of one of the containing location blocks.
+size_t Server::getLocationIndexForAddress(const std::string address_to_find) const {
+	size_t ret			   = -1;
+	size_t best_match	   = 0;
+	size_t length_of_match = 0;
+
+	std::vector<const Location>::iterator l_it = m_locations.begin();
+	for (; l_it != m_locations.end(); ++l_it) {
+		length_of_match = 0;
+		while (l_it->m_location[length_of_match] == address_to_find[length_of_match])
+			length_of_match++;
+		if (length_of_match > best_match) {
+			best_match = length_of_match;
+			ret		   = l_it - m_locations.begin();
+		}
+	}
+	return (ret);
+}
+
+// This function finds the appropriate Location block for a file
+// if it is present anywhere on the server.
+// It does so without using the Address specified by the user.
 size_t Server::getLocationIndexForFile(const std::string file_to_find) const {
 	std::string test_path;
 	int			test;
 
-	std::vector<const Location>::iterator litty = m_locations.begin();
-	for (; litty != m_locations.end(); ++litty) {
-		test_path = litty->m_root;
+	std::vector<const Location>::iterator l_it = m_locations.begin();
+	for (; l_it != m_locations.end(); ++l_it) {
+		test_path = l_it->m_root;
 		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
 		if (test != -1) {
 			close(test);
-			return litty - m_locations.begin();
+			return l_it - m_locations.begin();
 		}
 	}
 	return (-1); // Not present in any Location blocks, default to parent server settings.
@@ -158,19 +186,19 @@ size_t Server::getLocationIndexForFile(const std::string file_to_find) const {
 const std::string Server::getRootForFile(const size_t loc_index, const std::string file_to_find) const {
 	std::string							  test_path;
 	int									  test;
-	std::vector<const Location>::iterator litty = m_locations.begin();
+	std::vector<const Location>::iterator l_it = m_locations.begin();
 
 	if (loc_index != static_cast<size_t>(-1)) {
-		litty += loc_index;
-		test_path = litty->m_root;
+		l_it += loc_index;
+		test_path = l_it->m_root;
 		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
 		if (test != -1) {
 			close(test);
 			return test_path;
 		}
 	} else {
-		for (; litty != m_locations.end(); ++litty) {
-			test_path = litty->m_root;
+		for (; l_it != m_locations.end(); ++l_it) {
+			test_path = l_it->m_root;
 			test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
 			if (test != -1) {
 				close(test);
