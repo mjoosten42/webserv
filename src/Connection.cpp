@@ -10,9 +10,9 @@
 #include <sys/socket.h> //recv, send
 #include <unistd.h>		// close
 
-Connection::Connection(): m_fd(-1), m_listener(NULL) {}
+Connection::Connection() {}
 
-Connection::Connection(int m_fd, const Listener *listener): m_fd(m_fd), m_listener(listener) {}
+Connection::Connection(int m_fd, const Listener *listener): m_fd(m_fd), m_listener(listener), m_close(false) {}
 
 int Connection::receiveFromClient(short& events) {
 	ssize_t bytes_received = recv(m_fd, buf, BUFFER_SIZE, 0);
@@ -37,14 +37,14 @@ int Connection::receiveFromClient(short& events) {
 				response.m_statusCode = error;
 			}
 
-			if (request.getState() >= BODY) {		   // BODY or DONE
+			LOG(request);
+			if (request.getState() == BODY || request.getState() == DONE) {
 				if (!response.hasProcessedRequest()) { // Do once
-					LOG(request);
 					response.addServer(&(m_listener->getServerByHost(request.getHost())));
 					response.processRequest();
 
-					if (response.needsReadFd())
-						return response.getReadFD();
+					if (response.needsSourceFd())
+						return response.getSourceFD();
 					else
 						setFlag(events, POLLOUT);
 				} else
@@ -58,11 +58,10 @@ int Connection::receiveFromClient(short& events) {
 // This should only be called if POLLOUT is set
 // TODO: when send() doesn't send the entire chunk and response.isDone(), the function fails.
 // when fixing, it should bear in mind that the readfd should still be removed and POLLOUT is set!
-std::pair<bool, int> Connection::sendToClient(short& events) {
-	Response   & response	 = m_responses.front();
-	std::string& str		 = response.getNextChunk();
-	ssize_t		 bytes_sent	 = send(m_fd, str.data(), str.length(), 0);
-	bool		 shouldClose = false;
+int Connection::sendToClient(short& events) {
+	Response   & response	= m_responses.front();
+	std::string& str		= response.getNextChunk();
+	ssize_t		 bytes_sent = send(m_fd, str.data(), str.length(), 0);
 
 	LOG(RED "Send: " DEFAULT << bytes_sent);
 
@@ -76,18 +75,22 @@ std::pair<bool, int> Connection::sendToClient(short& events) {
 		default:
 			response.trimChunk(bytes_sent);
 			if (response.isDone()) {
-				shouldClose = response.shouldClose();
+				m_close = response.wantsClose();
 				m_responses.pop();
-				return std::make_pair(shouldClose, response.getReadFD());
+				return response.getSourceFD();
 			}
-			if (response.getReadFD() == -1)
+			if (response.getSourceFD() == -1)
 				setFlag(events, POLLOUT);
 	}
-	return std::make_pair(shouldClose, -1);
+	return -1;
 }
 
 Response& Connection::getLastResponse() {
 	if (m_responses.empty() || m_responses.back().getRequest().getState() == DONE)
 		m_responses.push(Response());
 	return m_responses.back();
+}
+
+bool Connection::wantsClose() const {
+	return m_close;
 }

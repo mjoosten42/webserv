@@ -23,17 +23,17 @@ class Response: public HTTP {
 		void appendBodyPiece(const std::string& str);
 
 		bool isDone() const;
-		bool needsReadFd() const;
+		bool needsSourceFd() const;
 		bool isInitialized() const;
 		bool finishedProcessing() const;
 		bool hasProcessedRequest() const;
-		bool shouldClose() const;
+		bool wantsClose() const;
 
 		void addServer(const Server *server);
 
 		Request		& getRequest();
 		const Server *getServer() const;
-		int			  getReadFD() const;
+		int			  getSourceFD() const;
 
 	private:
 		void setFlags();
@@ -83,6 +83,5 @@ class Response: public HTTP {
 		bool			  m_isCGI;					   // true if it is a CGI request, as filled in by checkWetherCGI()
 		bool			  m_CGI_DoneProcessingHeaders; // true if done parsing the headers back from the CGI and in CGI
 													   // chunked sending mode.
-		bool m_close;								   // Connection: close, close the connection after response is sent
 		bool m_processedRequest;
 };

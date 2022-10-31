@@ -94,14 +94,14 @@ void Poller::pollIn(pollfd& client) {
 // If response if done reading from its readfd, remove it
 // If response is done and wants to close the connection, remove the client
 void Poller::pollOut(pollfd& client) {
-	Connection		   & conn = m_connections[client.fd];
-	std::pair<bool, int> ret  = conn.sendToClient(client.events);
+	Connection& conn	  = m_connections[client.fd];
+	int			source_fd = conn.sendToClient(client.events);
 
-	if (ret.second != -1) { // returns readfd to close
-		m_readfds.remove(ret.second);
-		m_pollfds.erase(find(ret.second));
+	if (source_fd != -1) { // returns readfd to close
+		m_readfds.remove(source_fd);
+		m_pollfds.erase(find(source_fd));
 	}
-	if (ret.first) // returns true if clients wants close
+	if (conn.wantsClose()) // returns true if clients wants close
 		removeClient(client.fd);
 }
 
@@ -147,11 +147,11 @@ void Poller::removeClient(int client_fd) {
 	LOG(RED "CLIENT " DEFAULT << client_fd << RED " LEFT" DEFAULT);
 }
 
-size_t Poller::clientsIndex() {
+size_t Poller::clientsIndex() const {
 	return m_listeners.size();
 }
 
-size_t Poller::readFdsIndex() {
+size_t Poller::readFdsIndex() const {
 	return m_listeners.size() + m_connections.size();
 }
 
@@ -167,7 +167,7 @@ std::vector<pollfd>::iterator Poller::find(int fd) {
 	return m_pollfds.end();
 }
 
-std::string Poller::getPollFdsAsString(size_t first, size_t last) {
+std::string Poller::getPollFdsAsString(size_t first, size_t last) const {
 	std::string PollFds = "{ ";
 	for (; first != last; first++) {
 		PollFds += toString(m_pollfds[first].fd);

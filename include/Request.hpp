@@ -50,8 +50,8 @@ class Request: public HTTP {
 		std::string m_queryString; // ex. amongus=sus&greeting=Good%20morning
 
 		std::string m_saved;
-		std::size_t m_contentLength;
 		std::string m_host;
+		size_t		m_contentLength;
 		size_t		m_bodyTotal;
 		bool		m_processed;
 

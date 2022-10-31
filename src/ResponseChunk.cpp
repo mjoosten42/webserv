@@ -41,10 +41,7 @@ void Response::processRequest() {
 // Set to true if needed
 void Response::setFlags() {
 	m_processedRequest = true;
-	if (m_request.hasHeader("Connection"))
-		if (m_request.getHeaderValue("Connection") == "close")
-			m_close = true;
-	m_isCGI = (MIME::getExtension(m_request.getLocation()) == "php"); // TODO: server
+	m_isCGI			   = (MIME::getExtension(m_request.getLocation()) == "php"); // TODO: server
 }
 
 void Response::handleGet() {
@@ -99,6 +96,7 @@ void Response::handleDelete() {
 	m_statusCode = 204;
 }
 
+// TODO: check if directory (curl localhost:8080/img loops forever)
 void Response::handleGetWithFile() {
 	bool autoIndex	 = m_server->getAutoIndex();
 	bool isDirectory = m_filename.back() == '/';

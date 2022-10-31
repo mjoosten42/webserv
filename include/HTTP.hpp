@@ -17,7 +17,7 @@ class HTTP {
 		void addHeader(const std::string field, const std::string& value);
 		bool hasHeader(const std::string& field) const;
 
-		std::string getHeaderValue(const std::string& field);
+		std::string getHeaderValue(const std::string& field) const;
 		std::string getHeadersAsString() const;
 
 		void clear();

@@ -9,7 +9,7 @@ struct CGI_loc {
 };
 
 #include <iostream>
-std::ostream& operator<< (std::ostream& o, const CGI_loc & i);
+std::ostream& operator<<(std::ostream& o, const CGI_loc& i);
 
 class Location {
 	public:

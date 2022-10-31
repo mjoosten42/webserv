@@ -92,7 +92,8 @@ std::string Response::getResponseAsString() {
 }
 
 void Response::addDefaultHeaders() {
-	addHeader("Host", m_request.getHost());
+	if (m_request.hasHeader("Host"))
+		addHeader("Host", m_request.getHost());
 	if (!m_server->getServerSoftwareName().empty())
 		addHeader("Server", m_server->getServerSoftwareName());
 }
@@ -105,11 +106,11 @@ const Server *Response::getServer() const {
 	return m_server;
 }
 
-bool Response::shouldClose() const {
-	return m_close;
+bool Response::wantsClose() const {
+	return m_request.hasHeader("Connection") && m_request.getHeaderValue("Connection") == "close";
 }
 
-int Response::getReadFD() const {
+int Response::getSourceFD() const {
 	return m_readfd;
 }
 
@@ -117,6 +118,6 @@ bool Response::hasProcessedRequest() const {
 	return m_processedRequest;
 }
 
-bool Response::needsReadFd() const {
+bool Response::needsSourceFd() const {
 	return m_readfd != -1;
 }

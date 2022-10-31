@@ -32,12 +32,12 @@ class Poller {
 		void acceptClient(int listener_fd);
 		void removeClient(int index);
 
-		size_t clientsIndex();
-		size_t readFdsIndex();
+		size_t clientsIndex() const;
+		size_t readFdsIndex() const;
 
 		std::vector<pollfd>::iterator find(int fd);
 
-		std::string getPollFdsAsString(size_t first, size_t last);
+		std::string getPollFdsAsString(size_t first, size_t last) const;
 
 	private:
 		std::vector<pollfd>		  m_pollfds;	 // the array of pollfd structs

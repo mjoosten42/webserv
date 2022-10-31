@@ -17,7 +17,8 @@ bool isHttpVersion(const std::string& str);
 bool isSupportedMethod(methods method);
 bool containsNewline(const std::string& str);
 
-Request::Request(): m_state(STARTLINE), m_method(static_cast<methods>(-1)), m_contentLength(0), m_processed(false) {}
+Request::Request():
+	m_state(STARTLINE), m_method(static_cast<methods>(-1)), m_contentLength(0), m_bodyTotal(0), m_processed(false) {}
 
 void Request::append(const char *buf, ssize_t size) {
 	m_saved.append(buf, size);
@@ -31,12 +32,6 @@ void Request::append(const char *buf, ssize_t size) {
 	}
 }
 
-std::string Request::takePiece() {
-	std::string to_return = m_body.substr(BUFFER_SIZE);
-	m_body.erase(0, BUFFER_SIZE);
-	return to_return;
-}
-
 void Request::cut(ssize_t len) {
 	m_body.erase(0, len);
 }
@@ -47,8 +42,15 @@ void Request::clear() {
 	m_location.clear();
 	m_queryString.clear();
 	m_saved.clear();
-	m_contentLength = 0;
 	m_host.clear();
+	m_bodyTotal		= 0;
+	m_contentLength = 0;
+}
+
+std::string Request::takePiece() {
+	std::string piece = m_body.substr(0, BUFFER_SIZE);
+	m_body.erase(0, BUFFER_SIZE);
+	return piece;
 }
 
 void Request::parse() {
@@ -79,13 +81,13 @@ void Request::parse() {
 			}
 			break;
 		case BODY:
-			addToBody(m_saved);
-			m_bodyTotal += m_saved.length();
-			m_saved.clear();
 			if (!m_processed)
 				checkSpecialHeaders();
 			if (m_bodyTotal == m_contentLength)
 				m_state = DONE;
+			addToBody(m_saved);
+			m_bodyTotal += m_saved.length();
+			m_saved.clear();
 			break;
 		case DONE:
 			LOG_ERR("Appending to DONE request"); // Shouldn't be reached
@@ -155,14 +157,14 @@ void Request::parseHeader(const std::string& line) {
 	ss >> header.first;
 	ss >> header.second;
 	if (header.first.back() != ':') {
-		m_errorMsg = "Header field must end in ':' : " + line;
+		m_errorMsg = "Header field must end in ':' : \"" + line + "\"";
 		throw 400;
 	}
 	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so tolower them.
 	header.first.pop_back();
 	insert = m_headers.insert(header);
 	if (!insert.second) {
-		m_errorMsg = "Duplicate headers: " + line;
+		m_errorMsg = "Duplicate headers: \"" + line + "\"";
 		throw 400;
 	}
 }
@@ -171,6 +173,10 @@ void Request::checkSpecialHeaders() {
 	if (hasHeader("Host")) {
 		std::string hostHeader = getHeaderValue("Host");
 		m_host				   = hostHeader.substr(0, hostHeader.find(':'));
+		if (m_host.empty()) {
+			m_errorMsg = "Empty host";
+			throw 400;
+		}
 	} else {
 		m_errorMsg = "Missing host";
 		throw 400;

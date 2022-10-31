@@ -67,7 +67,7 @@ bool HTTP::hasHeader(const std::string& field) const {
 	return m_headers.find(copy) != m_headers.end();
 }
 
-std::string HTTP::getHeaderValue(const std::string& field) {
+std::string HTTP::getHeaderValue(const std::string& field) const {
 	std::string copy(field);
 
 	strToLower(copy);
