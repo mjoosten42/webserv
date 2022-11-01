@@ -5,7 +5,6 @@ HEADERS = \
 	include/ConfigParser.hpp \
 	include/Connection.hpp \
 	include/defines.hpp \
-	include/EndOfHeaderFinder.hpp \
 	include/EnvironmentMap.hpp \
 	include/HTTP.hpp \
 	include/Listener.hpp \
@@ -13,9 +12,9 @@ HEADERS = \
 	include/logger.hpp \
 	include/MIME.hpp \
 	include/Poller.hpp \
-	include/ReadFds.hpp \
 	include/Request.hpp \
 	include/Response.hpp \
 	include/Server.hpp \
+	include/SourceFds.hpp \
 	include/stringutils.hpp \
 	include/utils.hpp \

@@ -59,3 +59,10 @@ size_t winSize() {
 	ioctl(1, TIOCGWINSZ, &w);
 	return w.ws_col;
 }
+
+size_t findNewline(const std::string str, size_t begin) {
+	size_t pos = str.find("\r\n", begin);
+	if (pos != std::string::npos)
+		return pos;
+	return str.find("\n", begin);
+}

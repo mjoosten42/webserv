@@ -8,7 +8,6 @@ SOURCES = \
 	src/Config/init.cpp \
 	src/Config/Parser.cpp \
 	src/Connection.cpp \
-	src/EndOfHeaderFinder.cpp \
 	src/EnvironmentMap.cpp \
 	src/HTTP.cpp \
 	src/Listener.cpp \
@@ -16,11 +15,11 @@ SOURCES = \
 	src/main.cpp \
 	src/MIME.cpp \
 	src/Poller.cpp \
-	src/ReadFds.cpp \
 	src/Request.cpp \
 	src/Response.cpp \
 	src/ResponseChunk.cpp \
 	src/ResponseErrors.cpp \
 	src/Server.cpp \
+	src/SourceFds.cpp \
 	src/stringutils.cpp \
 	src/utils.cpp \

@@ -51,5 +51,4 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 		cgi_it++;
 	}
 	LOG("Location CGI:");
-	logVector(m_cgis_available);
 }

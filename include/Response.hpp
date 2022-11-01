@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CGI.hpp"
-#include "EndOfHeaderFinder.hpp"
 #include "HTTP.hpp"
 #include "Request.hpp"
 
@@ -20,7 +19,7 @@ class Response: public HTTP {
 		std::string& getNextChunk();
 		void		 trimChunk(ssize_t bytes_sent);
 
-		void appendBodyPiece(const std::string& str);
+		void appendBodyPiece();
 
 		bool isDone() const;
 		bool needsSourceFd() const;
@@ -50,9 +49,10 @@ class Response: public HTTP {
 
 		void startCGIGeneric();
 
-		void getFirstChunk();
-		void getCGIHeaderChunk();
-		void encodeChunked(std::string& str);
+		void   getFirstChunk();
+		void   getCGIHeaderChunk();
+		void   encodeChunked(std::string  &str);
+		size_t findHeaderEnd(const std::string str);
 
 		std::string readBlockFromFile();
 
@@ -70,18 +70,18 @@ class Response: public HTTP {
 		int m_statusCode;
 
 	private:
-		EndOfHeaderFinder m_headerEndFinder;
-		std::string		  m_chunk;
-		Request			  m_request;
-		CGI				  m_cgi;
-		std::string		  m_filename;
-		const Server	 *m_server;
-		int				  m_readfd;		   // the fd of the file/pipe.
-		size_t			  m_locationIndex; // number given to server to identify location
-		bool			  m_doneReading;   // true if all data from readfd has been read.
-		bool			  m_isChunked;
-		bool			  m_isCGI;					   // true if it is a CGI request, as filled in by checkWetherCGI()
-		bool			  m_CGI_DoneProcessingHeaders; // true if done parsing the headers back from the CGI and in CGI
-													   // chunked sending mode.
+		std::string	  m_chunk;
+		Request		  m_request;
+		CGI			  m_cgi;
+		std::string	  m_filename;
+		const Server *m_server;
+		int			  m_readfd;		   // the fd of the file/pipe.
+		size_t		  m_locationIndex; // number given to server to identify location
+		bool		  m_doneReading;   // true if all data from readfd has been read.
+		bool		  m_isChunked;
+		bool		  m_isCGI;					   // true if it is a CGI request, as filled in by checkWetherCGI()
+		bool		  m_CGI_DoneProcessingHeaders; // true if done parsing the headers back from the CGI and in CGI
+												   // chunked sending mode.
 		bool m_processedRequest;
+		bool m_chunkEndedWithNewline;
 };

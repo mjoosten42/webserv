@@ -128,7 +128,6 @@ Server::Server(t_block_directive *constructor_specs) {
 		cgi_it++;
 	}
 	LOG("Server CGI:");
-	logVector(m_cgis_available);
 
 	// ADD LOCATION BLOCKS, IF PRESENT //
 	std::vector<t_block_directive *> location_config_blocks;

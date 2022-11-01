@@ -55,3 +55,4 @@ T stringToIntegral(const std::string& number) {
 }
 
 size_t winSize();
+size_t findNewline(const std::string str, size_t begin = 0);
