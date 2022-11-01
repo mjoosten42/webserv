@@ -21,9 +21,10 @@ class Location {
 
 		std::string			 m_location;
 		std::vector<CGI_loc> m_cgis_available;
-		int					 m_client_max_body_size;
-		std::string			 m_limit_except; // IE only allow GET, POST
-		std::string			 m_redirect;	 // return 301 $URI
-		bool				 m_auto_index;
-		std::string			 m_root;
+		// std::map<std::string, std::string> cgi_map;
+		int			m_client_max_body_size;
+		std::string m_limit_except; // IE only allow GET, POST
+		std::string m_redirect;		// return 301 $URI
+		bool		m_auto_index;
+		std::string m_root;
 };

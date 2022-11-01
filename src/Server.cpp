@@ -62,7 +62,7 @@ static void overwriteIfSpecified(std::string search, int& field, int defaultVal,
 	field						= defaultVal;
 	std::string val_from_config = constructor_specs->fetch_simple(search);
 	if (!val_from_config.empty())
-		field = stoi(val_from_config); // TODO replace all stois
+		field = stringToIntegral<int>(val_from_config);
 }
 
 // Short
@@ -71,7 +71,7 @@ static void
 	field						= defaultVal;
 	std::string val_from_config = constructor_specs->fetch_simple(search);
 	if (!val_from_config.empty())
-		field = stoi(val_from_config); // TODO replace all stois
+		field = stringToIntegral<int>(val_from_config);
 }
 
 #pragma endregion
@@ -89,6 +89,8 @@ Server::Server(t_block_directive *constructor_specs) {
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
 	//	Nginx default: "html" TODO: absolute
 	overwriteIfSpecified("root", m_root, "html", constructor_specs);
+	if (m_root.back() == '/')
+		m_root.pop_back();
 	//	Nginx default: 0 (which means don't check)
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
 	//	Nginx default: false (serve 404 error when navigating ot directory without index.html)
@@ -102,13 +104,10 @@ Server::Server(t_block_directive *constructor_specs) {
 		error_it++;
 		if (error_it == pages.end())
 			break;
-		std::string full_path		  = m_root + "/" + *error_it;
-		int			user_defined_page = open(full_path.c_str(), O_RDONLY);
-		if (user_defined_page == -1)
+		std::string full_path = m_root + "/" + *error_it;
+		if (access(full_path.c_str(), R_OK) != 0)
 			LOG_ERR(RED << "WARNING: The custom error pages have been incorrectly configured." << DEFAULT);
-		else
-			close(user_defined_page);
-		user_defined_page				= stoi(*(error_it - 1)); // TODO:: check this for non numeric values
+		int user_defined_page			= stringToIntegral<int>(*(error_it - 1));
 		m_error_page[user_defined_page] = full_path;
 		error_it++;
 	}
@@ -128,6 +127,7 @@ Server::Server(t_block_directive *constructor_specs) {
 		cgi_it++;
 	}
 	LOG("Server CGI:");
+	logVector(m_cgis_available);
 
 	// ADD LOCATION BLOCKS, IF PRESENT //
 	std::vector<t_block_directive *> location_config_blocks;
@@ -162,8 +162,6 @@ size_t Server::getLocationIndexForAddress(const std::string& address_to_find) co
 	}
 	return (ret);
 }
-
-// TODO make sure all m_location variables in Location class end in '/', either by throwing or appending during parsing.
 
 const std::string Server::translateAddressToPath(size_t loc_index, std::string file_address) const {
 	std::vector<Location>::const_iterator loc = m_locations.begin() + loc_index;

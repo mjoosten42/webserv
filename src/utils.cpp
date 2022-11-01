@@ -40,7 +40,7 @@ std::string getEventsAsString(short revents) {
 	if (revents & POLLNVAL) {
 		if (!events.empty())
 			events += " | ";
-		events += "NVAL"; // TODO: This is returned when client navigates to directory without trailing slash.
+		events += "NVAL";
 	}
 	return events;
 }

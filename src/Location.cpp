@@ -3,6 +3,7 @@
 #include "Server.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
+#include "utils.hpp"
 
 std::ostream& operator<<(std::ostream& os, const CGI_loc& i) {
 	os << "Extension: " << i.cgi_ext << std::endl;
@@ -20,10 +21,12 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	val_from_config = constructor_specs->additional_params;
 	if (!val_from_config.empty())
 		m_location = val_from_config;
+	if (m_location.back() != '/')
+		m_location.push_back('/');
 
 	val_from_config = constructor_specs->fetch_simple("client_max_body_size");
 	if (!val_from_config.empty())
-		m_client_max_body_size = stoi(val_from_config);
+		m_client_max_body_size = stringToIntegral<int>(val_from_config);
 
 	val_from_config = constructor_specs->fetch_simple("limit_except");
 	if (!val_from_config.empty())
@@ -36,6 +39,8 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	val_from_config = constructor_specs->fetch_simple("root");
 	if (!val_from_config.empty())
 		m_root = val_from_config;
+	if (m_root.back() == '/')
+		m_root.pop_back();
 
 	// Allows user to specify CGI to handle cgi-scripts
 	std::vector<std::string>		   cgi_specs = stringSplit(constructor_specs->fetch_simple("cgi"));
@@ -51,4 +56,5 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 		cgi_it++;
 	}
 	LOG("Location CGI:");
+	logVector(m_cgis_available);
 }
