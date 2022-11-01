@@ -116,18 +116,13 @@ Server::Server(t_block_directive *constructor_specs) {
 	std::vector<std::string> cgi_specs;
 	overwriteIfSpecified("cgi", cgi_specs, "", constructor_specs);
 	std::vector<std::string>::iterator cgi_it = cgi_specs.begin();
-	while (cgi_it != cgi_specs.end()) {
-		cgi_it++;
-		if (cgi_it == cgi_specs.end())
-			break;
-		CGI_loc tmp;
-		tmp.cgi_path = *cgi_it;
-		tmp.cgi_ext	 = *(cgi_it - 1);
-		m_cgis_available.push_back(tmp);
-		cgi_it++;
+	while (cgi_it != cgi_specs.end() && cgi_it + 1 != cgi_specs.end()) {
+		m_cgi_map[*cgi_it] = *(cgi_it + 1);
+		cgi_it += 2;
 	}
 	LOG("Server CGI:");
-	logVector(m_cgis_available);
+	for (std::map<std::string, std::string>::iterator m_it = m_cgi_map.begin(); m_it != m_cgi_map.end(); ++m_it)
+		LOG(m_it->first + " " + m_it->second);
 
 	// ADD LOCATION BLOCKS, IF PRESENT //
 	std::vector<t_block_directive *> location_config_blocks;
