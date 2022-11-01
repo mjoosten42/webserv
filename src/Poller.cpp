@@ -1,6 +1,7 @@
 #include "Poller.hpp"
 
 #include "Server.hpp"
+#include "SourceFds.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
 #include "utils.hpp"
@@ -16,8 +17,8 @@ void Poller::start() {
 
 		LOG(RED << std::string(winSize(), '#') << DEFAULT);
 
-		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), readFdsIndex()));
-		LOG(RED "ReadFds: " DEFAULT << getPollFdsAsString(readFdsIndex(), m_pollfds.size()));
+		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
+		LOG(RED "ReadFds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 		switch (poll_status) {
@@ -35,7 +36,7 @@ void Poller::start() {
 void Poller::pollfdEvent() {
 
 	// loop over current clients to check if we can read or write
-	for (size_t i = clientsIndex(); i < readFdsIndex(); i++) {
+	for (size_t i = clientsIndex(); i < sourceFdsIndex(); i++) {
 		pollfd& client = m_pollfds[i];
 		unsetFlag(m_pollfds[i].events, POLLOUT);
 
@@ -53,9 +54,9 @@ void Poller::pollfdEvent() {
 	}
 
 	// loop over readfds. If one has POLLIN, set POLLOUT on it's connection
-	for (size_t i = readFdsIndex(); i < m_pollfds.size(); i++) {
+	for (size_t i = sourceFdsIndex(); i < m_pollfds.size(); i++) {
 		pollfd& source	  = m_pollfds[i];
-		int		client_fd = m_readfds.getClientFd(source.fd);
+		int		client_fd = m_sources.getClientFd(source.fd);
 
 		// LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
 		LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
@@ -85,7 +86,7 @@ void Poller::pollIn(pollfd& client) {
 	if (readfd != -1) { // A response wants to poll on a file/pipe
 		pollfd source = { readfd, POLLIN, 0 };
 
-		m_readfds.add(source, client.fd);
+		m_sources.add(source, client.fd);
 		m_pollfds.push_back(source);
 	}
 }
@@ -98,7 +99,7 @@ void Poller::pollOut(pollfd& client) {
 	int			source_fd = conn.sendToClient(client.events);
 
 	if (source_fd != -1) { // returns readfd to close
-		m_readfds.remove(source_fd);
+		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
 	}
 	if (conn.wantsClose()) // returns true if clients wants close
@@ -109,14 +110,14 @@ void Poller::pollOut(pollfd& client) {
 // Close and remove all readfds connected to client
 // Close and remove client
 void Poller::pollHup(pollfd& client) {
-	std::vector<int> readFds = m_readfds.getReadFds(client.fd); // get all readfds dependent on client fd
+	std::vector<int> readFds = m_sources.getSourceFds(client.fd); // get all readfds dependent on client fd
 
 	for (size_t i = 0; i < readFds.size(); i++) {
-		int read_fd = readFds[i];
-		if (close(read_fd) == -1)
+		int source_fd = readFds[i];
+		if (close(source_fd) == -1)
 			fatal_perror("close");
-		m_readfds.remove(read_fd);
-		m_pollfds.erase(find(read_fd));
+		m_sources.remove(source_fd);
+		m_pollfds.erase(find(source_fd));
 	}
 	removeClient(client.fd);
 }
@@ -131,7 +132,7 @@ void Poller::acceptClient(int listener_fd) {
 
 	set_fd_nonblocking(fd);
 
-	m_pollfds.insert(m_pollfds.begin() + readFdsIndex(), client); // insert after last client
+	m_pollfds.insert(m_pollfds.begin() + sourceFdsIndex(), client); // insert after last client
 	m_connections[fd] = Connection(fd, listener);
 
 	LOG(RED "NEW CLIENT: " DEFAULT << fd);
@@ -151,7 +152,7 @@ size_t Poller::clientsIndex() const {
 	return m_listeners.size();
 }
 
-size_t Poller::readFdsIndex() const {
+size_t Poller::sourceFdsIndex() const {
 	return m_listeners.size() + m_connections.size();
 }
 
@@ -162,8 +163,8 @@ std::vector<pollfd>::iterator Poller::find(int fd) {
 		if (it->fd == fd)
 			return it;
 	LOG_ERR("Fd not found in pollfds: " << fd);
-	LOG_ERR(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), readFdsIndex()));
-	LOG_ERR(RED "ReadFds: " DEFAULT << getPollFdsAsString(readFdsIndex(), m_pollfds.size()));
+	LOG_ERR(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
+	LOG_ERR(RED "ReadFds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 	return m_pollfds.end();
 }
 

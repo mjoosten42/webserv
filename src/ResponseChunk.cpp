@@ -33,9 +33,6 @@ void Response::processRequest() {
 	} else
 		serveError(m_request.getErrorMsg());
 
-	if (m_statusCode != 200)
-		serveError(getStatusMessage());
-
 	if (!m_isCGI)
 		m_chunk = getResponseAsString();
 }
@@ -44,8 +41,8 @@ void Response::processRequest() {
 // Set to true if applicable
 void Response::setFlags() {
 	m_processedRequest = true;
-	m_isCGI			   = (MIME::getExtension(m_request.getLocation()) == "php"); // TODO: server
-	m_isChunked |= m_isCGI;														 // CGI is always chunked
+	m_isCGI			   = (MIME::getExtension(m_request.getLocation()) == "pl"); // TODO: server
+	m_isChunked |= m_isCGI;														// CGI is always chunked
 }
 
 void Response::handleGet() {
@@ -63,7 +60,7 @@ void Response::handlePost() {
 
 	if (m_isCGI) {
 		handlePostCGI();
-	} else {
+	} else { // TODO
 		addHeader("Location", m_request.getLocation());
 		m_statusCode  = 418;
 		m_doneReading = true;
@@ -134,10 +131,8 @@ void Response::handleGetCGI() {
 void Response::startCGIGeneric() {
 	LOG(RED "Handle CGI" DEFAULT);
 
-	std::string filename = m_server->getRoot() + m_request.getLocation();
-
 	// TODO: parse from config
-	m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/php", filename);
+	m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", m_filename);
 
 	if (m_statusCode == 200) {
 		addHeader("Transfer-Encoding", "Chunked");
@@ -145,39 +140,28 @@ void Response::startCGIGeneric() {
 		m_CGI_DoneProcessingHeaders = false;
 
 		m_chunk = getStatusLine() + getHeadersAsString();
-	}
+	} else {
+	} // TODO
 }
 
-void Response::appendBodyPiece(const std::string& str) {
+void Response::appendBodyPiece() {
+	std::string& body = m_request.getBody();
+
 	// TODO: non-CGI
-	if (m_request.getMethod() != POST || !m_isCGI) {
-		ssize_t bytes_written = write(m_cgi.popen.writefd, str.data(), str.length());
-		if (bytes_written == -1) {
-			// TODO
-			perror("write");
-		} else if (bytes_written != static_cast<ssize_t>(str.length())) {
-			// TODO
-			LOG_ERR("bytes written appendbodypiece != str.length");
-		}
-		if (m_request.getState() == DONE && m_request.getBody().empty())
+	if (m_request.getMethod() == POST && m_isCGI) {
+		ssize_t bytes_written = write(m_cgi.popen.writefd, body.data(), body.length());
+		if (bytes_written == -1)
+			fatal_perror("write"); // TODO
+		body.erase(0, bytes_written);
+		if (m_request.getState() == DONE && body.empty())
 			close(m_cgi.popen.writefd);
-	}
+	} else
+		body.clear();
 }
 
 void Response::handlePostCGI() {
-
 	startCGIGeneric();
-	if (m_statusCode == 200) {
-		ssize_t bytes_written = write(m_cgi.popen.writefd, m_request.getBody().data(), m_request.getBody().length());
-		if (bytes_written == -1) {
-			// TODO
-			perror("write");
-		} else if (bytes_written != static_cast<ssize_t>(m_request.getBody().length())) {
-			// TODO
-			LOG_ERR("bytes written appendbodypiece != str.length");
-		}
-		close(m_cgi.popen.writefd);
-	}
+	appendBodyPiece();
 }
 
 // this function removes bytes_sent amount of bytes from the beginning of the chunk.
@@ -210,32 +194,57 @@ void Response::getCGIHeaderChunk() {
 
 	// TODO: a bit hacky. Should this be done just the first time? also, it works for perl, but not PHP.
 	// clean up next monday.
-	if (m_cgi.didExit() > 0) {
-		close(m_cgi.popen.readfd);
-		close(m_cgi.popen.writefd);
+	// if (m_cgi.didExit() > 0) {
+	// 	close(m_cgi.popen.readfd);
+	// 	close(m_cgi.popen.writefd);
 
-		m_statusCode = 502;
-		m_chunk.clear();
-		m_headers.clear();
-		addDefaultHeaders();
-		m_body.clear();
-		sendFail(502, "CGI BROKE 😂😂😂");
-		m_chunk = getResponseAsString();
-		return;
-	}
+	// 	m_statusCode = 502;
+	// 	m_chunk.clear();
+	// 	m_headers.clear();
+	// 	addDefaultHeaders();
+	// 	m_body.clear();
+	// 	sendFail(502, "CGI BROKE 😂😂😂");
+	// 	m_chunk = getResponseAsString();
+	// 	return;
+	// }
 
 	std::string block = readBlockFromFile();
 
-	size_t pos = m_headerEndFinder.find(block);
+	size_t pos = findHeaderEnd(block);
 	if (pos == std::string::npos) {
 		m_chunk += block;
 	} else {
 		m_CGI_DoneProcessingHeaders = true;
 		std::string headers			= block.substr(0, pos);
 		block						= block.substr(pos);
+
+		if (block.empty()) // Only send one trailing chunk
+			m_doneReading = true;
+
 		encodeChunked(block);
 		m_chunk += headers + block;
 	}
+}
+
+size_t Response::findHeaderEnd(const std::string str) {
+	size_t pos			 = findNewline(str);
+	size_t newlineLength = (str[pos] == '\r' ? 2 : 1); // "\r\n or \n"
+	size_t second;
+
+	if (m_chunkEndedWithNewline && pos == 0)
+		return newlineLength;
+
+	while (pos < str.size()) {
+		second = findNewline(str, pos + newlineLength);
+		if (second == pos + newlineLength)
+			return pos + newlineLength + 1;
+		pos			  = second;
+		newlineLength = (str[pos] == '\r' ? 2 : 1);
+	}
+
+	m_chunkEndedWithNewline = (str.back() == '\n');
+
+	return pos;
 }
 
 std::string& Response::getNextChunk() {

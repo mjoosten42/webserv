@@ -1,10 +1,11 @@
 #include "catch_amalgamated.hpp"
 
-#include "EndOfHeaderFinder.hpp"
+#include "Response.hpp"
 
+/*
 TEST_CASE( "EndOfHeaderFinder generic", "[EndOfHeaderFinder]") {
 
-	EndOfHeaderFinder finder;
+	Response rsp;
 
 	REQUIRE( finder.find("derp") == std::string::npos );
 	REQUIRE( finder.find("\n") == std::string::npos );
@@ -32,14 +33,4 @@ TEST_CASE( "EndOfHeaderFinder generic", "[EndOfHeaderFinder]") {
 	REQUIRE( finder.find("\n") == 1 );
 
 };
-
-TEST_CASE( "EndOfHeaderFinder state reset", "[EndOfHeaderFinder]") {
-
-	EndOfHeaderFinder finder;
-
-	REQUIRE( finder.find("\n") == std::string::npos );
-	finder.reset();
-	REQUIRE( finder.find("\r\n") == std::string::npos );
-	REQUIRE( finder.find("\n") == 1 );
-
-};
+*/

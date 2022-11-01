@@ -47,12 +47,6 @@ void Request::clear() {
 	m_contentLength = 0;
 }
 
-std::string Request::takePiece() {
-	std::string piece = m_body.substr(0, BUFFER_SIZE);
-	m_body.erase(0, BUFFER_SIZE);
-	return piece;
-}
-
 void Request::parse() {
 	std::string line;
 
@@ -81,13 +75,13 @@ void Request::parse() {
 			}
 			break;
 		case BODY:
+			m_bodyTotal += m_saved.length();
+			addToBody(m_saved);
+			m_saved.clear();
 			if (!m_processed)
 				checkSpecialHeaders();
 			if (m_bodyTotal == m_contentLength)
 				m_state = DONE;
-			addToBody(m_saved);
-			m_bodyTotal += m_saved.length();
-			m_saved.clear();
 			break;
 		case DONE:
 			LOG_ERR("Appending to DONE request"); // Shouldn't be reached
@@ -109,6 +103,13 @@ void Request::parseStartLine(const std::string& line) {
 
 	ss >> word;
 	parseHTTPVersion(word);
+	word.clear();
+
+	ss >> word;
+	if (!word.empty()) {
+		m_errorMsg = "Extra text after HTTP version: " + line;
+		throw 400;
+	}
 }
 
 void Request::parseMethod(const std::string& str) {
@@ -200,19 +201,12 @@ bool containsNewline(const std::string& str) {
 // Assumes ContainsNewline is called beforehand
 // Automatically erases line from saved data
 std::string Request::getNextLine() {
-	std::size_t pos			  = findNewline();
+	std::size_t pos			  = findNewline(m_saved);
 	std::string line		  = m_saved.substr(0, pos);
 	int			newlineLength = (m_saved[pos] == '\r') ? 2 : 1; // "\r\n or \n"
 
 	m_saved.erase(0, pos + newlineLength);
 	return line;
-}
-
-std::size_t Request::findNewline() const {
-	std::size_t pos = m_saved.find("\r\n");
-	if (pos != std::string::npos)
-		return pos;
-	return m_saved.find("\n");
 }
 
 const std::string& Request::getLocation() const {
@@ -269,6 +263,10 @@ size_t Request::getContentLength() const {
 	return m_contentLength;
 }
 
+size_t Request::getBodyTotal() const {
+	return m_bodyTotal;
+}
+
 std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << RED "State: " DEFAULT << request.getStateAsString() << std::endl;
 	os << RED "Method: " DEFAULT << request.getMethodAsString() << std::endl;
@@ -280,6 +278,7 @@ std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << RED "Host: " DEFAULT << request.getHost() << std::endl;
 	os << RED "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
 	if (!request.getBody().empty())
-		os << RED "Body: " DEFAULT << request.getBody();
+		os << RED "Body: " DEFAULT << request.getBody() << std::endl;
+	os << RED "Body total: " DEFAULT << request.getBodyTotal();
 	return os;
 }

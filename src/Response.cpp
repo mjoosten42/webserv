@@ -43,12 +43,13 @@ Response::Response():
 	m_isChunked(false),
 	m_isCGI(false),
 	m_CGI_DoneProcessingHeaders(false),
-	m_processedRequest(false) {}
+	m_processedRequest(false),
+	m_chunkEndedWithNewline(true) {}
 
+// TODO: remove
 void Response::clear() {
 	HTTP::clear();
 	m_statusCode = 0;
-	m_headerEndFinder.reset();
 }
 
 void Response::addServer(const Server *server) {

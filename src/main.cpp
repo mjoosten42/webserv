@@ -31,5 +31,6 @@ int main(int argc, const char *argv[]) {
 	initFromConfig(config, listeners);
 
 	Poller poller(listeners.begin(), listeners.end());
+
 	poller.start();
 }

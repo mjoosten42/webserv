@@ -39,7 +39,7 @@ int Popen::my_popen(const std::string& path, const std::string& filename, const 
 
 	status = 502; // 502 bad gateway
 	if (pipe(serverToCgi) == -1) {
-		return status;
+		return 502;
 	} else if (pipe(cgiToServer) == -1) {
 		closePipe(serverToCgi);
 		return status;
@@ -68,7 +68,8 @@ int Popen::my_popen(const std::string& path, const std::string& filename, const 
 			close(cgiToServer[1]);
 	}
 
-	return 200;
+	status = 200;
+	return status;
 }
 
 // THIS SHOULD NEVER BE USED!
@@ -86,14 +87,15 @@ int CGI::didExit() {
 
 	int status = waitpid(popen.pid, &stat_loc, WNOHANG);
 
-	if (status == -1) {
-		perror("waitpid");
-		return -1;
-	} else if (status == 0) {
-		return -1;
-	} else {
-		if (WIFEXITED(stat_loc))
-			return WEXITSTATUS(stat_loc);
+	switch (status) {
+		case -1:
+			perror("waitpid");
+		case 0:
+			return -1;
+		default:
+			if (WIFEXITED(stat_loc))
+				return WEXITSTATUS(stat_loc);
+			break;
 	}
 	return 0;
 }

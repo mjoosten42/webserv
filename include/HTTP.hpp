@@ -9,6 +9,7 @@ class HTTP {
 
 		static std::string capitalizeFieldPretty(std::string field);
 
+		std::string								& getBody();
 		const std::string						& getBody() const;
 		const std::map<std::string, std::string>& getHeaders() const;
 

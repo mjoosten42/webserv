@@ -2,7 +2,7 @@
 
 #include "Connection.hpp"
 #include "Listener.hpp"
-#include "ReadFds.hpp"
+#include "SourceFds.hpp"
 #include "stringutils.hpp"
 
 #include <map>
@@ -33,7 +33,7 @@ class Poller {
 		void removeClient(int index);
 
 		size_t clientsIndex() const;
-		size_t readFdsIndex() const;
+		size_t sourceFdsIndex() const;
 
 		std::vector<pollfd>::iterator find(int fd);
 
@@ -43,5 +43,5 @@ class Poller {
 		std::vector<pollfd>		  m_pollfds;	 // the array of pollfd structs
 		std::map<int, Listener>	  m_listeners;	 // map server fd with corresponding listener
 		std::map<int, Connection> m_connections; // map client fd to its handler
-		ReadFds					  m_readfds;	 // map readfds to clientfds and vice versa.
+		SourceFds				  m_sources;	 // map source fds to client fds and vice versa.
 };

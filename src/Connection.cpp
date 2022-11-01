@@ -37,9 +37,9 @@ int Connection::receiveFromClient(short& events) {
 				response.m_statusCode = error;
 			}
 
-			LOG(request);
 			if (request.getState() == BODY || request.getState() == DONE) {
 				if (!response.hasProcessedRequest()) { // Do once
+					LOG(request);
 					response.addServer(&(m_listener->getServerByHost(request.getHost())));
 					response.processRequest();
 
@@ -48,7 +48,7 @@ int Connection::receiveFromClient(short& events) {
 					else
 						setFlag(events, POLLOUT);
 				} else
-					response.appendBodyPiece(request.getBody());
+					response.appendBodyPiece();
 			}
 	}
 	return -1;
@@ -65,9 +65,9 @@ int Connection::sendToClient(short& events) {
 
 	LOG(RED "Send: " DEFAULT << bytes_sent);
 
-	// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-	// LOG(str.substr(0, bytes_sent));
-	// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+	LOG(RED << std::string(winSize(), '-') << DEFAULT);
+	LOG(str.substr(0, bytes_sent));
+	LOG(RED << std::string(winSize(), '-') << DEFAULT);
 
 	switch (bytes_sent) {
 		case -1:

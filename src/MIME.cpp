@@ -373,6 +373,8 @@ std::string fromFileName(const std::string& filename) {
 	if (extension.empty())
 		return DEFAULT_MIME_TYPE;
 
+	strToLower(extension);
+
 	const char *result = binarySearchKeyValue(extension, entries, entriesSize);
 	if (result == NULL)
 		return DEFAULT_MIME_TYPE;
@@ -380,14 +382,11 @@ std::string fromFileName(const std::string& filename) {
 }
 
 std::string getExtension(const std::string& filename) {
-	size_t		dot = filename.find_last_of('.');
-	std::string extension;
+	size_t dot = filename.find_last_of('.');
 
-	if (dot != filename.npos) {
-		extension = filename.substr(dot + 1);
-		strToLower(extension);
-	}
-	return extension;
+	if (dot != filename.npos)
+		return filename.substr(dot + 1);
+	return "";
 }
 
 } // namespace MIME

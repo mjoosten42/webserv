@@ -14,6 +14,10 @@ void HTTP::clear() {
 	m_body.clear();
 }
 
+std::string& HTTP::getBody() {
+	return m_body;
+}
+
 const std::string& HTTP::getBody() const {
 	return m_body;
 }

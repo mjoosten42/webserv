@@ -17,14 +17,13 @@ class Request: public HTTP {
 		void cut(ssize_t len);
 		void clear();
 
-		std::string takePiece();
-
 		const std::string& getHost() const;
 		const state		 & getState() const;
 		const methods	 & getMethod() const;
 		const std::string& getLocation() const;
 		const std::string& getQueryString() const;
 		size_t			   getContentLength() const;
+		size_t			   getBodyTotal() const;
 		const std::string& getErrorMsg() const;
 
 		std::string getStateAsString() const;
@@ -41,7 +40,6 @@ class Request: public HTTP {
 		void parseHTTPVersion(const std::string& str);
 
 		std::string getNextLine();
-		std::size_t findNewline() const;
 
 	private:
 		state		m_state;
