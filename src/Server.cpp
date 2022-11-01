@@ -89,6 +89,8 @@ Server::Server(t_block_directive *constructor_specs) {
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
 	//	Nginx default: "html" TODO: absolute
 	overwriteIfSpecified("root", m_root, "html", constructor_specs);
+	if (m_root.back() == '/')
+		m_root.pop_back();
 	//	Nginx default: 0 (which means don't check)
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
 	//	Nginx default: false (serve 404 error when navigating ot directory without index.html)
@@ -103,7 +105,7 @@ Server::Server(t_block_directive *constructor_specs) {
 		if (error_it == pages.end())
 			break;
 		std::string full_path		  = m_root + "/" + *error_it;
-		int			user_defined_page = open(full_path.c_str(), O_RDONLY);
+		int			user_defined_page = open(full_path.c_str(), O_RDONLY); // TODO use access instead
 		if (user_defined_page == -1)
 			LOG_ERR(RED << "WARNING: The custom error pages have been incorrectly configured." << DEFAULT);
 		else
@@ -163,8 +165,6 @@ size_t Server::getLocationIndexForAddress(const std::string &address_to_find) co
 	}
 	return (ret);
 }
-
-//TODO make sure all m_location variables in Location class end in '/', either by throwing or appending during parsing.
 
 const std::string Server::translateAddressToPath(size_t loc_index, std::string file_address) const {
 	std::vector<Location>::const_iterator loc = m_locations.begin() + loc_index;

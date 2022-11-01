@@ -20,6 +20,8 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	val_from_config = constructor_specs->additional_params;
 	if (!val_from_config.empty())
 		m_location = val_from_config;
+	if (m_location.back() != '/')
+		m_location.push_back('/');
 
 	val_from_config = constructor_specs->fetch_simple("client_max_body_size");
 	if (!val_from_config.empty())
@@ -36,6 +38,8 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	val_from_config = constructor_specs->fetch_simple("root");
 	if (!val_from_config.empty())
 		m_root = val_from_config;
+	if (m_root.back() == '/')
+		m_root.pop_back();
 
 	// Allows user to specify CGI to handle cgi-scripts
 	std::vector<std::string>		   cgi_specs = stringSplit(constructor_specs->fetch_simple("cgi"));
