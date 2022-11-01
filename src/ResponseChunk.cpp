@@ -1,5 +1,5 @@
 #include "AutoIndex.hpp"
-#include "MIME.hpp"
+#include "MIME.hpp" // TODO: remove
 #include "Response.hpp"
 #include "Server.hpp"
 #include "buffer.hpp"
@@ -43,17 +43,6 @@ void Response::processRequest() {
 		m_chunk = getResponseAsString();
 }
 
-// All bools are initialized to false in ctor
-// Set to true if applicable
-void Response::setFlags() {
-	m_processedRequest = true;
-	if (MIME::getExtension(m_request.getLocation()) == "pl" ||
-		MIME::getExtension(m_request.getLocation()) == "php") // TODO
-		m_isCGI = true;
-	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
-	m_isChunked |= m_isCGI;						// CGI is always chunked
-}
-
 void Response::handleDelete() {
 	std::string absolute = getRealPath(m_filename);
 
@@ -87,8 +76,8 @@ void Response::handleGetWithFile() {
 	if (isDirectory)
 		m_filename += "index.html"; // TODO: get from server
 
-	m_readfd = open(m_filename.c_str(), O_RDONLY);
-	if (m_readfd == -1) {
+	m_source_fd = open(m_filename.c_str(), O_RDONLY);
+	if (m_source_fd == -1) {
 		if (errno == EACCES)
 			m_statusCode = 403;
 		else if (isDirectory && autoIndex)
@@ -117,7 +106,7 @@ void Response::handleCGI() {
 
 	if (m_statusCode == 200) {
 		addHeader("Transfer-Encoding", "Chunked");
-		m_readfd					= m_cgi.popen.readfd;
+		m_source_fd					= m_cgi.popen.readfd;
 		m_CGI_DoneProcessingHeaders = false;
 
 		m_chunk = getStatusLine() + getHeadersAsString();
@@ -157,12 +146,12 @@ bool Response::isDone() const {
 
 // gets the first chunk of a static file
 void Response::getFirstChunk() {
-	off_t size = lseek(m_readfd, 0, SEEK_END);
+	off_t size = lseek(m_source_fd, 0, SEEK_END);
 
 	// get file size
 	if (size == -1)
 		size = std::numeric_limits<off_t>().max();
-	lseek(m_readfd, 0, SEEK_SET); // set back to start
+	lseek(m_source_fd, 0, SEEK_SET); // set back to start
 
 	m_isChunked = (size > BUFFER_SIZE);
 
@@ -237,7 +226,7 @@ void Response::encodeChunked(std::string& str) {
 
 std::string Response::readBlockFromFile() {
 	std::string block;
-	ssize_t		bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
+	ssize_t		bytes_read = read(m_source_fd, buf, BUFFER_SIZE - m_chunk.size());
 
 	LOG(RED "Read: " DEFAULT << bytes_read);
 	switch (bytes_read) {
@@ -245,7 +234,7 @@ std::string Response::readBlockFromFile() {
 			perror("read");
 		case 0:
 			m_doneReading = true;
-			close(m_readfd);
+			close(m_source_fd);
 			break;
 		default:
 			// LOG(RED << std::string(winSize(), '-') << DEFAULT);

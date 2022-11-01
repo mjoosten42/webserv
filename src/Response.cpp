@@ -5,6 +5,7 @@
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
+#include "MIME.hpp"
 
 struct Status {
 		int			key;
@@ -37,7 +38,7 @@ Response::Response():
 	HTTP(),
 	m_statusCode(200),
 	m_server(NULL),
-	m_readfd(-1),
+	m_source_fd(-1),
 	m_locationIndex(-1),
 	m_doneReading(false),
 	m_isChunked(false),
@@ -62,6 +63,19 @@ void Response::initialize() {
 
 	setFlags();
 	addDefaultHeaders();
+}
+
+// Set to true if applicable
+void Response::setFlags() {
+	m_processedRequest = true;
+
+	if (MIME::getExtension(m_request.getLocation()) == "pl")
+		m_isCGI = true;
+	if (MIME::getExtension(m_request.getLocation()) == "php") // TODO
+		m_isCGI = true;
+	
+	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
+	m_isChunked |= m_isCGI;						// CGI is always chunked
 }
 
 std::string Response::getStatusMessage() const {
@@ -112,7 +126,7 @@ bool Response::wantsClose() const {
 }
 
 int Response::getSourceFD() const {
-	return m_readfd;
+	return m_source_fd;
 }
 
 bool Response::hasProcessedRequest() const {
@@ -120,5 +134,5 @@ bool Response::hasProcessedRequest() const {
 }
 
 bool Response::hasSourceFd() const {
-	return m_readfd != -1;
+	return m_source_fd != -1;
 }

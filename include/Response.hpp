@@ -71,7 +71,7 @@ class Response: public HTTP {
 		CGI			  m_cgi;
 		std::string	  m_filename;
 		const Server *m_server;
-		int			  m_readfd;		   // the fd of the file/pipe.
+		int			  m_source_fd;		   // the fd of the file/pipe.
 		size_t		  m_locationIndex; // number given to server to identify location
 		bool		  m_doneReading;   // true if all data from readfd has been read.
 		bool		  m_isChunked;
