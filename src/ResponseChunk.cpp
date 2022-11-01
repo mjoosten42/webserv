@@ -13,16 +13,20 @@
 #include <sys/socket.h>
 #include <unistd.h> // lseek
 
+// GET --> CGI ? CGI : FILE
+// POST --> CGI
+// DELETE --> unlink
+
 void Response::processRequest() {
 	initialize();
 
 	if (m_statusCode == 200) {
 		switch (m_request.getMethod()) {
 			case GET:
-				handleGet();
+				m_isCGI ? handleCGI() : handleGetWithFile();
 				break;
 			case POST:
-				handlePost();
+				handleCGI();
 				break;
 			case DELETE:
 				handleDelete();
@@ -30,7 +34,9 @@ void Response::processRequest() {
 			default:
 				LOG_ERR("Invalid method");
 		}
-	} else
+	}
+
+	if (m_statusCode != 200)
 		serveError(m_request.getErrorMsg());
 
 	if (!m_isCGI)
@@ -41,49 +47,27 @@ void Response::processRequest() {
 // Set to true if applicable
 void Response::setFlags() {
 	m_processedRequest = true;
-	m_isCGI			   = (MIME::getExtension(m_request.getLocation()) == "pl"); // TODO: server
-	m_isChunked |= m_isCGI;														// CGI is always chunked
-}
-
-void Response::handleGet() {
-	LOG(RED "Handle Get" DEFAULT);
-
-	if (m_isCGI)
-		handleGetCGI();
-	else
-		handleGetWithFile();
-}
-
-// TODO: send to CGI
-void Response::handlePost() {
-	LOG(RED "Handle Post: " DEFAULT + m_filename);
-
-	if (m_isCGI) {
-		handlePostCGI();
-	} else { // TODO
-		addHeader("Location", m_request.getLocation());
-		m_statusCode  = 418;
-		m_doneReading = true;
-	}
+	if (MIME::getExtension(m_request.getLocation()) == "pl" ||
+		MIME::getExtension(m_request.getLocation()) == "php") // TODO
+		m_isCGI = true;
+	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
+	m_isChunked |= m_isCGI;						// CGI is always chunked
 }
 
 void Response::handleDelete() {
-	char absolute_path[PATH_MAX + 1];
-
-	m_doneReading = true;
+	std::string absolute = getRealPath(m_filename);
 
 	LOG(RED "Handle Delete: " DEFAULT + m_filename);
 
-	if (!realpath(m_filename.c_str(), absolute_path)) {
-		LOG_ERR("realpath: " << m_filename << ": " << strerror(errno));
+	m_doneReading = true;
+
+	if (absolute.empty()) {
 		m_statusCode = 404;
 		return;
 	}
 
-	LOG("Absolute path: " << absolute_path);
-
-	if (unlink(absolute_path) == -1) {
-		LOG_ERR("unlink: " << absolute_path << ": " << strerror(errno));
+	if (unlink(absolute.c_str()) == -1) {
+		LOG_ERR("unlink: " << absolute << ": " << strerror(errno));
 		if (errno == EACCES)
 			m_statusCode = 403;
 		else
@@ -121,18 +105,15 @@ void Response::handleGetWithFile() {
 	getFirstChunk();
 }
 
-void Response::handleGetCGI() {
-
-	startCGIGeneric();
-	if (m_statusCode == 200)
-		close(m_cgi.popen.writefd); // close the writing pipe, we are not doing anything with it
-}
-
-void Response::startCGIGeneric() {
-	LOG(RED "Handle CGI" DEFAULT);
+void Response::handleCGI() {
+	LOG(RED "Handle CGI: " DEFAULT + m_filename);
 
 	// TODO: parse from config
-	m_statusCode = m_cgi.start(m_request, m_server, "/usr/bin/perl", m_filename);
+	std::string bin = "/usr/bin/php";
+	if (MIME::getExtension(m_request.getLocation()) == "pl")
+		bin = "/usr/bin/pl";
+
+	m_statusCode = m_cgi.start(m_request, m_server, bin, m_filename);
 
 	if (m_statusCode == 200) {
 		addHeader("Transfer-Encoding", "Chunked");
@@ -145,23 +126,24 @@ void Response::startCGIGeneric() {
 }
 
 void Response::appendBodyPiece() {
-	std::string& body = m_request.getBody();
-
-	// TODO: non-CGI
-	if (m_request.getMethod() == POST && m_isCGI) {
-		ssize_t bytes_written = write(m_cgi.popen.writefd, body.data(), body.length());
-		if (bytes_written == -1)
-			fatal_perror("write"); // TODO
-		body.erase(0, bytes_written);
-		if (m_request.getState() == DONE && body.empty())
-			close(m_cgi.popen.writefd);
-	} else
-		body.clear();
+	if (m_isCGI)
+		writeToCGI();
+	else
+		m_request.getBody().clear();
 }
 
-void Response::handlePostCGI() {
-	startCGIGeneric();
-	appendBodyPiece();
+void Response::writeToCGI() {
+	std::string& body		   = m_request.getBody();
+	ssize_t		 bytes_written = write(m_cgi.popen.writefd, body.data(), body.length());
+
+	LOG(RED "Write: " DEFAULT << bytes_written);
+
+	if (bytes_written == -1)
+		fatal_perror("write"); // TODO
+	body.erase(0, bytes_written);
+
+	if (m_request.getState() == DONE && body.empty())
+		close(m_cgi.popen.writefd);
 }
 
 // this function removes bytes_sent amount of bytes from the beginning of the chunk.
@@ -191,22 +173,6 @@ void Response::getFirstChunk() {
 }
 
 void Response::getCGIHeaderChunk() {
-
-	// TODO: a bit hacky. Should this be done just the first time? also, it works for perl, but not PHP.
-	// clean up next monday.
-	// if (m_cgi.didExit() > 0) {
-	// 	close(m_cgi.popen.readfd);
-	// 	close(m_cgi.popen.writefd);
-
-	// 	m_statusCode = 502;
-	// 	m_chunk.clear();
-	// 	m_headers.clear();
-	// 	addDefaultHeaders();
-	// 	m_body.clear();
-	// 	sendFail(502, "CGI BROKE 😂😂😂");
-	// 	m_chunk = getResponseAsString();
-	// 	return;
-	// }
 
 	std::string block = readBlockFromFile();
 
@@ -273,10 +239,6 @@ std::string Response::readBlockFromFile() {
 	std::string block;
 	ssize_t		bytes_read = read(m_readfd, buf, BUFFER_SIZE - m_chunk.size());
 
-	// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-	// LOG(std::string(buf, bytes_read));
-	// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-
 	LOG(RED "Read: " DEFAULT << bytes_read);
 	switch (bytes_read) {
 		case -1:
@@ -286,6 +248,10 @@ std::string Response::readBlockFromFile() {
 			close(m_readfd);
 			break;
 		default:
+			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(std::string(buf, bytes_read));
+			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+
 			block.append(buf, bytes_read);
 	}
 	return block;

@@ -54,5 +54,6 @@ T stringToIntegral(const std::string& number) {
 	return value;
 }
 
-size_t winSize();
-size_t findNewline(const std::string str, size_t begin = 0);
+size_t		winSize();
+size_t		findNewline(const std::string str, size_t begin = 0);
+std::string getRealPath(const std::string& str);

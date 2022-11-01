@@ -22,7 +22,7 @@ class Response: public HTTP {
 		void appendBodyPiece();
 
 		bool isDone() const;
-		bool needsSourceFd() const;
+		bool hasSourceFd() const;
 		bool isInitialized() const;
 		bool finishedProcessing() const;
 		bool hasProcessedRequest() const;
@@ -30,24 +30,18 @@ class Response: public HTTP {
 
 		void addServer(const Server *server);
 
-		Request		& getRequest();
 		const Server *getServer() const;
+		Request		& getRequest();
 		int			  getSourceFD() const;
 
 	private:
 		void setFlags();
 		void addDefaultHeaders();
 
-		void handleGet();
-		void handlePost();
+		void handleCGI();
 		void handleDelete();
 
 		void handleGetWithFile();
-
-		void handleGetCGI();
-		void handlePostCGI();
-
-		void startCGIGeneric();
 
 		void   getFirstChunk();
 		void   getCGIHeaderChunk();
@@ -61,6 +55,8 @@ class Response: public HTTP {
 		void sendMoved(const std::string& location);
 
 		void createIndex(std::string path_to_index);
+
+		void writeToCGI();
 
 		std::string getStatusLine() const;
 		std::string getStatusMessage() const;

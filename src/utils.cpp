@@ -66,3 +66,14 @@ size_t findNewline(const std::string str, size_t begin) {
 		return pos;
 	return str.find("\n", begin);
 }
+
+std::string getRealPath(const std::string& str) {
+	static char resolved_path[PATH_MAX + 1] = { 0 };
+	char	   *ret							= realpath(str.c_str(), resolved_path);
+
+	if (!ret) {
+		LOG_ERR("realpath: " << str << ": " << strerror(errno));
+		return "";
+	}
+	return resolved_path;
+}
