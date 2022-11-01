@@ -62,7 +62,7 @@ static void overwriteIfSpecified(std::string search, int& field, int defaultVal,
 	field						= defaultVal;
 	std::string val_from_config = constructor_specs->fetch_simple(search);
 	if (!val_from_config.empty())
-		field = stoi(val_from_config); // TODO replace all stois
+		field = stringToIntegral<int>(val_from_config);
 }
 
 // Short
@@ -71,7 +71,7 @@ static void
 	field						= defaultVal;
 	std::string val_from_config = constructor_specs->fetch_simple(search);
 	if (!val_from_config.empty())
-		field = stoi(val_from_config); // TODO replace all stois
+		field = stringToIntegral<int>(val_from_config);
 }
 
 #pragma endregion
@@ -105,12 +105,9 @@ Server::Server(t_block_directive *constructor_specs) {
 		if (error_it == pages.end())
 			break;
 		std::string full_path		  = m_root + "/" + *error_it;
-		int			user_defined_page = open(full_path.c_str(), O_RDONLY); // TODO use access instead
-		if (user_defined_page == -1)
+		if (access(full_path.c_str(), R_OK) != 0)
 			LOG_ERR(RED << "WARNING: The custom error pages have been incorrectly configured." << DEFAULT);
-		else
-			close(user_defined_page);
-		user_defined_page				= stoi(*(error_it - 1)); // TODO:: check this for non numeric values
+		int	user_defined_page =  stringToIntegral<int>(*(error_it - 1));
 		m_error_page[user_defined_page] = full_path;
 		error_it++;
 	}

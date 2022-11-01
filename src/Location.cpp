@@ -3,6 +3,7 @@
 #include "Server.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
+#include "utils.hpp"
 
 std::ostream& operator<<(std::ostream& os, const CGI_loc& i) {
 	os << "Extension: " << i.cgi_ext << std::endl;
@@ -25,7 +26,7 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 
 	val_from_config = constructor_specs->fetch_simple("client_max_body_size");
 	if (!val_from_config.empty())
-		m_client_max_body_size = stoi(val_from_config);
+		m_client_max_body_size = stringToIntegral<int>(val_from_config);
 
 	val_from_config = constructor_specs->fetch_simple("limit_except");
 	if (!val_from_config.empty())
