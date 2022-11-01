@@ -145,7 +145,7 @@ Server::Server(t_block_directive *constructor_specs) {
 //  html/img/amogus.jpg
 //  This function tries to find the longest match between the user defined Address
 //  and the name of one of the containing location blocks.
-size_t Server::getLocationIndexForAddress(const std::string &address_to_find) const {
+size_t Server::getLocationIndexForAddress(const std::string& address_to_find) const {
 	size_t ret			   = -1;
 	size_t best_match	   = 0;
 	size_t length_of_match = 0;
@@ -163,14 +163,13 @@ size_t Server::getLocationIndexForAddress(const std::string &address_to_find) co
 	return (ret);
 }
 
-//TODO make sure all m_location variables in Location class end in '/', either by throwing or appending during parsing.
+// TODO make sure all m_location variables in Location class end in '/', either by throwing or appending during parsing.
 
 const std::string Server::translateAddressToPath(size_t loc_index, std::string file_address) const {
 	std::vector<Location>::const_iterator loc = m_locations.begin() + loc_index;
-	for(size_t match = 0; match < (loc->m_location.length()); ++match){
+	for (size_t match = 0; match < (loc->m_location.length()); ++match)
 		if (loc->m_location[match] != file_address[match])
-			return("");
-	}
+			return ("");
 	return loc->m_root + "/" + file_address.substr(loc->m_location.end() - loc->m_location.begin());
 }
 

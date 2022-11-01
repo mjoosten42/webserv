@@ -3,7 +3,6 @@ Language: Cpp
 # Not in this clang-format version
 # InsertBraces: false
 
-# TODO: review
 RemoveBracesLLVM: true
 
 # Tabs

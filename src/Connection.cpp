@@ -16,6 +16,7 @@ Connection::Connection(int m_fd, const Listener *listener): m_fd(m_fd), m_listen
 
 int Connection::receiveFromClient(short& events) {
 	ssize_t bytes_received = recv(m_fd, buf, BUFFER_SIZE, 0);
+	int		source_fd	   = -1;
 
 	LOG(RED "Received: " DEFAULT << bytes_received);
 	switch (bytes_received) {
@@ -24,9 +25,10 @@ int Connection::receiveFromClient(short& events) {
 		case 0:
 			break;
 		default:
-			LOG(RED << std::string(winSize(), '-') << DEFAULT);
-			LOG(std::string(buf, bytes_received));
-			LOG(RED << std::string(winSize(), '-') << DEFAULT);
+
+			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(std::string(buf, bytes_received));
+			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
 
 			Response& response = getLastResponse();
 			Request & request  = response.getRequest();
@@ -37,52 +39,55 @@ int Connection::receiveFromClient(short& events) {
 				response.m_statusCode = error;
 			}
 
+			LOG(request);
+
 			if (request.getState() == BODY || request.getState() == DONE) {
 				if (!response.hasProcessedRequest()) { // Do once
-					LOG(request);
 					response.addServer(&(m_listener->getServerByHost(request.getHost())));
 					response.processRequest();
 
-					if (response.needsSourceFd())
-						return response.getSourceFD();
+					if (response.hasSourceFd())
+						source_fd = response.getSourceFD();
 					else
 						setFlag(events, POLLOUT);
-				} else
-					response.appendBodyPiece();
+				}
+				response.appendBodyPiece();
 			}
 	}
-	return -1;
+	return source_fd;
 }
 
 // Send data back to a client
 // This should only be called if POLLOUT is set
-// TODO: when send() doesn't send the entire chunk and response.isDone(), the function fails.
-// when fixing, it should bear in mind that the readfd should still be removed and POLLOUT is set!
 int Connection::sendToClient(short& events) {
 	Response   & response	= m_responses.front();
 	std::string& str		= response.getNextChunk();
 	ssize_t		 bytes_sent = send(m_fd, str.data(), str.length(), 0);
+	int			 source_fd	= -1;
 
 	LOG(RED "Send: " DEFAULT << bytes_sent);
 
-	LOG(RED << std::string(winSize(), '-') << DEFAULT);
-	LOG(str.substr(0, bytes_sent));
-	LOG(RED << std::string(winSize(), '-') << DEFAULT);
-
 	switch (bytes_sent) {
 		case -1:
-			fatal_perror("send"); // TODO
+			perror("send");
+			m_close = true;
+			break;
 		default:
+
+			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(str.substr(0, bytes_sent));
+			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+
 			response.trimChunk(bytes_sent);
 			if (response.isDone()) {
-				m_close = response.wantsClose();
+				m_close	  = response.wantsClose();
+				source_fd = response.getSourceFD();
 				m_responses.pop();
-				return response.getSourceFD();
 			}
-			if (response.getSourceFD() == -1)
+			if (!response.hasSourceFd())
 				setFlag(events, POLLOUT);
 	}
-	return -1;
+	return source_fd;
 }
 
 Response& Connection::getLastResponse() {

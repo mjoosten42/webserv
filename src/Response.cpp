@@ -119,6 +119,6 @@ bool Response::hasProcessedRequest() const {
 	return m_processedRequest;
 }
 
-bool Response::needsSourceFd() const {
+bool Response::hasSourceFd() const {
 	return m_readfd != -1;
 }

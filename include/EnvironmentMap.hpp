@@ -4,7 +4,7 @@
 
 class EnvironmentMap {
 	public:
-		void initFromEnviron();
+		EnvironmentMap();
 
 		std::string& operator[](const std::string& key);
 

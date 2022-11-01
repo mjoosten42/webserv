@@ -5,8 +5,7 @@
 #include <string.h> // strdup(sighs...)
 #include <string>
 
-// fills the EnvironmentMap with the environ.
-void EnvironmentMap::initFromEnviron() {
+EnvironmentMap::EnvironmentMap() {
 	extern char **environ;
 
 	for (char **envp = environ; *envp != NULL; envp++) {
@@ -17,7 +16,7 @@ void EnvironmentMap::initFromEnviron() {
 			continue;
 		}
 		std::string key	  = entry.substr(0, eqpos);
-		std::string value = entry.substr(eqpos + 1, std::string::npos);
+		std::string value = entry.substr(eqpos + 1);
 
 		m_map[key] = value;
 	}
