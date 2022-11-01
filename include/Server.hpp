@@ -30,7 +30,7 @@ class Server {
 		const std::map<int, std::string>& getErrorPages() const;
 		const bool						& getAutoIndex() const;
 
-		bool	Server::checkWhetherCGI(const std::string& requested_file) const; //TODO: Move?
+		bool checkWhetherCGI(const std::string& requested_file) const; //TODO: Move?
 
 	private:
 		std::vector<Location>			   m_locations;
