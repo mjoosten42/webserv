@@ -5,12 +5,6 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
-std::ostream& operator<<(std::ostream& os, const CGI_loc& i) {
-	os << "Extension: " << i.cgi_ext << std::endl;
-	os << "Path: " << i.cgi_path << std::endl;
-	return (os);
-}
-
 Location::Location(): m_location("/"), m_client_max_body_size(-1), m_root("html") {}
 
 Location::Location(t_block_directive *constructor_specs, Server *parent):
@@ -45,16 +39,11 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	// Allows user to specify CGI to handle cgi-scripts
 	std::vector<std::string>		   cgi_specs = stringSplit(constructor_specs->fetch_simple("cgi"));
 	std::vector<std::string>::iterator cgi_it	 = cgi_specs.begin();
-	while (cgi_it != cgi_specs.end()) {
-		cgi_it++;
-		if (cgi_it == cgi_specs.end())
-			break;
-		CGI_loc tmp;
-		tmp.cgi_path = *cgi_it;
-		tmp.cgi_ext	 = *(cgi_it - 1);
-		m_cgis_available.push_back(tmp);
-		cgi_it++;
+	while (cgi_it != cgi_specs.end() && cgi_it + 1 != cgi_specs.end()) {
+		m_cgi_map[*cgi_it] = *(cgi_it + 1);
+		cgi_it += 2;
 	}
 	LOG("Location CGI:");
-	logVector(m_cgis_available);
+	for (std::map<std::string, std::string>::iterator m_it = m_cgi_map.begin(); m_it != m_cgi_map.end(); ++m_it)
+		LOG(m_it->first + " " + m_it->second);
 }
