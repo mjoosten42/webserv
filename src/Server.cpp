@@ -217,6 +217,12 @@ const std::string Server::getRootForFile(const size_t loc_index, const std::stri
 	return ("");
 }
 
+bool	Server::checkWhetherCGI(const std::string& requested_file) const{
+	std::string ext = requested_file.substr(requested_file.find_last_of('.'));
+	ext.erase(ext.begin());
+	return(m_cgi_map.count(ext));
+}
+
 #pragma region getters
 
 // returns the host, i.e. the address which the server should listen on.
