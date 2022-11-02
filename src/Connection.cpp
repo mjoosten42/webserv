@@ -39,7 +39,7 @@ int Connection::receiveFromClient(short& events) {
 				response.m_statusCode = error;
 			}
 
-			LOG(request);
+			// LOG(request);
 
 			if (request.getState() == BODY || request.getState() == DONE) {
 				if (!response.hasProcessedRequest()) { // Do once
@@ -61,8 +61,8 @@ int Connection::receiveFromClient(short& events) {
 // This should only be called if POLLOUT is set
 int Connection::sendToClient(short& events) {
 	Response   & response	= m_responses.front();
-	std::string& str		= response.getNextChunk();
-	ssize_t		 bytes_sent = send(m_fd, str.data(), str.length(), 0);
+	std::string& chunk		= response.getNextChunk();
+	ssize_t		 bytes_sent = send(m_fd, chunk.data(), chunk.length(), 0);
 	int			 source_fd	= -1;
 
 	LOG(RED "Send: " DEFAULT << bytes_sent);

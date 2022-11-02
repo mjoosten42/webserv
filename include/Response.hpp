@@ -23,8 +23,6 @@ class Response: public HTTP {
 
 		bool isDone() const;
 		bool hasSourceFd() const;
-		bool isInitialized() const;
-		bool finishedProcessing() const;
 		bool hasProcessedRequest() const;
 		bool wantsClose() const;
 
@@ -38,12 +36,12 @@ class Response: public HTTP {
 		void setFlags();
 		void addDefaultHeaders();
 
+		void handleFile();
 		void handleCGI();
 		void handleDelete();
 
-		void handleGetWithFile();
-
-		void   getFirstChunk();
+		void   openError(bool isDirectory);
+		void   addFileHeaders();
 		void   getCGIHeaderChunk();
 		void   encodeChunked(std::string  &str);
 		size_t findHeaderEnd(const std::string str);

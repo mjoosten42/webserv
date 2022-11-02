@@ -15,22 +15,25 @@ class Server {
 		Server();
 		Server(t_block_directive *constructor_specs);
 
-		size_t			  getLocationIndexForAddress(const std::string			 &address_to_find) const;
-		const std::string translateAddressToPath(size_t loc_index, std::string file_address) const;
-		size_t			  getLocationIndexForFile(const std::string file_to_find) const;
-		const std::string getRootForFile(const size_t loc_index, const std::string file_to_find) const;
+		size_t getLocationIndexForFile(const std::string& file_to_find) const;
+		size_t getLocationIndexForAddress(const std::string& address_to_find) const;
+
+		std::string translateAddressToPath(size_t loc_index, const std::string& file_address) const;
+
+		// std::string getRootForFile(size_t loc_index, const std::string& file_to_find) const;
+		std::string getRoot(size_t loc_index) const;
 
 		const std::string			  & getRoot() const;
 		const std::string			  & getHost() const;
 		const std::string			  & getServerSoftwareName() const;
 		const std::vector<std::string>& getNames() const;
 
-		size_t						getCMB() const;
+		size_t							  getCMB() const;
 		short							  getPort() const;
 		const std::map<int, std::string>& getErrorPages() const;
-		bool						getAutoIndex() const;
+		bool							  getAutoIndex() const;
 
-		bool checkWhetherCGI(const std::string& requested_file) const; //TODO: Move?
+		bool checkWhetherCGI(const std::string& requested_file) const; // TODO: Move?
 
 	private:
 		std::vector<Location>			   m_locations;
@@ -41,6 +44,6 @@ class Server {
 		std::string						   m_root;
 		std::string						   m_server_software_name; // i.e. amogus
 		std::map<int, std::string>		   m_error_page;
-		size_t						   m_client_max_body_size;
+		size_t							   m_client_max_body_size;
 		bool							   m_autoindex;
 };

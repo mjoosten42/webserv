@@ -1,6 +1,7 @@
 #include "CGI.hpp"
 
 #include "EnvironmentMap.hpp"
+#include "MIME.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
@@ -125,10 +126,15 @@ int CGI::start(const Request& req, const Server *server, const std::string& comm
 	em["SERVER_NAME"]		= req.getHost();
 	em["SERVER_PORT"]	  = toString(server->getPort()); // TODO: when multiple ports, it should be the listener's port.
 	em["SERVER_PROTOCOL"] = HTTP_VERSION;
-	em["REQUEST_METHOD"]  = req.getMethodAsString();
-	em["PATH_INFO"]		  = req.getLocation();
-	em["QUERY_STRING"]	  = req.getQueryString();
-	em["SCRIPT_NAME"]	  = filename;
+
+	em["PATH_INFO"]	   = req.getLocation();
+	em["QUERY_STRING"] = req.getQueryString();
+	em["SCRIPT_NAME"]  = filename;
+
+	// POST
+	em["REQUEST_METHOD"] = req.getMethodAsString();
+	em["CONTENT-LENGTH"] = req.getContentLength();
+	em["CONTENT-TYPE"]	 = MIME::fromFileName(req.getLocation());
 
 	return popen.my_popen(command, filename, em);
 }

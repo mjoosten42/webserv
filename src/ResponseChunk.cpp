@@ -11,7 +11,6 @@
 #include <fcntl.h>	// open
 #include <stdlib.h> // realpath
 #include <sys/socket.h>
-#include <unistd.h> // lseek
 
 // GET --> CGI ? CGI : FILE
 // POST --> CGI
@@ -23,7 +22,7 @@ void Response::processRequest() {
 	if (m_statusCode == 200) {
 		switch (m_request.getMethod()) {
 			case GET:
-				m_isCGI ? handleCGI() : handleGetWithFile();
+				m_isCGI ? handleCGI() : handleFile();
 				break;
 			case POST:
 				handleCGI();
@@ -48,12 +47,12 @@ void Response::handleDelete() {
 
 	LOG(RED "Handle Delete: " DEFAULT + m_filename);
 
-	m_doneReading = true;
-
 	if (absolute.empty()) {
 		m_statusCode = 404;
 		return;
 	}
+
+	m_doneReading = true;
 
 	if (unlink(absolute.c_str()) == -1) {
 		LOG_ERR("unlink: " << absolute << ": " << strerror(errno));
@@ -66,9 +65,8 @@ void Response::handleDelete() {
 	m_statusCode = 204;
 }
 
-// TODO: check if directory (curl localhost:8080/img loops forever)
-void Response::handleGetWithFile() {
-	bool autoIndex	 = m_server->getAutoIndex();
+// TODO: check if directory (curl localhost:8080/images loops forever)
+void Response::handleFile() {
 	bool isDirectory = m_filename.back() == '/';
 
 	LOG("Get: File: " + m_filename);
@@ -77,81 +75,33 @@ void Response::handleGetWithFile() {
 		m_filename += "index.html"; // TODO: get from server
 
 	m_source_fd = open(m_filename.c_str(), O_RDONLY);
-	if (m_source_fd == -1) {
-		if (errno == EACCES)
+	if (m_source_fd == -1)
+		return openError(isDirectory);
+
+	addFileHeaders();
+}
+
+void Response::openError(bool isDirectory) {
+	bool autoIndex = m_server->getAutoIndex();
+
+	switch (errno) {
+		case EACCES:
 			m_statusCode = 403;
-		else if (isDirectory && autoIndex)
-			createIndex(m_filename.substr(0, m_filename.find("index.html")));
-		else if (errno == ENOENT)
+			break;
+		case ENOENT:
 			m_statusCode = 404;
-		else
+			if (isDirectory && autoIndex)
+				createIndex(m_filename.substr(0, m_filename.find("index.html")));
+			break;
+		default:
 			m_statusCode = 500;
-		return;
 	}
+}
+
+void Response::addFileHeaders() {
+	off_t size = fileSize(m_source_fd);
 
 	addHeader("Content-Type", MIME::fromFileName(m_filename));
-
-	getFirstChunk();
-}
-
-void Response::handleCGI() {
-	LOG(RED "Handle CGI: " DEFAULT + m_filename);
-
-	// TODO: parse from config
-	std::string bin = "/usr/bin/php";
-	if (MIME::getExtension(m_request.getLocation()) == "pl")
-		bin = "/usr/bin/pl";
-
-	m_statusCode = m_cgi.start(m_request, m_server, bin, m_filename);
-
-	if (m_statusCode == 200) {
-		addHeader("Transfer-Encoding", "Chunked");
-		m_source_fd					= m_cgi.popen.readfd;
-		m_CGI_DoneProcessingHeaders = false;
-
-		m_chunk = getStatusLine() + getHeadersAsString();
-	} else {
-	} // TODO
-}
-
-void Response::appendBodyPiece() {
-	if (m_isCGI)
-		writeToCGI();
-	else
-		m_request.getBody().clear();
-}
-
-void Response::writeToCGI() {
-	std::string& body		   = m_request.getBody();
-	ssize_t		 bytes_written = write(m_cgi.popen.writefd, body.data(), body.length());
-
-	LOG(RED "Write: " DEFAULT << bytes_written);
-
-	if (bytes_written == -1)
-		fatal_perror("write"); // TODO
-	body.erase(0, bytes_written);
-
-	if (m_request.getState() == DONE && body.empty())
-		close(m_cgi.popen.writefd);
-}
-
-// this function removes bytes_sent amount of bytes from the beginning of the chunk.
-void Response::trimChunk(ssize_t bytes_sent) {
-	m_chunk.erase(0, bytes_sent);
-}
-
-bool Response::isDone() const {
-	return m_doneReading && m_chunk.empty();
-}
-
-// gets the first chunk of a static file
-void Response::getFirstChunk() {
-	off_t size = lseek(m_source_fd, 0, SEEK_END);
-
-	// get file size
-	if (size == -1)
-		size = std::numeric_limits<off_t>().max();
-	lseek(m_source_fd, 0, SEEK_SET); // set back to start
 
 	m_isChunked = (size > BUFFER_SIZE);
 
@@ -161,24 +111,20 @@ void Response::getFirstChunk() {
 		addHeader("Content-Length", toString(size));
 }
 
-void Response::getCGIHeaderChunk() {
+void Response::appendBodyPiece() {
+	if (m_isCGI)
+		writeToCGI();
+	else
+		m_request.getBody().clear();
+}
 
-	std::string block = readBlockFromFile();
+// this function removes bytes_sent amount of bytes from the beginning of the chunk.
+void Response::trimChunk(ssize_t bytes_sent) {
+	m_chunk.erase(0, bytes_sent);
+}
 
-	size_t pos = findHeaderEnd(block);
-	if (pos == std::string::npos) {
-		m_chunk += block;
-	} else {
-		m_CGI_DoneProcessingHeaders = true;
-		std::string headers			= block.substr(0, pos);
-		block						= block.substr(pos);
-
-		if (block.empty()) // Only send one trailing chunk
-			m_doneReading = true;
-
-		encodeChunked(block);
-		m_chunk += headers + block;
-	}
+bool Response::isDone() const {
+	return m_doneReading && m_chunk.empty();
 }
 
 size_t Response::findHeaderEnd(const std::string str) {

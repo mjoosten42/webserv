@@ -17,6 +17,7 @@ SOURCES = \
 	src/Poller.cpp \
 	src/Request.cpp \
 	src/Response.cpp \
+	src/ResponseCGI.cpp \
 	src/ResponseChunk.cpp \
 	src/ResponseErrors.cpp \
 	src/Server.cpp \

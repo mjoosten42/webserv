@@ -58,8 +58,14 @@ void Response::addServer(const Server *server) {
 }
 
 void Response::initialize() {
-	m_filename = m_server->getRoot() + m_request.getLocation();
-	// m_locationIndex = m_server.getLocationIndex(m_filename);
+	// LOG("Search: " << m_request.getLocation());
+
+	m_locationIndex = m_server->getLocationIndexForAddress(m_request.getLocation());
+	m_filename		= m_server->getRoot(m_locationIndex) + m_request.getLocation();
+
+	// LOG("loc: " << m_locationIndex);
+	// LOG("root: " << m_server->getRoot(m_locationIndex));
+	// LOG("File: " << m_filename);
 
 	setFlags();
 	addDefaultHeaders();
@@ -70,9 +76,9 @@ void Response::setFlags() {
 	m_processedRequest = true;
 
 	// TODO
-	if (MIME::getExtension(m_request.getLocation()) == "pl")
+	if (getExtension(m_request.getLocation()) == "pl")
 		m_isCGI = true;
-	if (MIME::getExtension(m_request.getLocation()) == "php")
+	if (getExtension(m_request.getLocation()) == "php")
 		m_isCGI = true;
 
 	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI

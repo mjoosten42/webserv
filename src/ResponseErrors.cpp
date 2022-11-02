@@ -13,7 +13,7 @@ void Response::sendFail(int code, const std::string& msg) {
 		std::string file = m_server->getErrorPages().at(code);
 		m_filename		 = file;
 		m_doneReading	 = false;
-		handleGetWithFile();
+		handleFile();
 		return;
 	}
 

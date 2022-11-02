@@ -58,7 +58,8 @@ static void overwriteIfSpecified(
 }
 
 // Integer
-static void overwriteIfSpecified(std::string search, size_t& field, size_t defaultVal, t_block_directive *constructor_specs) {
+static void
+	overwriteIfSpecified(std::string search, size_t& field, size_t defaultVal, t_block_directive *constructor_specs) {
 	field						= defaultVal;
 	std::string val_from_config = constructor_specs->fetch_simple(search);
 	if (!val_from_config.empty())
@@ -140,36 +141,37 @@ Server::Server(t_block_directive *constructor_specs) {
 //  html/img/amogus.jpg
 //  This function tries to find the longest match between the user defined Address
 //  and the name of one of the containing location blocks.
-size_t Server::getLocationIndexForAddress(const std::string& address_to_find) const {
-	size_t ret			   = -1;
-	size_t best_match	   = 0;
-	size_t length_of_match = 0;
+size_t Server::getLocationIndexForAddress(const std::string& address) const {
+	size_t ret		  = -1;
+	size_t best_match = 0;
 
-	std::vector<const Location>::const_iterator l_it = m_locations.begin();
-	for (; l_it != m_locations.end(); ++l_it) {
-		length_of_match = 0;
-		while (l_it->m_location[length_of_match] == address_to_find[length_of_match])
-			length_of_match++;
-		if (length_of_match > best_match && l_it->m_location[length_of_match - 1] == '/') {
-			best_match = length_of_match;
-			ret		   = l_it - m_locations.begin();
+	for (size_t i = 0; i < m_locations.size(); i++) {
+
+		const std::string& loc	   = m_locations[i].m_location;
+		size_t			   matched = match(loc, address); // Amount of characters matched
+
+		if (matched == loc.length()) { // I.E. make sure /index doesn't match /images
+			if (matched > best_match) {
+				best_match = matched;
+				ret		   = i;
+			}
 		}
 	}
 	return (ret);
 }
 
-const std::string Server::translateAddressToPath(size_t loc_index, std::string file_address) const {
+std::string Server::translateAddressToPath(size_t loc_index, const std::string& file_address) const {
 	std::vector<Location>::const_iterator loc = m_locations.begin() + loc_index;
 	for (size_t match = 0; match < (loc->m_location.length()); ++match)
 		if (loc->m_location[match] != file_address[match])
 			return ("");
-	return loc->m_root + "/" + file_address.substr(loc->m_location.end() - loc->m_location.begin());
+	return loc->m_root + "/" + file_address.substr(loc->m_location.length());
 }
 
 // This function finds the appropriate Location block for a file
 // if it is present anywhere on the server.
 // It does so without using the Address specified by the user.
-size_t Server::getLocationIndexForFile(const std::string file_to_find) const {
+size_t Server::getLocationIndexForFile(const std::string& file_to_find) const {
 	std::string test_path;
 	int			test;
 
@@ -185,7 +187,15 @@ size_t Server::getLocationIndexForFile(const std::string file_to_find) const {
 	return (-1); // Not present in any Location blocks, default to parent server settings.
 }
 
-const std::string Server::getRootForFile(const size_t loc_index, const std::string file_to_find) const {
+std::string Server::getRoot(size_t loc_index) const {
+	if (loc_index == static_cast<size_t>(-1))
+		return m_root;
+	else
+		return m_locations[loc_index].m_root;
+}
+
+/*
+std::string Server::getRootForFile(size_t loc_index, const std::string& file_to_find) const {
 	std::string							  test_path;
 	int									  test;
 	std::vector<const Location>::iterator l_it = m_locations.begin();
@@ -216,11 +226,12 @@ const std::string Server::getRootForFile(const size_t loc_index, const std::stri
 	}
 	return ("");
 }
+*/
 
-bool	Server::checkWhetherCGI(const std::string& requested_file) const{
-	std::string ext = requested_file.substr(requested_file.find_last_of('.'));
-	ext.erase(ext.begin());
-	return(m_cgi_map.count(ext));
+bool Server::checkWhetherCGI(const std::string& requested_file) const {
+	std::string ext = getExtension(requested_file);
+
+	return (m_cgi_map.find(ext) != m_cgi_map.end());
 }
 
 #pragma region getters

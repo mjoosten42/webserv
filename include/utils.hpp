@@ -57,3 +57,6 @@ T stringToIntegral(const std::string& number) {
 size_t		winSize();
 size_t		findNewline(const std::string str, size_t begin = 0);
 std::string getRealPath(const std::string& str);
+off_t		fileSize(int fd);
+size_t		match(const std::string first, const std::string	 &second);
+std::string getExtension(const std::string& filename);

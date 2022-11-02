@@ -381,12 +381,4 @@ std::string fromFileName(const std::string& filename) {
 	return result;
 }
 
-std::string getExtension(const std::string& filename) {
-	size_t dot = filename.find_last_of('.');
-
-	if (dot != filename.npos)
-		return filename.substr(dot + 1);
-	return "";
-}
-
 } // namespace MIME
