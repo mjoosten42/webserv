@@ -58,14 +58,8 @@ void Response::addServer(const Server *server) {
 }
 
 void Response::initialize() {
-	// LOG("Search: " << m_request.getLocation());
-
 	m_locationIndex = m_server->getLocationIndexForAddress(m_request.getLocation());
 	m_filename		= m_server->getRoot(m_locationIndex) + m_request.getLocation();
-
-	// LOG("loc: " << m_locationIndex);
-	// LOG("root: " << m_server->getRoot(m_locationIndex));
-	// LOG("File: " << m_filename);
 
 	setFlags();
 	addDefaultHeaders();
@@ -73,14 +67,10 @@ void Response::initialize() {
 
 // Set to true if applicable
 void Response::setFlags() {
+	std::string ext = getExtension(m_request.getLocation());
+
 	m_processedRequest = true;
-
-	// TODO
-	if (getExtension(m_request.getLocation()) == "pl")
-		m_isCGI = true;
-	if (getExtension(m_request.getLocation()) == "php")
-		m_isCGI = true;
-
+	m_isCGI			   = m_server->isCGI(m_locationIndex, ext);
 	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
 	m_isChunked |= m_isCGI;						// CGI is always chunked
 }

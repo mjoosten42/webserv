@@ -1,9 +1,10 @@
-#include "MIME.hpp" // TODO: remove
 #include "Response.hpp"
+#include "Server.hpp"
 #include "logger.hpp"
-#include "utils.hpp"
+#include "utils.hpp" // fatal_perror
 
 #include <string>
+#include <unistd.h> // write
 
 void Response::getCGIHeaderChunk() {
 
@@ -28,10 +29,7 @@ void Response::getCGIHeaderChunk() {
 void Response::handleCGI() {
 	LOG(RED "Handle CGI: " DEFAULT + m_filename);
 
-	// TODO: parse from config
-	std::string bin = "/usr/bin/php";
-	if (getExtension(m_request.getLocation()) == "pl")
-		bin = "/usr/bin/pl";
+	std::string bin = m_server->getCGI(m_locationIndex, getExtension(m_filename));
 
 	m_statusCode = m_cgi.start(m_request, m_server, bin, m_filename);
 

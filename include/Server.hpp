@@ -21,8 +21,7 @@ class Server {
 		std::string translateAddressToPath(size_t loc_index, const std::string& file_address) const;
 
 		// std::string getRootForFile(size_t loc_index, const std::string& file_to_find) const;
-		std::string getRoot(size_t loc_index) const;
-
+		const std::string			  & getRoot(size_t loc_index) const;
 		const std::string			  & getRoot() const;
 		const std::string			  & getHost() const;
 		const std::string			  & getServerSoftwareName() const;
@@ -33,7 +32,8 @@ class Server {
 		const std::map<int, std::string>& getErrorPages() const;
 		bool							  getAutoIndex() const;
 
-		bool checkWhetherCGI(const std::string& requested_file) const; // TODO: Move?
+		bool		isCGI(size_t loc, const std::string		  &ext) const;
+		std::string getCGI(size_t loc, const std::string ext) const;
 
 	private:
 		std::vector<Location>			   m_locations;

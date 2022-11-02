@@ -187,7 +187,7 @@ size_t Server::getLocationIndexForFile(const std::string& file_to_find) const {
 	return (-1); // Not present in any Location blocks, default to parent server settings.
 }
 
-std::string Server::getRoot(size_t loc_index) const {
+const std::string& Server::getRoot(size_t loc_index) const {
 	if (loc_index == static_cast<size_t>(-1))
 		return m_root;
 	else
@@ -228,10 +228,18 @@ std::string Server::getRootForFile(size_t loc_index, const std::string& file_to_
 }
 */
 
-bool Server::checkWhetherCGI(const std::string& requested_file) const {
-	std::string ext = getExtension(requested_file);
+bool Server::isCGI(size_t loc, const std::string& ext) const {
+	if (loc == static_cast<size_t>(-1))
+		return m_cgi_map.count(ext);
+	else
+		return m_locations[loc].m_cgi_map.count(ext);
+}
 
-	return (m_cgi_map.find(ext) != m_cgi_map.end());
+std::string Server::getCGI(size_t loc, const std::string ext) const {
+	if (loc == static_cast<size_t>(-1))
+		return m_cgi_map.find(ext)->second;
+	else
+		return m_locations[loc].m_cgi_map.find(ext)->second;
 }
 
 #pragma region getters
