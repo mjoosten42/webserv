@@ -1,11 +1,11 @@
 #include "Response.hpp"
 
+#include "MIME.hpp"
 #include "Server.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
-#include "MIME.hpp"
 
 struct Status {
 		int			key;
@@ -69,11 +69,12 @@ void Response::initialize() {
 void Response::setFlags() {
 	m_processedRequest = true;
 
+	// TODO
 	if (MIME::getExtension(m_request.getLocation()) == "pl")
 		m_isCGI = true;
-	if (MIME::getExtension(m_request.getLocation()) == "php") // TODO
+	if (MIME::getExtension(m_request.getLocation()) == "php")
 		m_isCGI = true;
-	
+
 	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
 	m_isChunked |= m_isCGI;						// CGI is always chunked
 }

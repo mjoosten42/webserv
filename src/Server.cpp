@@ -58,7 +58,7 @@ static void overwriteIfSpecified(
 }
 
 // Integer
-static void overwriteIfSpecified(std::string search, int& field, int defaultVal, t_block_directive *constructor_specs) {
+static void overwriteIfSpecified(std::string search, size_t& field, size_t defaultVal, t_block_directive *constructor_specs) {
 	field						= defaultVal;
 	std::string val_from_config = constructor_specs->fetch_simple(search);
 	if (!val_from_config.empty())
@@ -240,7 +240,7 @@ short Server::getPort() const {
 	return m_port;
 }
 
-const int& Server::getCMB() const {
+size_t Server::getCMB() const {
 	return m_client_max_body_size;
 }
 
@@ -248,7 +248,7 @@ const std::map<int, std::string>& Server::getErrorPages() const {
 	return m_error_page;
 }
 
-const bool& Server::getAutoIndex() const {
+bool Server::getAutoIndex() const {
 	return m_autoindex;
 }
 
