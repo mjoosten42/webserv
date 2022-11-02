@@ -16,10 +16,10 @@ SOURCES = \
 	src/MIME.cpp \
 	src/Poller.cpp \
 	src/Request.cpp \
-	src/Response.cpp \
-	src/ResponseCGI.cpp \
-	src/ResponseChunk.cpp \
-	src/ResponseErrors.cpp \
+	src/Response/Response.cpp \
+	src/Response/ResponseCGI.cpp \
+	src/Response/ResponseChunk.cpp \
+	src/Response/ResponseErrors.cpp \
 	src/Server.cpp \
 	src/SourceFds.cpp \
 	src/stringutils.cpp \

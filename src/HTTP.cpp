@@ -79,10 +79,9 @@ std::string HTTP::getHeaderValue(const std::string& field) const {
 }
 
 std::string HTTP::getHeadersAsString() const {
-	std::map<std::string, std::string>::const_iterator it;
-	std::string										   headers;
+	std::string headers;
 
-	for (it = m_headers.begin(); it != m_headers.end(); it++)
+	for (MapIter it = m_headers.begin(); it != m_headers.end(); it++)
 		headers += capitalizeFieldPretty(it->first) + ": " + it->second + CRLF;
 	return headers;
 }

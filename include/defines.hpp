@@ -13,3 +13,8 @@
 
 #define HTTP_VERSION "HTTP/1.1"
 #define CGI_VERSION "CGI/1.1"
+
+#include <map>
+#include <string>
+
+typedef std::map<std::string, std::string>::const_iterator MapIter;

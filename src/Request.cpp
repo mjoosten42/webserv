@@ -151,9 +151,9 @@ void Request::parseHTTPVersion(const std::string& str) {
 }
 
 void Request::parseHeader(const std::string& line) {
-	std::pair<std::map<std::string, std::string>::iterator, bool> insert;
-	std::pair<std::string, std::string>							  header;
-	std::istringstream											  ss(line);
+	std::pair<MapIter, bool>			insert;
+	std::pair<std::string, std::string> header;
+	std::istringstream					ss(line);
 
 	ss >> header.first;
 	ss >> header.second;

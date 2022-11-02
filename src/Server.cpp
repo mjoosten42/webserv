@@ -114,16 +114,10 @@ Server::Server(t_block_directive *constructor_specs) {
 	}
 
 	// Allows user to specify CGI to handle cgi-scripts
-	std::vector<std::string> cgi_specs;
-	overwriteIfSpecified("cgi", cgi_specs, "", constructor_specs);
-	std::vector<std::string>::iterator cgi_it = cgi_specs.begin();
-	while (cgi_it != cgi_specs.end() && cgi_it + 1 != cgi_specs.end()) {
-		m_cgi_map[*cgi_it] = *(cgi_it + 1);
-		cgi_it += 2;
-	}
+	overwriteIfSpecified("cgi", m_CGIs, "", constructor_specs);
 	LOG("Server CGI:");
-	for (std::map<std::string, std::string>::iterator m_it = m_cgi_map.begin(); m_it != m_cgi_map.end(); ++m_it)
-		LOG(m_it->first + " " + m_it->second);
+	for (size_t i = 0; i < m_CGIs.size(); i++)
+		LOG(m_CGIs[i] + " ");
 
 	// ADD LOCATION BLOCKS, IF PRESENT //
 	std::vector<t_block_directive *> location_config_blocks;
@@ -142,8 +136,8 @@ Server::Server(t_block_directive *constructor_specs) {
 //  This function tries to find the longest match between the user defined Address
 //  and the name of one of the containing location blocks.
 size_t Server::getLocationIndexForAddress(const std::string& address) const {
-	size_t ret		  = -1;
-	size_t best_match = 0;
+	size_t ret	   = -1;
+	size_t longest = 0;
 
 	for (size_t i = 0; i < m_locations.size(); i++) {
 
@@ -151,9 +145,9 @@ size_t Server::getLocationIndexForAddress(const std::string& address) const {
 		size_t			   matched = match(loc, address); // Amount of characters matched
 
 		if (matched == loc.length()) { // I.E. make sure /index doesn't match /images
-			if (matched > best_match) {
-				best_match = matched;
-				ret		   = i;
+			if (matched > longest) {
+				longest = matched;
+				ret		= i;
 			}
 		}
 	}
@@ -229,17 +223,16 @@ std::string Server::getRootForFile(size_t loc_index, const std::string& file_to_
 */
 
 bool Server::isCGI(size_t loc, const std::string& ext) const {
-	if (loc == static_cast<size_t>(-1))
-		return m_cgi_map.count(ext);
-	else
-		return m_locations[loc].m_cgi_map.count(ext);
-}
+	const std::vector<std::string>			*CGIs;
+	std::vector<std::string>::const_iterator it;
 
-std::string Server::getCGI(size_t loc, const std::string ext) const {
 	if (loc == static_cast<size_t>(-1))
-		return m_cgi_map.find(ext)->second;
+		CGIs = &m_CGIs;
 	else
-		return m_locations[loc].m_cgi_map.find(ext)->second;
+		CGIs = &m_locations[loc].m_CGIs;
+
+	it = std::find(CGIs->begin(), CGIs->end(), ext);
+	return it != CGIs->end();
 }
 
 #pragma region getters

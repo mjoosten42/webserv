@@ -11,39 +11,36 @@
 #include <fcntl.h>	  // open
 #include <sys/wait.h> // waitpid
 
-static void closePipe(int *pfds) {
+static void closePipe(int pfds[2]) {
 	close(pfds[0]);
 	close(pfds[1]);
 }
 
-static bool my_exec(int infd, int outfd, const std::string& path, const std::string& filename, char **envp) {
-	close(STDIN_FILENO);
-	if (dup(infd) == -1)
+static bool my_exec(int infd, int outfd, const std::string& filename, char **envp) {
+	if (dup2(infd, STDIN_FILENO) == -1)
 		return false;
 	close(infd);
 
-	close(STDOUT_FILENO);
-	if (dup(outfd) == -1)
+	if (dup2(outfd, STDOUT_FILENO) == -1)
 		return false;
 	close(outfd);
 
-	const char *args[] = { path.c_str(), filename.c_str(), NULL };
+	const char *const args[] = { filename.c_str(), filename.c_str(), NULL };
 
-	execve(path.c_str(), const_cast<char *const *>(args), const_cast<char *const *>(envp));
+	execve(filename.c_str(), const_cast<char *const *>(args), const_cast<char *const *>(envp));
 	return false;
 }
 
 // back to minishell ayy
-int Popen::my_popen(const std::string& path, const std::string& filename, const EnvironmentMap& em) {
+int Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 	int serverToCgi[2];
 	int cgiToServer[2];
 
-	status = 502; // 502 bad gateway
 	if (pipe(serverToCgi) == -1) {
 		return 502;
 	} else if (pipe(cgiToServer) == -1) {
 		closePipe(serverToCgi);
-		return status;
+		return 502;
 	}
 
 	readfd	= cgiToServer[0];
@@ -61,7 +58,7 @@ int Popen::my_popen(const std::string& path, const std::string& filename, const 
 		case 0: // child
 			close(serverToCgi[1]);
 			close(cgiToServer[0]);
-			if (my_exec(serverToCgi[0], cgiToServer[1], path, filename, em.toCharpp()) == false)
+			if (my_exec(serverToCgi[0], cgiToServer[1], filename, em.toCharpp()) == false)
 				exit(EXIT_FAILURE);
 			break;
 		default: // parent
@@ -69,8 +66,7 @@ int Popen::my_popen(const std::string& path, const std::string& filename, const 
 			close(cgiToServer[1]);
 	}
 
-	status = 200;
-	return status;
+	return 200;
 }
 
 // THIS SHOULD NEVER BE USED!
@@ -105,7 +101,7 @@ int CGI::didExit() {
 // TODO: when execution fails, close the pipe or something.
 // TODO: gateway timeout
 // TODO: throw instead of return?
-int CGI::start(const Request& req, const Server *server, const std::string& command, const std::string& filename) {
+int CGI::start(const Request& req, const Server *server, const std::string& filename) {
 
 	EnvironmentMap em;
 
@@ -133,8 +129,8 @@ int CGI::start(const Request& req, const Server *server, const std::string& comm
 
 	// POST
 	em["REQUEST_METHOD"] = req.getMethodAsString();
-	em["CONTENT-LENGTH"] = req.getContentLength();
-	em["CONTENT-TYPE"]	 = MIME::fromFileName(req.getLocation());
+	em["CONTENT_LENGTH"] = req.getContentLength();
+	em["CONTENT_TYPE"]	 = MIME::fromFileName(req.getLocation());
 
-	return popen.my_popen(command, filename, em);
+	return popen.my_popen(filename, em);
 }

@@ -6,6 +6,22 @@
 #include <string>
 #include <unistd.h> // write
 
+void Response::handleCGI() {
+	LOG(RED "Handle CGI: " DEFAULT + m_filename);
+
+	m_statusCode = m_cgi.start(m_request, m_server, m_filename);
+
+	if (m_statusCode == 200) {
+		addHeader("Transfer-Encoding", "Chunked");
+		m_source_fd					= m_cgi.popen.readfd;
+		m_CGI_DoneProcessingHeaders = false;
+
+		m_chunk = getStatusLine() + getHeadersAsString();
+	} else {
+
+	} // TODO
+}
+
 void Response::getCGIHeaderChunk() {
 
 	std::string block = readBlockFromFile();
@@ -24,23 +40,6 @@ void Response::getCGIHeaderChunk() {
 		encodeChunked(block);
 		m_chunk += headers + block;
 	}
-}
-
-void Response::handleCGI() {
-	LOG(RED "Handle CGI: " DEFAULT + m_filename);
-
-	std::string bin = m_server->getCGI(m_locationIndex, getExtension(m_filename));
-
-	m_statusCode = m_cgi.start(m_request, m_server, bin, m_filename);
-
-	if (m_statusCode == 200) {
-		addHeader("Transfer-Encoding", "Chunked");
-		m_source_fd					= m_cgi.popen.readfd;
-		m_CGI_DoneProcessingHeaders = false;
-
-		m_chunk = getStatusLine() + getHeadersAsString();
-	} else {
-	} // TODO
 }
 
 void Response::writeToCGI() {
