@@ -1,12 +1,17 @@
 #!/usr/bin/php
 <?php
 
+sleep(1);
+
 echo "Content-Type: text/plain\n";
 echo "\n";
 
 print_r($_ENV);
 print_r($_FILES);
+print_r($_POST);
+print_r($_GET);
 
+$uploaddir = "uploads/";
 $uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
 
 echo "Upload name: ($uploadfile) \n";

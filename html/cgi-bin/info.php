@@ -7,5 +7,5 @@
 	print("\n");
 
 	print("Current dir: " . getcwd());
-	phpinfo(INFO_ENVIRONMENT);
+	phpinfo(INFO_ALL);
 ?>

@@ -12,7 +12,8 @@ struct Status {
 		const char *value;
 };
 
-const static Status statusMessages[] = { { 200, "OK" },
+const static Status statusMessages[] = { { 100, "Continue" },
+										 { 200, "OK" },
 										 { 201, "Created" },
 										 { 204, "No Content" },
 										 { 301, "Moved Permanently" },

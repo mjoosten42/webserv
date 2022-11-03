@@ -76,8 +76,8 @@ class Response: public HTTP {
 		size_t m_locationIndex; // number given to server to identify location
 
 		bool m_processedRequest;
-		bool m_isCGI;					  // true if it is a CGI request
+		bool m_isCGI; // true if it is a CGI request
 		bool m_isChunked;
-		bool m_doneReading; // true if all data from readfd has been read.
+		bool m_doneReading;				  // true if all data from readfd has been read.
 		bool m_CGI_DoneProcessingHeaders; // true if done parsing CGI headers
 };

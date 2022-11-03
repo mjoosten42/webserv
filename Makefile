@@ -71,8 +71,11 @@ format: files
 siege:
 	siege -R siege.conf
 
-lsof: all
+lsof:
 	lsof -c webserv | tail +8
+
+upload:
+	curl localhost:8080/cgi-bin/upload.py -F "userfile=@$(FILE)" -H "Expect:" -v
 
 .PHONY: all clean fclean re run files print format siege lsof
 

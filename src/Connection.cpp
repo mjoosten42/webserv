@@ -39,7 +39,7 @@ int Connection::receiveFromClient(short& events) {
 				response.m_statusCode = error;
 			}
 
-			LOG(request);
+			// LOG(request);
 
 			if (request.getState() == BODY || request.getState() == DONE) {
 				if (!response.hasProcessedRequest()) { // Do once

@@ -35,7 +35,7 @@ void Response::processRequest() {
 		}
 	}
 
-	if (m_statusCode != 200 && m_statusCode != 301) // TODO: ugly
+	if (m_statusCode != 200 && m_statusCode != 201 && m_statusCode != 301) // TODO: ugly
 		serveError(m_request.getErrorMsg());
 
 	if (!m_isCGI)

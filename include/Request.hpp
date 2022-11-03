@@ -14,8 +14,6 @@ class Request: public HTTP {
 		Request();
 
 		void append(const char *buf, ssize_t size);
-		void cut(ssize_t len);
-		void clear();
 
 		const std::string& getHost() const;
 		const state		 & getState() const;
@@ -31,9 +29,10 @@ class Request: public HTTP {
 
 	private:
 		void parse();
+		void checkSpecialHeaders();
+
 		void parseStartLine(const std::string& line);
 		void parseHeader(const std::string& line);
-		void checkSpecialHeaders();
 
 		void parseMethod(const std::string& str);
 		void parseLocation(const std::string& str);
@@ -43,7 +42,7 @@ class Request: public HTTP {
 
 	private:
 		state		m_state;
-		methods		m_method;	   // GET, POST, etc.
+		methods		m_method;	   // GET, POST, DELETE
 		std::string m_location;	   // ex. /foo/bar.html
 		std::string m_queryString; // ex. amongus=sus&greeting=Good%20morning
 

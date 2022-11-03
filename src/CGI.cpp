@@ -26,19 +26,17 @@ static bool my_exec(int infd, int outfd, const std::string& filename, char *cons
 		return false;
 	close(outfd);
 
-	// getcwd(path, PATH_MAX);
-	// std::string str = path;
-	// str += "/" + filename;
-	// str.erase(str.find_last_of('/'));
-	// LOG_ERR(path);
-	// LOG_ERR(str);
-	// LOG_ERR(filename);
-	// if (chdir(str.c_str()) == -1)
-	// 	perror("chdir");
+	getcwd(path, PATH_MAX);
+	std::string str = path;
+	str += "/" + filename;
+	str.erase(str.find_last_of('/'));
+	if (chdir(str.c_str()) == -1)
+		perror("chdir");
 
-	char *const args[] = { const_cast<char *const>(filename.c_str()), NULL };
+	std::string copy   = filename.substr(filename.find_last_of('/') + 1);
+	char *const args[] = { const_cast<char *const>(copy.c_str()), NULL };
 
-	execve(filename.c_str(), args, const_cast<char *const *>(envp));
+	execve(copy.c_str(), args, const_cast<char *const *>(envp));
 	perror("execve"); // TODO
 	return false;
 }
@@ -59,7 +57,7 @@ int Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 	writefd = serverToCgi[1];
 
 	set_fd_nonblocking(readfd);
-	set_fd_nonblocking(writefd);
+	// set_fd_nonblocking(writefd);
 
 	pid = fork();
 	switch (pid) {
@@ -114,14 +112,17 @@ int CGI::start(const Request& req, const Server *server, const std::string& file
 	em["SERVER_PORT"]	  = toString(server->getPort()); // TODO: when multiple ports, it should be the listener's port.
 	em["SERVER_PROTOCOL"] = HTTP_VERSION;
 
-	em["PATH_INFO"]	   = req.getLocation();
-	em["QUERY_STRING"] = req.getQueryString();
-	em["SCRIPT_NAME"]  = filename;
+	em["PATH_INFO"]		  = req.getLocation();
+	em["PATH_TRANSLATED"] = req.getLocation();
+	em["QUERY_STRING"]	  = req.getQueryString();
+	em["SCRIPT_NAME"]	  = filename;
 
 	// POST
 	em["REQUEST_METHOD"] = req.getMethodAsString();
-	em["CONTENT_LENGTH"] = req.getContentLength();
-	em["CONTENT_TYPE"]	 = MIME::fromFileName(req.getLocation());
+	em["CONTENT_LENGTH"] = toString(req.getContentLength());
+	em["CONTENT_TYPE"]	 = req.getHeaderValue("Content-Type");
+
+	em["UPLOAD_DIR"] = getRealPath("html") + "/uploads/";
 
 	return popen.my_popen(filename, em);
 }

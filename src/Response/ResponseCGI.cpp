@@ -12,6 +12,8 @@ void Response::handleCGI() {
 	m_statusCode = m_cgi.start(m_request, m_server, m_filename);
 
 	if (m_statusCode == 200) {
+		if (m_request.getMethod() == POST)
+			m_statusCode = 201;
 		addHeader("Transfer-Encoding", "Chunked");
 		m_source_fd					= m_cgi.popen.readfd;
 		m_CGI_DoneProcessingHeaders = false;
@@ -70,8 +72,9 @@ void Response::writeToCGI() {
 	LOG(RED "Write: " DEFAULT << bytes_written);
 
 	if (bytes_written == -1)
-		fatal_perror("write"); // TODO
-	body.erase(0, bytes_written);
+		perror("write"); // TODO
+	else
+		body.erase(0, bytes_written);
 
 	if (m_request.getState() == DONE && body.empty())
 		close(m_cgi.popen.writefd);

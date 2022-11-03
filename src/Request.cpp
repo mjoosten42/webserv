@@ -31,21 +31,6 @@ void Request::append(const char *buf, ssize_t size) {
 	}
 }
 
-void Request::cut(ssize_t len) {
-	m_body.erase(0, len);
-}
-
-void Request::clear() {
-	HTTP::clear();
-	m_state = STARTLINE;
-	m_location.clear();
-	m_queryString.clear();
-	m_saved.clear();
-	m_host.clear();
-	m_bodyTotal		= 0;
-	m_contentLength = 0;
-}
-
 void Request::parse() {
 	std::string line;
 
@@ -153,9 +138,13 @@ void Request::parseHeader(const std::string& line) {
 	std::pair<MapIter, bool>			insert;
 	std::pair<std::string, std::string> header;
 	std::istringstream					ss(line);
+	std::string							word;
 
 	ss >> header.first;
 	ss >> header.second;
+	ss >> word;
+	if (!word.empty())
+		header.second += " " + word;
 	if (header.first.back() != ':') {
 		m_errorMsg = "Header field must end in ':' : \"" + line + "\"";
 		throw 400;
@@ -270,14 +259,11 @@ std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << RED "State: " DEFAULT << request.getStateAsString() << std::endl;
 	os << RED "Method: " DEFAULT << request.getMethodAsString() << std::endl;
 	os << RED "Location: " DEFAULT << request.getLocation() << std::endl;
-	if (!request.getQueryString().empty())
-		os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
-	// if (!request.getHeaders().empty())
-	// 	os << RED "Headers: {\n" DEFAULT << getStringMapAsString(request.getHeaders()) << RED << "}\n";
+	// os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
+	os << RED "Headers: {\n" DEFAULT << request.getHeadersAsString() << RED << "}\n";
 	os << RED "Host: " DEFAULT << request.getHost() << std::endl;
 	os << RED "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
-	if (!request.getBody().empty())
-		os << RED "Body: " DEFAULT << request.getBody() << std::endl;
+	// os << RED "Body: " DEFAULT << request.getBody() << std::endl;
 	os << RED "Body total: " DEFAULT << request.getBodyTotal();
 	return os;
 }
