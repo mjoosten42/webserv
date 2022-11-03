@@ -38,10 +38,11 @@ void Poller::pollfdEvent() {
 	// loop over current clients to check if we can read or write
 	for (size_t i = clientsIndex(); i < sourceFdsIndex(); i++) {
 		pollfd& client = m_pollfds[i];
-		unsetFlag(m_pollfds[i].events, POLLOUT);
 
 		// LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
 		// LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
+
+		unsetFlag(m_pollfds[i].events, POLLOUT);
 
 		if (client.revents & POLLHUP) {
 			pollHup(client);

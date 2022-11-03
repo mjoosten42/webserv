@@ -3,3 +3,4 @@
 #define BUFFER_SIZE 0xFFF
 
 extern char buf[];
+extern char path[];

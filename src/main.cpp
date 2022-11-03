@@ -13,7 +13,7 @@ int main(int argc, const char *argv[]) {
 		case 2:
 			break;
 		default:
-			std::cerr << "usage: ./webserv [configuration file]\n";
+			std::cerr << "Usage: ./webserv [configuration file]\n";
 			return EXIT_FAILURE;
 	}
 

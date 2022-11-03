@@ -5,6 +5,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
+#include "buffer.hpp"
 #include "logger.hpp"
 #include "utils.hpp"
 
@@ -16,7 +17,7 @@ static void closePipe(int pfds[2]) {
 	close(pfds[1]);
 }
 
-static bool my_exec(int infd, int outfd, const std::string& filename, char **envp) {
+static bool my_exec(int infd, int outfd, const std::string& filename, char *const envp[]) {
 	if (dup2(infd, STDIN_FILENO) == -1)
 		return false;
 	close(infd);
@@ -25,9 +26,20 @@ static bool my_exec(int infd, int outfd, const std::string& filename, char **env
 		return false;
 	close(outfd);
 
-	const char *const args[] = { filename.c_str(), filename.c_str(), NULL };
+	// getcwd(path, PATH_MAX);
+	// std::string str = path;
+	// str += "/" + filename;
+	// str.erase(str.find_last_of('/'));
+	// LOG_ERR(path);
+	// LOG_ERR(str);
+	// LOG_ERR(filename);
+	// if (chdir(str.c_str()) == -1)
+	// 	perror("chdir");
 
-	execve(filename.c_str(), const_cast<char *const *>(args), const_cast<char *const *>(envp));
+	char *const args[] = { const_cast<char *const>(filename.c_str()), NULL };
+
+	execve(filename.c_str(), args, const_cast<char *const *>(envp));
+	perror("execve"); // TODO
 	return false;
 }
 
@@ -69,20 +81,12 @@ int Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 	return 200;
 }
 
-// THIS SHOULD NEVER BE USED!
-CGI& CGI::operator=(const CGI& other) {
-	LOG_ERR("**** CGI = OPERATOR CALLED, SHOULD NOT BE CALLED!");
-	popen = other.popen;
-	exit(EXIT_FAILURE);
-	return *this;
-}
-
 // returns the status code when the child CGI process has exited. returns -1 on failure or when it hasn't exited yet.
-int CGI::didExit() {
+bool CGI::didExit() {
 
-	int stat_loc = 0;
-
-	int status = waitpid(popen.pid, &stat_loc, WNOHANG);
+	int	 stat_loc = 0;
+	int	 status	  = waitpid(popen.pid, &stat_loc, WNOHANG);
+	bool exit	  = false;
 
 	switch (status) {
 		case -1:
@@ -90,11 +94,9 @@ int CGI::didExit() {
 		case 0:
 			return -1;
 		default:
-			if (WIFEXITED(stat_loc))
-				return WEXITSTATUS(stat_loc);
-			break;
+			exit = WIFEXITED(stat_loc);
 	}
-	return 0;
+	return exit;
 }
 
 // TODO: Set correct path
@@ -104,17 +106,6 @@ int CGI::didExit() {
 int CGI::start(const Request& req, const Server *server, const std::string& filename) {
 
 	EnvironmentMap em;
-
-	// check if file is openable beforehand.
-	// if (access(filename.c_str(), F_OK)) {
-	// 	if (errno == EACCES) {
-	// 		return 403;
-	// 	} else if (errno == ENOENT) {
-	// 		return 404;
-	// 	} else {
-	// 		return 500;
-	// 	}
-	// }
 
 	// TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
 	em["GATEWAY_INTERFACE"] = CGI_VERSION;

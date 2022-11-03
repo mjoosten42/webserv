@@ -40,11 +40,11 @@ class Response: public HTTP {
 		void handleCGI();
 		void handleDelete();
 
-		void   openError(bool isDirectory);
-		void   addFileHeaders();
-		void   getCGIHeaderChunk();
-		void   encodeChunked(std::string  &str);
-		size_t findHeaderEnd(const std::string str);
+		void		openError(bool isDirectory);
+		void		addFileHeaders();
+		void		getCGIHeaderChunk();
+		void		encodeChunked(std::string		&str);
+		std::string getLine(std::string& str);
 
 		std::string readBlockFromFile();
 
@@ -64,18 +64,20 @@ class Response: public HTTP {
 		int m_statusCode;
 
 	private:
-		Request		  m_request;
 		const Server *m_server;
+		Request		  m_request;
 		CGI			  m_cgi;
-		std::string	  m_chunk;
-		std::string	  m_filename;
-		int			  m_source_fd;	   // the fd of the file/pipe.
-		size_t		  m_locationIndex; // number given to server to identify location
 
-		bool m_doneReading; // true if all data from readfd has been read.
-		bool m_isChunked;
-		bool m_isCGI;					  // true if it is a CGI request, as filled in by checkWetherCGI()
-		bool m_CGI_DoneProcessingHeaders; // true if done parsing CGI headers
+		std::string m_chunk;
+		std::string m_filename;
+		std::string m_savedLine; // Used to check if CGI is behaving
+
+		int	   m_source_fd;		// the fd of the file/pipe.
+		size_t m_locationIndex; // number given to server to identify location
+
 		bool m_processedRequest;
-		bool m_chunkEndedWithNewline;
+		bool m_isCGI;					  // true if it is a CGI request
+		bool m_isChunked;
+		bool m_doneReading; // true if all data from readfd has been read.
+		bool m_CGI_DoneProcessingHeaders; // true if done parsing CGI headers
 };

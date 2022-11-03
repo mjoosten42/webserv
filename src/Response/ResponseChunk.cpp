@@ -12,7 +12,7 @@
 #include <stdlib.h> // realpath
 #include <sys/socket.h>
 
-// GET --> CGI ? CGI : FILE
+// GET --> is CGI ? CGI : FILE
 // POST --> CGI
 // DELETE --> unlink
 
@@ -35,7 +35,7 @@ void Response::processRequest() {
 		}
 	}
 
-	if (m_statusCode != 200)
+	if (m_statusCode != 200 && m_statusCode != 301) // TODO: ugly
 		serveError(m_request.getErrorMsg());
 
 	if (!m_isCGI)
@@ -65,14 +65,17 @@ void Response::handleDelete() {
 	m_statusCode = 204;
 }
 
-// TODO: check if directory (curl localhost:8080/images loops forever)
 void Response::handleFile() {
-	bool isDirectory = m_filename.back() == '/';
+	bool isDirectory = isDir(m_filename);
 
-	LOG("Get: File: " + m_filename);
+	LOG(RED "Get: File: " DEFAULT + m_filename);
 
-	if (isDirectory)
+	if (isDirectory) {
+		if (m_filename.back() != '/')
+			// return sendMoved(m_request.getLocation() + "/");
+			m_filename += "/";
 		m_filename += "index.html"; // TODO: get from server
+	}
 
 	m_source_fd = open(m_filename.c_str(), O_RDONLY);
 	if (m_source_fd == -1)
@@ -84,11 +87,13 @@ void Response::handleFile() {
 void Response::openError(bool isDirectory) {
 	bool autoIndex = m_server->getAutoIndex();
 
+	perror("open"); // TODO
 	switch (errno) {
 		case EACCES:
 			m_statusCode = 403;
 			break;
 		case ENOENT:
+		case ENOTDIR:
 			m_statusCode = 404;
 			if (isDirectory && autoIndex)
 				createIndex(m_filename.substr(0, m_filename.find("index.html")));
@@ -127,41 +132,19 @@ bool Response::isDone() const {
 	return m_doneReading && m_chunk.empty();
 }
 
-size_t Response::findHeaderEnd(const std::string str) {
-	size_t pos			 = findNewline(str);
-	size_t newlineLength = (str[pos] == '\r' ? 2 : 1); // "\r\n or \n"
-	size_t second;
-
-	if (m_chunkEndedWithNewline && pos == 0)
-		return newlineLength;
-
-	while (pos < str.size()) {
-		second = findNewline(str, pos + newlineLength);
-		if (second == pos + newlineLength)
-			return pos + newlineLength + 1;
-		pos			  = second;
-		newlineLength = (str[pos] == '\r' ? 2 : 1);
-	}
-
-	m_chunkEndedWithNewline = (str.back() == '\n');
-
-	return pos;
-}
-
 std::string& Response::getNextChunk() {
+	std::string block;
 
-	if (m_doneReading || m_chunk.size() > BUFFER_SIZE)
-		return m_chunk;
-
-	if (m_isCGI && !m_CGI_DoneProcessingHeaders) {
-		getCGIHeaderChunk();
-		return m_chunk;
+	if (!m_doneReading && m_chunk.size() < BUFFER_SIZE) {
+		if (m_isCGI && !m_CGI_DoneProcessingHeaders)
+			getCGIHeaderChunk();
+		else {
+			block = readBlockFromFile();
+			if (m_isChunked)
+				encodeChunked(block);
+			m_chunk += block;
+		}
 	}
-
-	std::string block = readBlockFromFile();
-	if (m_isChunked)
-		encodeChunked(block);
-	m_chunk += block;
 	return m_chunk;
 }
 
@@ -194,7 +177,7 @@ std::string Response::readBlockFromFile() {
 
 void Response::createIndex(std::string path_to_index) {
 	addHeader("Content-Type", "text/html");
-	addToBody(autoIndexHtml(path_to_index, m_server->getRoot()));
+	addToBody(autoIndexHtml(path_to_index, m_server->getRoot(m_locationIndex)));
 
 	m_doneReading = true;
 	m_statusCode  = 200;

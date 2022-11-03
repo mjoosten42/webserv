@@ -1,7 +1,6 @@
 #include "Request.hpp"
 
 #include "HTTP.hpp"
-#include "buffer.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"

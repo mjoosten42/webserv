@@ -39,7 +39,7 @@ int Connection::receiveFromClient(short& events) {
 				response.m_statusCode = error;
 			}
 
-			// LOG(request);
+			LOG(request);
 
 			if (request.getState() == BODY || request.getState() == DONE) {
 				if (!response.hasProcessedRequest()) { // Do once
@@ -83,10 +83,10 @@ int Connection::sendToClient(short& events) {
 				m_close	  = response.wantsClose();
 				source_fd = response.getSourceFD();
 				m_responses.pop();
-			}
-			if (!response.hasSourceFd())
+			} else if (!response.hasSourceFd())
 				setFlag(events, POLLOUT);
 	}
+
 	return source_fd;
 }
 

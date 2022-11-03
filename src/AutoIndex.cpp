@@ -68,21 +68,20 @@ std::string autoIndexHtml(std::string dir_path, std::string root) {
 	recursiveFileCount(dir_path, content_names);
 	std::vector<std::string>::iterator cn_it = content_names.begin();
 
-	std::string ret;
+	std::string ret = "<h1> Index of directory: </h1>\n";
+	ret += "<ul>";
 
-	ret = ret + "<h1> Index of directory: </h1>\r\n";
 	for (; cp_it != content_paths.end(); cp_it++) {
-		ret				  = ret + "<p><a href=\"";
-		ret				  = ret + relative_path + *cp_it;
-		ret				  = ret + "\">";
+		ret += "<li><a href=\"" + relative_path + *cp_it + "\">";
 		unsigned int tabs = countAndTrimLeadingWhiteSpace(*cn_it);
 		for (unsigned int i = 0; i < tabs; i++)
-			ret = ret + "<ul>";
+			ret += "<ul>";
 		ret = ret + *cn_it;
 		for (unsigned int i = 0; i < tabs; i++)
 			ret = ret + "</ul>";
-		ret = ret + "</a></p>\r\n";
+		ret += "</a></li>\n";
 		cn_it++;
 	}
+	ret += "</ul>\n";
 	return (ret);
 }

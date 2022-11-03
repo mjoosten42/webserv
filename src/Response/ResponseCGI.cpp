@@ -23,23 +23,44 @@ void Response::handleCGI() {
 }
 
 void Response::getCGIHeaderChunk() {
-
 	std::string block = readBlockFromFile();
 
-	size_t pos = findHeaderEnd(block);
-	if (pos == std::string::npos) {
-		m_chunk += block;
-	} else {
+	if (m_doneReading && !m_CGI_DoneProcessingHeaders) { // CGI exited before completing respones
+		m_savedLine.clear();
+		m_chunk += CRLF;
 		m_CGI_DoneProcessingHeaders = true;
-		std::string headers			= block.substr(0, pos);
-		block						= block.substr(pos);
-
-		if (block.empty()) // Only send one trailing chunk
-			m_doneReading = true;
-
-		encodeChunked(block);
-		m_chunk += headers + block;
 	}
+
+	block.insert(0, m_savedLine); // Prepend previous remaining data
+
+	// Add lines to chunk, removing them from block as we go
+	m_savedLine = getLine(block);
+	while (!m_savedLine.empty()) {
+		m_chunk += m_savedLine;
+		if (m_savedLine == CRLF || m_savedLine == "\n") {
+			m_CGI_DoneProcessingHeaders = true;
+			break;
+		}
+		m_savedLine = getLine(block);
+	}
+	m_savedLine = block; // Save remaining data
+
+	if (m_CGI_DoneProcessingHeaders) {
+		encodeChunked(block);
+		m_chunk += block;
+	}
+}
+
+std::string Response::getLine(std::string& str) {
+	size_t		pos = str.find('\n');
+	std::string line;
+
+	if (pos != std::string::npos) {
+		line = str.substr(0, pos + 1);
+		str.erase(0, pos + 1);
+	}
+
+	return line;
 }
 
 void Response::writeToCGI() {

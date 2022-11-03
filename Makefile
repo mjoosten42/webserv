@@ -68,7 +68,7 @@ print:
 format: files
 	clang-format -i $(SOURCES) $(HEADERS)
 
-siege: all
+siege:
 	siege -R siege.conf
 
 lsof: all

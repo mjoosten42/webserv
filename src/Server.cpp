@@ -19,8 +19,7 @@ Server::Server() {
 	m_client_max_body_size = 0;
 	m_autoindex			   = false;
 
-	Location location = Location();
-	m_locations.push_back(location);
+	m_locations.push_back(Location());
 }
 
 #pragma region overwriteIfSpecified

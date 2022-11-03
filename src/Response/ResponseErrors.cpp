@@ -33,7 +33,6 @@ void Response::sendMoved(const std::string& location) {
 
 	// clear(); // <!-- TODO, also add default server
 	addHeader("Location", location);
-	addHeader("Connection", "close");
 	addHeader("Content-Type", "text/html");
 
 	addToBody("<h1>" + toString(m_statusCode) + " " + getStatusMessage() + "</h1>\r\n");

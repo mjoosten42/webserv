@@ -54,14 +54,16 @@ void HTTP::addToBody(const char *buf, ssize_t size) {
 	m_body.append(buf, size);
 }
 
-void HTTP::addHeader(const std::string field, const std::string& value) {
-	std::pair<std::string, std::string> header = std::make_pair(field, value);
+void HTTP::addHeader(const std::string& field, const std::string& value) {
+	std::string copy(field);
 
-	strToLower(header.first);
-	if (!m_headers.insert(header).second) {
+	if (hasHeader(field)) {
 		LOG_ERR("Overwriting Header: " << field);
-		LOG_ERR(getHeadersAsString());
+		LOG_ERR("Current headers: " << getHeadersAsString());
 	}
+
+	strToLower(copy);
+	m_headers[copy] = value;
 }
 
 bool HTTP::hasHeader(const std::string& field) const {

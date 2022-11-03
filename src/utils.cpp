@@ -1,7 +1,9 @@
 #include "utils.hpp"
 
+#include "buffer.hpp" // path
 #include "logger.hpp"
 
+#include <dirent.h> // opendir
 #include <fcntl.h>	// fcntl
 #include <stdio.h>	// perror
 #include <stdlib.h> // exit
@@ -69,14 +71,13 @@ size_t findNewline(const std::string str, size_t begin) {
 }
 
 std::string getRealPath(const std::string& str) {
-	static char resolved_path[PATH_MAX + 1] = { 0 };
-	char	   *ret							= realpath(str.c_str(), resolved_path);
+	char *ret = realpath(str.c_str(), path);
 
 	if (!ret) {
 		LOG_ERR("realpath: " << str << ": " << strerror(errno));
 		return "";
 	}
-	return resolved_path;
+	return path;
 }
 
 off_t fileSize(int fd) {
@@ -108,4 +109,14 @@ std::string getExtension(const std::string& filename) {
 	if (dot != filename.npos)
 		return filename.substr(dot + 1);
 	return "";
+}
+
+bool isDir(const std::string& path) {
+	DIR *dir = opendir(path.c_str());
+
+	if (!dir)
+		return false;
+	if (closedir(dir) == -1)
+		perror("closedir");
+	return true;
 }

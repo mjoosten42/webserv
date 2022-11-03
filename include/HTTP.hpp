@@ -15,7 +15,7 @@ class HTTP {
 
 		void addToBody(const char *buf, ssize_t size);
 		void addToBody(const std::string& str);
-		void addHeader(const std::string field, const std::string& value);
+		void addHeader(const std::string& field, const std::string& value);
 		bool hasHeader(const std::string& field) const;
 
 		std::string getHeaderValue(const std::string& field) const;

@@ -40,12 +40,11 @@ Response::Response():
 	m_server(NULL),
 	m_source_fd(-1),
 	m_locationIndex(-1),
-	m_doneReading(false),
-	m_isChunked(false),
-	m_isCGI(false),
-	m_CGI_DoneProcessingHeaders(false),
 	m_processedRequest(false),
-	m_chunkEndedWithNewline(true) {}
+	m_isCGI(false),
+	m_isChunked(false),
+	m_doneReading(false),
+	m_CGI_DoneProcessingHeaders(false) {}
 
 // TODO: remove
 void Response::clear() {

@@ -60,3 +60,4 @@ std::string getRealPath(const std::string& str);
 off_t		fileSize(int fd);
 size_t		match(const std::string first, const std::string	 &second);
 std::string getExtension(const std::string& filename);
+bool		isDir(const std::string		  &path);
