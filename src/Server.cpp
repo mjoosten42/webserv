@@ -141,7 +141,8 @@ size_t Server::getLocationIndexForAddress(const std::string& address) const {
 	for (size_t i = 0; i < m_locations.size(); i++) {
 
 		const std::string& loc	   = m_locations[i].m_location;
-		size_t			   matched = match(loc, address); // Amount of characters matched
+		std::string incase_dir = address + "/"; // I.E. make sure /images matches /images/
+		size_t			   matched = match(loc, incase_dir); // Amount of characters matched
 
 		if (matched == loc.length()) { // I.E. make sure /index doesn't match /images
 			if (matched > longest) {
@@ -154,11 +155,15 @@ size_t Server::getLocationIndexForAddress(const std::string& address) const {
 }
 
 std::string Server::translateAddressToPath(size_t loc_index, const std::string& file_address) const {
-	std::vector<Location>::const_iterator loc = m_locations.begin() + loc_index;
-	for (size_t match = 0; match < (loc->m_location.length()); ++match)
-		if (loc->m_location[match] != file_address[match])
-			return ("");
-	return loc->m_root + "/" + file_address.substr(loc->m_location.length());
+	std::string ret;
+	if (loc_index == static_cast<size_t>(-1)) // Should only use this on a location block, not on a server block;
+		ret = m_root + file_address;
+	else {
+		std::vector<Location>::const_iterator loc = m_locations.begin() + loc_index;
+		ret = loc->m_root + "/" + file_address.substr(match(file_address, loc->m_location));
+	}
+	LOG("Translating ADDRESS \"" + file_address + "\" to PATH \"" + ret + "\"");
+	return (ret);
 }
 
 // This function finds the appropriate Location block for a file
