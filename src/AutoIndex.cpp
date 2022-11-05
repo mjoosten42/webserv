@@ -56,8 +56,11 @@ unsigned int
 //	Returns as a string the html body of a Response that indexes all files and sub directories of a given dir.
 //	Params: the 'dir_path' passed must be a path from, and including, the server's root directory.
 //	Params: the 'root' passed must be the root of the server that we are indexing relative to.
-std::string autoIndexHtml(std::string dir_path, std::string root) {
-	std::string relative_path = dir_path.substr(root.length());
+std::string autoIndexHtml(std::string dir_path, std::string root) { //TODO: need to write a pathToAddress translator to fix this mess
+	std::string relative_path;
+	relative_path = dir_path.substr(root.length());
+	// (void)root;
+	// relative_path = "";
 
 	LOG("AutoIndexing...");
 	std::vector<std::string> content_paths;
@@ -71,7 +74,10 @@ std::string autoIndexHtml(std::string dir_path, std::string root) {
 	std::string ret = "<h1> Index of directory: </h1>\n";
 	ret += "<ul>";
 
+	LOG("Dir path: " + dir_path);
+	LOG("Rel path: " + relative_path);
 	for (; cp_it != content_paths.end(); cp_it++) {
+		LOG("File name: " + *cp_it);
 		ret += "<li><a href=\"" + relative_path + *cp_it + "\">";
 		unsigned int tabs = countAndTrimLeadingWhiteSpace(*cn_it);
 		for (unsigned int i = 0; i < tabs; i++)

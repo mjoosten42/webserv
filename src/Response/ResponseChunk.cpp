@@ -178,6 +178,8 @@ std::string Response::readBlockFromFile() {
 void Response::createIndex(std::string path_to_index) {
 	addHeader("Content-Type", "text/html");
 	addToBody(autoIndexHtml(path_to_index, m_server->getRoot(m_locationIndex)));
+	// (void)path_to_index;
+	// addToBody(autoIndexHtml(path_to_index, ""));
 
 	m_doneReading = true;
 	m_statusCode  = 200;
