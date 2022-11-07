@@ -140,9 +140,9 @@ size_t Server::getLocationIndexForAddress(const std::string& address) const {
 
 	for (size_t i = 0; i < m_locations.size(); i++) {
 
-		const std::string& loc	   = m_locations[i].m_location;
-		std::string incase_dir = address + "/"; // I.E. make sure /images matches /images/
-		size_t			   matched = match(loc, incase_dir); // Amount of characters matched
+		const std::string& loc		  = m_locations[i].m_location;
+		std::string		   incase_dir = address + "/";			// I.E. make sure /images matches /images/
+		size_t			   matched	  = match(loc, incase_dir); // Amount of characters matched
 
 		if (matched == loc.length()) { // I.E. make sure /index doesn't match /images
 			if (matched > longest) {
