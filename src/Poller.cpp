@@ -16,7 +16,6 @@ void Poller::start() {
 	while (true) {
 
 		LOG(RED << std::string(winSize(), '#') << DEFAULT);
-
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
 		// LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 
@@ -65,6 +64,7 @@ void Poller::pollfdEvent() {
 		// If source has POLLIN, set POLLOUT in client
 		// However, source will get POLLIN next loop because client will only read next loop, not this one
 		// To prevent resetting POLLOUT when the source is done, we unset POLLIN of source for one loop
+		// To fix: separate polls
 		if (source.revents & POLLIN) {
 			setFlag(find(client_fd)->events, POLLOUT);
 			unsetFlag(source.events, POLLIN);
@@ -79,13 +79,13 @@ void Poller::pollfdEvent() {
 }
 
 // Let connection read new data
-// Add a readfd if asked
+// Add a source_fd if asked
 void Poller::pollIn(pollfd& client) {
-	Connection& conn   = m_connections[client.fd];
-	int			readfd = conn.receiveFromClient(client.events);
+	Connection& conn	  = m_connections[client.fd];
+	int			source_fd = conn.receiveFromClient(client.events);
 
-	if (readfd != -1) { // A response wants to poll on a file/pipe
-		pollfd source = { readfd, POLLIN, 0 };
+	if (source_fd != -1) { // A response wants to poll on a file/pipe
+		pollfd source = { source_fd, POLLIN, 0 };
 
 		m_sources.add(source, client.fd);
 		m_pollfds.push_back(source);
@@ -93,17 +93,17 @@ void Poller::pollIn(pollfd& client) {
 }
 
 // Let connection send data
-// If response if done reading from its readfd, remove it
+// If response if done reading from its source_fd, remove it
 // If response is done and wants to close the connection, remove the client
 void Poller::pollOut(pollfd& client) {
 	Connection& conn	  = m_connections[client.fd];
 	int			source_fd = conn.sendToClient(client.events);
 
-	if (source_fd != -1) { // returns readfd to close
+	if (source_fd != -1) { // returns source_fd to close
 		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
 	}
-	if (conn.wantsClose()) // returns true if clients wants close
+	if (conn.wantsClose())
 		removeClient(client.fd);
 }
 
@@ -111,12 +111,12 @@ void Poller::pollOut(pollfd& client) {
 // Close and remove all source fds connected to client
 // Close and remove client
 void Poller::pollHup(pollfd& client) {
-	std::vector<int> sourcefds = m_sources.getSourceFds(client.fd); // get all sourcef ds dependent on client fd
+	std::vector<int> sourcefds = m_sources.getSourceFds(client.fd); // get all source fds dependent on client fd
 
 	for (size_t i = 0; i < sourcefds.size(); i++) {
 		int source_fd = sourcefds[i];
 		if (close(source_fd) == -1)
-			fatal_perror("close");
+			LOG_ERR("close: " << strerror(errno) << source_fd);
 		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
 	}

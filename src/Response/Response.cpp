@@ -12,15 +12,13 @@ struct Status {
 		const char *value;
 };
 
-const static Status statusMessages[] = { { 100, "Continue" },
-										 { 200, "OK" },
+const static Status statusMessages[] = { { 200, "OK" },
 										 { 201, "Created" },
 										 { 204, "No Content" },
 										 { 301, "Moved Permanently" },
 										 { 400, "Bad Request" },
 										 { 403, "Forbidden" },
 										 { 404, "Not Found" },
-										 { 413, "Payload Too Large" },
 										 { 418, "I'm a teapot" },
 										 { 500, "Internal Server Error" },
 										 { 501, "Not Implemented" },
@@ -29,15 +27,9 @@ const static Status statusMessages[] = { { 100, "Continue" },
 
 const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMessages);
 
-// TO DETERMINE WHICH SERVER:
-// in connection, a map of servers and hostnames. get the hostname from the request(as it is required),
-// and just pass the correct server into the response. That's it.
-// the hard part is the map and the socket creation(no duplicate sockets for same host/port)
-// perhaps just loop over the survurs and check hostname/port?
-
 Response::Response():
 	HTTP(),
-	m_statusCode(200),
+	m_statusCode(0),
 	m_server(NULL),
 	m_source_fd(-1),
 	m_locationIndex(-1),
@@ -46,12 +38,6 @@ Response::Response():
 	m_isChunked(false),
 	m_doneReading(false),
 	m_CGI_DoneProcessingHeaders(false) {}
-
-// TODO: remove
-void Response::clear() {
-	HTTP::clear();
-	m_statusCode = 0;
-}
 
 void Response::addServer(const Server *server) {
 	m_server = server;
@@ -70,7 +56,8 @@ void Response::setFlags() {
 	std::string ext = getExtension(m_request.getLocation());
 
 	m_processedRequest = true;
-	m_isCGI			   = m_server->isCGI(m_locationIndex, ext);
+
+	m_isCGI = m_server->isCGI(m_locationIndex, ext);
 	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
 	m_isChunked |= m_isCGI;						// CGI is always chunked
 }
@@ -84,7 +71,7 @@ std::string Response::getStatusMessage() const {
 }
 
 std::string Response::getStatusLine() const {
-	return std::string(HTTP_VERSION) + " " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
+	return HTTP_VERSION " " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
 }
 
 // Returns the response as a string to send over a socket. When there is a body present,
@@ -100,7 +87,7 @@ std::string Response::getResponseAsString() {
 	response += CRLF;
 	response += getBody();
 
-	return (response);
+	return response;
 }
 
 void Response::addDefaultHeaders() {

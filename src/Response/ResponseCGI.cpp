@@ -4,25 +4,27 @@
 #include "utils.hpp" // fatal_perror
 
 #include <string>
-#include <fcntl.h> // open
 #include <unistd.h> // write
 
 void Response::handleCGI() {
 	LOG(RED "Handle CGI: " DEFAULT + m_filename);
 
-	m_statusCode = m_cgi.start(m_request, m_server, m_filename);
-
-	if (isGood(m_statusCode)) {
+	try {
+		m_cgi.start(m_request, m_server, m_filename);
+		if (m_request.getMethod() == GET)
+			m_statusCode = 200;
 		if (m_request.getMethod() == POST)
 			m_statusCode = 201;
-		addHeader("Transfer-Encoding", "Chunked");
-		m_source_fd					= m_cgi.popen.readfd;
-		m_CGI_DoneProcessingHeaders = false;
-
-		m_chunk = getStatusLine() + getHeadersAsString();
-	} else {
+	} catch (int error) {
+		m_statusCode = error;
 		serveError("CGI broke");
-	} // TODO
+	}
+
+	if (isGood(m_statusCode)) {
+		m_source_fd = m_cgi.popen.readfd;
+		addHeader("Transfer-Encoding", "Chunked");
+		m_chunk = getStatusLine() + getHeadersAsString();
+	}
 }
 
 void Response::getCGIHeaderChunk() {

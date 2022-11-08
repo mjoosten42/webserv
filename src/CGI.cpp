@@ -17,16 +17,32 @@ static void closePipe(int pfds[2]) {
 	close(pfds[1]);
 }
 
-static bool my_exec(int infd, int outfd, const std::string& filename, char *const envp[]) {
-	if (dup2(infd, STDIN_FILENO) == -1)
-		return false;
-	close(infd);
+static void pipeTwo(int serverToCgi[2], int CgiToServer[2]) {
+	if (pipe(serverToCgi) == -1)
+		throw 502;
+	if (pipe(CgiToServer) == -1) {
+		closePipe(serverToCgi);
+		throw 502;
+	}
+}
 
-	if (dup2(outfd, STDOUT_FILENO) == -1)
-		return false;
-	close(outfd);
-	
+static void dupTwo(int in_fd, int out_fd) {
+	if (dup2(in_fd, STDIN_FILENO) == -1)
+		throw 502;
+	close(in_fd);
+
+	if (dup2(out_fd, STDOUT_FILENO) == -1) {
+		close(STDIN_FILENO);
+		throw 502;
+	}
+	close(out_fd);
+}
+
+static void my_exec(int infd, int outfd, const std::string& filename, char *const envp[]) {
 	std::string str = filename;
+
+	dupTwo(infd, outfd);
+
 	str.erase(str.find_last_of('/'));
 	if (chdir(str.c_str()) == -1) {
 		LOG_ERR("chdir: " << strerror(errno) << ": " << str);
@@ -38,52 +54,44 @@ static bool my_exec(int infd, int outfd, const std::string& filename, char *cons
 
 	execve(copy.c_str(), args, const_cast<char *const *>(envp));
 	LOG_ERR("execve: " << strerror(errno) << ": " << filename);
-	return false;
+	exit(EXIT_FAILURE);
 }
 
 // back to minishell ayy
-int Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
+void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 	int serverToCgi[2];
 	int cgiToServer[2];
 
-	if (pipe(serverToCgi) == -1) {
-		return 502;
-	} else if (pipe(cgiToServer) == -1) {
-		closePipe(serverToCgi);
-		return 502;
-	}
+	pipeTwo(serverToCgi, cgiToServer);
 
 	readfd	= cgiToServer[0];
 	writefd = serverToCgi[1];
 
 	set_fd_nonblocking(readfd);
-	// set_fd_nonblocking(writefd);
+	// set_fd_nonblocking(writefd); // TODO: remove
 
 	pid = fork();
 	switch (pid) {
 		case -1: // failure
+			LOG_ERR("fork: " << strerror(errno));
 			closePipe(serverToCgi);
 			closePipe(cgiToServer);
-			return status;
+			throw 502;
 		case 0: // child
 			close(serverToCgi[1]);
 			close(cgiToServer[0]);
-			if (my_exec(serverToCgi[0], cgiToServer[1], filename, em.toCharpp()) == false)
-				exit(EXIT_FAILURE);
-			break;
-		default: // parent
+			my_exec(serverToCgi[0], cgiToServer[1], filename, em.toCharpp()); // Always exits
+		default:															  // parent
 			close(serverToCgi[0]);
 			close(cgiToServer[1]);
 	}
-
-	return 200;
 }
 
 // TODO: Set correct path
 // TODO: when execution fails, close the pipe or something.
 // TODO: gateway timeout
 // TODO: throw instead of return?
-int CGI::start(const Request& req, const Server *server, const std::string& filename) {
+void CGI::start(const Request& req, const Server *server, const std::string& filename) {
 
 	EnvironmentMap em;
 
@@ -106,5 +114,10 @@ int CGI::start(const Request& req, const Server *server, const std::string& file
 
 	em["UPLOAD_DIR"] = getRealPath("html") + "/uploads/";
 
-	return popen.my_popen(filename, em);
+	popen.my_popen(filename, em);
+}
+
+void Popen::closeFDs() {
+	close(readfd);
+	close(writefd);
 }

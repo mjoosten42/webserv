@@ -42,13 +42,12 @@ std::string trimTrailingWhiteSpace(const std::string& s) {
 // splits a string on whitespace chars.
 std::vector<std::string> stringSplit(const std::string& s) {
 	std::vector<std::string> ret;
-	const std::string		 whitespaceChars = IFS;
+	size_t					 begin = 0;
+	size_t					 end   = 0;
 
-	size_t begin = 0;
-	size_t end	 = 0;
 	while (end != std::string::npos) {
-		begin = s.find_first_not_of(whitespaceChars, end);
-		end	  = s.find_first_of(whitespaceChars, begin);
+		begin = s.find_first_not_of(IFS, end);
+		end	  = s.find_first_of(IFS, begin);
 		if (begin != std::string::npos)
 			ret.push_back(s.substr(begin, end - begin));
 	}

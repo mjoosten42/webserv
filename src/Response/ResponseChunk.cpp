@@ -79,6 +79,7 @@ void Response::handleFile() {
 	if (m_source_fd == -1)
 		return openError(isDirectory);
 
+	m_statusCode = 200;
 	addFileHeaders();
 }
 

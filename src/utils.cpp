@@ -126,7 +126,7 @@ bool isGood(int status) {
 }
 
 std::string getWorkingDir() {
-	char * ret = getcwd(path, PATH_MAX);
+	char *ret = getcwd(path, PATH_MAX);
 
 	if (!ret)
 		LOG_ERR("getcwd: " << strerror(errno));

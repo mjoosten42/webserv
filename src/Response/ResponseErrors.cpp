@@ -10,8 +10,8 @@ void Response::serveError(const std::string& str) {
 void Response::sendFail(int code, const std::string& msg) {
 
 	if (m_server->getErrorPages().find(code) != m_server->getErrorPages().end()) {
-		m_filename		 = m_server->getErrorPages().at(code);
-		m_doneReading	 = false;
+		m_filename	  = m_server->getErrorPages().at(code);
+		m_doneReading = false;
 		handleFile();
 		return;
 	}

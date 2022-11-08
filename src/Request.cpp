@@ -74,26 +74,22 @@ void Request::parse() {
 
 // TODO: unit test this
 void Request::parseStartLine(const std::string& line) {
-	std::istringstream ss(line);
-	std::string		   word;
+	const char *errorMessages[] = {
+		"Missing startline", "Missing location", "Missing HTTP version", "Extra info after HTTP version"
+	};
+	std::vector<std::string> strs = stringSplit(line);
 
-	ss >> word;
-	parseMethod(word);
-	word.clear();
-
-	ss >> word;
-	parseLocation(word);
-	word.clear();
-
-	ss >> word;
-	parseHTTPVersion(word);
-	word.clear();
-
-	ss >> word;
-	if (!word.empty()) {
-		m_errorMsg = "Extra text after HTTP version: " + line;
+	if (strs.size() != 3) {
+		if (strs.size() < 3)
+			m_errorMsg = errorMessages[strs.size()];
+		else
+			m_errorMsg = errorMessages[3];
 		throw 400;
 	}
+
+	parseMethod(strs[0]);
+	parseLocation(strs[1]);
+	parseHTTPVersion(strs[2]);
 }
 
 void Request::parseMethod(const std::string& str) {
@@ -113,11 +109,6 @@ void Request::parseMethod(const std::string& str) {
 void Request::parseLocation(const std::string& str) {
 	size_t pos = str.find('?');
 
-	if (str.empty()) {
-		m_errorMsg = "Missing location: " + str;
-		throw 400;
-	}
-
 	m_location = str.substr(0, pos);
 	if (pos != std::string::npos)
 		m_queryString = str.substr(pos + 1);
@@ -134,11 +125,19 @@ void Request::parseHTTPVersion(const std::string& str) {
 	}
 }
 
+// TODO: header value with whitespace
 void Request::parseHeader(const std::string& line) {
 	std::pair<MapIter, bool>			insert;
 	std::pair<std::string, std::string> header;
 	std::istringstream					ss(line);
 	std::string							word;
+
+	size_t pos = line.find_first_of(IFS);
+	header.first = line.substr(0, pos);
+	pos = line.find_first_not_of(IFS, pos);
+	header.second = line.substr(pos);
+	LOG("first: " << header.first);
+	LOG("second: " << header.second);
 
 	ss >> header.first;
 	ss >> header.second;

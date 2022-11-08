@@ -14,7 +14,6 @@ class Response: public HTTP {
 
 		void processRequest();
 		void initialize();
-		void clear();
 
 		std::string& getNextChunk();
 		void		 trimChunk(ssize_t bytes_sent);
