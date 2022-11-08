@@ -19,7 +19,7 @@
 void Response::processRequest() {
 	initialize();
 
-	if (m_statusCode == 200) {
+	if (isGood(m_statusCode)) {
 		switch (m_request.getMethod()) {
 			case GET:
 				m_isCGI ? handleCGI() : handleFile();
@@ -35,7 +35,7 @@ void Response::processRequest() {
 		}
 	}
 
-	if (m_statusCode != 200 && m_statusCode != 201 && m_statusCode != 301) // TODO: ugly
+	if (!isGood(m_statusCode))
 		serveError(m_request.getErrorMsg());
 
 	if (!m_isCGI)

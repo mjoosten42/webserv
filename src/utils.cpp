@@ -120,3 +120,7 @@ bool isDir(const std::string& path) {
 		perror("closedir");
 	return true;
 }
+
+bool isGood(int status) {
+	return status < 400;
+}

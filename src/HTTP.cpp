@@ -14,14 +14,6 @@ void HTTP::clear() {
 	m_body.clear();
 }
 
-std::string& HTTP::getBody() {
-	return m_body;
-}
-
-const std::string& HTTP::getBody() const {
-	return m_body;
-}
-
 // this function returns a pretty header field. Example: "host" becomes "Host",
 // "transfer-encoding" becomes "Transfer-Encoding". Segfaults if field is empty.
 std::string HTTP::capitalizeFieldPretty(std::string field) {
@@ -71,6 +63,14 @@ bool HTTP::hasHeader(const std::string& field) const {
 
 	strToLower(copy);
 	return m_headers.find(copy) != m_headers.end();
+}
+
+std::string& HTTP::getBody() {
+	return m_body;
+}
+
+const std::string& HTTP::getBody() const {
+	return m_body;
 }
 
 std::string HTTP::getHeaderValue(const std::string& field) const {
