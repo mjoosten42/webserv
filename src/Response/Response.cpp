@@ -59,7 +59,7 @@ void Response::addServer(const Server *server) {
 
 void Response::initialize() {
 	m_locationIndex = m_server->getLocationIndexForAddress(m_request.getLocation());
-	m_filename		= m_server->getRoot(m_locationIndex) + m_request.getLocation();
+	m_filename		= m_server->translateAddressToPath(m_locationIndex, m_request.getLocation());
 
 	setFlags();
 	addDefaultHeaders();

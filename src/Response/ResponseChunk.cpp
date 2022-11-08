@@ -18,6 +18,7 @@
 
 void Response::processRequest() {
 	initialize();
+	LOG("Requested address: " + m_request.getLocation());
 
 	if (isGood(m_statusCode)) {
 		switch (m_request.getMethod()) {
@@ -177,7 +178,7 @@ std::string Response::readBlockFromFile() {
 
 void Response::createIndex(std::string path_to_index) {
 	addHeader("Content-Type", "text/html");
-	addToBody(autoIndexHtml(path_to_index, m_server->getRoot(m_locationIndex)));
+	addToBody(autoIndexHtml(path_to_index, m_request.getLocation()));
 
 	m_doneReading = true;
 	m_statusCode  = 200;

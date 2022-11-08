@@ -4,6 +4,7 @@
 #include "logger.hpp"
 #include "ConfigParser.hpp"
 #include "Server.hpp"
+#include "utils.hpp"
 
 TEST_CASE( "Hosts", "[Server]" ) {
 	ConfigParser config;
@@ -16,11 +17,13 @@ TEST_CASE( "Hosts", "[Server]" ) {
 	int loc_index;
 	std::string test;
 
+	//THESE TESTS NO LONGER WORK AS THE FUNCTION WAS COMMENTED OUT
+
 	// TESTING getLocationIndexForFile
-	loc_index = s.getLocationIndexForFile("amogus.jpg");
-	REQUIRE( loc_index == 1);
-	test = s.getRootForFile(loc_index, "amogus.jpg");
-	REQUIRE( test == "html/img"); //Check loc 1 for file it contains
+	// loc_index = s.getLocationIndexForFile("amogus.jpg");
+	// REQUIRE( loc_index == 1);
+	// test = s.getRootForFile(loc_index, "amogus.jpg");
+	// REQUIRE( test == "html/img"); //Check loc 1 for file it contains
 
 	//THESE TESTS NO LONGER WORK AS THE TEST DIRECOTRY WAS "CLEANED UP":
 
@@ -32,13 +35,15 @@ TEST_CASE( "Hosts", "[Server]" ) {
 	// test = s.getRootForFile(1, "amogus_bogus_file");
 	// REQUIRE( test == "");  //Check loc 1 for file in loc 2
 
-	test = s.getRootForFile(-1, "amogus.jpg");
-	REQUIRE( test == "html/img"); //Check whole server for file in loc 0
+	//THESE TESTS NO LONGER WORK AS THE FUNCTION WAS COMMENTED OUT
 
-	loc_index = s.getLocationIndexForFile("404.html");
-	REQUIRE( loc_index == 0);
-	test = s.getRootForFile(loc_index, "404.html");
-	REQUIRE( test == "html"); // Check for file in server root
+	// test = s.getRootForFile(-1, "amogus.jpg");
+	// REQUIRE( test == "html/img"); //Check whole server for file in loc 0
+
+	// loc_index = s.getLocationIndexForFile("404.html");
+	// REQUIRE( loc_index == 0);
+	// test = s.getRootForFile(loc_index, "404.html");
+	// REQUIRE( test == "html"); // Check for file in server root
 
 	// TESTING getLocationIndexForAddress
 	loc_index = s.getLocationIndexForAddress("/images/amogus.jpg");
@@ -67,4 +72,18 @@ TEST_CASE( "Hosts", "[Server]" ) {
 	test = s.translateAddressToPath(loc_index, "/image/hoi.jopg");
 	REQUIRE( test == "html/image/hoi.jopg");
 
+	std::string ext;
+	
+	ext = "Some test";
+	ext = getExtension(ext);
+	REQUIRE( ext == "");
+	ext = "Test.py";
+	ext = getExtension(ext);
+	REQUIRE( ext == "py");
+	ext = "Test..py";
+	ext = getExtension(ext);
+	REQUIRE( ext == "py");
+	ext = "Test.";
+	ext = getExtension(ext);
+	REQUIRE( ext == "");
 }
