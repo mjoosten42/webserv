@@ -23,10 +23,7 @@ struct Popen {
 
 class CGI {
 	public:
-		bool didExit();
-
 		int start(const Request& request, const Server *server, const std::string& filename);
-		// TODO: how to close readfd?
 
 	public:
 		Popen popen;

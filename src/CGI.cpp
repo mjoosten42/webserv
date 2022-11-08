@@ -25,19 +25,19 @@ static bool my_exec(int infd, int outfd, const std::string& filename, char *cons
 	if (dup2(outfd, STDOUT_FILENO) == -1)
 		return false;
 	close(outfd);
-
-	getcwd(path, PATH_MAX);
-	std::string str = path;
-	str += "/" + filename;
+	
+	std::string str = filename;
 	str.erase(str.find_last_of('/'));
-	if (chdir(str.c_str()) == -1)
-		perror("chdir");
+	if (chdir(str.c_str()) == -1) {
+		LOG_ERR("chdir: " << strerror(errno) << ": " << str);
+		exit(EXIT_FAILURE);
+	}
 
 	std::string copy   = filename.substr(filename.find_last_of('/') + 1);
 	char *const args[] = { const_cast<char *const>(copy.c_str()), NULL };
 
 	execve(copy.c_str(), args, const_cast<char *const *>(envp));
-	perror("execve"); // TODO
+	LOG_ERR("execve: " << strerror(errno) << ": " << filename);
 	return false;
 }
 
@@ -77,24 +77,6 @@ int Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 	}
 
 	return 200;
-}
-
-// returns the status code when the child CGI process has exited. returns -1 on failure or when it hasn't exited yet.
-bool CGI::didExit() {
-
-	int	 stat_loc = 0;
-	int	 status	  = waitpid(popen.pid, &stat_loc, WNOHANG);
-	bool exit	  = false;
-
-	switch (status) {
-		case -1:
-			perror("waitpid");
-		case 0:
-			return -1;
-		default:
-			exit = WIFEXITED(stat_loc);
-	}
-	return exit;
 }
 
 // TODO: Set correct path

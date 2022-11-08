@@ -15,24 +15,24 @@ class Server {
 		Server();
 		Server(t_block_directive *constructor_specs);
 
-		size_t getLocationIndexForFile(const std::string& file_to_find) const;
-		size_t getLocationIndexForAddress(const std::string& address_to_find) const;
+		int getLocationIndexForFile(const std::string& file_to_find) const;
+		int getLocationIndexForAddress(const std::string& address_to_find) const;
 
-		std::string translateAddressToPath(size_t loc_index, const std::string& file_address) const;
+		std::string translateAddressToPath(int loc_index, const std::string& file_address) const;
 
-		// std::string getRootForFile(size_t loc_index, const std::string& file_to_find) const;
-		const std::string			  & getRoot(size_t loc_index) const;
-		const std::string			  & getRoot() const;
-		const std::string			  & getHost() const;
-		const std::string			  & getServerSoftwareName() const;
-		const std::vector<std::string>& getNames() const;
+		const std::string& getRoot(int loc_index) const;
+		const std::string& getRoot() const;
+		const std::string& getHost() const;
+		const std::string& getServerSoftwareName() const;
 
-		size_t							  getCMB() const;
-		short							  getPort() const;
+		const std::vector<std::string>	& getNames() const;
 		const std::map<int, std::string>& getErrorPages() const;
-		bool							  getAutoIndex() const;
 
-		bool isCGI(size_t loc, const std::string& ext) const;
+		size_t getCMB() const;
+		short  getPort() const;
+		bool   getAutoIndex() const;
+
+		bool isCGI(int loc, const std::string& ext) const;
 
 	private:
 		std::vector<Location>	   m_locations;

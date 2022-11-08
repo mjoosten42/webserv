@@ -51,7 +51,7 @@ void HTTP::addHeader(const std::string& field, const std::string& value) {
 
 	if (hasHeader(field)) {
 		LOG_ERR("Overwriting Header: " << field);
-		LOG_ERR("Current headers: " << getHeadersAsString());
+		LOG_ERR("Current headers: {\n" << getHeadersAsString() << "}");
 	}
 
 	strToLower(copy);

@@ -9,7 +9,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-Listener::Listener(): m_fd(-1), m_listenAddr(""), m_port(-1) {}
+Listener::Listener(): m_fd(-1), m_port(-1) {}
 
 Listener::Listener(const std::string& listenAddress, short port): m_fd(-1), m_listenAddr(listenAddress), m_port(port) {
 	setupSocket();

@@ -87,7 +87,7 @@ Server::Server(t_block_directive *constructor_specs) {
 	overwriteIfSpecified("server", m_server_software_name, SERVER_SOFTWARE_DEFAULT_NAME, constructor_specs);
 	//	Nginx default: ""
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
-	//	Nginx default: "html" TODO: absolute
+	//	Nginx default: "html"
 	overwriteIfSpecified("root", m_root, "html", constructor_specs);
 	if (m_root.back() == '/')
 		m_root.pop_back();
@@ -134,15 +134,14 @@ Server::Server(t_block_directive *constructor_specs) {
 //  html/img/amogus.jpg
 //  This function tries to find the longest match between the user defined Address
 //  and the name of one of the containing location blocks.
-size_t Server::getLocationIndexForAddress(const std::string& address) const {
+int Server::getLocationIndexForAddress(const std::string& address) const {
 	size_t ret	   = -1;
 	size_t longest = 0;
 
 	for (size_t i = 0; i < m_locations.size(); i++) {
 
-		const std::string& loc		  = m_locations[i].m_location;
-		std::string		   incase_dir = address + "/";			// I.E. make sure /images matches /images/
-		size_t			   matched	  = match(loc, incase_dir); // Amount of characters matched
+		const std::string& loc	   = m_locations[i].m_location;
+		size_t			   matched = match(loc, address); // Amount of characters matched
 
 		if (matched == loc.length()) { // I.E. make sure /index doesn't match /images
 			if (matched > longest) {
@@ -154,83 +153,28 @@ size_t Server::getLocationIndexForAddress(const std::string& address) const {
 	return (ret);
 }
 
-std::string Server::translateAddressToPath(size_t loc_index, const std::string& file_address) const {
+std::string Server::translateAddressToPath(int loc_index, const std::string& file_address) const {
 	std::string ret;
-	if (loc_index == static_cast<size_t>(-1)) // Should only use this on a location block, not on a server block;
+	if (loc_index == -1) // Should only use this on a location block, not on a server block;
 		ret = m_root + file_address;
-	else {
-		std::vector<Location>::const_iterator loc = m_locations.begin() + loc_index;
-		ret = loc->m_root + "/" + file_address.substr(match(file_address, loc->m_location));
-	}
+	else
+		ret = m_locations[loc_index].m_root + file_address;
 	LOG("Translating ADDRESS \"" + file_address + "\" to PATH \"" + ret + "\"");
 	return (ret);
 }
 
-// This function finds the appropriate Location block for a file
-// if it is present anywhere on the server.
-// It does so without using the Address specified by the user.
-size_t Server::getLocationIndexForFile(const std::string& file_to_find) const {
-	std::string test_path;
-	int			test;
-
-	std::vector<const Location>::iterator l_it = m_locations.begin();
-	for (; l_it != m_locations.end(); ++l_it) {
-		test_path = l_it->m_root;
-		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
-		if (test != -1) {
-			close(test);
-			return l_it - m_locations.begin();
-		}
-	}
-	return (-1); // Not present in any Location blocks, default to parent server settings.
-}
-
-const std::string& Server::getRoot(size_t loc_index) const {
-	if (loc_index == static_cast<size_t>(-1))
+const std::string& Server::getRoot(int loc_index) const {
+	if (loc_index == -1)
 		return m_root;
 	else
 		return m_locations[loc_index].m_root;
 }
 
-/*
-std::string Server::getRootForFile(size_t loc_index, const std::string& file_to_find) const {
-	std::string							  test_path;
-	int									  test;
-	std::vector<const Location>::iterator l_it = m_locations.begin();
-
-	if (loc_index != static_cast<size_t>(-1)) {
-		l_it += loc_index;
-		test_path = l_it->m_root;
-		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
-		if (test != -1) {
-			close(test);
-			return test_path;
-		}
-	} else {
-		for (; l_it != m_locations.end(); ++l_it) {
-			test_path = l_it->m_root;
-			test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
-			if (test != -1) {
-				close(test);
-				return test_path;
-			}
-		}
-		test_path = m_root;
-		test	  = open((test_path + "/" + file_to_find).c_str(), O_RDONLY);
-		if (test != -1) {
-			close(test);
-			return test_path;
-		}
-	}
-	return ("");
-}
-*/
-
-bool Server::isCGI(size_t loc, const std::string& ext) const {
+bool Server::isCGI(int loc, const std::string& ext) const {
 	const std::vector<std::string>			*CGIs;
 	std::vector<std::string>::const_iterator it;
 
-	if (loc == static_cast<size_t>(-1))
+	if (loc == -1)
 		CGIs = &m_CGIs;
 	else
 		CGIs = &m_locations[loc].m_CGIs;

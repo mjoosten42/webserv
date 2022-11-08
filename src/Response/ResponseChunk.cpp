@@ -8,8 +8,7 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
-#include <fcntl.h>	// open
-#include <stdlib.h> // realpath
+#include <fcntl.h> // open
 #include <sys/socket.h>
 
 // GET --> is CGI ? CGI : FILE
@@ -18,7 +17,6 @@
 
 void Response::processRequest() {
 	initialize();
-	LOG("Requested address: " + m_request.getLocation());
 
 	if (isGood(m_statusCode)) {
 		switch (m_request.getMethod()) {
@@ -73,8 +71,7 @@ void Response::handleFile() {
 
 	if (isDirectory) {
 		if (m_filename.back() != '/')
-			// return sendMoved(m_request.getLocation() + "/");
-			m_filename += "/";
+			return sendMoved(m_request.getLocation() + "/");
 		m_filename += "index.html"; // TODO: get from server
 	}
 

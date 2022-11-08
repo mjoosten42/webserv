@@ -62,3 +62,4 @@ size_t		match(const std::string first, const std::string	 &second);
 std::string getExtension(const std::string& filename);
 bool		isDir(const std::string		  &path);
 bool		isGood(int status);
+std::string getWorkingDir();

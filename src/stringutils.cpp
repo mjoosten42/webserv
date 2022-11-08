@@ -32,7 +32,8 @@ unsigned int countAndTrimLeadingWhiteSpace(std::string& s) {
 
 std::string trimTrailingWhiteSpace(const std::string& s) {
 	size_t		end = s.find_last_not_of(IFS);
-	std::string ret = "";
+	std::string ret;
+
 	if (end != std::string::npos)
 		ret = s.substr(0, end + 1);
 	return (ret);

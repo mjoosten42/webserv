@@ -124,3 +124,11 @@ bool isDir(const std::string& path) {
 bool isGood(int status) {
 	return status < 400;
 }
+
+std::string getWorkingDir() {
+	char * ret = getcwd(path, PATH_MAX);
+
+	if (!ret)
+		LOG_ERR("getcwd: " << strerror(errno));
+	return path;
+}

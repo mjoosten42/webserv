@@ -23,6 +23,7 @@ int Connection::receiveFromClient(short& events) {
 		case -1:
 			perror("recv");
 		case 0:
+			m_close = true;
 			break;
 		default:
 
@@ -80,7 +81,7 @@ int Connection::sendToClient(short& events) {
 
 			response.trimChunk(bytes_sent);
 			if (response.isDone()) {
-				m_close	  = response.wantsClose();
+				m_close |= response.wantsClose();
 				source_fd = response.getSourceFD();
 				m_responses.pop();
 			} else if (!response.hasSourceFd())

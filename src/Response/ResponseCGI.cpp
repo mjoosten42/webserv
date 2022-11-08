@@ -4,6 +4,7 @@
 #include "utils.hpp" // fatal_perror
 
 #include <string>
+#include <fcntl.h> // open
 #include <unistd.h> // write
 
 void Response::handleCGI() {
@@ -11,7 +12,7 @@ void Response::handleCGI() {
 
 	m_statusCode = m_cgi.start(m_request, m_server, m_filename);
 
-	if (m_statusCode == 200) {
+	if (isGood(m_statusCode)) {
 		if (m_request.getMethod() == POST)
 			m_statusCode = 201;
 		addHeader("Transfer-Encoding", "Chunked");
@@ -20,7 +21,7 @@ void Response::handleCGI() {
 
 		m_chunk = getStatusLine() + getHeadersAsString();
 	} else {
-
+		serveError("CGI broke");
 	} // TODO
 }
 

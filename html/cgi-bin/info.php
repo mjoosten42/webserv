@@ -6,6 +6,6 @@
 	// exit;
 	print("\n");
 
-	print("Current dir: " . getcwd());
-	phpinfo(INFO_ALL);
+	print("Current dir: " . getcwd() . "\n");
+	// phpinfo(INFO_ENVIRONMENT);
 ?>

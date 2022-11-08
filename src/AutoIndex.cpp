@@ -72,7 +72,7 @@ std::string autoIndexHtml(std::string dir_path,
 	for (; cp_it != content_paths.end(); cp_it++) {
 		std::string file_address = address + *cp_it;
 		ret += "<li><a href=\"" + file_address + "\">";
-		std::string	 file_name = file_address.substr(address.length()); 
+		std::string	 file_name = file_address.substr(address.length());
 		unsigned int tabs	   = 0;
 		while (file_name.find('/') != std::string::npos) {
 			file_name = file_name.substr(file_name.find('/') + 1);
