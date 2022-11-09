@@ -74,8 +74,8 @@ std::string getRealPath(const std::string& str) {
 	char *ret = realpath(str.c_str(), path);
 
 	if (!ret) {
-		LOG_ERR("realpath: " << str << ": " << strerror(errno));
-		return "";
+		LOG_ERR("realpath: " << strerror(errno) << ": " << str);
+		throw 404;
 	}
 	return path;
 }
@@ -85,7 +85,7 @@ off_t fileSize(int fd) {
 
 	if (size == -1) {
 		LOG_ERR("lseek: " << strerror(errno));
-		size = std::numeric_limits<off_t>().max();
+		throw 500;
 	}
 	lseek(fd, 0, SEEK_SET); // set back to start
 

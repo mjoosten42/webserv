@@ -28,7 +28,7 @@ static void pipeTwo(int serverToCgi[2], int CgiToServer[2]) {
 
 static void dupTwo(int in_fd, int out_fd) {
 	if (dup2(in_fd, STDIN_FILENO) == -1)
-		throw 502;
+		exit(EXIT_FAILURE);
 	close(in_fd);
 
 	if (dup2(out_fd, STDOUT_FILENO) == -1) {
@@ -57,6 +57,11 @@ static void my_exec(int infd, int outfd, const std::string& filename, char *cons
 	exit(EXIT_FAILURE);
 }
 
+void Popen::closeFDs() {
+	close(readfd);
+	close(writefd);
+}
+
 // back to minishell ayy
 void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 	int serverToCgi[2];
@@ -68,7 +73,7 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 	writefd = serverToCgi[1];
 
 	set_fd_nonblocking(readfd);
-	// set_fd_nonblocking(writefd); // TODO: remove
+	set_fd_nonblocking(writefd); // TODO
 
 	pid = fork();
 	switch (pid) {
@@ -80,8 +85,8 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 		case 0: // child
 			close(serverToCgi[1]);
 			close(cgiToServer[0]);
-			my_exec(serverToCgi[0], cgiToServer[1], filename, em.toCharpp()); // Always exits
-		default:															  // parent
+			my_exec(serverToCgi[0], cgiToServer[1], filename, em.toCharpp());
+		default: // parent
 			close(serverToCgi[0]);
 			close(cgiToServer[1]);
 	}
@@ -89,8 +94,6 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 
 // TODO: Set correct path
 // TODO: when execution fails, close the pipe or something.
-// TODO: gateway timeout
-// TODO: throw instead of return?
 void CGI::start(const Request& req, const Server *server, const std::string& filename) {
 
 	EnvironmentMap em;
@@ -115,9 +118,4 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 	em["UPLOAD_DIR"] = getRealPath("html") + "/uploads/";
 
 	popen.my_popen(filename, em);
-}
-
-void Popen::closeFDs() {
-	close(readfd);
-	close(writefd);
 }

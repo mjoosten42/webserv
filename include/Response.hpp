@@ -39,12 +39,13 @@ class Response: public HTTP {
 		void handleCGI();
 		void handleDelete();
 
-		void		openError(bool isDirectory);
-		void		addFileHeaders();
-		void		getCGIHeaderChunk();
-		void		encodeChunked(std::string		&str);
-		std::string getLine(std::string& str);
+		void openError(const std::string& dir, bool isDirectory);
 
+		void addFileHeaders();
+		void getCGIHeaderChunk();
+		void encodeChunked(std::string& str);
+
+		std::string getLine(std::string& str);
 		std::string readBlockFromFile();
 
 		void serveError(const std::string& str);

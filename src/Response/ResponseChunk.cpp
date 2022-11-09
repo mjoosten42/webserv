@@ -16,9 +16,14 @@
 // DELETE --> unlink
 
 void Response::processRequest() {
+	m_processedRequest = true;
+
 	initialize();
 
-	if (isGood(m_statusCode)) {
+	if (!isGood(m_request.getStatus()))
+		return serveError(m_request.getErrorMsg());
+
+	try {
 		switch (m_request.getMethod()) {
 			case GET:
 				m_isCGI ? handleCGI() : handleFile();
@@ -32,40 +37,34 @@ void Response::processRequest() {
 			default:
 				LOG_ERR("Invalid method");
 		}
+	} catch (int error) {
+		m_statusCode = error;
+		serveError(getStatusMessage());
 	}
-
-	if (!isGood(m_statusCode))
-		serveError(m_request.getErrorMsg());
-
-	if (!m_isCGI)
-		m_chunk = getResponseAsString();
 }
 
 void Response::handleDelete() {
-	std::string absolute = getRealPath(m_filename);
-
 	LOG(RED "Handle Delete: " DEFAULT + m_filename);
 
-	if (absolute.empty()) {
-		m_statusCode = 404;
-		return;
-	}
+	std::string absolute = getRealPath(m_filename);
 
 	m_doneReading = true;
 
 	if (unlink(absolute.c_str()) == -1) {
-		LOG_ERR("unlink: " << absolute << ": " << strerror(errno));
+		LOG_ERR("unlink: " << strerror(errno) << ": " << absolute);
 		if (errno == EACCES)
-			m_statusCode = 403;
+			throw 403;
 		else
-			m_statusCode = 404;
+			throw 404;
 	}
 
 	m_statusCode = 204;
+	m_chunk		 = getResponseAsString();
 }
 
 void Response::handleFile() {
-	bool isDirectory = isDir(m_filename);
+	std::string originalFile = m_filename;
+	bool		isDirectory	 = isDir(m_filename);
 
 	LOG(RED "Get: File: " DEFAULT + m_filename);
 
@@ -77,28 +76,27 @@ void Response::handleFile() {
 
 	m_source_fd = open(m_filename.c_str(), O_RDONLY);
 	if (m_source_fd == -1)
-		return openError(isDirectory);
+		return openError(originalFile, isDirectory);
 
-	m_statusCode = 200;
 	addFileHeaders();
+	m_statusCode = 200;
+	m_chunk		 = getResponseAsString();
 }
 
-void Response::openError(bool isDirectory) {
+void Response::openError(const std::string& dir, bool isDirectory) {
 	bool autoIndex = m_server->getAutoIndex();
 
-	perror("open"); // TODO
+	LOG_ERR("open: " << strerror(errno) << ": " << m_filename);
 	switch (errno) {
 		case EACCES:
-			m_statusCode = 403;
-			break;
+			throw 403;
 		case ENOENT:
 		case ENOTDIR:
-			m_statusCode = 404;
 			if (isDirectory && autoIndex)
-				createIndex(m_filename.substr(0, m_filename.find("index.html")));
-			break;
+				return createIndex(dir);
+			throw 404;
 		default:
-			m_statusCode = 500;
+			throw 500;
 	}
 }
 
@@ -176,8 +174,10 @@ std::string Response::readBlockFromFile() {
 
 void Response::createIndex(std::string path_to_index) {
 	addHeader("Content-Type", "text/html");
-	addToBody(autoIndexHtml(path_to_index, m_request.getLocation()));
+	addToBody(autoIndexHtml(path_to_index));
 
 	m_doneReading = true;
 	m_statusCode  = 200;
+
+	m_chunk = getResponseAsString();
 }

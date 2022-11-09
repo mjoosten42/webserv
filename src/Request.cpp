@@ -17,17 +17,23 @@ bool isSupportedMethod(methods method);
 bool containsNewline(const std::string& str);
 
 Request::Request():
-	m_state(STARTLINE), m_method(static_cast<methods>(-1)), m_contentLength(0), m_bodyTotal(0), m_processed(false) {}
+	m_state(STARTLINE),
+	m_method(static_cast<methods>(-1)),
+	m_contentLength(0),
+	m_bodyTotal(0),
+	m_processed(false),
+	m_status(0) {}
 
 void Request::append(const char *buf, ssize_t size) {
 	m_saved.append(buf, size);
 
 	try {
 		parse();
-	} catch (int status) {
+		m_status = 200;
+	} catch (int error) {
 		m_state = DONE;
 		LOG_ERR(m_errorMsg);
-		throw;
+		m_status = error;
 	}
 }
 
@@ -219,6 +225,10 @@ size_t Request::getBodyTotal() const {
 	return m_bodyTotal;
 }
 
+int Request::getStatus() const {
+	return m_status;
+}
+
 std::string Request::getMethodAsString() const {
 	switch (m_method) {
 		case GET:
@@ -250,10 +260,11 @@ std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << RED "Method: " DEFAULT << request.getMethodAsString() << std::endl;
 	os << RED "Location: " DEFAULT << request.getLocation() << std::endl;
 	// os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
-	os << RED "Headers: {\n" DEFAULT << request.getHeadersAsString() << RED << "}\n";
+	// os << RED "Headers: {\n" DEFAULT << request.getHeadersAsString() << RED << "}\n";
 	os << RED "Host: " DEFAULT << request.getHost() << std::endl;
 	os << RED "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
 	// os << RED "Body: " DEFAULT << request.getBody() << std::endl;
-	os << RED "Body total: " DEFAULT << request.getBodyTotal();
+	os << RED "Body total: " DEFAULT << request.getBodyTotal() << std::endl;
+	os << RED "Status: " DEFAULT << request.getStatus();
 	return os;
 }

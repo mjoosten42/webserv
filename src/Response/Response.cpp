@@ -44,8 +44,9 @@ void Response::addServer(const Server *server) {
 }
 
 void Response::initialize() {
-	m_locationIndex = m_server->getLocationIndexForAddress(m_request.getLocation());
+	m_locationIndex = m_server->getLocationIndex(m_request.getLocation());
 	m_filename		= m_server->translateAddressToPath(m_locationIndex, m_request.getLocation());
+	m_statusCode	= m_request.getStatus();
 
 	setFlags();
 	addDefaultHeaders();
@@ -54,8 +55,6 @@ void Response::initialize() {
 // Set to true if applicable
 void Response::setFlags() {
 	std::string ext = getExtension(m_request.getLocation());
-
-	m_processedRequest = true;
 
 	m_isCGI = m_server->isCGI(m_locationIndex, ext);
 	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI

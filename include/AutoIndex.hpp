@@ -4,12 +4,13 @@
 #include <string>
 #include <vector>
 
-unsigned int recursiveFileCount(const std::string		  directory,
-								std::vector<std::string>& file_structure,
-								std::string				  tabulation = "");
+struct Entry {
+		std::string		   name;
+		std::vector<Entry> subdir;
 
-unsigned int recursivePathCount(const std::string		  directory,
-								std::vector<std::string>& file_structure,
-								std::string				  tabulation = "");
+		std::string toString() const;
+};
 
-std::string autoIndexHtml(std::string absolute_dir_path, std::string root);
+std::string		   basename(const std::string		&path);
+std::string		   autoIndexHtml(std::string absolute_dir_path);
+std::vector<Entry> recursivePathCount(const std::string directory);

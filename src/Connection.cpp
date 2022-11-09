@@ -21,7 +21,7 @@ int Connection::receiveFromClient(short& events) {
 	LOG(RED "Received: " DEFAULT << bytes_received);
 	switch (bytes_received) {
 		case -1:
-			perror("recv");
+			LOG_ERR("recv: " << strerror(errno) << ": " << m_fd);
 		case 0:
 			m_close = true;
 			break;
@@ -34,17 +34,13 @@ int Connection::receiveFromClient(short& events) {
 			Response& response = getLastResponse();
 			Request & request  = response.getRequest();
 
-			try {
-				request.append(buf, bytes_received);
-			} catch (int error) {
-				response.m_statusCode = error;
-			}
+			request.append(buf, bytes_received);
 
 			LOG(request);
 
 			if (request.getState() == BODY || request.getState() == DONE) {
 				if (!response.hasProcessedRequest()) { // Do once
-					response.addServer(&(m_listener->getServerByHost(request.getHost())));
+					response.addServer(&m_listener->getServerByHost(request.getHost()));
 					response.processRequest();
 
 					if (response.hasSourceFd())
@@ -67,7 +63,6 @@ int Connection::sendToClient(short& events) {
 	int			 source_fd	= -1;
 
 	LOG(RED "Send: " DEFAULT << bytes_sent);
-
 	switch (bytes_sent) {
 		case -1:
 			perror("send");

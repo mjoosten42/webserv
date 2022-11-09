@@ -134,7 +134,7 @@ Server::Server(t_block_directive *constructor_specs) {
 //  html/img/amogus.jpg
 //  This function tries to find the longest match between the user defined Address
 //  and the name of one of the containing location blocks.
-int Server::getLocationIndexForAddress(const std::string& address) const {
+int Server::getLocationIndex(const std::string& address) const {
 	size_t ret	   = -1;
 	size_t longest = 0;
 

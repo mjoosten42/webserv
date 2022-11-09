@@ -2,88 +2,67 @@
 
 #include "logger.hpp"
 #include "stringutils.hpp"
+#include "utils.hpp"
 
-// TODO: Still need to fix the behaviour when a directory is selected in the auto indexing.
-
-// Returns the number of files and directories in the specified directory recursively.
-// Stores the names of all files and directories in a string vector it is passed as a param.
-// These stored names have leading tabs to indicate directory structure.
-unsigned int
-	recursiveFileCount(const std::string directory, std::vector<std::string>& file_structure, std::string tabulation) {
-	DIR			*derp; // DirEctoRy Pointer
-	unsigned int ret = 0;
+std::vector<Entry> recursivePathCount(const std::string directory) {
+	std::vector<Entry> paths;
+	Entry			   entry;
+	std::string		   name;
+	DIR				  *derp; // DirEctoRy Pointer
+	struct dirent	  *contents;
 
 	derp = opendir(directory.c_str());
 	if (derp == NULL)
-		return (ret);
-	struct dirent *contents;
+		return (paths);
 	while ((contents = readdir(derp)) != NULL) {
-		std::string name = contents->d_name;
-		if (name != "." && name != "..") {
-			file_structure.push_back(tabulation + name);
-			ret++;
-			std::string next_dir = directory + "/" + name;
-			ret					 = ret + recursiveFileCount(next_dir, file_structure, tabulation + "\t");
+		name = contents->d_name;
+		if (name.back() == '.') // Skip current, up and hidden
+			continue;
+		entry.name = name;
+		if (contents->d_type == DT_DIR) {
+			entry.name += "/";
+			entry.subdir = recursivePathCount(directory + entry.name);
 		}
+		paths.push_back(entry);
+		entry.subdir.clear();
 	}
 	closedir(derp);
-	return (ret);
-}
-
-// Same as the above, except it saves a vector of paths relative to the site's root.
-unsigned int
-	recursivePathCount(const std::string directory, std::vector<std::string>& file_structure, std::string tabulation) {
-	DIR			*derp; // DirEctoRy Pointer
-	unsigned int ret = 0;
-
-	derp = opendir(directory.c_str());
-	if (derp == NULL)
-		return (ret);
-	struct dirent *contents;
-	while ((contents = readdir(derp)) != NULL) {
-		std::string name = contents->d_name;
-		if (name != "." && name != "..") {
-			file_structure.push_back(tabulation + name);
-			ret++;
-			std::string next_dir = directory + "/" + name;
-			ret					 = ret + recursivePathCount(next_dir, file_structure, tabulation + name + "/");
-		}
-	}
-	closedir(derp);
-	return (ret);
+	return paths;
 }
 
 //	Returns as a string the html body of a Response that indexes all files and sub directories of a given dir.
 //	Params: the 'dir_path' passed must be a path from, and including, the server's root directory.
-//	Params: the 'root' passed must be the root of the server that we are indexing relative to.
-std::string autoIndexHtml(std::string dir_path,
-						  std::string address) { // TODO: need to write a pathToAddress translator to fix this mess
+std::string autoIndexHtml(std::string dir_path) {
 	LOG("AutoIndexing...");
 
-	std::vector<std::string> content_paths;
-	recursivePathCount(dir_path, content_paths);
-	std::vector<std::string>::iterator cp_it = content_paths.begin();
+	std::vector<Entry> content_paths = recursivePathCount(dir_path);
+	std::string		   ret			 = "<h1> Index of directory: </h1>\n<ul>";
 
-	std::string ret = "<h1> Index of directory: </h1>\n";
-	ret += "<ul>";
+	for (size_t i = 0; i < content_paths.size(); i++)
+		ret += content_paths[i].toString();
 
-	if (address.back() != '/')
-		address.push_back('/');
-	for (; cp_it != content_paths.end(); cp_it++) {
-		std::string file_address = address + *cp_it;
-		ret += "<li><a href=\"" + file_address + "\">";
-		std::string	 file_name = file_address.substr(address.length());
-		unsigned int tabs	   = 0;
-		while (file_name.find('/') != std::string::npos) {
-			file_name = file_name.substr(file_name.find('/') + 1);
-			ret += "<ul>";
-			tabs++;
-		}
-		ret = ret + file_name;
-		for (unsigned int i = 0; i < tabs; i++)
-			ret = ret + "</ul>";
-		ret += "</a></li>\n";
+	return ret;
+}
+
+std::string Entry::toString() const {
+	std::string ret = "<li>";
+
+	ret += "<a href=\"" + name + "\">" + name + "</a>\n";
+
+	if (!subdir.empty()) {
+		ret += "<ul>\n";
+		for (size_t i = 0; i < subdir.size(); i++)
+			ret += subdir[i].toString();
+		ret += "</ul>\n";
 	}
-	ret += "</ul>\n";
-	return (ret);
+
+	return ret + "</li>";
+}
+
+std::string basename(const std::string& path) {
+	size_t pos = path.find_last_of("/");
+
+	if (pos != std::string::npos)
+		return path.substr(pos);
+	return path;
 }

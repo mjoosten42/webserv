@@ -15,8 +15,7 @@ class Server {
 		Server();
 		Server(t_block_directive *constructor_specs);
 
-		int getLocationIndexForFile(const std::string& file_to_find) const;
-		int getLocationIndexForAddress(const std::string& address_to_find) const;
+		int getLocationIndex(const std::string& address_to_find) const;
 
 		std::string translateAddressToPath(int loc_index, const std::string& file_address) const;
 

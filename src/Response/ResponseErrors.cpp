@@ -24,16 +24,19 @@ void Response::sendFail(int code, const std::string& msg) {
 	addToBody("<title>" + toString(code) + " " + getStatusMessage() + "</title></head>");
 	addToBody("<body><h1>" + toString(code) + " " + getStatusMessage() + "</h1>\r\n");
 	addToBody("<p>oops something went wrong: <b>" + msg + "</b></p></body></html>\r\n");
+
+	m_chunk = getResponseAsString();
 }
 
 void Response::sendMoved(const std::string& location) {
 	m_statusCode  = 301;
 	m_doneReading = true;
 
-	// clear(); // <!-- TODO, also add default server
 	addHeader("Location", location);
 	addHeader("Content-Type", "text/html");
 
 	addToBody("<h1>" + toString(m_statusCode) + " " + getStatusMessage() + "</h1>\r\n");
 	addToBody("<p>The resource has been moved to <a href=\"" + location + "\">" + location + "</a>.</p>");
+
+	m_chunk = getResponseAsString();
 }

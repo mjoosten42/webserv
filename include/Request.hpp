@@ -23,6 +23,7 @@ class Request: public HTTP {
 		size_t			   getContentLength() const;
 		size_t			   getBodyTotal() const;
 		const std::string& getErrorMsg() const;
+		int				   getStatus() const;
 
 		std::string getStateAsString() const;
 		std::string getMethodAsString() const;
@@ -51,6 +52,7 @@ class Request: public HTTP {
 		size_t		m_contentLength;
 		size_t		m_bodyTotal;
 		bool		m_processed;
+		int			m_status;
 
 		std::string m_errorMsg;
 };
