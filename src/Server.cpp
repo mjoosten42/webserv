@@ -18,6 +18,7 @@ Server::Server() {
 	m_root				   = "html";
 	m_client_max_body_size = 0;
 	m_autoindex			   = false;
+	m_indexPage			   = "index.html";
 
 	m_locations.push_back(Location());
 }
@@ -96,6 +97,8 @@ Server::Server(t_block_directive *constructor_specs) {
 	//	Nginx default: false (serve 404 error when navigating ot directory without index.html)
 	overwriteIfSpecified("autoindex", m_autoindex, false, "on", constructor_specs);
 
+	overwriteIfSpecified("index", m_indexPage, "index.html", constructor_specs);
+
 	// Default error pages are built in, here the user can define their own.
 	std::vector<std::string> pages;
 	overwriteIfSpecified("error_page", pages, "", constructor_specs);
@@ -163,13 +166,6 @@ std::string Server::translateAddressToPath(int loc_index, const std::string& fil
 	return (ret);
 }
 
-const std::string& Server::getRoot(int loc_index) const {
-	if (loc_index == -1)
-		return m_root;
-	else
-		return m_locations[loc_index].m_root;
-}
-
 bool Server::isCGI(int loc, const std::string& ext) const {
 	const std::vector<std::string>			*CGIs;
 	std::vector<std::string>::const_iterator it;
@@ -190,8 +186,11 @@ const std::string& Server::getHost() const {
 	return m_host;
 }
 
-const std::string& Server::getRoot() const {
-	return m_root;
+const std::string& Server::getRoot(int loc_index) const {
+	if (loc_index == -1)
+		return m_root;
+	else
+		return m_locations[loc_index].m_root;
 }
 
 const std::string& Server::getServerSoftwareName() const {
@@ -216,6 +215,13 @@ const std::map<int, std::string>& Server::getErrorPages() const {
 
 bool Server::getAutoIndex() const {
 	return m_autoindex;
+}
+
+const std::string& Server::getIndexPage(int loc_index) const {
+	if (loc_index == -1)
+		return m_indexPage;
+	else
+		return m_locations[loc_index].m_indexPage;
 }
 
 #pragma endregion

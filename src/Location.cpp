@@ -5,10 +5,13 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
-Location::Location(): m_location("/"), m_client_max_body_size(-1), m_root("html") {}
+Location::Location(): m_location("/"), m_client_max_body_size(-1), m_root("html"), m_indexPage("index.html") {}
 
 Location::Location(t_block_directive *constructor_specs, Server *parent):
-	m_location("/"), m_client_max_body_size(parent->getCMB()), m_root(parent->getRoot()) {
+	m_location("/"),
+	m_client_max_body_size(parent->getCMB()),
+	m_root(parent->getRoot()),
+	m_indexPage(parent->getIndexPage()) {
 
 	std::string val_from_config;
 
@@ -30,6 +33,10 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	val_from_config = constructor_specs->fetch_simple("autoindex");
 	if (!val_from_config.empty())
 		m_auto_index = (val_from_config == "on" ? true : false);
+
+	val_from_config = constructor_specs->fetch_simple("index");
+	if (!val_from_config.empty())
+		m_indexPage = val_from_config;
 
 	val_from_config = constructor_specs->fetch_simple("root");
 	if (!val_from_config.empty())

@@ -20,4 +20,5 @@ class Location {
 		std::string				 m_redirect;	 // return 301 $URI
 		bool					 m_auto_index;
 		std::string				 m_root;
+		std::string				 m_indexPage;
 };

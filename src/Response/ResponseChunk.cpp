@@ -71,7 +71,8 @@ void Response::handleFile() {
 	if (isDirectory) {
 		if (m_filename.back() != '/')
 			return sendMoved(m_request.getLocation() + "/");
-		m_filename += "index.html"; // TODO: get from server
+		m_filename += m_server->getIndexPage(m_locationIndex);
+		LOG("index at: " + m_filename);
 	}
 
 	m_source_fd = open(m_filename.c_str(), O_RDONLY);
@@ -93,7 +94,7 @@ void Response::openError(const std::string& dir, bool isDirectory) {
 			throw 403;
 		case ENOENT:
 		case ENOTDIR:
-			if (isDirectory && autoIndex)
+			if (isDirectory && autoIndex && m_server->getIndexPage(m_locationIndex) == "index.html") // TODO: if auto-indexing is on and the custom index page is specified but missing, do we return 404, or do we default to auto indexing?
 				return createIndex(dir);
 			throw 404;
 		default:

@@ -19,10 +19,10 @@ class Server {
 
 		std::string translateAddressToPath(int loc_index, const std::string& file_address) const;
 
-		const std::string& getRoot(int loc_index) const;
-		const std::string& getRoot() const;
+		const std::string& getRoot(int loc_index = -1) const;
 		const std::string& getHost() const;
 		const std::string& getServerSoftwareName() const;
+		const std::string& getIndexPage(int loc_index = -1) const;
 
 		const std::vector<std::string>	& getNames() const;
 		const std::map<int, std::string>& getErrorPages() const;
@@ -44,4 +44,5 @@ class Server {
 		std::map<int, std::string> m_error_page;
 		size_t					   m_client_max_body_size;
 		bool					   m_autoindex;
+		std::string				   m_indexPage;
 };
