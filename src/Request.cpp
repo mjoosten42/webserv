@@ -193,6 +193,8 @@ std::string Request::getNextLine() {
 	return line;
 }
 
+#pragma region accessors
+
 const std::string& Request::getLocation() const {
 	return m_location;
 }
@@ -254,6 +256,8 @@ std::string Request::getStateAsString() const {
 			return "DONE";
 	}
 }
+
+#pragma endregion
 
 std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << RED "State: " DEFAULT << request.getStateAsString() << std::endl;

@@ -12,4 +12,3 @@ struct Entry {
 };
 
 std::vector<Entry> recursivePathCount(const std::string directory);
-

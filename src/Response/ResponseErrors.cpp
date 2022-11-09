@@ -1,7 +1,7 @@
 #include "Response.hpp"
 #include "Server.hpp"
-#include "utils.hpp"
 #include "defines.hpp"
+#include "utils.hpp"
 
 void Response::serveError(const std::string& str) {
 	m_isCGI = false; // when we have an error, the CGI is no longer active.
