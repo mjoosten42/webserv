@@ -77,6 +77,7 @@ void Response::handleFile() {
 	m_source_fd = open(m_filename.c_str(), O_RDONLY);
 	if (m_source_fd == -1)
 		return openError(originalFile, isDirectory);
+	LOG("Opened " << m_source_fd);
 
 	addFileHeaders();
 	m_statusCode = 200;
@@ -157,7 +158,7 @@ std::string Response::readBlockFromFile() {
 	LOG(RED "Read: " DEFAULT << bytes_read);
 	switch (bytes_read) {
 		case -1:
-			perror("read");
+			LOG_ERR("read: " << strerror(errno) << ": " << m_source_fd);
 		case 0:
 			m_doneReading = true;
 			close(m_source_fd);
@@ -176,6 +177,7 @@ void Response::createIndex(std::string path_to_index) {
 	Entry entry = { m_request.getLocation(), recursivePathCount(path_to_index) };
 
 	addHeader("Content-Type", "text/html");
+
 	addToBody("<h1> Index of directory: " + entry.name + "</h1>\n<ul>");
 
 	for (size_t i = 0; i < entry.subdir.size(); i++)

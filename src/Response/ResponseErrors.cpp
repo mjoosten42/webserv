@@ -1,6 +1,7 @@
 #include "Response.hpp"
 #include "Server.hpp"
 #include "utils.hpp"
+#include "defines.hpp"
 
 void Response::serveError(const std::string& str) {
 	m_isCGI = false; // when we have an error, the CGI is no longer active.
@@ -22,8 +23,8 @@ void Response::sendFail(int code, const std::string& msg) {
 
 	addToBody("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>");
 	addToBody("<title>" + toString(code) + " " + getStatusMessage() + "</title></head>");
-	addToBody("<body><h1>" + toString(code) + " " + getStatusMessage() + "</h1>\r\n");
-	addToBody("<p>oops something went wrong: <b>" + msg + "</b></p></body></html>\r\n");
+	addToBody("<body><h1>" + toString(code) + " " + getStatusMessage() + "</h1>" CRLF);
+	addToBody("<p>oops something went wrong: <b>" + msg + "</b></p></body></html>" CRLF);
 
 	m_chunk = getResponseAsString();
 }
@@ -35,8 +36,8 @@ void Response::sendMoved(const std::string& location) {
 	addHeader("Location", location);
 	addHeader("Content-Type", "text/html");
 
-	addToBody("<h1>" + toString(m_statusCode) + " " + getStatusMessage() + "</h1>\r\n");
-	addToBody("<p>The resource has been moved to <a href=\"" + location + "\">" + location + "</a>.</p>");
+	addToBody("<h1>" + toString(m_statusCode) + " " + getStatusMessage() + "</h1>" CRLF);
+	addToBody("<p>The resource has been moved to <a href=\"" + location + "\">" + location + "</a>.</p>" CRLF);
 
 	m_chunk = getResponseAsString();
 }

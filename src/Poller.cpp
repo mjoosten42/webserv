@@ -17,7 +17,7 @@ void Poller::start() {
 
 		LOG(RED << std::string(winSize(), '#') << DEFAULT);
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
-		// LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
+		LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 
 		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
 		switch (poll_status) {
@@ -112,9 +112,10 @@ void Poller::pollOut(pollfd& client) {
 // Close and remove client
 void Poller::pollHup(pollfd& client) {
 	std::vector<int> sourcefds = m_sources.getSourceFds(client.fd); // get all source fds dependent on client fd
+	int source_fd;
 
 	for (size_t i = 0; i < sourcefds.size(); i++) {
-		int source_fd = sourcefds[i];
+		source_fd = sourcefds[i];
 		if (close(source_fd) == -1)
 			LOG_ERR("close: " << strerror(errno) << source_fd);
 		m_sources.remove(source_fd);
@@ -144,7 +145,7 @@ void Poller::removeClient(int client_fd) {
 	m_connections.erase(client_fd);	  // erase from connection map
 
 	if (close(client_fd) == -1) // close connection
-		fatal_perror("close");
+		LOG_ERR("close: " << strerror(errno) << ": " << client_fd);
 
 	LOG(RED "CLIENT " DEFAULT << client_fd << RED " LEFT" DEFAULT);
 }

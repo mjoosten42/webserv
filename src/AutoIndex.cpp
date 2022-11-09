@@ -31,7 +31,7 @@ std::vector<Entry> recursivePathCount(const std::string directory) {
 }
 
 std::string Entry::toString(const std::string& path) const {
-	std::string ret = "<li>";
+	std::string ret = "<li>\n";
 
 	ret += "<a href=\"" + path + name + "\">" + basename(name) + "</a>\n";
 	if (!subdir.empty()) {
@@ -40,18 +40,5 @@ std::string Entry::toString(const std::string& path) const {
 			ret += subdir[i].toString(path + name);
 		ret += "</ul>\n";
 	}
-	return ret + "</li>";
-}
-
-std::string basename(const std::string& path) {
-	std::string base = path;
-
-	if (base.back() == '/')
-		base.pop_back();
-
-	size_t pos = base.find_last_of("/");
-
-	if (pos != std::string::npos)
-		return base.substr(pos);
-	return path;
+	return ret + "</li>\n";
 }

@@ -63,3 +63,4 @@ std::string getExtension(const std::string& filename);
 bool		isDir(const std::string		  &path);
 bool		isGood(int status);
 std::string getWorkingDir();
+std::string basename(const std::string& path);

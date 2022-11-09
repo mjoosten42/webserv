@@ -69,7 +69,7 @@ format: files
 	clang-format -i $(SOURCES) $(HEADERS)
 
 siege:
-	siege -R siege.conf
+	siege -iR siege.conf
 
 lsof:
 	lsof -c webserv | tail +8

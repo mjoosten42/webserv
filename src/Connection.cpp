@@ -27,16 +27,16 @@ int Connection::receiveFromClient(short& events) {
 			break;
 		default:
 
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-			// LOG(std::string(buf, bytes_received));
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			LOG(std::string(buf, bytes_received));
+			LOG(RED << std::string(winSize(), '-') << DEFAULT);
 
 			Response& response = getLastResponse();
 			Request & request  = response.getRequest();
 
 			request.append(buf, bytes_received);
 
-			// LOG(request);
+			LOG(request);
 
 			if (request.getState() == BODY || request.getState() == DONE) {
 				if (!response.hasProcessedRequest()) { // Do once
@@ -65,13 +65,13 @@ int Connection::sendToClient(short& events) {
 	LOG(RED "Send: " DEFAULT << bytes_sent);
 	switch (bytes_sent) {
 		case -1:
-			perror("send");
+			LOG_ERR("send: " << strerror(errno) << ": " << m_fd);
 			m_close = true;
 			break;
 		default:
 
 			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-			// LOG(str.substr(0, bytes_sent));
+			// LOG(chunk.substr(0, bytes_sent));
 			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
 
 			response.trimChunk(bytes_sent);

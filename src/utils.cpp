@@ -132,3 +132,16 @@ std::string getWorkingDir() {
 		LOG_ERR("getcwd: " << strerror(errno));
 	return path;
 }
+
+std::string basename(const std::string& path) {
+	std::string base = path;
+
+	if (base.back() == '/')
+		base.pop_back();
+
+	size_t pos = base.find_last_of("/");
+
+	if (pos != std::string::npos)
+		return base.substr(pos);
+	return path;
+}

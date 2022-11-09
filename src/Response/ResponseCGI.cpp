@@ -69,8 +69,8 @@ void Response::writeToCGI() {
 
 	LOG(RED "Write: " DEFAULT << bytes_written);
 
-	if (bytes_written == -1)
-		perror("write"); // TODO
+	if (bytes_written == -1) // TODO
+		LOG_ERR("write: " << strerror(errno) << ": " << m_cgi.popen.writefd);
 	else
 		body.erase(0, bytes_written);
 
