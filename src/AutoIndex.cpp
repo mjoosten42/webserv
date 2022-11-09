@@ -6,17 +6,17 @@
 
 std::vector<Entry> recursivePathCount(const std::string directory) {
 	std::vector<Entry> paths;
-	Entry			   entry;
-	std::string		   name;
 	DIR				  *derp; // DirEctoRy Pointer
 	struct dirent	  *contents;
+	Entry			   entry;
+	std::string		   name;
 
 	derp = opendir(directory.c_str());
 	if (derp == NULL)
 		return (paths);
 	while ((contents = readdir(derp)) != NULL) {
 		name = contents->d_name;
-		if (name.back() == '.') // Skip current, up and hidden
+		if (name.front() == '.') // Skip current, up and hidden
 			continue;
 		entry.name = name;
 		if (contents->d_type == DT_DIR) {
@@ -30,39 +30,28 @@ std::vector<Entry> recursivePathCount(const std::string directory) {
 	return paths;
 }
 
-//	Returns as a string the html body of a Response that indexes all files and sub directories of a given dir.
-//	Params: the 'dir_path' passed must be a path from, and including, the server's root directory.
-std::string autoIndexHtml(std::string dir_path) {
-	LOG("AutoIndexing...");
-
-	std::vector<Entry> content_paths = recursivePathCount(dir_path);
-	std::string		   ret			 = "<h1> Index of directory: </h1>\n<ul>";
-
-	for (size_t i = 0; i < content_paths.size(); i++)
-		ret += content_paths[i].toString();
-
-	return ret;
-}
-
-std::string Entry::toString() const {
+std::string Entry::toString(const std::string& path) const {
 	std::string ret = "<li>";
 
-	ret += "<a href=\"" + name + "\">" + name + "</a>\n";
-
+	ret += "<a href=\"" + path + name + "\">" + basename(name) + "</a>\n";
 	if (!subdir.empty()) {
 		ret += "<ul>\n";
 		for (size_t i = 0; i < subdir.size(); i++)
-			ret += subdir[i].toString();
+			ret += subdir[i].toString(path + name);
 		ret += "</ul>\n";
 	}
-
 	return ret + "</li>";
 }
 
 std::string basename(const std::string& path) {
-	size_t pos = path.find_last_of("/");
+	std::string base = path;
+
+	if (base.back() == '/')
+		base.pop_back();
+
+	size_t pos = base.find_last_of("/");
 
 	if (pos != std::string::npos)
-		return path.substr(pos);
+		return base.substr(pos);
 	return path;
 }

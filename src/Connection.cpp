@@ -36,7 +36,7 @@ int Connection::receiveFromClient(short& events) {
 
 			request.append(buf, bytes_received);
 
-			LOG(request);
+			// LOG(request);
 
 			if (request.getState() == BODY || request.getState() == DONE) {
 				if (!response.hasProcessedRequest()) { // Do once

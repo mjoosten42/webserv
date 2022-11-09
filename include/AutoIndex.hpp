@@ -8,9 +8,9 @@ struct Entry {
 		std::string		   name;
 		std::vector<Entry> subdir;
 
-		std::string toString() const;
+		std::string toString(const std::string& path = "") const;
 };
 
-std::string		   basename(const std::string		&path);
-std::string		   autoIndexHtml(std::string absolute_dir_path);
 std::vector<Entry> recursivePathCount(const std::string directory);
+
+std::string basename(const std::string& path);
