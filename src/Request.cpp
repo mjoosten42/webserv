@@ -129,27 +129,18 @@ void Request::parseHTTPVersion(const std::string& str) {
 void Request::parseHeader(const std::string& line) {
 	std::pair<MapIter, bool>			insert;
 	std::pair<std::string, std::string> header;
-	std::istringstream					ss(line);
-	std::string							word;
+	size_t								pos = line.find_first_of(IFS);
 
-	size_t pos = line.find_first_of(IFS);
 	header.first = line.substr(0, pos);
-	pos = line.find_first_not_of(IFS, pos);
-	header.second = line.substr(pos);
-	LOG("first: " << header.first);
-	LOG("second: " << header.second);
+	if (pos != std::string::npos)
+		header.second = line.substr(line.find_first_not_of(IFS, pos));
 
-	ss >> header.first;
-	ss >> header.second;
-	ss >> word;
-	if (!word.empty())
-		header.second += " " + word;
 	if (header.first.back() != ':') {
 		m_errorMsg = "Header field must end in ':' : \"" + line + "\"";
 		throw 400;
 	}
-	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so tolower them.
 	header.first.pop_back();
+	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so lowercase them.
 	insert = m_headers.insert(header);
 	if (!insert.second) {
 		m_errorMsg = "Duplicate headers: \"" + line + "\"";
@@ -174,7 +165,7 @@ void Request::checkSpecialHeaders() {
 }
 
 bool isHttpVersion(const std::string& str) {
-	return str.substr(0, 5) == "HTTP/" && std::isdigit(str[5]) && str[6] == '.' && std::isdigit(str[7]);
+	return !str.compare(0, 5, "HTTP/") && std::isdigit(str[5]) && str[6] == '.' && std::isdigit(str[7]);
 }
 
 bool isSupportedMethod(methods method) {
@@ -220,6 +211,14 @@ const std::string& Request::getErrorMsg() const {
 	return m_errorMsg;
 }
 
+size_t Request::getContentLength() const {
+	return m_contentLength;
+}
+
+size_t Request::getBodyTotal() const {
+	return m_bodyTotal;
+}
+
 std::string Request::getMethodAsString() const {
 	switch (m_method) {
 		case GET:
@@ -244,14 +243,6 @@ std::string Request::getStateAsString() const {
 		case DONE:
 			return "DONE";
 	}
-}
-
-size_t Request::getContentLength() const {
-	return m_contentLength;
-}
-
-size_t Request::getBodyTotal() const {
-	return m_bodyTotal;
 }
 
 std::ostream& operator<<(std::ostream& os, const Request& request) {

@@ -74,6 +74,7 @@ siege:
 lsof:
 	lsof -c webserv | tail +8
 
+FILE := lorem_ipsum
 upload:
 	curl localhost:8080/cgi-bin/upload.py -F "userfile=@$(FILE)" -H "Expect:" -v
 
