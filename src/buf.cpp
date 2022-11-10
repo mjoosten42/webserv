@@ -5,5 +5,5 @@
 // Global buffer
 char buf[BUFFER_SIZE] = { 0 };
 
-// Used for realpath and getcwd
+// Used for realpath
 char path[PATH_MAX + 1] = { 0 };

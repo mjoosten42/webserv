@@ -157,13 +157,10 @@ int Server::getLocationIndex(const std::string& address) const {
 }
 
 std::string Server::translateAddressToPath(int loc_index, const std::string& file_address) const {
-	std::string ret;
 	if (loc_index == -1) // Should only use this on a location block, not on a server block;
-		ret = m_root + file_address;
+		return m_root + file_address;
 	else
-		ret = m_locations[loc_index].m_root + file_address;
-	LOG("Translating ADDRESS \"" + file_address + "\" to PATH \"" + ret + "\"");
-	return (ret);
+		return m_locations[loc_index].m_root + file_address;
 }
 
 bool Server::isCGI(int loc, const std::string& ext) const {

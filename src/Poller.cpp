@@ -4,32 +4,55 @@
 #include "SourceFds.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
+#include "syscalls.hpp"
 #include "utils.hpp"
 
-#include <sys/socket.h> // accept
-#include <unistd.h>		// close
+bool Poller::m_active = false;
+
+Poller::Poller() {}
+
+Poller::~Poller() {
+	for (size_t i = 0; i < m_pollfds.size(); i++)
+		WS::close(m_pollfds[i].fd);
+}
+
+void Poller::add(const Listener& listener) {
+	int	   fd	  = listener.getFD();
+	pollfd server = { fd, POLLIN, 0 };
+
+	m_pollfds.push_back(server);
+	m_listeners[fd] = listener;
+}
 
 void Poller::start() {
+	m_active = true;
 
 	LOG(RED "\n----STARTING LOOP----\n" DEFAULT);
 
-	while (true) {
+	while (m_active) {
 
 		LOG(RED << std::string(winSize(), '#') << DEFAULT);
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
 		LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 
-		int poll_status = poll(m_pollfds.data(), static_cast<nfds_t>(m_pollfds.size()), -1);
+		int poll_status = WS::poll(m_pollfds);
 		switch (poll_status) {
 			case -1:
-				fatal_perror("poll");
-			case 0:
-				LOG_ERR("Poll returned 0");
+				if (errno == EINTR) // SIGCHLD
+					continue;
+				exit(EXIT_FAILURE); // TODO: throw?
+			case 0:					// Poll is blocking
 				break;
 			default:
 				pollfdEvent();
 		}
 	}
+
+	LOG(RED "\n----EXITING LOOP----" DEFAULT);
+}
+
+void Poller::quit() {
+	m_active = false;
 }
 
 void Poller::pollfdEvent() {
@@ -93,7 +116,7 @@ void Poller::pollIn(pollfd& client) {
 }
 
 // Let connection send data
-// If response if done reading from its source_fd, remove it
+// If response is done reading from its source_fd, remove it
 // If response is done and wants to close the connection, remove the client
 void Poller::pollOut(pollfd& client) {
 	Connection& conn	  = m_connections[client.fd];
@@ -116,8 +139,8 @@ void Poller::pollHup(pollfd& client) {
 
 	for (size_t i = 0; i < sourcefds.size(); i++) {
 		source_fd = sourcefds[i];
-		if (close(source_fd) == -1)
-			LOG_ERR("close: " << strerror(errno) << source_fd);
+
+		WS::close(source_fd);
 		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
 	}
@@ -125,14 +148,12 @@ void Poller::pollHup(pollfd& client) {
 }
 
 void Poller::acceptClient(int listener_fd) {
-	int				fd		 = accept(listener_fd, NULL, NULL);
+	int				fd		 = WS::accept(listener_fd);
 	pollfd			client	 = { fd, POLLIN, 0 };
 	const Listener *listener = &m_listeners[listener_fd];
 
 	if (fd < 0)
-		fatal_perror("accept");
-
-	set_fd_nonblocking(fd);
+		exit(EXIT_FAILURE); // TODO: throw?
 
 	m_pollfds.insert(m_pollfds.begin() + sourceFdsIndex(), client); // insert after last client
 	m_connections[fd] = Connection(fd, listener);
@@ -144,8 +165,7 @@ void Poller::removeClient(int client_fd) {
 	m_pollfds.erase(find(client_fd)); // erase from pollfd vector
 	m_connections.erase(client_fd);	  // erase from connection map
 
-	if (close(client_fd) == -1) // close connection
-		LOG_ERR("close: " << strerror(errno) << ": " << client_fd);
+	WS::close(client_fd);
 
 	LOG(RED "CLIENT " DEFAULT << client_fd << RED " LEFT" DEFAULT);
 }

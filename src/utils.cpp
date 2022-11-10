@@ -70,16 +70,6 @@ size_t findNewline(const std::string str, size_t begin) {
 	return str.find("\n", begin);
 }
 
-std::string getRealPath(const std::string& str) {
-	char *ret = realpath(str.c_str(), path);
-
-	if (!ret) {
-		LOG_ERR("realpath: " << strerror(errno) << ": " << str);
-		throw 404;
-	}
-	return path;
-}
-
 off_t fileSize(int fd) {
 	off_t size = lseek(fd, 0, SEEK_END);
 
@@ -123,14 +113,6 @@ bool isDir(const std::string& path) {
 
 bool isGood(int status) {
 	return status < 400;
-}
-
-std::string getWorkingDir() {
-	char *ret = getcwd(path, PATH_MAX);
-
-	if (!ret)
-		LOG_ERR("getcwd: " << strerror(errno));
-	return path;
 }
 
 std::string basename(const std::string& path) {

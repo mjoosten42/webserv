@@ -1,6 +1,10 @@
 #include "ConfigParser.hpp"
 #include "Listener.hpp"
 #include "Server.hpp"
+#include "logger.hpp"
+
+#include <string>
+#include <vector>
 
 static std::vector<Server> initServers(ConfigParser& config) {
 	std::vector<Server>				 servers;
@@ -23,8 +27,12 @@ static Listener *getListenerByHostPort(std::vector<Listener>& listeners, const s
 	return NULL;
 }
 
-void initFromConfig(ConfigParser& config, std::vector<Listener>& listeners) {
-	std::vector<Server> servers = initServers(config);
+std::vector<Listener> initFromConfig(const char *file) {
+	std::vector<Listener> listeners;
+	ConfigParser		  config(file);
+	std::vector<Server>	  servers = initServers(config);
+
+	LOG(config.getConfigAsString());
 
 	for (std::vector<Server>::const_iterator it = servers.begin(); it != servers.end(); it++) {
 
@@ -37,4 +45,6 @@ void initFromConfig(ConfigParser& config, std::vector<Listener>& listeners) {
 
 		listener->addServer(*it);
 	}
+
+	return listeners;
 }

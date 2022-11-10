@@ -23,4 +23,5 @@ SOURCES = \
 	src/Server.cpp \
 	src/SourceFds.cpp \
 	src/stringutils.cpp \
+	src/syscalls.cpp \
 	src/utils.cpp \

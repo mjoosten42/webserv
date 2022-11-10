@@ -7,14 +7,16 @@
 #include "Server.hpp"
 #include "buffer.hpp"
 #include "logger.hpp"
+#include "syscalls.hpp"
 #include "utils.hpp"
 
-#include <fcntl.h>	  // open
-#include <sys/wait.h> // waitpid
+#include <fcntl.h>		// open
+#include <sys/socket.h> // setsockopt
+#include <sys/wait.h>	// waitpid
 
 static void closePipe(int pfds[2]) {
-	close(pfds[0]);
-	close(pfds[1]);
+	WS::close(pfds[0]);
+	WS::close(pfds[1]);
 }
 
 static void pipeTwo(int serverToCgi[2], int CgiToServer[2]) {
@@ -29,37 +31,30 @@ static void pipeTwo(int serverToCgi[2], int CgiToServer[2]) {
 static void dupTwo(int in_fd, int out_fd) {
 	if (dup2(in_fd, STDIN_FILENO) == -1)
 		exit(EXIT_FAILURE);
-	close(in_fd);
+	WS::close(in_fd);
 
 	if (dup2(out_fd, STDOUT_FILENO) == -1) {
-		close(STDIN_FILENO);
+		WS::close(STDIN_FILENO);
 		throw 502;
 	}
-	close(out_fd);
+	WS::close(out_fd);
 }
 
-static void my_exec(int infd, int outfd, const std::string& filename, char *const envp[]) {
-	std::string str = filename;
-
+static void my_exec(int infd, int outfd, const std::string& filename, const EnvironmentMap& em) {
 	dupTwo(infd, outfd);
 
-	str.erase(str.find_last_of('/'));
-	if (chdir(str.c_str()) == -1) {
-		LOG_ERR("chdir: " << strerror(errno) << ": " << str);
-		exit(EXIT_FAILURE);
-	}
+	WS::chdir(filename.substr(0, filename.find_last_of("/")));
 
-	std::string copy   = filename.substr(filename.find_last_of('/') + 1);
+	std::string copy   = filename.substr(filename.find_last_of("/") + 1);
 	char *const args[] = { const_cast<char *const>(copy.c_str()), NULL };
 
-	execve(copy.c_str(), args, const_cast<char *const *>(envp));
-	LOG_ERR("execve: " << strerror(errno) << ": " << filename);
+	WS::execve(copy, args, em);
 	exit(EXIT_FAILURE);
 }
 
 void Popen::closeFDs() {
-	close(readfd);
-	close(writefd);
+	WS::close(readfd);
+	WS::close(writefd);
 }
 
 // back to minishell ayy
@@ -75,20 +70,19 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 	set_fd_nonblocking(readfd);
 	set_fd_nonblocking(writefd); // TODO
 
-	pid = fork();
+	pid = WS::fork();
 	switch (pid) {
 		case -1: // failure
-			LOG_ERR("fork: " << strerror(errno));
 			closePipe(serverToCgi);
 			closePipe(cgiToServer);
 			throw 502;
 		case 0: // child
-			close(serverToCgi[1]);
-			close(cgiToServer[0]);
-			my_exec(serverToCgi[0], cgiToServer[1], filename, em.toCharpp());
+			WS::close(serverToCgi[1]);
+			WS::close(cgiToServer[0]);
+			my_exec(serverToCgi[0], cgiToServer[1], filename, em);
 		default: // parent
-			close(serverToCgi[0]);
-			close(cgiToServer[1]);
+			WS::close(serverToCgi[0]);
+			WS::close(cgiToServer[1]);
 	}
 }
 
@@ -115,7 +109,7 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 	em["CONTENT_LENGTH"] = toString(req.getContentLength());
 	em["CONTENT_TYPE"]	 = req.getHeaderValue("Content-Type");
 
-	em["UPLOAD_DIR"] = getRealPath("html") + "/uploads/";
+	em["UPLOAD_DIR"] = WS::realpath("html") + "/uploads/";
 
 	popen.my_popen(filename, em);
 }

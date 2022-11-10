@@ -6,6 +6,7 @@
 #include "defines.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
+#include "syscalls.hpp"
 #include "utils.hpp"
 
 #include <fcntl.h> // open
@@ -38,15 +39,14 @@ void Response::processRequest() {
 				LOG_ERR("Invalid method");
 		}
 	} catch (int error) {
+		LOG("error: " << error);
 		m_statusCode = error;
 		serveError(getStatusMessage());
 	}
 }
 
 void Response::handleDelete() {
-	LOG(RED "Handle Delete: " DEFAULT + m_filename);
-
-	std::string absolute = getRealPath(m_filename);
+	std::string absolute = WS::realpath(m_filename);
 
 	m_doneReading = true;
 
@@ -66,8 +66,6 @@ void Response::handleFile() {
 	std::string originalFile = m_filename;
 	bool		isDirectory	 = isDir(m_filename);
 
-	LOG(RED "Get: File: " DEFAULT + m_filename);
-
 	if (isDirectory) {
 		if (m_filename.back() != '/')
 			return sendMoved(m_request.getLocation() + "/");
@@ -75,10 +73,9 @@ void Response::handleFile() {
 		LOG("index at: " + m_filename);
 	}
 
-	m_source_fd = open(m_filename.c_str(), O_RDONLY);
+	m_source_fd = WS::open(m_filename, O_RDONLY);
 	if (m_source_fd == -1)
 		return openError(originalFile, isDirectory);
-	LOG("Opened " << m_source_fd);
 
 	addFileHeaders();
 	m_statusCode = 200;
@@ -88,13 +85,12 @@ void Response::handleFile() {
 void Response::openError(const std::string& dir, bool isDirectory) {
 	bool autoIndex = m_server->getAutoIndex();
 
-	LOG_ERR("open: " << strerror(errno) << ": " << m_filename);
 	switch (errno) {
 		case EACCES:
 			throw 403;
 		case ENOENT:
 		case ENOTDIR:
-			if (isDirectory && autoIndex && m_server->getIndexPage(m_locationIndex) == "index.html") // TODO: if auto-indexing is on and the custom index page is specified but missing, do we return 404, or do we default to auto indexing?
+			if (isDirectory && autoIndex)
 				return createIndex(dir);
 			throw 404;
 		default:
@@ -113,13 +109,6 @@ void Response::addFileHeaders() {
 		addHeader("Transfer-Encoding", "Chunked");
 	else
 		addHeader("Content-Length", toString(size));
-}
-
-void Response::appendBodyPiece() {
-	if (m_isCGI)
-		writeToCGI();
-	else
-		m_request.getBody().clear();
 }
 
 // this function removes bytes_sent amount of bytes from the beginning of the chunk.
@@ -153,16 +142,15 @@ void Response::encodeChunked(std::string& str) {
 }
 
 std::string Response::readBlockFromFile() {
+	ssize_t		bytes_read = WS::read(m_source_fd, BUFFER_SIZE - m_chunk.size());
 	std::string block;
-	ssize_t		bytes_read = read(m_source_fd, buf, BUFFER_SIZE - m_chunk.size());
 
 	LOG(RED "Read: " DEFAULT << bytes_read);
 	switch (bytes_read) {
 		case -1:
-			LOG_ERR("read: " << strerror(errno) << ": " << m_source_fd);
 		case 0:
 			m_doneReading = true;
-			close(m_source_fd);
+			WS::close(m_source_fd);
 			break;
 		default:
 			// LOG(RED << std::string(winSize(), '-') << DEFAULT);

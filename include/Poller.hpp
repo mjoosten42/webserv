@@ -11,16 +11,13 @@
 
 class Poller {
 	public:
-		template <typename InputIt>
-		Poller(InputIt first, InputIt last) {
-			for (; first != last; first++) {
-				pollfd server = { first->getFD(), POLLIN, 0 };
-				m_pollfds.push_back(server);
-				m_listeners[first->getFD()] = *first;
-			}
-		}
+		Poller();
+		~Poller();
 
-		void start(); // starts the polling.
+		void add(const Listener& listener);
+
+		void start();
+		void quit();
 
 	private:
 		void pollfdEvent();
@@ -40,6 +37,8 @@ class Poller {
 		std::string getPollFdsAsString(size_t first, size_t last) const;
 
 	private:
+		static bool m_active;
+
 		std::vector<pollfd>		  m_pollfds;	 // the array of pollfd structs
 		std::map<int, Listener>	  m_listeners;	 // map server fd with corresponding listener
 		std::map<int, Connection> m_connections; // map client fd to its handler

@@ -3,20 +3,17 @@
 
 #include <fstream>
 
-ConfigParser::ConfigParser() {
+ConfigParser::ConfigParser(const char *path) {
 	m_main_context.name			  = "main";
 	m_main_context.parent_context = NULL;
 	m_tokens[SEMICOLON]			  = ';';
 	m_tokens[COMMENT]			  = '#';
 	m_tokens[OPEN_BRACE]		  = '{';
 	m_tokens[CLOSE_BRACE]		  = '}';
-}
 
-bool ConfigParser::parse_config(const char *path) {
 	std::vector<std::string> config_file = readFile(path);
 	check_validity(config_file); // Will throw exception incase of invalid config.
 	finite_state_machine(config_file);
-	return (true);
 }
 
 std::vector<std::string> ConfigParser::readFile(const char *path) {

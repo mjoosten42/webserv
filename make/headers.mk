@@ -17,4 +17,5 @@ HEADERS = \
 	include/Server.hpp \
 	include/SourceFds.hpp \
 	include/stringutils.hpp \
+	include/syscalls.hpp \
 	include/utils.hpp \

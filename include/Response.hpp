@@ -18,10 +18,10 @@ class Response: public HTTP {
 		std::string& getNextChunk();
 		void		 trimChunk(ssize_t bytes_sent);
 
-		void appendBodyPiece();
+		void writeToCGI();
 
 		bool isDone() const;
-		bool hasSourceFd() const;
+		bool isCGI() const;
 		bool hasProcessedRequest() const;
 		bool wantsClose() const;
 
@@ -54,8 +54,6 @@ class Response: public HTTP {
 
 		void createIndex(std::string path_to_index);
 
-		void writeToCGI();
-
 		std::string getStatusLine() const;
 		std::string getStatusMessage() const;
 		std::string getResponseAsString();
@@ -72,8 +70,8 @@ class Response: public HTTP {
 		std::string m_filename;
 		std::string m_savedLine; // Used to check if CGI is behaving
 
-		int	   m_source_fd;		// the fd of the file/pipe.
-		size_t m_locationIndex; // number given to server to identify location
+		int m_source_fd;	 // the fd of the file/pipe.
+		int m_locationIndex; // number given to server to identify location
 
 		bool m_processedRequest;
 		bool m_isCGI; // true if it is a CGI request

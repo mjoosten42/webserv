@@ -1,14 +1,12 @@
 #include "Response.hpp"
 #include "Server.hpp"
 #include "logger.hpp"
+#include "syscalls.hpp"
 #include "utils.hpp" // fatal_perror
 
 #include <string>
-#include <unistd.h> // write
 
 void Response::handleCGI() {
-	LOG(RED "Handle CGI: " DEFAULT + m_filename);
-
 	m_cgi.start(m_request, m_server, m_filename);
 
 	if (m_request.getMethod() == GET)
@@ -65,15 +63,19 @@ std::string Response::getLine(std::string& str) {
 
 void Response::writeToCGI() {
 	std::string& body		   = m_request.getBody();
-	ssize_t		 bytes_written = write(m_cgi.popen.writefd, body.data(), body.length());
+	int			 fd			   = m_cgi.popen.writefd;
+	ssize_t		 bytes_written = WS::write(fd, body);
 
 	LOG(RED "Write: " DEFAULT << bytes_written);
 
-	if (bytes_written == -1) // TODO
-		LOG_ERR("write: " << strerror(errno) << ": " << m_cgi.popen.writefd);
-	else
-		body.erase(0, bytes_written);
-
-	if (m_request.getState() == DONE && body.empty())
-		close(m_cgi.popen.writefd);
+	switch (bytes_written) {
+		case -1:
+			body.clear();
+		case 0:
+			if (m_request.getState() == DONE)
+				WS::close(fd);
+			break;
+		default:
+			body.erase(0, bytes_written);
+	}
 }

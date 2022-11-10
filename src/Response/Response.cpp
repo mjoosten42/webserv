@@ -116,6 +116,6 @@ bool Response::hasProcessedRequest() const {
 	return m_processedRequest;
 }
 
-bool Response::hasSourceFd() const {
-	return m_source_fd != -1;
+bool Response::isCGI() const {
+	return m_isCGI;
 }

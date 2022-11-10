@@ -15,6 +15,8 @@
 // main context -> Directives placed in the configuration file outside of any
 // contexts are considered to be in the main context.
 
+class Listener;
+
 typedef struct s_simple_directive {
 		std::string name;
 		std::string params;
@@ -39,8 +41,7 @@ struct s_block_directive {
 
 class ConfigParser {
 	public:
-		ConfigParser();
-		bool					 parse_config(const char *path);
+		ConfigParser(const char *path);
 		std::vector<std::string> readFile(const char *path);
 
 	public:
@@ -74,5 +75,4 @@ class ConfigParser {
 };
 
 // Initialising of Listeners based on config:
-class Listener;
-void initFromConfig(ConfigParser& config, std::vector<Listener>& listeners);
+std::vector<Listener> initFromConfig(const char *path);

@@ -31,8 +31,7 @@ void Request::append(const char *buf, ssize_t size) {
 		parse();
 		m_status = 200;
 	} catch (int error) {
-		m_state = DONE;
-		LOG_ERR(m_errorMsg);
+		m_state	 = DONE;
 		m_status = error;
 	}
 }
