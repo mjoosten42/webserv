@@ -4,6 +4,7 @@
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
+#include "cpp109.hpp"
 
 Location::Location(): m_location("/"), m_client_max_body_size(-1), m_root("html"), m_indexPage("index.html") {}
 
@@ -19,7 +20,7 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	if (!val_from_config.empty())
 		m_location = val_from_config;
 
-	if (m_location.back() != '/') // TODO: check if correct
+	if (my_back(m_location) != '/') // TODO: check if correct
 		m_location.push_back('/');
 
 	val_from_config = constructor_specs->fetch_simple("client_max_body_size");

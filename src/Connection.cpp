@@ -8,6 +8,7 @@
 #include "logger.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
+#include "cpp109.hpp"
 
 #include <queue>
 
@@ -92,9 +93,9 @@ int Connection::sendToClient(short& events) {
 }
 
 Response& Connection::getLastResponse() {
-	if (m_responses.empty() || m_responses.back().getRequest().getState() == DONE)
+	if (m_responses.empty() || my_back(m_responses).getRequest().getState() == DONE)
 		m_responses.push(Response());
-	return m_responses.back();
+	return my_back(m_responses);
 }
 
 bool Connection::wantsClose() const {

@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include "cpp109.hpp"
 
 #include "buffer.hpp" // path
 #include "logger.hpp"
@@ -12,6 +13,7 @@
 #include <sys/stat.h>  // stat
 #include <unistd.h>	   // lseek
 #include <vector>
+#include <arpa/inet.h> // ntohl
 
 // perrors and exits.
 void fatal_perror(const char *msg) {
@@ -118,7 +120,7 @@ bool isGood(int status) {
 std::string basename(const std::string& path) {
 	std::string base = path;
 
-	if (base.back() == '/') //CPP11
+	if (my_back(base) == '/') //CPP11
 		base.pop_back(); //CPP11
 
 	size_t pos = base.find_last_of("/");
