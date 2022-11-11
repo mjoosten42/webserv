@@ -5,6 +5,7 @@
 #include <sstream>
 #include <sys/poll.h>
 #include <vector>
+#include <algorithm> // transform
 
 // A binary search template. Key is the key you want to search.
 // The entries is an array of structs with a key and value.

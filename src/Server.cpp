@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h> // close
+#include <algorithm>
 
 Server::Server() {
 	m_host = "localhost";
@@ -90,8 +91,8 @@ Server::Server(t_block_directive *constructor_specs) {
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
 	//	Nginx default: "html"
 	overwriteIfSpecified("root", m_root, "html", constructor_specs);
-	if (m_root.back() == '/')
-		m_root.pop_back();
+	if (m_root.back() == '/') // CPP11
+		m_root.pop_back(); //CPP 11
 	//	Nginx default: 0 (which means don't check)
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
 	//	Nginx default: false (serve 404 error when navigating ot directory without index.html)

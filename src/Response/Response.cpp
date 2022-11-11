@@ -67,6 +67,7 @@ std::string Response::getStatusMessage() const {
 		return msg;
 	LOG_ERR("Status code not found: " << m_statusCode);
 	exit(EXIT_FAILURE);
+	return ("");
 }
 
 std::string Response::getStatusLine() const {

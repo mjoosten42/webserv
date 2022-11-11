@@ -253,6 +253,8 @@ std::string Request::getStateAsString() const {
 			return "BODY";
 		case DONE:
 			return "DONE";
+		default:
+			return "DONE";
 	}
 }
 

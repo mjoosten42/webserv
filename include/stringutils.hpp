@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <string>
+#include <vector>
 
 void strToLower(std::string& str);
 void strToUpper(std::string& str);

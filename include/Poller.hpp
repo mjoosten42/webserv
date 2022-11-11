@@ -8,6 +8,8 @@
 #include <map>
 #include <sys/poll.h>
 #include <vector>
+#include <stdlib.h> // exit
+
 
 class Poller {
 	public:

@@ -4,6 +4,7 @@
 #include "logger.hpp"
 #include "syscalls.hpp"
 
+#include <csignal>
 #include <iostream>
 #include <vector>
 

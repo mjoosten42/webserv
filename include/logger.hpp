@@ -1,6 +1,8 @@
 #pragma once
 
 #include "defines.hpp"
+#include <string.h> // strerror
+#include <cerrno> // errno
 
 #ifdef DEBUG
 #	include <iostream>

@@ -71,6 +71,7 @@ void Response::writeToCGI() {
 	switch (bytes_written) {
 		case -1:
 			body.clear();
+			break;
 		case 0:
 			if (m_request.getState() == DONE)
 				WS::close(fd);
