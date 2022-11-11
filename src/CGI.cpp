@@ -43,7 +43,8 @@ static void dupTwo(int in_fd, int out_fd) {
 static void my_exec(int infd, int outfd, const std::string& filename, const EnvironmentMap& em) {
 	dupTwo(infd, outfd);
 
-	WS::chdir(filename.substr(0, filename.find_last_of("/")));
+	if (WS::chdir(filename.substr(0, filename.find_last_of("/"))) == -1)
+		exit(EXIT_FAILURE);
 
 	std::string copy   = filename.substr(filename.find_last_of("/") + 1);
 	char *const args[] = { const_cast<char *const>(copy.c_str()), NULL };
@@ -86,30 +87,43 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 	}
 }
 
+// https://www.rfc-editor.org/rfc/rfc3875#section-4.1.5
+
 // TODO: Set correct path
-// TODO: when execution fails, close the pipe or something.
-void CGI::start(const Request& req, const Server *server, const std::string& filename) {
+void CGI::start(const Request& req, const Server *server, const std::string& filename, const std::string& peer) {
 
 	EnvironmentMap em;
 
-	// TODO: make sure it is compliant https://en.wikipedia.org/wiki/Common_Gateway_Interface
-	em["GATEWAY_INTERFACE"] = CGI_VERSION;
-	em["SERVER_SOFTWARE"]	= server->getServerSoftwareName();
-	em["SERVER_NAME"]		= req.getHost();
-	em["SERVER_PORT"]	  = toString(server->getPort()); // TODO: when multiple ports, it should be the listener's port.
-	em["SERVER_PROTOCOL"] = HTTP_VERSION;
+	// Unused
+	// em["AUTH_TYPE"];
+	// em["REMOTE_IDENT"];
+	// em["REMOTE_USER"];
 
-	em["PATH_INFO"]		  = req.getLocation();
-	em["PATH_TRANSLATED"] = req.getLocation();
-	em["QUERY_STRING"]	  = req.getQueryString();
-	em["SCRIPT_NAME"]	  = filename;
+	if (req.getContentLength() > 0)
+		em["CONTENT_LENGTH"] = toString(req.getContentLength());
 
-	// POST
+	if (req.hasHeader("Content-Type"))
+		em["CONTENT_TYPE"] = req.getHeaderValue("Content-Type");
+
+	em["PATH_INFO"]		  = req.getPathInfo(); // TODO
+	em["PATH_TRANSLATED"] = "";				   // TODO
+
+	em["QUERY_STRING"]	 = req.getQueryString();
+	em["REMOTE_ADDR"]	 = peer;
+	em["REMOTE_HOST"]	 = peer;
 	em["REQUEST_METHOD"] = req.getMethodAsString();
-	em["CONTENT_LENGTH"] = toString(req.getContentLength());
-	em["CONTENT_TYPE"]	 = req.getHeaderValue("Content-Type");
+	em["SCRIPT_NAME"]	 = filename;
+	em["SERVER_NAME"]	 = req.getHost();
 
-	em["UPLOAD_DIR"] = WS::realpath("html") + "/uploads/";
+	// TODO: when multiple ports, it should be the listener's port.
+	// M: an incoming connection can only have one port right?
+	em["SERVER_PORT"] = toString(server->getPort());
+
+	if (req.getMethod() == POST)
+		em["UPLOAD_DIR"] = WS::realpath("html") + "/uploads/"; // TODO
+
+	LOG("PATH_INFO: " << em["PATH_INFO"]);
+	LOG("PATH_TRANSLATED: " << em["PATH_TRANSLATED"]);
 
 	popen.my_popen(filename, em);
 }

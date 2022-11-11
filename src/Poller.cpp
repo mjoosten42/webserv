@@ -7,6 +7,9 @@
 #include "syscalls.hpp"
 #include "utils.hpp"
 
+#include <netinet/in.h> // sockaddr_in
+#include <sys/socket.h> // pollfd
+
 bool Poller::m_active = false;
 
 Poller::Poller() {}
@@ -33,7 +36,7 @@ void Poller::start() {
 
 		LOG(RED << std::string(winSize(), '#') << DEFAULT);
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
-		LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
+		// LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 
 		int poll_status = WS::poll(m_pollfds);
 		switch (poll_status) {
@@ -148,15 +151,16 @@ void Poller::pollHup(pollfd& client) {
 }
 
 void Poller::acceptClient(int listener_fd) {
-	int				fd		 = WS::accept(listener_fd);
-	pollfd			client	 = { fd, POLLIN, 0 };
 	const Listener *listener = &m_listeners[listener_fd];
+	sockaddr_in		peer	 = { sizeof(sockaddr_in), AF_INET, 0, { 0 }, { 0 } };
+	int				fd		 = WS::accept(listener_fd, reinterpret_cast<sockaddr *>(&peer));
+	pollfd			client	 = { fd, POLLIN, 0 };
 
 	if (fd < 0)
 		exit(EXIT_FAILURE); // TODO: throw?
 
 	m_pollfds.insert(m_pollfds.begin() + sourceFdsIndex(), client); // insert after last client
-	m_connections[fd] = Connection(fd, listener);
+	m_connections[fd] = Connection(fd, listener, addressToString(peer.sin_addr.s_addr));
 
 	LOG(RED "NEW CLIENT: " DEFAULT << fd);
 }

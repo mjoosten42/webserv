@@ -1,7 +1,5 @@
 #pragma once
 
-#define SERVER_SOFTWARE_DEFAULT_NAME "WebSus 0.1"
-
 // HTTP RFC newline
 #define CRLF "\r\n"
 
@@ -13,6 +11,7 @@
 
 #define HTTP_VERSION "HTTP/1.1"
 #define CGI_VERSION "CGI/1.1"
+#define SERVER_SOFTWARE "WebSus/1.1"
 
 #include <map>
 #include <string>

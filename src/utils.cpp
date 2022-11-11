@@ -127,3 +127,15 @@ std::string basename(const std::string& path) {
 		return base.substr(pos);
 	return path;
 }
+
+std::string addressToString(int address) {
+	std::string str;
+
+	for (int i = 24; i >= 0; i -= 8) {
+		str += toString((ntohl(address) >> i) & 0xFF);
+		if (i)
+			str += ".";
+	}
+
+	return str;
+}

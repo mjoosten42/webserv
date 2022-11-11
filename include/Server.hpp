@@ -21,7 +21,6 @@ class Server {
 
 		const std::string& getRoot(int loc_index = -1) const;
 		const std::string& getHost() const;
-		const std::string& getServerSoftwareName() const;
 		const std::string& getIndexPage(int loc_index = -1) const;
 
 		const std::vector<std::string>	& getNames() const;
@@ -40,7 +39,6 @@ class Server {
 		short					   m_port;	// port the server listens on
 		std::vector<std::string>   m_names; // i.e. example.com www.example.com etc.
 		std::string				   m_root;
-		std::string				   m_server_software_name; // i.e. amogus
 		std::map<int, std::string> m_error_page;
 		size_t					   m_client_max_body_size;
 		bool					   m_autoindex;

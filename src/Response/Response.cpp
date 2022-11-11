@@ -91,10 +91,9 @@ std::string Response::getResponseAsString() {
 }
 
 void Response::addDefaultHeaders() {
+	addHeader("Server", SERVER_SOFTWARE);
 	if (m_request.hasHeader("Host"))
 		addHeader("Host", m_request.getHost());
-	if (!m_server->getServerSoftwareName().empty())
-		addHeader("Server", m_server->getServerSoftwareName());
 }
 
 Request& Response::getRequest() {

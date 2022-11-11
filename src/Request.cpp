@@ -112,11 +112,20 @@ void Request::parseMethod(const std::string& str) {
 }
 
 void Request::parseLocation(const std::string& str) {
-	size_t pos = str.find('?');
+	size_t dotpos	= str.find('.');
+	size_t slashpos = str.find('/', dotpos);
+	size_t qmpos	= str.find('?');
 
-	m_location = str.substr(0, pos);
-	if (pos != std::string::npos)
-		m_queryString = str.substr(pos + 1);
+	if (qmpos != std::string::npos)
+		m_queryString = str.substr(qmpos + 1);
+
+	if (slashpos != std::string::npos)
+		m_location = str.substr(0, slashpos);
+	else
+		m_location = str.substr(0, qmpos);
+
+	if (slashpos != std::string::npos)
+		m_pathInfo = str.substr(slashpos, qmpos - slashpos);
 }
 
 void Request::parseHTTPVersion(const std::string& str) {
@@ -198,6 +207,10 @@ const std::string& Request::getLocation() const {
 	return m_location;
 }
 
+const std::string& Request::getPathInfo() const {
+	return m_pathInfo;
+}
+
 const std::string& Request::getQueryString() const {
 	return m_queryString;
 }
@@ -264,12 +277,13 @@ std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << RED "State: " DEFAULT << request.getStateAsString() << std::endl;
 	os << RED "Method: " DEFAULT << request.getMethodAsString() << std::endl;
 	os << RED "Location: " DEFAULT << request.getLocation() << std::endl;
-	// os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
+	os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
+	os << RED "Path info: " DEFAULT << request.getPathInfo() << std::endl;
 	// os << RED "Headers: {\n" DEFAULT << request.getHeadersAsString() << RED << "}\n";
 	os << RED "Host: " DEFAULT << request.getHost() << std::endl;
 	os << RED "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
 	// os << RED "Body: " DEFAULT << request.getBody() << std::endl;
 	os << RED "Body total: " DEFAULT << request.getBodyTotal() << std::endl;
-	os << RED "Status: " DEFAULT << request.getStatus();
+	// os << RED "Status: " DEFAULT << request.getStatus();
 	return os;
 }

@@ -70,7 +70,6 @@ void Response::handleFile() {
 		if (m_filename.back() != '/') // CPP11
 			return sendMoved(m_request.getLocation() + "/");
 		m_filename += m_server->getIndexPage(m_locationIndex);
-		LOG("index at: " + m_filename);
 	}
 
 	m_source_fd = WS::open(m_filename, O_RDONLY);
@@ -142,7 +141,7 @@ void Response::encodeChunked(std::string& str) {
 }
 
 std::string Response::readBlockFromFile() {
-	ssize_t		bytes_read = WS::read(m_source_fd, BUFFER_SIZE - m_chunk.size());
+	ssize_t		bytes_read = WS::read(m_source_fd);
 	std::string block;
 
 	LOG(RED "Read: " DEFAULT << bytes_read);

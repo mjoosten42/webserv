@@ -7,7 +7,7 @@
 #include <string>
 
 void Response::handleCGI() {
-	m_cgi.start(m_request, m_server, m_filename);
+	m_cgi.start(m_request, m_server, m_filename, m_peer);
 
 	if (m_request.getMethod() == GET)
 		m_statusCode = 200;
