@@ -26,5 +26,3 @@ if ($ENV{"REQUEST_METHOD"} eq "POST") {
         printf "%s=\"%s\"\n", $var, $ENV{$var};
     }
 }
-
-printf "done.\n"
