@@ -11,6 +11,8 @@ class EnvironmentMap {
 		char **toCharpp() const;
 
 	private:
+		void addEnv();
+
 		std::map<std::string, std::string> m_map;
 };
 

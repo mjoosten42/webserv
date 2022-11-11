@@ -4,6 +4,7 @@
 
 #include <string>
 #include <sys/poll.h>
+#include <sys/socket.h>
 #include <sys/types.h>
 #include <vector>
 
@@ -17,7 +18,7 @@ int close(int fd);
 
 // I.O.
 ssize_t write(int fd, const std::string& str);
-ssize_t read(int fd, size_t len = BUFFER_SIZE);
+ssize_t read(int fd);
 
 // Processes
 pid_t fork();
@@ -29,7 +30,7 @@ int execve(const std::string& path, char *const argv[], const EnvironmentMap& em
 
 // Sockets
 int poll(std::vector<pollfd>& pollfds);
-int accept(int fd);
+int accept(int fd, sockaddr *peer);
 
 // Paths
 std::string realpath(const std::string& path);

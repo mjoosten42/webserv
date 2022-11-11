@@ -142,7 +142,7 @@ void Response::encodeChunked(std::string& str) {
 }
 
 std::string Response::readBlockFromFile() {
-	ssize_t		bytes_read = WS::read(m_source_fd, BUFFER_SIZE - m_chunk.size());
+	ssize_t		bytes_read = WS::read(m_source_fd);
 	std::string block;
 
 	LOG(RED "Read: " DEFAULT << bytes_read);

@@ -20,7 +20,7 @@ struct Popen {
 
 class CGI {
 	public:
-		void start(const Request& request, const Server *server, const std::string& filename);
+		void start(const Request& request, const Server *server, const std::string& filename, const std::string& peer);
 
 	public:
 		Popen popen;

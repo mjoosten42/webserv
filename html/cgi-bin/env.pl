@@ -11,15 +11,7 @@ printenv — a CGI program that just prints its environment
 print "Content-Type: text/plain \n";
 print "\n";
 
-use Cwd;
-
-print("Cur: ");
-print(getcwd());
-print("\n");
-
 #sleep(2);
-
-# dsdfasdfd
 
 if ($ENV{"REQUEST_METHOD"} eq "POST") {
 

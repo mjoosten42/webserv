@@ -63,3 +63,4 @@ bool   isGood(int status);
 
 std::string getExtension(const std::string& filename);
 std::string basename(const std::string& path);
+std::string addressToString(int address);

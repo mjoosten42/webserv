@@ -1,6 +1,8 @@
 #include "Connection.hpp"
 
 #include "Listener.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
 #include "buffer.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
@@ -8,12 +10,11 @@
 #include "utils.hpp"
 
 #include <queue>
-#include <sys/socket.h> //recv, send
-#include <unistd.h>		// close
 
 Connection::Connection() {}
 
-Connection::Connection(int m_fd, const Listener *listener): m_fd(m_fd), m_listener(listener), m_close(false) {}
+Connection::Connection(int m_fd, const Listener *listener, const std::string& peer):
+	m_fd(m_fd), m_listener(listener), m_peer(peer), m_close(false) {}
 
 int Connection::receiveFromClient(short& events) {
 	ssize_t bytes_received = WS::read(m_fd);
@@ -42,6 +43,7 @@ int Connection::receiveFromClient(short& events) {
 				break;
 
 			if (!response.hasProcessedRequest()) { // Do once
+				response.m_peer = m_peer;
 				response.addServer(&m_listener->getServerByHost(request.getHost()));
 				response.processRequest();
 

@@ -84,8 +84,6 @@ Server::Server(t_block_directive *constructor_specs) {
 
 	//	Nginx default is 80 if super user, otherwise 8000
 	overwriteIfSpecified("listen", m_port, 8000, constructor_specs);
-	//	Not an Nginx config param
-	overwriteIfSpecified("server", m_server_software_name, SERVER_SOFTWARE_DEFAULT_NAME, constructor_specs);
 	//	Nginx default: ""
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
 	//	Nginx default: "html"
@@ -188,10 +186,6 @@ const std::string& Server::getRoot(int loc_index) const {
 		return m_root;
 	else
 		return m_locations[loc_index].m_root;
-}
-
-const std::string& Server::getServerSoftwareName() const {
-	return m_server_software_name;
 }
 
 const std::vector<std::string>& Server::getNames() const {

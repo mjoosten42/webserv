@@ -59,7 +59,8 @@ class Response: public HTTP {
 		std::string getResponseAsString();
 
 	public:
-		int m_statusCode;
+		int			m_statusCode;
+		std::string m_peer; // 127.0.0.1
 
 	private:
 		const Server *m_server;
