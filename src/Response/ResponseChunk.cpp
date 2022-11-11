@@ -70,7 +70,6 @@ void Response::handleFile() {
 		if (m_filename.back() != '/')
 			return sendMoved(m_request.getLocation() + "/");
 		m_filename += m_server->getIndexPage(m_locationIndex);
-		LOG("index at: " + m_filename);
 	}
 
 	m_source_fd = WS::open(m_filename, O_RDONLY);

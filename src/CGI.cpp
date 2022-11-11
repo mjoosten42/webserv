@@ -105,14 +105,15 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 	if (req.hasHeader("Content-Type"))
 		em["CONTENT_TYPE"] = req.getHeaderValue("Content-Type");
 
-	em["PATH_INFO"]		  = ""; // TODO
-	em["PATH_TRANSLATED"] = ""; // TODO: realpath of PATH_INFO
-	em["QUERY_STRING"]	  = req.getQueryString();
-	em["REMOTE_ADDR"]	  = peer;
-	em["REMOTE_HOST"]	  = peer;
-	em["REQUEST_METHOD"]  = req.getMethodAsString();
-	em["SCRIPT_NAME"]	  = filename;
-	em["SERVER_NAME"]	  = req.getHost();
+	em["PATH_INFO"]		  = req.getPathInfo(); // TODO
+	em["PATH_TRANSLATED"] = "";				   // TODO
+
+	em["QUERY_STRING"]	 = req.getQueryString();
+	em["REMOTE_ADDR"]	 = peer;
+	em["REMOTE_HOST"]	 = peer;
+	em["REQUEST_METHOD"] = req.getMethodAsString();
+	em["SCRIPT_NAME"]	 = filename;
+	em["SERVER_NAME"]	 = req.getHost();
 
 	// TODO: when multiple ports, it should be the listener's port.
 	// M: an incoming connection can only have one port right?
@@ -120,6 +121,9 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 
 	if (req.getMethod() == POST)
 		em["UPLOAD_DIR"] = WS::realpath("html") + "/uploads/"; // TODO
+
+	LOG("PATH_INFO: " << em["PATH_INFO"]);
+	LOG("PATH_TRANSLATED: " << em["PATH_TRANSLATED"]);
 
 	popen.my_popen(filename, em);
 }

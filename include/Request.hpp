@@ -15,15 +15,18 @@ class Request: public HTTP {
 
 		void append(const char *buf, ssize_t size);
 
+		const state	 & getState() const;
+		const methods& getMethod() const;
+
 		const std::string& getHost() const;
-		const state		 & getState() const;
-		const methods	 & getMethod() const;
 		const std::string& getLocation() const;
 		const std::string& getQueryString() const;
-		size_t			   getContentLength() const;
-		size_t			   getBodyTotal() const;
+		const std::string& getPathInfo() const;
 		const std::string& getErrorMsg() const;
-		int				   getStatus() const;
+
+		size_t getContentLength() const;
+		size_t getBodyTotal() const;
+		int	   getStatus() const;
 
 		std::string getStateAsString() const;
 		std::string getMethodAsString() const;
@@ -34,7 +37,6 @@ class Request: public HTTP {
 
 		void parseStartLine(const std::string& line);
 		void parseHeader(const std::string& line);
-
 		void parseMethod(const std::string& str);
 		void parseLocation(const std::string& str);
 		void parseHTTPVersion(const std::string& str);
@@ -46,6 +48,7 @@ class Request: public HTTP {
 		methods		m_method;	   // GET, POST, DELETE
 		std::string m_location;	   // ex. /foo/bar.html
 		std::string m_queryString; // ex. amongus=sus&greeting=Good%20morning
+		std::string m_pathInfo;	   // /info.php/another/path
 
 		std::string m_saved;
 		std::string m_host;
