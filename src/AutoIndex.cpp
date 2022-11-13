@@ -16,7 +16,7 @@ std::vector<Entry> recursivePathCount(const std::string directory) {
 		return (paths);
 	while ((contents = readdir(derp)) != NULL) {
 		name = contents->d_name;
-		if (name.front() == '.') // Skip current, up and hidden
+		if (*(name.begin()) == '.') // Skip current, up and hidden
 			continue;
 		entry.name = name;
 		if (contents->d_type == DT_DIR) {

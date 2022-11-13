@@ -42,8 +42,8 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	val_from_config = constructor_specs->fetch_simple("root");
 	if (!val_from_config.empty())
 		m_root = val_from_config;
-	if (m_root.back() == '/')
-		m_root.pop_back();
+	if (my_back(m_root) == '/')
+		my_pop_back(m_root);
 
 	// Allows user to specify CGI to handle cgi-scripts
 	m_CGIs = stringSplit(constructor_specs->fetch_simple("cgi"));

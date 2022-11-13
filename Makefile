@@ -2,7 +2,7 @@ NAME = webserv
 
 CXX = c++
 
-CXX_FLAGS = -Wall -Werror -Wextra -std=c++98 -MMD -MP -Wold-style-cast -Wpedantic
+CXX_FLAGS = -Wall -Werror -Wextra -std=c++98 -MMD -MP -Wold-style-cast -Wpedantic -Wno-unknown-pragmas
 
 SRC_DIR = src
 INC_DIR = include

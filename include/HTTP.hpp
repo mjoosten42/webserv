@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <unistd.h> //ssize_t
 
 class HTTP {
 	public:

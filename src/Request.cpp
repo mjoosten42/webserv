@@ -5,6 +5,7 @@
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
+#include "cpp109.hpp"
 
 #include <sstream>
 #include <string>
@@ -149,11 +150,11 @@ void Request::parseHeader(const std::string& line) {
 	if (pos != std::string::npos)
 		header.second = line.substr(line.find_first_not_of(IFS, pos));
 
-	if (header.first.back() != ':') {
+	if (my_back(header.first) != ':') {
 		m_errorMsg = "Header field must end in ':' : \"" + line + "\"";
 		throw 400;
 	}
-	header.first.pop_back();
+	my_pop_back(header.first);
 	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so lowercase them.
 	insert = m_headers.insert(header);
 	if (!insert.second) {

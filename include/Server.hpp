@@ -4,7 +4,6 @@
 #include "Location.hpp"
 #include "cpp109.hpp"
 
-#include <array>
 #include <map>
 #include <string>
 #include <vector>
