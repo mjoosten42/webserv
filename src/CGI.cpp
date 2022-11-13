@@ -47,7 +47,7 @@ static void my_exec(int infd, int outfd, const std::string& filename, const Envi
 		exit(EXIT_FAILURE);
 
 	std::string copy   = filename.substr(filename.find_last_of("/") + 1);
-	char *const args[] = { const_cast<char *const>(copy.c_str()), NULL };
+	char *const args[] = { const_cast<char *const>(copy.c_str()), NULL }; //Werror type qualifiers ignored on cast result type
 
 	WS::execve(copy, args, em);
 	exit(EXIT_FAILURE);
@@ -81,6 +81,7 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 			WS::close(serverToCgi[1]);
 			WS::close(cgiToServer[0]);
 			my_exec(serverToCgi[0], cgiToServer[1], filename, em);
+			break;
 		default: // parent
 			WS::close(serverToCgi[0]);
 			WS::close(cgiToServer[1]);

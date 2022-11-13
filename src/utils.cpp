@@ -120,8 +120,8 @@ bool isGood(int status) {
 std::string basename(const std::string& path) {
 	std::string base = path;
 
-	if (my_back(base) == '/') //CPP11
-		my_pop_back(base); //CPP11
+	if (my_back(base) == '/')
+		my_pop_back(base);
 
 	size_t pos = base.find_last_of("/");
 

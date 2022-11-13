@@ -93,9 +93,9 @@ int Connection::sendToClient(short& events) {
 }
 
 Response& Connection::getLastResponse() {
-	if (m_responses.empty() || my_back(m_responses).getRequest().getState() == DONE)
+	if (m_responses.empty() || m_responses.back().getRequest().getState() == DONE)
 		m_responses.push(Response());
-	return my_back(m_responses);
+	return m_responses.back();
 }
 
 bool Connection::wantsClose() const {

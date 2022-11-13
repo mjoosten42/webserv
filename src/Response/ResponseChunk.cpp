@@ -67,7 +67,7 @@ void Response::handleFile() {
 	bool		isDirectory	 = isDir(m_filename);
 
 	if (isDirectory) {
-		if (my_back(m_filename) != '/') // CPP11
+		if (my_back(m_filename) != '/')
 			return sendMoved(m_request.getLocation() + "/");
 		m_filename += m_server->getIndexPage(m_locationIndex);
 	}
