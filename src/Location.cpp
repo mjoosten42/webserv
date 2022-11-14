@@ -6,13 +6,21 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
-Location::Location(): m_location("/"), m_client_max_body_size(-1), m_root("html"), m_indexPage("index.html") {}
+Location::Location():
+	m_location("/"),
+	m_client_max_body_size(-1),
+	m_root("html"),
+	m_indexPage("index.html"),
+	m_is_redirected(false),
+	m_redirection_path("") {}
 
 Location::Location(t_block_directive *constructor_specs, Server *parent):
 	m_location("/"),
 	m_client_max_body_size(parent->getCMB()),
 	m_root(parent->getRoot()),
-	m_indexPage(parent->getIndexPage()) {
+	m_indexPage(parent->getIndexPage()),
+	m_is_redirected(false),
+	m_redirection_path("") {
 
 	std::string val_from_config;
 
@@ -38,6 +46,13 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	val_from_config = constructor_specs->fetch_simple("index");
 	if (!val_from_config.empty())
 		m_indexPage = val_from_config;
+
+	val_from_config = constructor_specs->fetch_simple("redirect");
+	if (!val_from_config.empty())
+	{
+		m_is_redirected = true;
+		m_redirection_path = val_from_config;
+	}
 
 	val_from_config = constructor_specs->fetch_simple("root");
 	if (!val_from_config.empty())
