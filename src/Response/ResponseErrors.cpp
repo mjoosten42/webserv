@@ -9,19 +9,18 @@ void Response::serveError(const std::string& str) {
 	sendFail(str);
 }
 
-bool Response::sendCustomErrorPage() {
-	if (m_server->getErrorPages().find(m_statusCode) != m_server->getErrorPages().end()) {
-		m_filename	  = m_server->getErrorPages().at(m_statusCode);
-		m_doneReading = false;
-		handleFile();
-		return true;
-	}
-	return false;
+void Response::sendCustomErrorPage() {
+	int tmp = m_statusCode;
+
+	m_filename	  = m_server->getErrorPage(m_statusCode);
+	m_doneReading = false;
+	handleFile();
+	m_statusCode = tmp;
 }
 
 void Response::sendFail(const std::string& msg) {
-	if (sendCustomErrorPage())
-		return;
+	if (m_server->hasErrorPage(m_statusCode))
+		return sendCustomErrorPage();
 	m_doneReading = true;
 
 	addHeader("Content-Type", "text/html");
@@ -35,9 +34,9 @@ void Response::sendFail(const std::string& msg) {
 }
 
 void Response::sendMoved(const std::string& location) {
-	m_statusCode = 301; // should be superfluous
-	if (sendCustomErrorPage())
-		return;
+	m_statusCode = 301;
+	if (m_server->hasErrorPage(m_statusCode))
+		return sendCustomErrorPage();
 	m_doneReading = true;
 
 	addHeader("Location", location);

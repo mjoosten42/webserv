@@ -180,8 +180,8 @@ size_t Server::getCMB() const {
 	return m_client_max_body_size;
 }
 
-const std::map<int, std::string>& Server::getErrorPages() const {
-	return m_error_page;
+const std::string& Server::getErrorPage(int code) const {
+	return m_error_page.at(code);
 }
 
 bool Server::isAutoIndex() const {
@@ -204,6 +204,10 @@ const std::string& Server::getRedirect(int loc_index) const {
 		return m_root;
 	else
 		return m_locations[loc_index].m_redirect;
+}
+
+bool Server::hasErrorPage(int code) const {
+	return m_error_page.find(code) != m_error_page.end();
 }
 
 #pragma endregion
