@@ -150,6 +150,8 @@ void Request::parseHeader(const std::string& line) {
 	if (pos != std::string::npos)
 		header.second = line.substr(line.find_first_not_of(IFS, pos));
 
+	LOG(header.first);
+	LOG(my_back(header.first));
 	if (my_back(header.first) != ':') {
 		m_errorMsg = "Header field must end in ':' : \"" + line + "\"";
 		throw 400;
