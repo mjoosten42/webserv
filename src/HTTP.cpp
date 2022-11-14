@@ -1,18 +1,12 @@
 #include "HTTP.hpp"
 
+#include "cpp109.hpp" // TODO
 #include "defines.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
 
 #include <string>
 #include <utility>
-
-HTTP::HTTP() {}
-
-void HTTP::clear() {
-	m_headers.clear();
-	m_body.clear();
-}
 
 // this function returns a pretty header field. Example: "host" becomes "Host",
 // "transfer-encoding" becomes "Transfer-Encoding". Segfaults if field is empty.
@@ -32,6 +26,46 @@ std::string HTTP::capitalizeFieldPretty(std::string field) {
 		field[pos] = std::toupper(field[pos]);
 	}
 	return field;
+}
+
+bool HTTP::containsNewline(const std::string& str) {
+	return str.find(CRLF) != str.npos || str.find("\n") != str.npos;
+}
+
+size_t HTTP::findNewline(const std::string str, size_t begin) {
+	size_t pos = str.find("\r\n", begin);
+	if (pos != std::string::npos)
+		return pos;
+	return str.find("\n", begin);
+}
+
+// Assumes ContainsNewline is called beforehand
+// Automatically erases line from saved data
+std::string HTTP::getNextLine() {
+	std::size_t pos			  = findNewline(m_saved);
+	std::string line		  = m_saved.substr(0, pos);
+	int			newlineLength = (m_saved[pos] == '\r') ? 2 : 1; // "\r\n or \n"
+
+	m_saved.erase(0, pos + newlineLength);
+	return line;
+}
+
+void HTTP::parseHeader(const std::string& line) {
+	std::pair<MapIter, bool>			insert;
+	std::pair<std::string, std::string> header;
+	size_t								pos = line.find_first_of(IFS);
+
+	header.first = line.substr(0, pos);
+	if (pos != std::string::npos)
+		header.second = line.substr(line.find_first_not_of(IFS, pos));
+
+	if (my_back(header.first) != ':')
+		throw ServerException(400, "Header field must end in ':' : " + line);
+	my_pop_back(header.first);
+	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so lowercase them.
+	insert = m_headers.insert(header);
+	if (!insert.second)
+		throw ServerException(400, "Duplicate headers: " + line);
 }
 
 const std::map<std::string, std::string>& HTTP::getHeaders() const {

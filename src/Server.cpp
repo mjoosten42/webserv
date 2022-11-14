@@ -5,12 +5,12 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
+#include <algorithm>
 #include <arpa/inet.h>
 #include <fcntl.h> // for serving error files
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h> // close
-#include <algorithm>
 
 Server::Server() {
 	m_host = "localhost";
@@ -90,7 +90,7 @@ Server::Server(t_block_directive *constructor_specs) {
 	//	Nginx default: "html"
 	overwriteIfSpecified("root", m_root, "html", constructor_specs);
 	if (my_back(m_root) == '/')
-		my_pop_back(m_root); //CPP 11
+		my_pop_back(m_root); // CPP 11
 	//	Nginx default: 0 (which means don't check)
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
 	//	Nginx default: false (serve 404 error when navigating ot directory without index.html)

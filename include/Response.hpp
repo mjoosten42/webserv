@@ -45,7 +45,6 @@ class Response: public HTTP {
 		void getCGIHeaderChunk();
 		void encodeChunked(std::string& str);
 
-		std::string getLine(std::string& str);
 		std::string readBlockFromFile();
 
 		void serveError(const std::string& str);
@@ -69,7 +68,6 @@ class Response: public HTTP {
 
 		std::string m_chunk;
 		std::string m_filename;
-		std::string m_savedLine; // Used to check if CGI is behaving
 
 		int m_source_fd;	 // the fd of the file/pipe.
 		int m_locationIndex; // number given to server to identify location

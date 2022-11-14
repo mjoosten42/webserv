@@ -36,7 +36,7 @@ void Poller::start() {
 
 		LOG(RED << std::string(winSize(), '#') << DEFAULT);
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
-		// LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
+		LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 
 		int poll_status = WS::poll(m_pollfds);
 		switch (poll_status) {
@@ -64,8 +64,8 @@ void Poller::pollfdEvent() {
 	for (size_t i = clientsIndex(); i < sourceFdsIndex(); i++) {
 		pollfd& client = m_pollfds[i];
 
-		// LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
-		// LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
+		LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
+		LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
 
 		unsetFlag(m_pollfds[i].events, POLLOUT);
 
@@ -84,8 +84,8 @@ void Poller::pollfdEvent() {
 		pollfd& source	  = m_pollfds[i];
 		int		client_fd = m_sources.getClientFd(source.fd);
 
-		// LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
-		// LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
+		LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
+		LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
 
 		// If source has POLLIN, set POLLOUT in client
 		// However, source will get POLLIN next loop because client will only read next loop, not this one

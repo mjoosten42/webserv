@@ -6,10 +6,9 @@
 #include "stringutils.hpp"
 
 #include <map>
+#include <stdlib.h> // exit
 #include <sys/poll.h>
 #include <vector>
-#include <stdlib.h> // exit
-
 
 class Poller {
 	public:

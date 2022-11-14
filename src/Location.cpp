@@ -1,10 +1,10 @@
 #include "Location.hpp"
 
 #include "Server.hpp"
+#include "cpp109.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
-#include "cpp109.hpp"
 
 Location::Location(): m_location("/"), m_client_max_body_size(-1), m_root("html"), m_indexPage("index.html") {}
 

@@ -4,11 +4,11 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "buffer.hpp"
+#include "cpp109.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
-#include "cpp109.hpp"
 
 #include <queue>
 
@@ -75,9 +75,9 @@ int Connection::sendToClient(short& events) {
 			break;
 		default:
 
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-			// LOG(chunk.substr(0, bytes_sent));
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			LOG(chunk.substr(0, bytes_sent));
+			LOG(RED << std::string(winSize(), '-') << DEFAULT);
 
 			response.trimChunk(bytes_sent);
 			if (response.isDone()) {

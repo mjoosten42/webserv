@@ -36,12 +36,9 @@ class Request: public HTTP {
 		void checkSpecialHeaders();
 
 		void parseStartLine(const std::string& line);
-		void parseHeader(const std::string& line);
 		void parseMethod(const std::string& str);
 		void parseLocation(const std::string& str);
 		void parseHTTPVersion(const std::string& str);
-
-		std::string getNextLine();
 
 	private:
 		state		m_state;
@@ -50,11 +47,10 @@ class Request: public HTTP {
 		std::string m_queryString; // ex. amongus=sus&greeting=Good%20morning
 		std::string m_pathInfo;	   // /info.php/another/path
 
-		std::string m_saved;
 		std::string m_host;
 		size_t		m_contentLength;
 		size_t		m_bodyTotal;
-		bool		m_processed;
+		bool		m_processedHeaders;
 		int			m_status;
 
 		std::string m_errorMsg;
