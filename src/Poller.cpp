@@ -27,8 +27,7 @@ void Poller::start() {
 
 	while (m_active) {
 
-		if (isatty(STDOUT_FILENO))
-			LOG(RED << std::string(winSize(), '#') << DEFAULT);
+		LOG(RED << std::string(winSize(), '#') << DEFAULT);
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
 		// LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 

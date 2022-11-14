@@ -36,6 +36,8 @@ void Response::sendMoved(const std::string& location) {
 	addHeader("Location", location);
 	addHeader("Content-Type", "text/html");
 
+	addToBody("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>");
+	addToBody("<title>" + toString(m_statusCode) + " " + getStatusMessage() + "</title></head>");
 	addToBody("<h1>" + toString(m_statusCode) + " " + getStatusMessage() + "</h1>" CRLF);
 	addToBody("<p>The resource has been moved to <a href=\"" + location + "\">" + location + "</a>.</p>" CRLF);
 

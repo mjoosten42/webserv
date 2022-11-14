@@ -5,15 +5,13 @@
 
 class EnvironmentMap {
 	public:
-		EnvironmentMap();
-
+		void addEnv();
+	
 		std::string& operator[](const std::string& key);
 
 		char **toCharpp() const;
 
 	private:
-		void addEnv();
-
 		std::map<std::string, std::string> m_map;
 };
 
