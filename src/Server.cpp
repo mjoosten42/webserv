@@ -102,7 +102,7 @@ Server::Server(t_block_directive *constructor_specs) {
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
 	overwriteIfSpecified("root", m_root, "html", constructor_specs);
 	if (my_back(m_root) == '/')
-		my_pop_back(m_root); // CPP 11
+		my_pop_back(m_root);
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
 	overwriteIfSpecified("autoindex", m_autoindex, false, "on", constructor_specs);
 
@@ -116,8 +116,8 @@ Server::Server(t_block_directive *constructor_specs) {
 		error_it++;
 		if (error_it == pages.end())
 			break;
-		std::string full_path = m_root + "/" + *error_it;
-		int user_defined_page			= stringToIntegral<int>(*(error_it - 1));
+		std::string full_path			= m_root + "/" + *error_it;
+		int			user_defined_page	= stringToIntegral<int>(*(error_it - 1));
 		m_error_page[user_defined_page] = full_path;
 		error_it++;
 	}

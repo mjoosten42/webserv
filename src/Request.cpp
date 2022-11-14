@@ -105,9 +105,8 @@ void Request::parseMethod(const std::string& str) {
 
 void Request::parseLocation(const std::string& str) {
 
-	if (str.find("..") != std::string::npos) {
+	if (str.find("..") != std::string::npos)
 		throw ServerException(400, "Invalid location(contains <pre>..</pre>)");
-	}
 
 	size_t dotpos	= str.find('.');
 	size_t slashpos = str.find('/', dotpos);

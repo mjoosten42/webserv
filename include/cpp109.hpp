@@ -1,8 +1,9 @@
 // It's CPP98 + 11!
 #pragma once
 
-#include <string>
 #include "logger.hpp"
+
+#include <string>
 
 template <typename C>
 typename C::value_type& my_back(C& cont) {
