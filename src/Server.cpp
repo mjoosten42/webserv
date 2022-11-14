@@ -224,4 +224,11 @@ const std::string& Server::getIndexPage(int loc_index) const {
 		return m_locations[loc_index].m_indexPage;
 }
 
+const std::string& Server::getRedirect(int loc_index) const {
+	if (loc_index == -1)
+		return m_root;
+	else
+		return m_locations[loc_index].m_redirection_path;
+}
+
 #pragma endregion

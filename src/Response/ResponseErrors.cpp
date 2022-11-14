@@ -3,13 +3,13 @@
 #include "defines.hpp"
 #include "utils.hpp"
 
-// By the time serveError is called, the error should be known and m_statusCode should be set. 
+// By the time serveError is called, the error should be known and m_statusCode should be set.
 void Response::serveError(const std::string& str) {
 	m_isCGI = false; // when we have an error, the CGI is no longer active.
 	sendFail(str);
 }
 
-bool Response::sendCustomErrorPage(){
+bool Response::sendCustomErrorPage() {
 	if (m_server->getErrorPages().find(m_statusCode) != m_server->getErrorPages().end()) {
 		m_filename	  = m_server->getErrorPages().at(m_statusCode);
 		m_doneReading = false;
@@ -35,7 +35,7 @@ void Response::sendFail(const std::string& msg) {
 }
 
 void Response::sendMoved(const std::string& location) {
-	m_statusCode  = 301; // should be superfluous
+	m_statusCode = 301; // should be superfluous
 	if (sendCustomErrorPage())
 		return;
 	m_doneReading = true;

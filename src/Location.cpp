@@ -10,7 +10,7 @@ Location::Location():
 	m_location("/"),
 	m_CGIs(stringSplit("")),
 	m_client_max_body_size(-1),
-	m_limit_except(""), //not yet implemented
+	m_limit_except(""), // not yet implemented
 	m_root("html"),
 	m_auto_index(false),
 	m_indexPage("index.html"),
@@ -51,9 +51,8 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 		m_indexPage = val_from_config;
 
 	val_from_config = constructor_specs->fetch_simple("redirect");
-	if (!val_from_config.empty())
-	{
-		m_is_redirected = true;
+	if (!val_from_config.empty()) {
+		m_is_redirected	   = true;
 		m_redirection_path = val_from_config;
 	}
 
