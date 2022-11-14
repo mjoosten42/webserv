@@ -17,10 +17,9 @@ class Location {
 		std::vector<std::string> m_CGIs;
 		int						 m_client_max_body_size;
 		std::string				 m_limit_except; // IE only allow GET, POST
-		std::string				 m_redirect;	 // return 301 $URI
+		std::string				 m_root;
 		bool					 m_auto_index;
 		std::string				 m_indexPage;
-		std::string				 m_root;
 		bool					 m_is_redirected;
-		std::string				 m_redirection_path;
+		std::string				 m_redirection_path; // return 301 $URI
 };

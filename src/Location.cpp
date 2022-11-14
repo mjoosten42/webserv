@@ -8,8 +8,11 @@
 
 Location::Location():
 	m_location("/"),
+	m_CGIs(stringSplit("")),
 	m_client_max_body_size(-1),
+	m_limit_except(""), //not yet implemented
 	m_root("html"),
+	m_auto_index(false),
 	m_indexPage("index.html"),
 	m_is_redirected(false),
 	m_redirection_path("") {}
