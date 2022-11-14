@@ -24,6 +24,7 @@ class Server {
 		const std::string& getRoot(int loc_index = -1) const;
 		const std::string& getHost() const;
 		const std::string& getIndexPage(int loc_index = -1) const;
+		const std::string& getRedirect(int loc_index = -1) const;
 
 		const std::vector<std::string>	& getNames() const;
 		const std::map<int, std::string>& getErrorPages() const;
@@ -31,7 +32,8 @@ class Server {
 		size_t getCMB() const;
 		short  getPort() const;
 		bool   isAutoIndex() const;
-		bool   isCGI(int loc, const std::string	 &ext) const;
+		bool   isCGI(int loc_index, const std::string  &ext) const;
+		bool   hasRedirect(int loc_index) const;
 
 	private:
 		// Server only

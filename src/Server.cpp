@@ -143,13 +143,13 @@ std::string Server::translateAddressToPath(int loc_index, const std::string& fil
 		return m_locations[loc_index].m_root + file_address;
 }
 
-bool Server::isCGI(int loc, const std::string& ext) const {
+bool Server::isCGI(int loc_index, const std::string& ext) const {
 	const std::vector<std::string> *CGIs;
 
-	if (loc == -1)
+	if (loc_index == -1)
 		CGIs = &m_CGIs;
 	else
-		CGIs = &m_locations[loc].m_CGIs;
+		CGIs = &m_locations[loc_index].m_CGIs;
 
 	return std::find(CGIs->begin(), CGIs->end(), ext) != CGIs->end();
 }
@@ -193,6 +193,17 @@ const std::string& Server::getIndexPage(int loc_index) const {
 		return m_indexPage;
 	else
 		return m_locations[loc_index].m_indexPage;
+}
+
+bool Server::hasRedirect(int loc_index) const {
+	return !m_locations[loc_index].m_redirect.empty();
+}
+
+const std::string& Server::getRedirect(int loc_index) const {
+	if (loc_index == -1)
+		return m_root;
+	else
+		return m_locations[loc_index].m_redirect;
 }
 
 #pragma endregion

@@ -48,7 +48,8 @@ class Response: public HTTP {
 		std::string readBlockFromFile();
 
 		void serveError(const std::string& str);
-		void sendFail(int code, const std::string& msg);
+		bool sendCustomErrorPage();
+		void sendFail(const std::string& msg);
 		void sendMoved(const std::string& location);
 
 		void createIndex(std::string path_to_index);

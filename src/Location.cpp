@@ -39,6 +39,8 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	if (!val_from_config.empty())
 		m_indexPage = val_from_config;
 
+	m_redirect = constructor_specs->fetch_simple("redirect");
+
 	val_from_config = constructor_specs->fetch_simple("root");
 	if (!val_from_config.empty())
 		m_root = val_from_config;

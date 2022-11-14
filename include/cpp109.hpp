@@ -1,6 +1,8 @@
 // It's CPP98 + 11!
 #pragma once
 
+#include "logger.hpp"
+
 #include <string>
 
 template <typename C>
