@@ -94,8 +94,8 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 	em.addEnv();
 
 	em["GATEWAY_INTERFACE"] = CGI_VERSION;
-	em["SERVER_PROTOCOL"]   = HTTP_VERSION;
-	em["SERVER_SOFTWARE"]   = SERVER_SOFTWARE;
+	em["SERVER_PROTOCOL"]	= HTTP_VERSION;
+	em["SERVER_SOFTWARE"]	= SERVER_SOFTWARE;
 
 	// Unused
 	// em["AUTH_TYPE"];

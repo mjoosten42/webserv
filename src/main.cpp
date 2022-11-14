@@ -50,8 +50,8 @@ int main(int argc, const char *argv[]) {
 	signal(SIGPIPE, signalHandler);
 	signal(SIGCHLD, signalHandler);
 
-	for (size_t i = 0; i < listeners.size(); i++)
-		poller.add(listeners[i]);
+	for (auto& listener : listeners)
+		poller.add(listener);
 
 	poller.start();
 }

@@ -6,13 +6,13 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
-Location::Location(): m_location("/"), m_client_max_body_size(-1), m_root("html"), m_indexPage("index.html") {}
+Location::Location(): m_location("/"), m_root("html"), m_indexPage("index.html"), m_client_max_body_size(0) {}
 
 Location::Location(t_block_directive *constructor_specs, Server *parent):
 	m_location("/"),
-	m_client_max_body_size(parent->getCMB()),
 	m_root(parent->getRoot()),
-	m_indexPage(parent->getIndexPage()) {
+	m_indexPage(parent->getIndexPage()),
+	m_client_max_body_size(parent->getCMB()) {
 
 	std::string val_from_config;
 
@@ -47,8 +47,4 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 
 	// Allows user to specify CGI to handle cgi-scripts
 	m_CGIs = stringSplit(constructor_specs->fetch_simple("cgi"));
-
-	LOG("Location CGI: ");
-	for (size_t i = 0; i < m_CGIs.size(); i++)
-		LOG("\t" + m_CGIs[i] + " ");
 }

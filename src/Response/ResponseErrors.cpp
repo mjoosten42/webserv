@@ -9,11 +9,13 @@ void Response::serveError(const std::string& str) {
 }
 
 void Response::sendFail(int code, const std::string& msg) {
+	auto errorPages = m_server->getErrorPages();
 
-	if (m_server->getErrorPages().find(code) != m_server->getErrorPages().end()) {
-		m_filename	  = m_server->getErrorPages().at(code);
+	if (errorPages.find(code) != errorPages.end()) {
+		m_filename	  = errorPages[code];
 		m_doneReading = false;
 		handleFile();
+		m_statusCode = 200;
 		return;
 	}
 

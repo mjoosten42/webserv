@@ -7,6 +7,11 @@
 #include <sys/poll.h>
 #include <vector>
 
+struct KeyValue {
+		const char *key;
+		const char *value;
+};
+
 // A binary search template. Key is the key you want to search.
 // The entries is an array of structs with a key and value.
 // Size is the length of the array.

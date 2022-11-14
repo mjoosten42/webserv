@@ -15,6 +15,8 @@ class Server {
 		Server();
 		Server(t_block_directive *constructor_specs);
 
+		void init();
+
 		int getLocationIndex(const std::string& address_to_find) const;
 
 		std::string translateAddressToPath(int loc_index, const std::string& file_address) const;
@@ -28,19 +30,20 @@ class Server {
 
 		size_t getCMB() const;
 		short  getPort() const;
-		bool   getAutoIndex() const;
-
-		bool isCGI(int loc, const std::string& ext) const;
+		bool   isAutoIndex() const;
+		bool   isCGI(int loc, const std::string	 &ext) const;
 
 	private:
-		std::vector<Location>	   m_locations;
-		std::vector<std::string>   m_CGIs;
-		std::string				   m_host;	// the IP address this server listens on. TODO: use inet_addr?
-		short					   m_port;	// port the server listens on
-		std::vector<std::string>   m_names; // i.e. example.com www.example.com etc.
+		// Server only
+		std::vector<Location>	 m_locations;
+		std::string				 m_host;  // the IP address this server listens on. TODO: use inet_addr?
+		short					 m_port;  // port the server listens on
+		std::vector<std::string> m_names; // i.e. example.com www.example.com etc.
+
 		std::string				   m_root;
+		std::string				   m_indexPage;
 		std::map<int, std::string> m_error_page;
+		std::vector<std::string>   m_CGIs;
 		size_t					   m_client_max_body_size;
 		bool					   m_autoindex;
-		std::string				   m_indexPage;
 };

@@ -13,7 +13,7 @@ class Listener {
 		Listener(const std::string& listenAddress, short port);
 		~Listener();
 
-		void		  addServer(const Server server);
+		void		  addServer(const Server		 &server);
 		const Server& getServerByHost(const std::string& host) const;
 
 		int				   getFD() const;
