@@ -5,12 +5,27 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
+#include <algorithm>
 #include <arpa/inet.h>
-#include <fcntl.h> // for serving error files
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include <unistd.h> // close
-#include <algorithm>
+
+// struct Default {
+// 	const char*	key;
+// 	const char* value;
+// };
+
+// const static Default	defaults[] = {
+// 	{"listen", "127.0.0.1:8080"},
+// 	{"server_name", ""},
+// 	{"root", "html"},
+// 	{"client_max_body_size", "-1"},
+// 	{"autoindex", "off"},
+// 	{"index", "index.html"},
+// 	{"error_page", ""},
+// 	{"limit_except", "GET POST DELETE"},
+// 	{"CGI", ""}
+// };
 
 Server::Server() {
 	m_host = "localhost";
@@ -83,17 +98,12 @@ Server::Server(t_block_directive *constructor_specs) {
 	m_host = "127.0.0.1"; //	The only address we handle requests on is localhost
 	// TODO: also parse that optionally from cfg
 
-	//	Nginx default is 80 if super user, otherwise 8000
-	overwriteIfSpecified("listen", m_port, 8000, constructor_specs);
-	//	Nginx default: ""
+	overwriteIfSpecified("listen", m_port, 8080, constructor_specs);
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
-	//	Nginx default: "html"
 	overwriteIfSpecified("root", m_root, "html", constructor_specs);
 	if (my_back(m_root) == '/')
-		my_pop_back(m_root); //CPP 11
-	//	Nginx default: 0 (which means don't check)
+		my_pop_back(m_root); // CPP 11
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
-	//	Nginx default: false (serve 404 error when navigating ot directory without index.html)
 	overwriteIfSpecified("autoindex", m_autoindex, false, "on", constructor_specs);
 
 	overwriteIfSpecified("index", m_indexPage, "index.html", constructor_specs);
@@ -107,8 +117,6 @@ Server::Server(t_block_directive *constructor_specs) {
 		if (error_it == pages.end())
 			break;
 		std::string full_path = m_root + "/" + *error_it;
-		if (access(full_path.c_str(), R_OK) != 0)
-			LOG_ERR(RED << "WARNING: The custom error pages have been incorrectly configured." << DEFAULT);
 		int user_defined_page			= stringToIntegral<int>(*(error_it - 1));
 		m_error_page[user_defined_page] = full_path;
 		error_it++;

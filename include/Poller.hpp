@@ -6,16 +6,12 @@
 #include "stringutils.hpp"
 
 #include <map>
+#include <stdlib.h> // exit
 #include <sys/poll.h>
 #include <vector>
-#include <stdlib.h> // exit
-
 
 class Poller {
 	public:
-		Poller();
-		~Poller();
-
 		void add(const Listener& listener);
 
 		void start();

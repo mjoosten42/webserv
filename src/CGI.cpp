@@ -35,7 +35,7 @@ static void dupTwo(int in_fd, int out_fd) {
 
 	if (dup2(out_fd, STDOUT_FILENO) == -1) {
 		WS::close(STDIN_FILENO);
-		throw 502;
+		exit(EXIT_FAILURE);
 	}
 	WS::close(out_fd);
 }
@@ -47,15 +47,11 @@ static void my_exec(int infd, int outfd, const std::string& filename, const Envi
 		exit(EXIT_FAILURE);
 
 	std::string copy   = filename.substr(filename.find_last_of("/") + 1);
-	char *const args[] = { const_cast<char *const>(copy.c_str()), NULL }; //Werror type qualifiers ignored on cast result type
+	char *const args[] = { const_cast<char *const>(copy.c_str()),
+						   NULL }; // Werror type qualifiers ignored on cast result type
 
 	WS::execve(copy, args, em);
 	exit(EXIT_FAILURE);
-}
-
-void Popen::closeFDs() {
-	WS::close(readfd);
-	WS::close(writefd);
 }
 
 // back to minishell ayy
@@ -95,6 +91,12 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 
 	EnvironmentMap em;
 
+	em.addEnv();
+
+	em["GATEWAY_INTERFACE"] = CGI_VERSION;
+	em["SERVER_PROTOCOL"]   = HTTP_VERSION;
+	em["SERVER_SOFTWARE"]   = SERVER_SOFTWARE;
+
 	// Unused
 	// em["AUTH_TYPE"];
 	// em["REMOTE_IDENT"];
@@ -106,8 +108,8 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 	if (req.hasHeader("Content-Type"))
 		em["CONTENT_TYPE"] = req.getHeaderValue("Content-Type");
 
-	em["PATH_INFO"]		  = req.getPathInfo(); // TODO
-	em["PATH_TRANSLATED"] = "";				   // TODO
+	em["PATH_INFO"]		  = req.getPathInfo();
+	em["PATH_TRANSLATED"] = ""; // TODO
 
 	em["QUERY_STRING"]	 = req.getQueryString();
 	em["REMOTE_ADDR"]	 = peer;
@@ -122,9 +124,6 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 
 	if (req.getMethod() == POST)
 		em["UPLOAD_DIR"] = WS::realpath("html") + "/uploads/"; // TODO
-
-	LOG("PATH_INFO: " << em["PATH_INFO"]);
-	LOG("PATH_TRANSLATED: " << em["PATH_TRANSLATED"]);
 
 	popen.my_popen(filename, em);
 }

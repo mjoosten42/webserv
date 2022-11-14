@@ -1,11 +1,11 @@
 #include "Request.hpp"
 
 #include "HTTP.hpp"
+#include "cpp109.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
-#include "cpp109.hpp"
 
 #include <sstream>
 #include <string>
@@ -15,14 +15,13 @@ const static int   methodStringsSize = sizeof(methodStrings) / sizeof(*methodStr
 
 bool isHttpVersion(const std::string& str);
 bool isSupportedMethod(methods method);
-bool containsNewline(const std::string& str);
 
 Request::Request():
 	m_state(STARTLINE),
 	m_method(static_cast<methods>(-1)),
 	m_contentLength(0),
 	m_bodyTotal(0),
-	m_processed(false),
+	m_processedHeaders(false),
 	m_status(0) {}
 
 void Request::append(const char *buf, ssize_t size) {
@@ -31,9 +30,10 @@ void Request::append(const char *buf, ssize_t size) {
 	try {
 		parse();
 		m_status = 200;
-	} catch (int error) {
-		m_state	 = DONE;
-		m_status = error;
+	} catch (const ServerException& e) {
+		m_state	   = DONE;
+		m_status   = e.code;
+		m_errorMsg = e.what();
 	}
 }
 
@@ -44,10 +44,8 @@ void Request::parse() {
 		case STARTLINE:
 			if (containsNewline(m_saved)) {
 				line = getNextLine();
-				if (line.empty()) {
-					m_errorMsg = "Missing startline";
-					throw 400;
-				}
+				if (line.empty())
+					throw ServerException(400, "Missing startline");
 				parseStartLine(line);
 				m_state = HEADERS;
 				parse();
@@ -68,7 +66,7 @@ void Request::parse() {
 			m_bodyTotal += m_saved.length();
 			addToBody(m_saved);
 			m_saved.clear();
-			if (!m_processed)
+			if (!m_processedHeaders)
 				checkSpecialHeaders();
 			if (m_bodyTotal == m_contentLength)
 				m_state = DONE;
@@ -80,17 +78,14 @@ void Request::parse() {
 
 // TODO: unit test this
 void Request::parseStartLine(const std::string& line) {
-	const char *errorMessages[] = {
-		"Missing startline", "Missing location", "Missing HTTP version", "Extra info after HTTP version"
-	};
-	std::vector<std::string> strs = stringSplit(line);
+	const char				*errorMessages[] = { "Missing startline", "Missing location", "Missing HTTP version" };
+	std::vector<std::string> strs			 = stringSplit(line);
 
 	if (strs.size() != 3) {
 		if (strs.size() < 3)
-			m_errorMsg = errorMessages[strs.size()];
+			throw ServerException(400, errorMessages[strs.size()]);
 		else
-			m_errorMsg = errorMessages[3];
-		throw 400;
+			throw ServerException(400, "Extra info after HTTP version");
 	}
 
 	parseMethod(strs[0]);
@@ -102,17 +97,18 @@ void Request::parseMethod(const std::string& str) {
 	for (int i = 0; i < methodStringsSize; i++)
 		if (str == methodStrings[i])
 			m_method = static_cast<methods>(i);
-	if (m_method == static_cast<methods>(-1)) {
-		m_errorMsg = "Incorrect method: " + str;
-		throw 400;
-	}
-	if (!isSupportedMethod(m_method)) {
-		m_errorMsg = "Unsupported method: " + str;
-		throw 501;
-	}
+	if (m_method == static_cast<methods>(-1))
+		throw ServerException(400, "Incorrect method: " + str);
+	if (!isSupportedMethod(m_method))
+		throw ServerException(501, "Unsupported method: " + str);
 }
 
 void Request::parseLocation(const std::string& str) {
+
+	if (str.find("..") != std::string::npos) {
+		throw ServerException(400, "Invalid location(contains <pre>..</pre>)");
+	}
+
 	size_t dotpos	= str.find('.');
 	size_t slashpos = str.find('/', dotpos);
 	size_t qmpos	= str.find('?');
@@ -130,51 +126,20 @@ void Request::parseLocation(const std::string& str) {
 }
 
 void Request::parseHTTPVersion(const std::string& str) {
-	if (!isHttpVersion(str)) {
-		m_errorMsg = "Invalid HTTP version: " + str;
-		throw 400;
-	}
-	if (str != HTTP_VERSION) {
-		m_errorMsg = std::string(HTTP_VERSION) + " only: " + str;
-		throw 505;
-	}
-}
-
-// TODO: header value with whitespace
-void Request::parseHeader(const std::string& line) {
-	std::pair<MapIter, bool>			insert;
-	std::pair<std::string, std::string> header;
-	size_t								pos = line.find_first_of(IFS);
-
-	header.first = line.substr(0, pos);
-	if (pos != std::string::npos)
-		header.second = line.substr(line.find_first_not_of(IFS, pos));
-
-	if (my_back(header.first) != ':') {
-		m_errorMsg = "Header field must end in ':' : \"" + line + "\"";
-		throw 400;
-	}
-	my_pop_back(header.first);
-	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so lowercase them.
-	insert = m_headers.insert(header);
-	if (!insert.second) {
-		m_errorMsg = "Duplicate headers: \"" + line + "\"";
-		throw 400;
-	}
+	if (!isHttpVersion(str))
+		throw ServerException(400, "Invalid HTTP version: " + str);
+	if (str != HTTP_VERSION)
+		throw ServerException(505, HTTP_VERSION " only: " + str);
 }
 
 void Request::checkSpecialHeaders() {
 	if (hasHeader("Host")) {
 		std::string hostHeader = getHeaderValue("Host");
 		m_host				   = hostHeader.substr(0, hostHeader.find(':'));
-		if (m_host.empty()) {
-			m_errorMsg = "Empty host";
-			throw 400;
-		}
-	} else {
-		m_errorMsg = "Missing host";
-		throw 400;
-	}
+		if (m_host.empty())
+			throw ServerException(400, "Empty host header");
+	} else
+		throw ServerException(400, "Missing host header");
 	if (hasHeader("Content-Length"))
 		m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("Content-Length"));
 }
@@ -185,21 +150,6 @@ bool isHttpVersion(const std::string& str) {
 
 bool isSupportedMethod(methods method) {
 	return method == GET || method == POST || method == DELETE;
-}
-
-bool containsNewline(const std::string& str) {
-	return str.find("\r\n") != str.npos || str.find("\n") != str.npos;
-}
-
-// Assumes ContainsNewline is called beforehand
-// Automatically erases line from saved data
-std::string Request::getNextLine() {
-	std::size_t pos			  = findNewline(m_saved);
-	std::string line		  = m_saved.substr(0, pos);
-	int			newlineLength = (m_saved[pos] == '\r') ? 2 : 1; // "\r\n or \n"
-
-	m_saved.erase(0, pos + newlineLength);
-	return line;
 }
 
 #pragma region accessors
@@ -253,7 +203,8 @@ std::string Request::getMethodAsString() const {
 		case DELETE:
 			return "DELETE";
 		default:
-			return "NONE";
+			LOG_ERR("Invalid method: " << m_state);
+			return "INVALID METHOD";
 	}
 }
 
@@ -268,7 +219,8 @@ std::string Request::getStateAsString() const {
 		case DONE:
 			return "DONE";
 		default:
-			return "DONE";
+			LOG_ERR("Invalid state: " << m_state);
+			return "INVALID STATE";
 	}
 }
 

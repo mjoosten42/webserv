@@ -4,8 +4,10 @@ HEADERS = \
 	include/CGI.hpp \
 	include/ConfigParser.hpp \
 	include/Connection.hpp \
+	include/cpp109.hpp \
 	include/defines.hpp \
 	include/EnvironmentMap.hpp \
+	include/FD.hpp \
 	include/HTTP.hpp \
 	include/Listener.hpp \
 	include/Location.hpp \

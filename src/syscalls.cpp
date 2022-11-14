@@ -96,7 +96,7 @@ int accept(int fd, sockaddr *peer) {
 	int		  ret  = ::accept(fd, peer, &size);
 
 	if (ret == -1)
-		LOG_ERR("open(\"" << fd << "\"): " << strerror(errno));
+		LOG_ERR("accept(\"" << fd << "\"): " << strerror(errno)); // TODO: throw
 
 	set_fd_nonblocking(ret);
 

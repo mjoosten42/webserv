@@ -6,14 +6,6 @@
 #include <string.h> // strdup(sighs...)
 #include <string>
 
-EnvironmentMap::EnvironmentMap() {
-	addEnv();
-
-	m_map["GATEWAY_INTERFACE"] = CGI_VERSION;
-	m_map["SERVER_PROTOCOL"]   = HTTP_VERSION;
-	m_map["SERVER_SOFTWARE"]   = SERVER_SOFTWARE;
-}
-
 std::string& EnvironmentMap::operator[](const std::string& key) {
 	return m_map[key];
 }

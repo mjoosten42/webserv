@@ -1,20 +1,21 @@
 #include "Connection.hpp"
 
+#include "FD.hpp"
 #include "Listener.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "buffer.hpp"
+#include "cpp109.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
-#include "cpp109.hpp"
 
 #include <queue>
 
 Connection::Connection() {}
 
-Connection::Connection(int m_fd, const Listener *listener, const std::string& peer):
+Connection::Connection(FD m_fd, const Listener *listener, const std::string& peer):
 	m_fd(m_fd), m_listener(listener), m_peer(peer), m_close(false) {}
 
 int Connection::receiveFromClient(short& events) {

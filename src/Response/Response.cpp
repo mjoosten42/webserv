@@ -19,7 +19,6 @@ const static Status statusMessages[] = { { 200, "OK" },
 										 { 400, "Bad Request" },
 										 { 403, "Forbidden" },
 										 { 404, "Not Found" },
-										 { 418, "I'm a teapot" },
 										 { 500, "Internal Server Error" },
 										 { 501, "Not Implemented" },
 										 { 502, "Bad Gateway" },
@@ -31,11 +30,8 @@ Response::Response():
 	HTTP(),
 	m_statusCode(0),
 	m_server(NULL),
-	m_source_fd(-1),
 	m_locationIndex(-1),
 	m_processedRequest(false),
-	m_isCGI(false),
-	m_isChunked(false),
 	m_doneReading(false),
 	m_CGI_DoneProcessingHeaders(false) {}
 
@@ -46,7 +42,6 @@ void Response::addServer(const Server *server) {
 void Response::initialize() {
 	m_locationIndex = m_server->getLocationIndex(m_request.getLocation());
 	m_filename		= m_server->translateAddressToPath(m_locationIndex, m_request.getLocation());
-	m_statusCode	= m_request.getStatus();
 
 	setFlags();
 	addDefaultHeaders();
@@ -58,7 +53,7 @@ void Response::setFlags() {
 
 	m_isCGI = m_server->isCGI(m_locationIndex, ext);
 	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
-	m_isChunked |= m_isCGI;						// CGI is always chunked
+	m_isChunked = m_isCGI;						// CGI is always chunked
 }
 
 std::string Response::getStatusMessage() const {

@@ -1,19 +1,19 @@
 #include "utils.hpp"
-#include "cpp109.hpp"
 
 #include "buffer.hpp" // path
+#include "cpp109.hpp"
 #include "logger.hpp"
 
-#include <dirent.h> // opendir
-#include <fcntl.h>	// fcntl
-#include <stdio.h>	// perror
-#include <stdlib.h> // exit
+#include <arpa/inet.h> // ntohl
+#include <dirent.h>	   // opendir
+#include <fcntl.h>	   // fcntl
+#include <stdio.h>	   // perror
+#include <stdlib.h>	   // exit
 #include <string>
 #include <sys/ioctl.h> // ioctl
 #include <sys/stat.h>  // stat
 #include <unistd.h>	   // lseek
 #include <vector>
-#include <arpa/inet.h> // ntohl
 
 // perrors and exits.
 void fatal_perror(const char *msg) {
@@ -63,13 +63,6 @@ size_t winSize() {
 	struct winsize w;
 	ioctl(1, TIOCGWINSZ, &w);
 	return w.ws_col;
-}
-
-size_t findNewline(const std::string str, size_t begin) {
-	size_t pos = str.find("\r\n", begin);
-	if (pos != std::string::npos)
-		return pos;
-	return str.find("\n", begin);
 }
 
 off_t fileSize(int fd) {

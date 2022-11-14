@@ -39,7 +39,6 @@ void Response::processRequest() {
 				LOG_ERR("Invalid method");
 		}
 	} catch (int error) {
-		LOG("error: " << error);
 		m_statusCode = error;
 		serveError(getStatusMessage());
 	}
@@ -65,6 +64,7 @@ void Response::handleDelete() {
 void Response::handleFile() {
 	std::string originalFile = m_filename;
 	bool		isDirectory	 = isDir(m_filename);
+	int			fd;
 
 	if (isDirectory) {
 		if (my_back(m_filename) != '/')
@@ -72,10 +72,11 @@ void Response::handleFile() {
 		m_filename += m_server->getIndexPage(m_locationIndex);
 	}
 
-	m_source_fd = WS::open(m_filename, O_RDONLY);
-	if (m_source_fd == -1)
+	fd = WS::open(m_filename, O_RDONLY);
+	if (fd == -1)
 		return openError(originalFile, isDirectory);
 
+	m_source_fd = fd;
 	addFileHeaders();
 	m_statusCode = 200;
 	m_chunk		 = getResponseAsString();
@@ -149,7 +150,6 @@ std::string Response::readBlockFromFile() {
 		case -1:
 		case 0:
 			m_doneReading = true;
-			WS::close(m_source_fd);
 			break;
 		default:
 			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
@@ -164,12 +164,18 @@ std::string Response::readBlockFromFile() {
 void Response::createIndex(std::string path_to_index) {
 	Entry entry = { m_request.getLocation(), recursivePathCount(path_to_index) };
 
+	std::string title = "Index of directory: " + entry.name;
+
 	addHeader("Content-Type", "text/html");
 
-	addToBody("<h1> Index of directory: " + entry.name + "</h1>\n<ul>");
+	addToBody("<!DOCTYPE html><html>\n");
+	addToBody("<head><meta charset='utf-8'><title>" + title + "</title></head>\n");
+	addToBody("<h1>" + title + "</h1>\n<ul>");
 
 	for (size_t i = 0; i < entry.subdir.size(); i++)
 		addToBody(entry.subdir[i].toString());
+
+	addToBody("</ul></body></html>");
 
 	m_doneReading = true;
 	m_statusCode  = 200;

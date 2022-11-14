@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FD.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 
@@ -11,7 +12,7 @@ class Listener;
 class Connection {
 	public:
 		Connection();
-		Connection(int fd, const Listener *listener, const std::string& peer);
+		Connection(FD fd, const Listener *listener, const std::string& peer);
 
 		int receiveFromClient(short& events);
 		int sendToClient(short& events);
@@ -22,7 +23,7 @@ class Connection {
 		Response& getLastResponse();
 
 	private:
-		int m_fd;
+		FD m_fd;
 
 		std::queue<Response> m_responses;
 		const Listener		*m_listener;
