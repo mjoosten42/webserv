@@ -53,7 +53,7 @@ void s_block_directive::recurse_blocks(std::vector<t_block_directive *>& ret, co
 std::string s_block_directive::fetch_simple(const std::string& key) {
 	std::vector<t_simple_directive>::iterator it_s;
 	for (it_s = this->simple_directives.begin(); it_s != this->simple_directives.end(); ++it_s)
-		if ((*it_s).name.compare(key) == 0)
+		if (it_s->name == key)
 			return ((*it_s).params);
 	return ("");
 }

@@ -36,8 +36,8 @@ std::string Entry::toString(const std::string& path) const {
 	ret += "<a href=\"" + path + name + "\">" + basename(name) + "</a>\n";
 	if (!subdir.empty()) {
 		ret += "<ul>\n";
-		for (size_t i = 0; i < subdir.size(); i++)
-			ret += subdir[i].toString(path + name);
+		for (auto& entry : subdir)
+			ret += entry.toString(path + name);
 		ret += "</ul>\n";
 	}
 	return ret + "</li>\n";

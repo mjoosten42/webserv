@@ -21,8 +21,10 @@ void Response::processRequest() {
 
 	initialize();
 
-	if (!isGood(m_request.getStatus()))
+	if (!isGood(m_request.getStatus())){
+		m_statusCode = m_request.getStatus();
 		return sendFail(m_request.getErrorMsg());
+	}
 
 	try {
 		switch (m_request.getMethod()) {
@@ -84,7 +86,7 @@ void Response::handleFile() {
 }
 
 void Response::openError(const std::string& dir, bool isDirectory) {
-	bool autoIndex = m_server->getAutoIndex();
+	bool autoIndex = m_server->isAutoIndex();
 
 	switch (errno) {
 		case EACCES:
@@ -163,9 +165,8 @@ std::string Response::readBlockFromFile() {
 }
 
 void Response::createIndex(std::string path_to_index) {
-	Entry entry = { m_request.getLocation(), recursivePathCount(path_to_index) };
-
-	std::string title = "Index of directory: " + entry.name;
+	Entry		root  = { m_request.getLocation(), recursivePathCount(path_to_index) };
+	std::string title = "Index of directory: " + root.name;
 
 	addHeader("Content-Type", "text/html");
 
@@ -173,8 +174,8 @@ void Response::createIndex(std::string path_to_index) {
 	addToBody("<head><meta charset='utf-8'><title>" + title + "</title></head>\n");
 	addToBody("<h1>" + title + "</h1>\n<ul>");
 
-	for (size_t i = 0; i < entry.subdir.size(); i++)
-		addToBody(entry.subdir[i].toString());
+	for (auto& entry : root.subdir)
+		addToBody(entry.toString());
 
 	addToBody("</ul></body></html>");
 

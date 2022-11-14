@@ -11,19 +11,16 @@
 // this function returns a pretty header field. Example: "host" becomes "Host",
 // "transfer-encoding" becomes "Transfer-Encoding". Segfaults if field is empty.
 std::string HTTP::capitalizeFieldPretty(std::string field) {
-	field[0] = std::toupper(field[0]);
-
 	size_t pos = 0;
 
 	while (true) {
-
-		pos = field.find_first_of('-', pos);
+		field[pos] = std::toupper(field[pos]);
+		pos		   = field.find_first_of('-', pos);
 		if (pos == std::string::npos)
 			break;
 		pos++;
 		if (pos >= field.length())
 			break;
-		field[pos] = std::toupper(field[pos]);
 	}
 	return field;
 }
@@ -33,7 +30,8 @@ bool HTTP::containsNewline(const std::string& str) {
 }
 
 size_t HTTP::findNewline(const std::string str, size_t begin) {
-	size_t pos = str.find("\r\n", begin);
+	size_t pos = str.find(CRLF, begin);
+
 	if (pos != std::string::npos)
 		return pos;
 	return str.find("\n", begin);
@@ -51,7 +49,6 @@ std::string HTTP::getNextLine() {
 }
 
 void HTTP::parseHeader(const std::string& line) {
-	std::pair<MapIter, bool>			insert;
 	std::pair<std::string, std::string> header;
 	size_t								pos = line.find_first_of(IFS);
 
@@ -63,7 +60,7 @@ void HTTP::parseHeader(const std::string& line) {
 		throw ServerException(400, "Header field must end in ':' : " + line);
 	my_pop_back(header.first);
 	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so lowercase them.
-	insert = m_headers.insert(header);
+	auto insert = m_headers.insert(header);
 	if (!insert.second)
 		throw ServerException(400, "Duplicate headers: " + line);
 }
@@ -117,7 +114,7 @@ std::string HTTP::getHeaderValue(const std::string& field) const {
 std::string HTTP::getHeadersAsString() const {
 	std::string headers;
 
-	for (MapIter it = m_headers.begin(); it != m_headers.end(); it++)
-		headers += capitalizeFieldPretty(it->first) + ": " + it->second + CRLF;
+	for (auto header : m_headers)
+		headers += capitalizeFieldPretty(header.first) + ": " + header.second + CRLF;
 	return headers;
 }

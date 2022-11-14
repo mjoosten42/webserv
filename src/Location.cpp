@@ -6,24 +6,13 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
-Location::Location():
-	m_location("/"),
-	m_CGIs(stringSplit("")),
-	m_client_max_body_size(-1),
-	m_limit_except(""), // not yet implemented
-	m_root("html"),
-	m_auto_index(false),
-	m_indexPage("index.html"),
-	m_is_redirected(false),
-	m_redirection_path("") {}
+Location::Location(): m_location("/"), m_root("html"), m_indexPage("index.html"), m_client_max_body_size(0) {}
 
 Location::Location(t_block_directive *constructor_specs, Server *parent):
 	m_location("/"),
-	m_client_max_body_size(parent->getCMB()),
 	m_root(parent->getRoot()),
 	m_indexPage(parent->getIndexPage()),
-	m_is_redirected(false),
-	m_redirection_path("") {
+	m_client_max_body_size(parent->getCMB()) {
 
 	std::string val_from_config;
 
@@ -50,11 +39,7 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 	if (!val_from_config.empty())
 		m_indexPage = val_from_config;
 
-	val_from_config = constructor_specs->fetch_simple("redirect");
-	if (!val_from_config.empty()) {
-		m_is_redirected	   = true;
-		m_redirection_path = val_from_config;
-	}
+	m_redirect = constructor_specs->fetch_simple("redirect");
 
 	val_from_config = constructor_specs->fetch_simple("root");
 	if (!val_from_config.empty())
@@ -64,8 +49,4 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 
 	// Allows user to specify CGI to handle cgi-scripts
 	m_CGIs = stringSplit(constructor_specs->fetch_simple("cgi"));
-
-	LOG("Location CGI: ");
-	for (size_t i = 0; i < m_CGIs.size(); i++)
-		LOG("\t" + m_CGIs[i] + " ");
 }

@@ -11,36 +11,35 @@ void SourceFds::add(const pollfd& pollfd, int client_fd) {
 }
 
 void SourceFds::remove(int source_fd) {
-	for (size_t i = 0; i < m_sourceFds.size(); i++) {
-		if (m_sourceFds[i].first == source_fd) {
-			m_sourceFds.erase(m_sourceFds.begin() + i);
+	auto it = m_sourceFds.begin();
+	for (; it != m_sourceFds.end(); it++) {
+		if (it->first == source_fd) {
+			m_sourceFds.erase(it);
 			break;
 		}
 	}
 }
 
 int SourceFds::getClientFd(int source_fd) {
-	for (size_t i = 0; i < m_sourceFds.size(); i++)
-		if (m_sourceFds[i].first == source_fd)
-			return m_sourceFds[i].second;
-	LOG_ERR("Client for source fd " << source_fd << " not found!");
-	LOG_ERR(getSourceFdsAsString());
+	for (auto& sourceFd : m_sourceFds)
+		if (sourceFd.first == source_fd)
+			return sourceFd.second;
 	return -1;
 }
 
 std::vector<int> SourceFds::getSourceFds(int client_fd) {
 	std::vector<int> fds;
 
-	for (size_t i = 0; i < m_sourceFds.size(); i++)
-		if (m_sourceFds[i].second == client_fd)
-			fds.push_back(m_sourceFds[i].first);
+	for (auto& sourceFd : m_sourceFds)
+		if (sourceFd.second == client_fd)
+			fds.push_back(sourceFd.first);
 	return fds;
 }
 
 std::string SourceFds::getSourceFdsAsString() {
 	std::string str = "SourceFds: {";
-	for (size_t i = 0; i < m_sourceFds.size(); i++)
-		str += "\n\t{ " + toString(m_sourceFds[i].first) + ", " + toString(m_sourceFds[i].second) + " }";
+	for (auto& sourceFd : m_sourceFds)
+		str += "\n\t{ " + toString(sourceFd.first) + ", " + toString(sourceFd.second) + " }";
 	str += "\n}";
 	return str;
 }

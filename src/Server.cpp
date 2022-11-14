@@ -10,33 +10,21 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-// struct Default {
-// 	const char*	key;
-// 	const char* value;
-// };
-
-// const static Default	defaults[] = {
-// 	{"listen", "127.0.0.1:8080"},
-// 	{"server_name", ""},
-// 	{"root", "html"},
-// 	{"client_max_body_size", "-1"},
-// 	{"autoindex", "off"},
-// 	{"index", "index.html"},
-// 	{"error_page", ""},
-// 	{"limit_except", "GET POST DELETE"},
-// 	{"CGI", ""}
-// };
-
 Server::Server() {
-	m_host = "localhost";
-	m_port = 8080;
-	m_names.push_back("webserv.com");
+	init();
+
+	m_locations.push_back(Location());
+}
+
+void Server::init() {
+	m_host				   = "127.0.0.1";
+	m_port				   = 8080;
 	m_root				   = "html";
 	m_client_max_body_size = 0;
 	m_autoindex			   = false;
 	m_indexPage			   = "index.html";
 
-	m_locations.push_back(Location());
+	m_names.push_back("webserv.com");
 }
 
 #pragma region overwriteIfSpecified
@@ -94,18 +82,13 @@ static void
 #pragma endregion
 
 Server::Server(t_block_directive *constructor_specs) {
-	// INITIALISE MEMBER VARIABLES //
-	m_host = "127.0.0.1"; //	The only address we handle requests on is localhost
-	// TODO: also parse that optionally from cfg
+	init();
 
 	overwriteIfSpecified("listen", m_port, 8080, constructor_specs);
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
 	overwriteIfSpecified("root", m_root, "html", constructor_specs);
-	if (my_back(m_root) == '/')
-		my_pop_back(m_root);
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
 	overwriteIfSpecified("autoindex", m_autoindex, false, "on", constructor_specs);
-
 	overwriteIfSpecified("index", m_indexPage, "index.html", constructor_specs);
 
 	// Default error pages are built in, here the user can define their own.
@@ -122,26 +105,17 @@ Server::Server(t_block_directive *constructor_specs) {
 		error_it++;
 	}
 
-	// Allows user to specify CGI to handle cgi-scripts
 	overwriteIfSpecified("cgi", m_CGIs, "", constructor_specs);
-	LOG("Server CGI:");
-	for (size_t i = 0; i < m_CGIs.size(); i++)
-		LOG(m_CGIs[i] + " ");
 
-	// ADD LOCATION BLOCKS, IF PRESENT //
-	std::vector<t_block_directive *> location_config_blocks;
-	location_config_blocks = constructor_specs->fetch_matching_blocks("location");
-
-	std::vector<t_block_directive *>::iterator it;
-	for (it = location_config_blocks.begin(); it != location_config_blocks.end(); ++it)
-		m_locations.push_back(Location(*it, this));
+	for (auto& location : constructor_specs->fetch_matching_blocks("location"))
+		m_locations.push_back(Location(location, this));
 }
 
 // For clarity:
 //  -We use "Address" to refer to the way the user navigates the server, e.g.
 //  webserv.com/images/amogus.jpg
 //  -We use "Path" to refer the client-side storage of files, e.g.
-//  html/img/amogus.jpg
+//  html/images/amogus.jpg
 //  This function tries to find the longest match between the user defined Address
 //  and the name of one of the containing location blocks.
 int Server::getLocationIndex(const std::string& address) const {
@@ -149,7 +123,6 @@ int Server::getLocationIndex(const std::string& address) const {
 	size_t longest = 0;
 
 	for (size_t i = 0; i < m_locations.size(); i++) {
-
 		const std::string& loc	   = m_locations[i].m_location;
 		size_t			   matched = match(loc, address); // Amount of characters matched
 
@@ -164,23 +137,21 @@ int Server::getLocationIndex(const std::string& address) const {
 }
 
 std::string Server::translateAddressToPath(int loc_index, const std::string& file_address) const {
-	if (loc_index == -1) // Should only use this on a location block, not on a server block;
+	if (loc_index == -1)
 		return m_root + file_address;
 	else
 		return m_locations[loc_index].m_root + file_address;
 }
 
-bool Server::isCGI(int loc, const std::string& ext) const {
-	const std::vector<std::string>			*CGIs;
-	std::vector<std::string>::const_iterator it;
+bool Server::isCGI(int loc_index, const std::string& ext) const {
+	const std::vector<std::string> *CGIs;
 
-	if (loc == -1)
+	if (loc_index == -1)
 		CGIs = &m_CGIs;
 	else
-		CGIs = &m_locations[loc].m_CGIs;
+		CGIs = &m_locations[loc_index].m_CGIs;
 
-	it = std::find(CGIs->begin(), CGIs->end(), ext);
-	return it != CGIs->end();
+	return std::find(CGIs->begin(), CGIs->end(), ext) != CGIs->end();
 }
 
 #pragma region getters
@@ -209,11 +180,11 @@ size_t Server::getCMB() const {
 	return m_client_max_body_size;
 }
 
-const std::map<int, std::string>& Server::getErrorPages() const {
-	return m_error_page;
+const std::string& Server::getErrorPage(int code) const {
+	return m_error_page.at(code);
 }
 
-bool Server::getAutoIndex() const {
+bool Server::isAutoIndex() const {
 	return m_autoindex;
 }
 
@@ -229,7 +200,11 @@ const std::string& Server::getRedirect(const std::string& address) const {
 	if (loc_index == -1 || !m_locations[loc_index].m_is_redirected)
 		return address;
 	else
-		return m_locations[loc_index].m_redirection_path;
+		return m_locations[loc_index].m_redirect;
+}
+
+bool Server::hasErrorPage(int code) const {
+	return m_error_page.find(code) != m_error_page.end();
 }
 
 #pragma endregion

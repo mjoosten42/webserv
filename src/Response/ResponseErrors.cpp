@@ -5,20 +5,19 @@
 
 // By the time sendFail or sendMoved is called, the error should be known and m_statusCode should be set.
 
-bool Response::sendCustomErrorPage() {
-	if (m_server->getErrorPages().find(m_statusCode) != m_server->getErrorPages().end()) {
-		m_filename	  = m_server->getErrorPages().at(m_statusCode);
-		m_doneReading = false;
-		handleFile();
-		return true;
-	}
-	return false;
+void Response::sendCustomErrorPage() {
+	int tmp = m_statusCode;
+
+	m_filename	  = m_server->getErrorPage(m_statusCode);
+	m_doneReading = false;
+	handleFile();
+	m_statusCode = tmp;
 }
 
 void Response::sendFail(const std::string& msg) {
 	m_isCGI = false; // when we have an error, the CGI is no longer active.
-	if (sendCustomErrorPage())
-		return;
+	if (m_server->hasErrorPage(m_statusCode))
+		return sendCustomErrorPage();
 	m_doneReading = true;
 
 	addHeader("Content-Type", "text/html");
@@ -35,8 +34,8 @@ void Response::sendMoved(const std::string& address) {
 	LOG("SEND MOVED");
 	LOG("Address: " + address);
 	m_statusCode = 301; // TODO: should be superfluous
-	if (sendCustomErrorPage())
-		return;
+	if (m_server->hasErrorPage(m_statusCode))
+		return sendCustomErrorPage();
 	m_doneReading = true;
 	m_request.setLocation(m_server->getRedirect(address));
 	std::string redirect = m_request.getLocation();

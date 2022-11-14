@@ -17,19 +17,18 @@ Listener::Listener(const std::string& listenAddress, short port): m_fd(-1), m_li
 
 Listener::~Listener() {}
 
-void Listener::addServer(const Server server) {
+void Listener::addServer(const Server& server) {
+	auto names = server.getNames();
+
 	m_servers.push_back(server);
 
-	const std::vector<std::string>& names = server.getNames();
-
-	std::vector<std::string>::const_iterator it;
-	for (it = names.begin(); it != names.end(); it++)
-		m_hostToServer[*it] = &(m_servers.back());
+	for (auto& name : names)
+		m_hostToServer[name] = &(m_servers.back());
 }
 
 const Server& Listener::getServerByHost(const std::string& host) const {
 	// try to find it. Otherwise, use the first server.
-	std::map<std::string, const Server *>::const_iterator it = m_hostToServer.find(host);
+	auto it = m_hostToServer.find(host);
 	if (it != m_hostToServer.end())
 		return *(it->second);
 	return m_servers.front();

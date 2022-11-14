@@ -16,6 +16,7 @@ void Response::handleCGI() {
 		m_statusCode = 201;
 }
 
+// TODO: CGI Status header
 void Response::getCGIHeaderChunk() {
 	std::string line;
 

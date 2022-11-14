@@ -171,9 +171,7 @@ size_t Poller::sourceFdsIndex() const {
 }
 
 std::vector<pollfd>::iterator Poller::find(int fd) {
-	std::vector<pollfd>::iterator it;
-
-	for (it = m_pollfds.begin(); it != m_pollfds.end(); it++)
+	for (auto it = m_pollfds.begin(); it != m_pollfds.end(); it++)
 		if (it->fd == fd)
 			return it;
 	LOG_ERR("Fd not found in pollfds: " << fd);
