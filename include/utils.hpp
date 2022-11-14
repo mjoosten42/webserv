@@ -2,10 +2,10 @@
 
 #include "stringutils.hpp"
 
+#include <algorithm> // transform
 #include <sstream>
 #include <sys/poll.h>
 #include <vector>
-#include <algorithm> // transform
 
 // A binary search template. Key is the key you want to search.
 // The entries is an array of structs with a key and value.
@@ -56,7 +56,6 @@ T stringToIntegral(const std::string& number) {
 }
 
 size_t winSize();
-size_t findNewline(const std::string str, size_t begin = 0);
 off_t  fileSize(int fd);
 size_t match(const std::string first, const std::string& second);
 bool   isDir(const std::string	&path);

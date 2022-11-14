@@ -2,63 +2,54 @@
 #include "Server.hpp"
 #include "logger.hpp"
 #include "syscalls.hpp"
-#include "utils.hpp" // fatal_perror
 
 #include <string>
 
 void Response::handleCGI() {
 	m_cgi.start(m_request, m_server, m_filename, m_peer);
 
+	m_source_fd = m_cgi.popen.readfd;
+
 	if (m_request.getMethod() == GET)
 		m_statusCode = 200;
-	if (m_request.getMethod() == POST)
+	else
 		m_statusCode = 201;
-
-	addHeader("Transfer-Encoding", "Chunked");
-
-	m_source_fd = m_cgi.popen.readfd;
-	m_chunk		= getStatusLine() + getHeadersAsString();
 }
 
 void Response::getCGIHeaderChunk() {
-	std::string block = readBlockFromFile();
+	std::string line;
 
-	if (m_doneReading && !m_CGI_DoneProcessingHeaders) { // CGI exited before completing respones
-		m_savedLine.clear();
-		m_chunk += CRLF;
-		m_CGI_DoneProcessingHeaders = true;
-	}
+	m_saved += readBlockFromFile();
 
-	block.insert(0, m_savedLine); // Prepend previous remaining data
-
-	// Add lines to chunk, removing them from block as we go
-	m_savedLine = getLine(block);
-	while (!m_savedLine.empty()) {
-		m_chunk += m_savedLine;
-		if (m_savedLine == CRLF || m_savedLine == "\n") {
+	// Parse headers line by line
+	while (containsNewline(m_saved)) {
+		line = getNextLine();
+		if (line.empty()) {
 			m_CGI_DoneProcessingHeaders = true;
 			break;
 		}
-		m_savedLine = getLine(block);
+		try {
+			parseHeader(line);
+		} catch (const ServerException& e) {
+			m_statusCode = e.code;
+			serveError(e.what());
+			break;
+		}
 	}
-	m_savedLine = block; // Save remaining data
+
+	if (m_doneReading && !m_CGI_DoneProcessingHeaders) { // CGI exited before completing respones
+		m_saved.clear();
+		m_statusCode = 502;
+		serveError("CGI exited before completing headers");
+	}
 
 	if (m_CGI_DoneProcessingHeaders) {
-		encodeChunked(block);
-		m_chunk += block;
+		addHeader("Transfer-Encoding", "Chunked");
+		m_chunk = getResponseAsString();
+		encodeChunked(m_saved);
+		m_chunk += m_saved;
+		m_saved.clear();
 	}
-}
-
-std::string Response::getLine(std::string& str) {
-	size_t		pos = str.find('\n');
-	std::string line;
-
-	if (pos != std::string::npos) {
-		line = str.substr(0, pos + 1);
-		str.erase(0, pos + 1);
-	}
-
-	return line;
 }
 
 void Response::writeToCGI() {
@@ -67,7 +58,6 @@ void Response::writeToCGI() {
 	ssize_t		 bytes_written = WS::write(fd, body);
 
 	LOG(RED "Write: " DEFAULT << bytes_written);
-
 	switch (bytes_written) {
 		case -1:
 			body.clear();
