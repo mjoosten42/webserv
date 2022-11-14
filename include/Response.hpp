@@ -47,10 +47,9 @@ class Response: public HTTP {
 
 		std::string readBlockFromFile();
 
-		void serveError(const std::string& str);
 		bool sendCustomErrorPage();
 		void sendFail(const std::string& msg);
-		void sendMoved(const std::string& location);
+		void sendMoved(const std::string& redirect);
 
 		void createIndex(std::string path_to_index);
 

@@ -157,6 +157,11 @@ const std::string& Request::getLocation() const {
 	return m_location;
 }
 
+void Request::setLocation(const std::string val) {
+	m_location = val;
+	return;
+}
+
 const std::string& Request::getPathInfo() const {
 	return m_pathInfo;
 }

@@ -22,7 +22,7 @@ class Server {
 		const std::string& getRoot(int loc_index = -1) const;
 		const std::string& getHost() const;
 		const std::string& getIndexPage(int loc_index = -1) const;
-		const std::string& getRedirect(int loc_index = -1) const;
+		const std::string& getRedirect(const std::string& address) const;
 
 		const std::vector<std::string>	& getNames() const;
 		const std::map<int, std::string>& getErrorPages() const;

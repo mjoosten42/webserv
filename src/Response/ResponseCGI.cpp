@@ -32,7 +32,7 @@ void Response::getCGIHeaderChunk() {
 			parseHeader(line);
 		} catch (const ServerException& e) {
 			m_statusCode = e.code;
-			serveError(e.what());
+			sendFail(e.what());
 			break;
 		}
 	}
@@ -40,7 +40,7 @@ void Response::getCGIHeaderChunk() {
 	if (m_doneReading && !m_CGI_DoneProcessingHeaders) { // CGI exited before completing respones
 		m_saved.clear();
 		m_statusCode = 502;
-		serveError("CGI exited before completing headers");
+		sendFail("CGI exited before completing headers");
 	}
 
 	if (m_CGI_DoneProcessingHeaders) {

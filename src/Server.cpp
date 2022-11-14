@@ -224,9 +224,10 @@ const std::string& Server::getIndexPage(int loc_index) const {
 		return m_locations[loc_index].m_indexPage;
 }
 
-const std::string& Server::getRedirect(int loc_index) const {
-	if (loc_index == -1)
-		return m_root;
+const std::string& Server::getRedirect(const std::string& address) const {
+	int loc_index = getLocationIndex(address);
+	if (loc_index == -1 || !m_locations[loc_index].m_is_redirected)
+		return address;
 	else
 		return m_locations[loc_index].m_redirection_path;
 }

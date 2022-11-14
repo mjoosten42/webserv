@@ -20,6 +20,7 @@ class Request: public HTTP {
 
 		const std::string& getHost() const;
 		const std::string& getLocation() const;
+		void			   setLocation(const std::string);
 		const std::string& getQueryString() const;
 		const std::string& getPathInfo() const;
 		const std::string& getErrorMsg() const;

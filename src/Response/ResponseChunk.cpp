@@ -22,7 +22,7 @@ void Response::processRequest() {
 	initialize();
 
 	if (!isGood(m_request.getStatus()))
-		return serveError(m_request.getErrorMsg());
+		return sendFail(m_request.getErrorMsg());
 
 	try {
 		switch (m_request.getMethod()) {
@@ -40,7 +40,7 @@ void Response::processRequest() {
 		}
 	} catch (int error) {
 		m_statusCode = error;
-		serveError(getStatusMessage());
+		sendFail(getStatusMessage());
 	}
 }
 
@@ -62,6 +62,7 @@ void Response::handleDelete() {
 }
 
 void Response::handleFile() {
+	LOG("Handling File: " + m_filename);
 	std::string originalFile = m_filename;
 	bool		isDirectory	 = isDir(m_filename);
 	int			fd;
