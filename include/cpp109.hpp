@@ -2,12 +2,13 @@
 #pragma once
 
 #include <string>
+#include "logger.hpp"
 
 template <typename C>
 typename C::value_type& my_back(C &cont)
 {
 	typename C::iterator it = cont.end();
-	return (*(it--));
+	return (*(--it));
 }
 
 template <typename C>
