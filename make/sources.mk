@@ -9,6 +9,7 @@ SOURCES = \
 	src/Config/Parser.cpp \
 	src/Connection.cpp \
 	src/EnvironmentMap.cpp \
+	src/FD.cpp \
 	src/HTTP.cpp \
 	src/Listener.cpp \
 	src/Location.cpp \

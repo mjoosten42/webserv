@@ -35,7 +35,7 @@ static void dupTwo(int in_fd, int out_fd) {
 
 	if (dup2(out_fd, STDOUT_FILENO) == -1) {
 		WS::close(STDIN_FILENO);
-		throw 502;
+		exit(EXIT_FAILURE);
 	}
 	WS::close(out_fd);
 }
@@ -52,11 +52,6 @@ static void my_exec(int infd, int outfd, const std::string& filename, const Envi
 
 	WS::execve(copy, args, em);
 	exit(EXIT_FAILURE);
-}
-
-void Popen::closeFDs() {
-	WS::close(readfd);
-	WS::close(writefd);
 }
 
 // back to minishell ayy

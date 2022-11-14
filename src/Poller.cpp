@@ -12,13 +12,6 @@
 
 bool Poller::m_active = false;
 
-Poller::Poller() {}
-
-Poller::~Poller() {
-	for (size_t i = 0; i < m_pollfds.size(); i++)
-		WS::close(m_pollfds[i].fd);
-}
-
 void Poller::add(const Listener& listener) {
 	int	   fd	  = listener.getFD();
 	pollfd server = { fd, POLLIN, 0 };
@@ -34,9 +27,10 @@ void Poller::start() {
 
 	while (m_active) {
 
-		LOG(RED << std::string(winSize(), '#') << DEFAULT);
+		if (isatty(STDOUT_FILENO))
+			LOG(RED << std::string(winSize(), '#') << DEFAULT);
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
-		LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
+		// LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 
 		int poll_status = WS::poll(m_pollfds);
 		switch (poll_status) {
@@ -64,8 +58,8 @@ void Poller::pollfdEvent() {
 	for (size_t i = clientsIndex(); i < sourceFdsIndex(); i++) {
 		pollfd& client = m_pollfds[i];
 
-		LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
-		LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
+		// LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
+		// LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
 
 		unsetFlag(m_pollfds[i].events, POLLOUT);
 
@@ -84,8 +78,8 @@ void Poller::pollfdEvent() {
 		pollfd& source	  = m_pollfds[i];
 		int		client_fd = m_sources.getClientFd(source.fd);
 
-		LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
-		LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
+		// LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
+		// LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
 
 		// If source has POLLIN, set POLLOUT in client
 		// However, source will get POLLIN next loop because client will only read next loop, not this one
@@ -133,17 +127,14 @@ void Poller::pollOut(pollfd& client) {
 		removeClient(client.fd);
 }
 
-// We close source fds here because if we received POLLHUP, it means the response hasn't had a chance to close
-// Close and remove all source fds connected to client
-// Close and remove client
+// Remove all source fds connected to client
+// Remove client
 void Poller::pollHup(pollfd& client) {
 	std::vector<int> sourcefds = m_sources.getSourceFds(client.fd); // get all source fds dependent on client fd
-	int				 source_fd;
 
 	for (size_t i = 0; i < sourcefds.size(); i++) {
-		source_fd = sourcefds[i];
+		int source_fd = sourcefds[i];
 
-		WS::close(source_fd);
 		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
 	}
@@ -157,7 +148,7 @@ void Poller::acceptClient(int listener_fd) {
 	pollfd			client	 = { fd, POLLIN, 0 };
 
 	if (fd < 0)
-		exit(EXIT_FAILURE); // TODO: throw?
+		return;
 
 	m_pollfds.insert(m_pollfds.begin() + sourceFdsIndex(), client); // insert after last client
 	m_connections[fd] = Connection(fd, listener, addressToString(peer.sin_addr.s_addr));
@@ -168,8 +159,6 @@ void Poller::acceptClient(int listener_fd) {
 void Poller::removeClient(int client_fd) {
 	m_pollfds.erase(find(client_fd)); // erase from pollfd vector
 	m_connections.erase(client_fd);	  // erase from connection map
-
-	WS::close(client_fd);
 
 	LOG(RED "CLIENT " DEFAULT << client_fd << RED " LEFT" DEFAULT);
 }

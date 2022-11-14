@@ -12,9 +12,6 @@
 
 class Poller {
 	public:
-		Poller();
-		~Poller();
-
 		void add(const Listener& listener);
 
 		void start();

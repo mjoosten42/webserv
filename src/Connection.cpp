@@ -1,5 +1,6 @@
 #include "Connection.hpp"
 
+#include "FD.hpp"
 #include "Listener.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
@@ -14,7 +15,7 @@
 
 Connection::Connection() {}
 
-Connection::Connection(int m_fd, const Listener *listener, const std::string& peer):
+Connection::Connection(FD m_fd, const Listener *listener, const std::string& peer):
 	m_fd(m_fd), m_listener(listener), m_peer(peer), m_close(false) {}
 
 int Connection::receiveFromClient(short& events) {
@@ -75,9 +76,9 @@ int Connection::sendToClient(short& events) {
 			break;
 		default:
 
-			LOG(RED << std::string(winSize(), '-') << DEFAULT);
-			LOG(chunk.substr(0, bytes_sent));
-			LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(chunk.substr(0, bytes_sent));
+			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
 
 			response.trimChunk(bytes_sent);
 			if (response.isDone()) {

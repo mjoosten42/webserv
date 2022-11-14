@@ -1,5 +1,7 @@
 #pragma once
 
+#include "FD.hpp"
+
 #include <string>
 #include <unistd.h> // pid_t, close, pipe, fork etc.
 
@@ -9,9 +11,8 @@ class Server;
 
 struct Popen {
 		pid_t pid;
-		int	  readfd;
-		int	  writefd;
-		int	  status;
+		FD	  readfd;
+		FD	  writefd;
 
 		void my_popen(const std::string& filename, const EnvironmentMap& em);
 

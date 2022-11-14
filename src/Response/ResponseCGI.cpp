@@ -62,10 +62,6 @@ void Response::writeToCGI() {
 		case -1:
 			body.clear();
 			break;
-		case 0:
-			if (m_request.getState() == DONE)
-				WS::close(fd);
-			break;
 		default:
 			body.erase(0, bytes_written);
 	}
