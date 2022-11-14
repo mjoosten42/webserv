@@ -164,12 +164,18 @@ std::string Response::readBlockFromFile() {
 void Response::createIndex(std::string path_to_index) {
 	Entry entry = { m_request.getLocation(), recursivePathCount(path_to_index) };
 
+	std::string title = "Index of directory: " + entry.name;
+
 	addHeader("Content-Type", "text/html");
 
-	addToBody("<h1> Index of directory: " + entry.name + "</h1>\n<ul>");
+	addToBody("<!DOCTYPE html><html>\n");
+	addToBody("<head><meta charset='utf-8'><title>" + title + "</title></head>\n");
+	addToBody("<h1>" + title + "</h1>\n<ul>");
 
 	for (size_t i = 0; i < entry.subdir.size(); i++)
 		addToBody(entry.subdir[i].toString());
+
+	addToBody("</ul></body></html>");
 
 	m_doneReading = true;
 	m_statusCode  = 200;
