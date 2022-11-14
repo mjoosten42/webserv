@@ -47,7 +47,7 @@ class Response: public HTTP {
 
 		std::string readBlockFromFile();
 
-		bool sendCustomErrorPage();
+		void sendCustomErrorPage();
 		void sendFail(const std::string& msg);
 		void sendMoved(const std::string& redirect);
 

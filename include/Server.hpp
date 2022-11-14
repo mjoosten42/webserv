@@ -33,7 +33,6 @@ class Server {
 		short  getPort() const;
 		bool   isAutoIndex() const;
 		bool   isCGI(int loc_index, const std::string  &ext) const;
-		bool   hasRedirect(int loc_index) const;
 		bool   hasErrorPage(int code) const;
 
 	private:

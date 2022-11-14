@@ -19,6 +19,7 @@ class Location {
 		std::string m_indexPage;
 		std::string m_limit_except; // IE only allow GET, POST
 		std::string m_redirect;		// redirect /cgi-bin/
+				bool						m_is_redirected;
 
 		std::vector<std::string> m_CGIs;
 
