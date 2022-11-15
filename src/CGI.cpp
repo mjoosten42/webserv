@@ -20,11 +20,16 @@ static void closePipe(int pfds[2]) {
 }
 
 static void pipeTwo(int serverToCgi[2], int CgiToServer[2]) {
-	if (pipe(serverToCgi) == -1)
-		throw 502;
-	if (pipe(CgiToServer) == -1) {
-		closePipe(serverToCgi);
-		throw 502;
+	int ret[2] = { pipe(serverToCgi), pipe(CgiToServer) };
+
+	if (ret[0] == -1 || ret[1] == -1) {
+		if (ret[0] != -1)
+			closePipe(serverToCgi);
+		if (ret[1] != -1)
+			closePipe(CgiToServer);
+		if (errno == EMFILE)
+			throw 503;
+		throw 500;
 	}
 }
 
@@ -72,7 +77,9 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 		case -1: // failure
 			closePipe(serverToCgi);
 			closePipe(cgiToServer);
-			throw 502;
+			if (errno == EAGAIN)
+				throw 503;
+			throw 500;
 		case 0: // child
 			WS::close(serverToCgi[1]);
 			WS::close(cgiToServer[0]);

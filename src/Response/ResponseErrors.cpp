@@ -19,8 +19,13 @@ void Response::sendCustomErrorPage() {
 void Response::sendFail(int code, const std::string& msg) {
 	m_status = code;
 	m_isCGI	 = false; // when we have an error, the CGI is no longer active.
-	if (m_server->hasErrorPage(m_status))
-		return sendCustomErrorPage();
+	if (m_server->hasErrorPage(m_status)) {
+		try {
+			return sendCustomErrorPage();
+		} catch (int error) {
+			m_status = error;
+		}
+	}
 	m_doneReading = true;
 
 	addHeader("Content-Type", "text/html");
@@ -34,9 +39,7 @@ void Response::sendFail(int code, const std::string& msg) {
 }
 
 void Response::sendMoved(const std::string& address) {
-	LOG("SEND MOVED");
-	LOG("Address: " + address);
-	m_status = 301; // TODO: should be superfluous
+	m_status = 301;
 	if (m_server->hasErrorPage(m_status))
 		return sendCustomErrorPage();
 	m_doneReading = true;

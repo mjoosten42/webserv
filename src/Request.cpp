@@ -105,8 +105,8 @@ void Request::parseURI(const std::string& str) {
 	m_location = str.substr(0, extra);
 
 	if (extra != std::string::npos) {
-		size_t qm	 = str.find('?', extra);
-	
+		size_t qm = str.find('?', extra);
+
 		if (str[extra] == '/') {
 			m_pathInfo = str.substr(extra, qm - extra);
 

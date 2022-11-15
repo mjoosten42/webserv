@@ -22,6 +22,7 @@ const static Status statusMessages[] = { { 200, "OK" },
 										 { 500, "Internal Server Error" },
 										 { 501, "Not Implemented" },
 										 { 502, "Bad Gateway" },
+										 { 503, "Service Unavailable" },
 										 { 505, "HTTP Version Not Supported" } };
 
 const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMessages);

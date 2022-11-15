@@ -96,6 +96,8 @@ void Response::openError(const std::string& dir, bool isDirectory) {
 			if (isDirectory && autoIndex)
 				return createIndex(dir);
 			throw 404;
+		case EMFILE:
+			throw 503;
 		default:
 			throw 500;
 	}
@@ -148,7 +150,7 @@ std::string Response::readBlockFromFile() {
 	ssize_t		bytes_read = WS::read(m_source_fd);
 	std::string block;
 
-	LOG(RED "Read: " DEFAULT << bytes_read);
+	// LOG(RED "Read: " DEFAULT << bytes_read);
 	switch (bytes_read) {
 		case -1:
 		case 0:
