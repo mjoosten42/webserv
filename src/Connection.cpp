@@ -20,7 +20,7 @@ int Connection::receive(short& events) {
 	ssize_t bytes_received = WS::read(m_fd);
 	int		source_fd	   = -1;
 
-	LOG(RED "Received: " DEFAULT << bytes_received);
+	// LOG(RED "Received: " DEFAULT << bytes_received);
 	switch (bytes_received) {
 		case -1:
 			m_close = true;
@@ -67,7 +67,7 @@ int Connection::send(short& events) {
 	ssize_t		 bytes_sent = WS::write(m_fd, chunk);
 	int			 source_fd	= -1;
 
-	LOG(RED "Send: " DEFAULT << bytes_sent);
+	// LOG(RED "Send: " DEFAULT << bytes_sent);
 	switch (bytes_sent) {
 		case -1:
 			m_close = true;
@@ -87,7 +87,6 @@ int Connection::send(short& events) {
 			} else if (!response.isCGI())
 				setFlag(events, POLLOUT);
 	}
-
 	return source_fd;
 }
 

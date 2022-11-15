@@ -25,8 +25,10 @@ int open(const std::string& path, int flags) {
 int close(int fd) {
 	int ret = ::close(fd);
 
-	if (ret == -1)
+	if (ret == -1) {
 		LOG_ERR("close(" << fd << "): " << strerror(errno));
+		exit(1);
+	}
 	return ret;
 }
 
@@ -97,8 +99,8 @@ int accept(int fd, sockaddr *peer) {
 
 	if (ret == -1)
 		LOG_ERR("accept(\"" << fd << "\"): " << strerror(errno)); // TODO: throw
-
-	set_fd_nonblocking(ret);
+	else
+		set_fd_nonblocking(ret);
 
 	return ret;
 }

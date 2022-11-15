@@ -1,5 +1,6 @@
 #include "FD.hpp"
 
+#include "logger.hpp"
 #include "syscalls.hpp"
 
 FD::FD(): m_copies(NULL) {}

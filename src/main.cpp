@@ -8,6 +8,16 @@
 #include <iostream>
 #include <vector>
 
+// TODO: remove
+#include <sys/resource.h> // setrlimit
+
+void limit_max_open(rlim_t limit) {
+	struct rlimit rlim = { limit, limit };
+
+	if (setrlimit(RLIMIT_NOFILE, &rlim) == -1)
+		perror("setrlimit");
+}
+
 void signalHandler(int signum) {
 	Poller ref;
 	pid_t  child;
@@ -52,6 +62,8 @@ int main(int argc, const char *argv[]) {
 
 	for (auto& listener : listeners)
 		poller.add(listener);
+
+	limit_max_open(200);
 
 	poller.start();
 }
