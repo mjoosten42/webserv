@@ -1,13 +1,12 @@
 #include "Request.hpp"
 
 #include "HTTP.hpp"
-#include "cpp109.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
 
-#include <sstream>
+#include <algorithm> // std::min
 #include <string>
 
 const static char *methodStrings[] = { "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH" };
@@ -16,13 +15,7 @@ const static int   methodStringsSize = sizeof(methodStrings) / sizeof(*methodStr
 bool isHttpVersion(const std::string& str);
 bool isSupportedMethod(methods method);
 
-Request::Request():
-	m_state(STARTLINE),
-	m_method(static_cast<methods>(-1)),
-	m_contentLength(0),
-	m_bodyTotal(0),
-	m_processedHeaders(false),
-	m_status(0) {}
+Request::Request(): m_state(STARTLINE), m_method(static_cast<methods>(-1)), m_contentLength(0), m_bodyTotal(0) {}
 
 void Request::append(const char *buf, ssize_t size) {
 	m_saved.append(buf, size);
@@ -55,6 +48,7 @@ void Request::parse() {
 			while (containsNewline(m_saved)) {
 				line = getNextLine();
 				if (line.empty()) {
+					checkSpecialHeaders();
 					m_state = BODY;
 					parse();
 					break;
@@ -66,8 +60,6 @@ void Request::parse() {
 			m_bodyTotal += m_saved.length();
 			addToBody(m_saved);
 			m_saved.clear();
-			if (!m_processedHeaders)
-				checkSpecialHeaders();
 			if (m_bodyTotal == m_contentLength)
 				m_state = DONE;
 			break;
@@ -89,7 +81,7 @@ void Request::parseStartLine(const std::string& line) {
 	}
 
 	parseMethod(strs[0]);
-	parseLocation(strs[1]);
+	parseURI(strs[1]);
 	parseHTTPVersion(strs[2]);
 }
 
@@ -103,24 +95,28 @@ void Request::parseMethod(const std::string& str) {
 		throw ServerException(501, "Unsupported method: " + str);
 }
 
-void Request::parseLocation(const std::string& str) {
+void Request::parseURI(const std::string& str) {
 	if (str.find("..") != std::string::npos)
 		throw ServerException(400, "Location contains \"..\": " + str);
 
-	size_t dotpos	= str.find('.');
-	size_t slashpos = str.find('/', dotpos);
-	size_t qmpos	= str.find('?');
+	size_t dot	 = str.find('.');
+	size_t extra = str.find_first_of("/?", dot);
 
-	if (qmpos != std::string::npos)
-		m_queryString = str.substr(qmpos + 1);
+	m_location = str.substr(0, extra);
 
-	if (slashpos != std::string::npos)
-		m_location = str.substr(0, slashpos);
-	else
-		m_location = str.substr(0, qmpos);
+	if (extra != std::string::npos) {
+		size_t qm	 = str.find('?', extra);
+	
+		if (str[extra] == '/') {
+			m_pathInfo = str.substr(extra, qm - extra);
 
-	if (slashpos != std::string::npos)
-		m_pathInfo = str.substr(slashpos, qmpos - slashpos);
+			if (qm != std::string::npos && str.size() > qm)
+				m_queryString = str.substr(qm + 1);
+		}
+
+		if (str[extra] == '?' && str.size() > qm)
+			m_queryString = str.substr(qm + 1);
+	}
 }
 
 void Request::parseHTTPVersion(const std::string& str) {
@@ -156,25 +152,12 @@ const std::string& Request::getLocation() const {
 	return m_location;
 }
 
-void Request::setLocation(const std::string val) {
-	m_location = val;
-	return;
-}
-
 const std::string& Request::getPathInfo() const {
 	return m_pathInfo;
 }
 
 const std::string& Request::getQueryString() const {
 	return m_queryString;
-}
-
-const methods& Request::getMethod() const {
-	return m_method;
-}
-
-const state& Request::getState() const {
-	return m_state;
 }
 
 const std::string& Request::getHost() const {
@@ -185,16 +168,20 @@ const std::string& Request::getErrorMsg() const {
 	return m_errorMsg;
 }
 
+methods Request::getMethod() const {
+	return m_method;
+}
+
+state Request::getState() const {
+	return m_state;
+}
+
 size_t Request::getContentLength() const {
 	return m_contentLength;
 }
 
 size_t Request::getBodyTotal() const {
 	return m_bodyTotal;
-}
-
-int Request::getStatus() const {
-	return m_status;
 }
 
 std::string Request::getMethodAsString() const {

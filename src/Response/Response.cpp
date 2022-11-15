@@ -28,7 +28,6 @@ const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMes
 
 Response::Response():
 	HTTP(),
-	m_statusCode(0),
 	m_server(NULL),
 	m_locationIndex(-1),
 	m_processedRequest(false),
@@ -57,16 +56,16 @@ void Response::setFlags() {
 }
 
 std::string Response::getStatusMessage() const {
-	const char *msg = binarySearchKeyValue(m_statusCode, statusMessages, statusMessagesSize);
+	const char *msg = binarySearchKeyValue(m_status, statusMessages, statusMessagesSize);
 	if (msg != NULL)
 		return msg;
-	LOG_ERR("Status code not found: " << m_statusCode);
+	LOG_ERR("Status code not found: " << m_status);
 	exit(EXIT_FAILURE);
 	return ("");
 }
 
 std::string Response::getStatusLine() const {
-	return HTTP_VERSION " " + toString(m_statusCode) + " " + getStatusMessage() + CRLF;
+	return HTTP_VERSION " " + toString(m_status) + " " + getStatusMessage() + CRLF;
 }
 
 // Returns the response as a string to send over a socket. When there is a body present,

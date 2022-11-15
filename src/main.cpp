@@ -46,7 +46,7 @@ int main(int argc, const char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	signal(SIGINT, signalHandler);
+	// signal(SIGINT, signalHandler);
 	signal(SIGPIPE, signalHandler);
 	signal(SIGCHLD, signalHandler);
 

@@ -195,16 +195,16 @@ const std::string& Server::getIndexPage(int loc_index) const {
 		return m_locations[loc_index].m_indexPage;
 }
 
-const std::string& Server::getRedirect(const std::string& address) const {
-	int loc_index = getLocationIndex(address);
-	if (loc_index == -1 || !m_locations[loc_index].m_is_redirected)
-		return address;
-	else
-		return m_locations[loc_index].m_redirect;
+const std::string& Server::getRedirect(int loc_index) const {
+	return m_locations[loc_index].m_redirect;
 }
 
 bool Server::hasErrorPage(int code) const {
 	return m_error_page.find(code) != m_error_page.end();
+}
+
+bool Server::isRedirect(int loc_index) const {
+	return loc_index != -1 && !m_locations[loc_index].m_redirect.empty();
 }
 
 #pragma endregion

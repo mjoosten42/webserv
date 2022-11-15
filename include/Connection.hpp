@@ -14,8 +14,8 @@ class Connection {
 		Connection();
 		Connection(FD fd, const Listener *listener, const std::string& peer);
 
-		int receiveFromClient(short& events);
-		int sendToClient(short& events);
+		int receive(short& events);
+		int send(short& events);
 
 		bool wantsClose() const;
 

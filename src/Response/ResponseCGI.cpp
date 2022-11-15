@@ -11,9 +11,9 @@ void Response::handleCGI() {
 	m_source_fd = m_cgi.popen.readfd;
 
 	if (m_request.getMethod() == GET)
-		m_statusCode = 200;
+		m_status = 200;
 	else
-		m_statusCode = 201;
+		m_status = 201;
 }
 
 // TODO: CGI Status header
@@ -32,24 +32,22 @@ void Response::getCGIHeaderChunk() {
 		try {
 			parseHeader(line);
 		} catch (const ServerException& e) {
-			m_statusCode = e.code;
-			sendFail(e.what());
+			sendFail(e.code, e.what());
 			break;
 		}
 	}
 
-	if (m_doneReading && !m_CGI_DoneProcessingHeaders) { // CGI exited before completing respones
-		m_saved.clear();
-		m_statusCode = 502;
-		sendFail("CGI exited before completing headers");
-	}
+	if (m_doneReading && !m_CGI_DoneProcessingHeaders) // CGI exited before completing respones
+		return sendFail(502, "CGI exited before completing headers");
 
 	if (m_CGI_DoneProcessingHeaders) {
 		addHeader("Transfer-Encoding", "Chunked");
 		m_chunk = getResponseAsString();
-		encodeChunked(m_saved);
-		m_chunk += m_saved;
-		m_saved.clear();
+		if (!m_saved.empty()) {
+			encodeChunked(m_saved);
+			m_chunk += m_saved;
+			m_saved.clear();
+		}
 	}
 }
 

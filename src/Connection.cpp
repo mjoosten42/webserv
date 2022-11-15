@@ -5,8 +5,6 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "buffer.hpp"
-#include "cpp109.hpp"
-#include "defines.hpp"
 #include "logger.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
@@ -18,7 +16,7 @@ Connection::Connection() {}
 Connection::Connection(FD m_fd, const Listener *listener, const std::string& peer):
 	m_fd(m_fd), m_listener(listener), m_peer(peer), m_close(false) {}
 
-int Connection::receiveFromClient(short& events) {
+int Connection::receive(short& events) {
 	ssize_t bytes_received = WS::read(m_fd);
 	int		source_fd	   = -1;
 
@@ -63,7 +61,7 @@ int Connection::receiveFromClient(short& events) {
 
 // Send data back to a client
 // This should only be called if POLLOUT is set
-int Connection::sendToClient(short& events) {
+int Connection::send(short& events) {
 	Response   & response	= m_responses.front();
 	std::string& chunk		= response.getNextChunk();
 	ssize_t		 bytes_sent = WS::write(m_fd, chunk);

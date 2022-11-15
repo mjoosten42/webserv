@@ -83,7 +83,6 @@ void Poller::pollfdEvent() {
 		// If source has POLLIN, set POLLOUT in client
 		// However, source will get POLLIN next loop because client will only read next loop, not this one
 		// To prevent resetting POLLOUT when the source is done, we unset POLLIN of source for one loop
-		// To fix: separate polls
 		if (source.revents & POLLIN) {
 			setFlag(find(client_fd)->events, POLLOUT);
 			unsetFlag(source.events, POLLIN);
@@ -101,7 +100,7 @@ void Poller::pollfdEvent() {
 // Add a source_fd if asked
 void Poller::pollIn(pollfd& client) {
 	Connection& conn	  = m_connections[client.fd];
-	int			source_fd = conn.receiveFromClient(client.events);
+	int			source_fd = conn.receive(client.events);
 
 	if (source_fd != -1) { // A response wants to poll on a file/pipe
 		pollfd source = { source_fd, POLLIN, 0 };
@@ -116,7 +115,7 @@ void Poller::pollIn(pollfd& client) {
 // If response is done and wants to close the connection, remove the client
 void Poller::pollOut(pollfd& client) {
 	Connection& conn	  = m_connections[client.fd];
-	int			source_fd = conn.sendToClient(client.events);
+	int			source_fd = conn.send(client.events);
 
 	if (source_fd != -1) { // returns source_fd to close
 		m_sources.remove(source_fd);

@@ -2,7 +2,6 @@
 
 #include "ConfigParser.hpp"
 #include "Location.hpp"
-#include "cpp109.hpp"
 
 #include <map>
 #include <string>
@@ -24,7 +23,7 @@ class Server {
 		const std::string& getRoot(int loc_index = -1) const;
 		const std::string& getHost() const;
 		const std::string& getIndexPage(int loc_index = -1) const;
-		const std::string& getRedirect(const std::string& address) const;
+		const std::string& getRedirect(int loc_index) const;
 		const std::string& getErrorPage(int code) const;
 
 		const std::vector<std::string>& getNames() const;
@@ -34,6 +33,7 @@ class Server {
 		bool   isAutoIndex() const;
 		bool   isCGI(int loc_index, const std::string  &ext) const;
 		bool   hasErrorPage(int code) const;
+		bool   isRedirect(int loc_index) const;
 
 	private:
 		// Server only

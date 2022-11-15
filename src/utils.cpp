@@ -1,7 +1,6 @@
 #include "utils.hpp"
 
 #include "buffer.hpp" // path
-#include "cpp109.hpp"
 #include "logger.hpp"
 
 #include <arpa/inet.h> // ntohl
@@ -113,8 +112,8 @@ bool isGood(int status) {
 std::string basename(const std::string& path) {
 	std::string base = path;
 
-	if (my_back(base) == '/')
-		my_pop_back(base);
+	if (base.back() == '/')
+		base.pop_back();
 
 	size_t pos = base.find_last_of("/");
 

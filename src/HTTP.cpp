@@ -1,6 +1,5 @@
 #include "HTTP.hpp"
 
-#include "cpp109.hpp" // TODO
 #include "defines.hpp"
 #include "logger.hpp"
 #include "stringutils.hpp"
@@ -13,14 +12,12 @@
 std::string HTTP::capitalizeFieldPretty(std::string field) {
 	size_t pos = 0;
 
-	while (true) {
+	while (field.size() > pos) {
 		field[pos] = std::toupper(field[pos]);
 		pos		   = field.find_first_of('-', pos);
 		if (pos == std::string::npos)
 			break;
 		pos++;
-		if (pos >= field.length())
-			break;
 	}
 	return field;
 }
@@ -56,17 +53,13 @@ void HTTP::parseHeader(const std::string& line) {
 	if (pos != std::string::npos)
 		header.second = line.substr(line.find_first_not_of(IFS, pos));
 
-	if (my_back(header.first) != ':')
+	if (header.first.back() != ':')
 		throw ServerException(400, "Header field must end in ':' : " + line);
-	my_pop_back(header.first);
+	header.first.pop_back();
 	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so lowercase them.
 	auto insert = m_headers.insert(header);
 	if (!insert.second)
 		throw ServerException(400, "Duplicate headers: " + line);
-}
-
-const std::map<std::string, std::string>& HTTP::getHeaders() const {
-	return m_headers;
 }
 
 void HTTP::addToBody(const std::string& str) {
@@ -94,6 +87,10 @@ bool HTTP::hasHeader(const std::string& field) const {
 
 	strToLower(copy);
 	return m_headers.find(copy) != m_headers.end();
+}
+
+int HTTP::getStatus() const {
+	return m_status;
 }
 
 std::string& HTTP::getBody() {

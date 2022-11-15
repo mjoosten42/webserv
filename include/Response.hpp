@@ -13,6 +13,7 @@ class Response: public HTTP {
 		Response();
 
 		void processRequest();
+		void addServer(const Server *server);
 		void initialize();
 
 		std::string& getNextChunk();
@@ -20,12 +21,10 @@ class Response: public HTTP {
 
 		void writeToCGI();
 
-		bool isDone() const;
-		bool isCGI() const;
 		bool hasProcessedRequest() const;
+		bool isCGI() const;
+		bool isDone() const;
 		bool wantsClose() const;
-
-		void addServer(const Server *server);
 
 		const Server *getServer() const;
 		Request		& getRequest();
@@ -48,7 +47,7 @@ class Response: public HTTP {
 		std::string readBlockFromFile();
 
 		void sendCustomErrorPage();
-		void sendFail(const std::string& msg);
+		void sendFail(int code, const std::string& msg);
 		void sendMoved(const std::string& redirect);
 
 		void createIndex(std::string path_to_index);
@@ -58,7 +57,6 @@ class Response: public HTTP {
 		std::string getResponseAsString();
 
 	public:
-		int			m_statusCode;
 		std::string m_peer; // 127.0.0.1
 
 	private:

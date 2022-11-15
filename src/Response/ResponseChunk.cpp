@@ -21,10 +21,11 @@ void Response::processRequest() {
 
 	initialize();
 
-	if (!isGood(m_request.getStatus())){
-		m_statusCode = m_request.getStatus();
-		return sendFail(m_request.getErrorMsg());
-	}
+	if (!isGood(m_request.getStatus()))
+		return sendFail(m_request.getStatus(), m_request.getErrorMsg());
+
+	if (m_server->isRedirect(m_locationIndex))
+		return sendMoved(m_server->getRedirect(m_locationIndex));
 
 	try {
 		switch (m_request.getMethod()) {
@@ -41,8 +42,8 @@ void Response::processRequest() {
 				LOG_ERR("Invalid method");
 		}
 	} catch (int error) {
-		m_statusCode = error;
-		sendFail(getStatusMessage());
+		m_status = error;
+		sendFail(error, getStatusMessage());
 	}
 }
 
@@ -59,18 +60,17 @@ void Response::handleDelete() {
 			throw 404;
 	}
 
-	m_statusCode = 204;
-	m_chunk		 = getResponseAsString();
+	m_status = 204;
+	m_chunk	 = getResponseAsString();
 }
 
 void Response::handleFile() {
-	LOG("Handling File: " + m_filename);
 	std::string originalFile = m_filename;
 	bool		isDirectory	 = isDir(m_filename);
 	int			fd;
 
 	if (isDirectory) {
-		if (my_back(m_filename) != '/')
+		if (m_filename.back() != '/')
 			return sendMoved(m_request.getLocation() + "/");
 		m_filename += m_server->getIndexPage(m_locationIndex);
 	}
@@ -81,8 +81,8 @@ void Response::handleFile() {
 
 	m_source_fd = fd;
 	addFileHeaders();
-	m_statusCode = 200;
-	m_chunk		 = getResponseAsString();
+	m_status = 200;
+	m_chunk	 = getResponseAsString();
 }
 
 void Response::openError(const std::string& dir, bool isDirectory) {
@@ -180,7 +180,7 @@ void Response::createIndex(std::string path_to_index) {
 	addToBody("</ul></body></html>");
 
 	m_doneReading = true;
-	m_statusCode  = 200;
+	m_status	  = 200;
 
 	m_chunk = getResponseAsString();
 }
