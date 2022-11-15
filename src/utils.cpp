@@ -14,6 +14,10 @@
 #include <unistd.h>	   // lseek
 #include <vector>
 
+bool	operator<(const pollfd& lhs, const pollfd& rhs) {
+	return lhs.fd < rhs.fd;
+}
+
 // perrors and exits.
 void fatal_perror(const char *msg) {
 	perror(msg);

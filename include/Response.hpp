@@ -75,4 +75,5 @@ class Response: public HTTP {
 		bool m_isChunked;
 		bool m_doneReading;				  // true if all data from readfd has been read.
 		bool m_CGI_DoneProcessingHeaders; // true if done parsing CGI headers
+		bool m_close;					  // Wants to close
 };

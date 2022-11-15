@@ -7,6 +7,8 @@
 #include <sys/poll.h>
 #include <vector>
 
+bool	operator<(const pollfd& lhs, const pollfd& rhs);
+
 struct KeyValue {
 		const char *key;
 		const char *value;

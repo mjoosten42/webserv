@@ -33,7 +33,8 @@ Response::Response():
 	m_locationIndex(-1),
 	m_processedRequest(false),
 	m_doneReading(false),
-	m_CGI_DoneProcessingHeaders(false) {}
+	m_CGI_DoneProcessingHeaders(false),
+	m_close(false) {}
 
 void Response::addServer(const Server *server) {
 	m_server = server;
@@ -54,6 +55,7 @@ void Response::setFlags() {
 	m_isCGI = m_server->isCGI(m_locationIndex, ext);
 	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
 	m_isChunked = m_isCGI;						// CGI is always chunked
+	m_close		= (m_request.hasHeader("Connection") && m_request.getHeaderValue("Connection") == "close");
 }
 
 std::string Response::getStatusMessage() const {
@@ -100,7 +102,7 @@ const Server *Response::getServer() const {
 }
 
 bool Response::wantsClose() const {
-	return m_request.hasHeader("Connection") && m_request.getHeaderValue("Connection") == "close";
+	return m_close;
 }
 
 int Response::getSourceFD() const {

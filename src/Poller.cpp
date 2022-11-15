@@ -9,6 +9,7 @@
 
 #include <netinet/in.h> // sockaddr_in
 #include <sys/socket.h> // pollfd
+#include <algorithm> // TODO
 
 bool Poller::m_active = false;
 
@@ -27,9 +28,14 @@ void Poller::start() {
 
 	while (m_active) {
 
+		std::sort(m_pollfds.begin(), m_pollfds.begin() + clientsIndex());
+		std::sort(m_pollfds.begin() + clientsIndex(), m_pollfds.begin() + sourceFdsIndex());
+		std::sort(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end());
+	
 		LOG(RED << std::string(winSize(), '#') << DEFAULT);
+		LOG(RED "Servers: " DEFAULT << getPollFdsAsString(0, clientsIndex()));
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
-		// LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
+		LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 
 		int poll_status = WS::poll(m_pollfds);
 		switch (poll_status) {
@@ -58,7 +64,7 @@ void Poller::pollfdEvent() {
 		pollfd& client = m_pollfds[i];
 
 		// LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
-		// LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
+		LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
 
 		unsetFlag(m_pollfds[i].events, POLLOUT);
 
@@ -78,7 +84,7 @@ void Poller::pollfdEvent() {
 		int		client_fd = m_sources.getClientFd(source.fd);
 
 		// LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
-		// LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
+		LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
 
 		// If source has POLLIN, set POLLOUT in client
 		// However, source will get POLLIN next loop because client will only read next loop, not this one
@@ -88,6 +94,8 @@ void Poller::pollfdEvent() {
 			unsetFlag(source.events, POLLIN);
 		} else
 			setFlag(source.events, POLLIN);
+		if (source.revents & POLLNVAL) // TODO
+			exit(1);
 	}
 
 	// Loop over the listening sockets for new clients

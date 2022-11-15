@@ -87,7 +87,6 @@ int Connection::send(short& events) {
 			} else if (!response.isCGI())
 				setFlag(events, POLLOUT);
 	}
-
 	return source_fd;
 }
 
