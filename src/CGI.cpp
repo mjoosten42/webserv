@@ -66,15 +66,13 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 
 	pipeTwo(serverToCgi, cgiToServer);
 
-	readfd	= cgiToServer[0];
-	writefd = serverToCgi[1];
-
 	set_fd_nonblocking(readfd);
 	set_fd_nonblocking(writefd); // TODO
 
-	pid = WS::fork();
+	pid = fork();
 	switch (pid) {
 		case -1: // failure
+			perror("fork");
 			closePipe(serverToCgi);
 			closePipe(cgiToServer);
 			if (errno == EAGAIN)
@@ -88,6 +86,9 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 		default: // parent
 			WS::close(serverToCgi[0]);
 			WS::close(cgiToServer[1]);
+
+			readfd	= cgiToServer[0]; // Only assign to FD when successfull,
+			writefd = serverToCgi[1]; // otherwise they will be closes twice...
 	}
 }
 

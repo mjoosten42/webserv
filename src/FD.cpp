@@ -3,11 +3,17 @@
 #include "logger.hpp"
 #include "syscalls.hpp"
 
-FD::FD(): m_copies(NULL) {}
+std::map<int, int> FD::m_references = { { -1, 2 } }; // Add 2 copies of -1 so it will never be closed
 
-FD::FD(int fd): m_fd(fd), m_copies(new int(1)) {}
+FD::FD(): m_fd(-1) {
+	increase();
+}
 
-FD::FD(const FD& other): m_fd(other.m_fd), m_copies(other.m_copies) {
+FD::FD(int fd): m_fd(fd) {
+	increase();
+}
+
+FD::FD(const FD& other): m_fd(other.m_fd) {
 	increase();
 }
 
@@ -17,8 +23,7 @@ FD::~FD() {
 
 FD& FD::operator=(const FD& rhs) {
 	decrease();
-	m_fd	 = rhs.m_fd;
-	m_copies = rhs.m_copies;
+	m_fd = rhs.m_fd;
 	increase();
 	return *this;
 }
@@ -28,16 +33,11 @@ FD::operator int() const {
 }
 
 void FD::increase() {
-	if (m_copies)
-		(*m_copies)++;
+	m_references[m_fd]++;
 }
 
 void FD::decrease() {
-	if (m_copies) {
-		(*m_copies)--;
-		if (!(*m_copies)) {
-			delete m_copies;
-			WS::close(m_fd);
-		}
-	}
+	m_references[m_fd]--;
+	if (m_references[m_fd] == 0)
+		WS::close(m_fd);
 }

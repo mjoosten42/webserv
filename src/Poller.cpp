@@ -1,5 +1,6 @@
 #include "Poller.hpp"
 
+#include "FD.hpp"
 #include "Server.hpp"
 #include "SourceFds.hpp"
 #include "defines.hpp"
@@ -14,7 +15,7 @@
 bool Poller::m_active = false;
 
 void Poller::add(const Listener& listener) {
-	int	   fd	  = listener.getFD();
+	FD	   fd	  = listener.getFD();
 	pollfd server = { fd, POLLIN, 0 };
 
 	m_pollfds.push_back(server);
@@ -33,7 +34,7 @@ void Poller::start() {
 		std::sort(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end());
 
 		LOG(RED << std::string(winSize(), '#') << DEFAULT);
-		LOG(RED "Servers: " DEFAULT << getPollFdsAsString(0, clientsIndex()));
+		// LOG(RED "Servers: " DEFAULT << getPollFdsAsString(0, clientsIndex()));
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
 		LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 
@@ -63,13 +64,14 @@ void Poller::pollfdEvent() {
 	for (size_t i = clientsIndex(); i < sourceFdsIndex(); i++) {
 		pollfd& client = m_pollfds[i];
 
-		// LOG(client.fd << RED " Set: " << getEventsAsString(client.events) << DEFAULT);
-		LOG(client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
-
 		unsetFlag(m_pollfds[i].events, POLLOUT);
+
+		if (client.revents)
+			LOG(RED "Client " DEFAULT << client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
 
 		if (client.revents & POLLHUP) {
 			pollHup(client);
+			i--;
 			continue;
 		}
 		if (client.revents & POLLIN)
@@ -81,10 +83,10 @@ void Poller::pollfdEvent() {
 	// loop over sourcefds. If one has POLLIN, set POLLOUT on it's connection
 	for (size_t i = sourceFdsIndex(); i < m_pollfds.size(); i++) {
 		pollfd& source	  = m_pollfds[i];
-		int		client_fd = m_sources.getClientFd(source.fd);
+		FD		client_fd = m_sources.getClientFd(source.fd);
 
-		// LOG(source.fd << RED " Set: " << getEventsAsString(source.events) << DEFAULT);
-		LOG(source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
+		if (source.revents)
+			LOG(RED "Source " DEFAULT << source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
 
 		// If source has POLLIN, set POLLOUT in client
 		// However, source will get POLLIN next loop because client will only read next loop, not this one
@@ -108,7 +110,7 @@ void Poller::pollfdEvent() {
 // Add a source_fd if asked
 void Poller::pollIn(pollfd& client) {
 	Connection& conn	  = m_connections[client.fd];
-	int			source_fd = conn.receive(client.events);
+	FD			source_fd = conn.receive(client.events);
 
 	if (source_fd != -1) { // A response wants to poll on a file/pipe
 		pollfd source = { source_fd, POLLIN, 0 };
@@ -123,7 +125,7 @@ void Poller::pollIn(pollfd& client) {
 // If response is done and wants to close the connection, remove the client
 void Poller::pollOut(pollfd& client) {
 	Connection& conn	  = m_connections[client.fd];
-	int			source_fd = conn.send(client.events);
+	FD			source_fd = conn.send(client.events);
 
 	if (source_fd != -1) { // returns source_fd to close
 		m_sources.remove(source_fd);
@@ -136,10 +138,10 @@ void Poller::pollOut(pollfd& client) {
 // Remove all source fds connected to client
 // Remove client
 void Poller::pollHup(pollfd& client) {
-	std::vector<int> sourcefds = m_sources.getSourceFds(client.fd); // get all source fds dependent on client fd
+	std::vector<FD> sourcefds = m_sources.getSourceFds(client.fd); // get all source fds dependent on client fd
 
 	for (size_t i = 0; i < sourcefds.size(); i++) {
-		int source_fd = sourcefds[i];
+		FD source_fd = sourcefds[i];
 
 		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
@@ -147,10 +149,10 @@ void Poller::pollHup(pollfd& client) {
 	removeClient(client.fd);
 }
 
-void Poller::acceptClient(int listener_fd) {
+void Poller::acceptClient(FD listener_fd) {
 	const Listener *listener = &m_listeners[listener_fd];
 	sockaddr_in		peer	 = { sizeof(sockaddr_in), AF_INET, 0, { 0 }, { 0 } };
-	int				fd		 = WS::accept(listener_fd, reinterpret_cast<sockaddr *>(&peer));
+	FD				fd		 = WS::accept(listener_fd, reinterpret_cast<sockaddr *>(&peer));
 	pollfd			client	 = { fd, POLLIN, 0 };
 
 	if (fd < 0)
@@ -162,7 +164,7 @@ void Poller::acceptClient(int listener_fd) {
 	LOG(RED "NEW CLIENT: " DEFAULT << fd);
 }
 
-void Poller::removeClient(int client_fd) {
+void Poller::removeClient(FD client_fd) {
 	m_pollfds.erase(find(client_fd)); // erase from pollfd vector
 	m_connections.erase(client_fd);	  // erase from connection map
 
@@ -177,7 +179,7 @@ size_t Poller::sourceFdsIndex() const {
 	return m_listeners.size() + m_connections.size();
 }
 
-std::vector<pollfd>::iterator Poller::find(int fd) {
+std::vector<pollfd>::iterator Poller::find(FD fd) {
 	for (auto it = m_pollfds.begin(); it != m_pollfds.end(); it++)
 		if (it->fd == fd)
 			return it;

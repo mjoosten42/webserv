@@ -24,6 +24,9 @@ void Response::processRequest() {
 	if (!isGood(m_request.getStatus()))
 		return sendFail(m_request.getStatus(), m_request.getErrorMsg());
 
+	if (m_request.getContentLength() > m_server->getCMB())
+		return sendFail(413, "Max body size is " + toString(m_server->getCMB()));
+
 	if (m_server->isRedirect(m_locationIndex))
 		return sendMoved(m_server->getRedirect(m_locationIndex));
 
