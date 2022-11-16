@@ -1,6 +1,10 @@
 #pragma once
 
+#include <map>
+
 class FD {
+		static std::map<int, int> m_references; // Map fd to the amount of copies it has
+
 	public:
 		FD();
 		FD(int fd);
@@ -16,6 +20,5 @@ class FD {
 		void decrease();
 
 	private:
-		int	 m_fd;
-		int *m_copies;
+		int m_fd;
 };

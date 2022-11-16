@@ -3,7 +3,7 @@
 #include "EnvironmentMap.hpp"
 #include "buffer.hpp" // buf
 #include "logger.hpp"
-#include "utils.hpp" // set_fd_nonblock
+#include "utils.hpp" // set_fd_nonblocking
 
 #include <fcntl.h>	// open
 #include <stdlib.h> // realpath
@@ -45,14 +45,6 @@ ssize_t write(int fd, const std::string& str) {
 
 	if (ret == -1)
 		LOG_ERR("write(" << fd << "): " << strerror(errno));
-	return ret;
-}
-
-pid_t fork() {
-	pid_t ret = ::fork();
-
-	if (ret == -1)
-		LOG_ERR("fork: " << strerror(errno));
 	return ret;
 }
 

@@ -7,9 +7,9 @@
 #include "syscalls.hpp"
 #include "utils.hpp"
 
+#include <algorithm>	// TODO
 #include <netinet/in.h> // sockaddr_in
 #include <sys/socket.h> // pollfd
-#include <algorithm> // TODO
 
 bool Poller::m_active = false;
 
@@ -31,9 +31,9 @@ void Poller::start() {
 		std::sort(m_pollfds.begin(), m_pollfds.begin() + clientsIndex());
 		std::sort(m_pollfds.begin() + clientsIndex(), m_pollfds.begin() + sourceFdsIndex());
 		std::sort(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end());
-	
+
 		LOG(RED << std::string(winSize(), '#') << DEFAULT);
-		LOG(RED "Servers: " DEFAULT << getPollFdsAsString(0, clientsIndex()));
+		// LOG(RED "Servers: " DEFAULT << getPollFdsAsString(0, clientsIndex()));
 		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
 		LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 

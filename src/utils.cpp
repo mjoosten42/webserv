@@ -14,7 +14,7 @@
 #include <unistd.h>	   // lseek
 #include <vector>
 
-bool	operator<(const pollfd& lhs, const pollfd& rhs) {
+bool operator<(const pollfd& lhs, const pollfd& rhs) {
 	return lhs.fd < rhs.fd;
 }
 

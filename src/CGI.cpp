@@ -72,9 +72,10 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 	set_fd_nonblocking(readfd);
 	set_fd_nonblocking(writefd); // TODO
 
-	pid = WS::fork();
+	pid = fork();
 	switch (pid) {
 		case -1: // failure
+			perror("fork");
 			closePipe(serverToCgi);
 			closePipe(cgiToServer);
 			if (errno == EAGAIN)
