@@ -3,7 +3,7 @@
 #include "logger.hpp"
 #include "syscalls.hpp"
 
-std::map<int, int> FD::m_references = { { -1, 1 } }; // Add a copy of -1 so it won't be closed while running
+std::map<int, int> FD::m_references = { { -1, 2 } }; // Add 2 copies of -1 so it will never be closed
 
 FD::FD(): m_fd(-1) {
 	increase();

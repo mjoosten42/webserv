@@ -25,10 +25,8 @@ int open(const std::string& path, int flags) {
 int close(int fd) {
 	int ret = ::close(fd);
 
-	if (ret == -1) {
-		LOG_ERR("close(" << fd << "): " << strerror(errno));
-		exit(1);
-	}
+	if (ret == -1)
+		perror("close");
 	return ret;
 }
 

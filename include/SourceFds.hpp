@@ -1,5 +1,7 @@
 #pragma once
 
+#include "FD.hpp"
+
 #include <string>
 #include <sys/poll.h>
 #include <utility>
@@ -7,14 +9,14 @@
 
 class SourceFds {
 	public:
-		void add(const pollfd& pollfd, int client_fd);
-		void remove(int source_fd);
+		void add(const pollfd& pollfd, FD client_fd);
+		void remove(FD source_fd);
 
-		int				 getClientFd(int source_fd);
-		std::vector<int> getSourceFds(int client_fd);
+		FD				getClientFd(FD source_fd);
+		std::vector<FD> getSourceFds(FD client_fd);
 
 		std::string getSourceFdsAsString();
 
 	private:
-		std::vector<std::pair<int, int> > m_sourceFds;
+		std::vector<std::pair<FD, FD> > m_sourceFds;
 };

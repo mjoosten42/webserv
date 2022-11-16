@@ -20,18 +20,16 @@ void limit_max_open(rlim_t limit) {
 
 void signalHandler(int signum) {
 	Poller ref;
-	pid_t  child;
 
 	switch (signum) {
-		case SIGINT: // Allow gracefull exit
+		case SIGINT: // Allow graceful exit
 			ref.quit();
 			break;
 		case SIGPIPE: // CGI exited with write data remaining
 			LOG("SIGPIPE");
 			break;
 		case SIGCHLD: // CGI exited
-			child = WS::wait();
-			LOG(RED "Reaped child: " DEFAULT << child);
+			WS::wait();
 	}
 }
 
@@ -63,7 +61,7 @@ int main(int argc, const char *argv[]) {
 	for (auto& listener : listeners)
 		poller.add(listener);
 
-	limit_max_open(200);
+	// limit_max_open(200);
 
 	poller.start();
 }

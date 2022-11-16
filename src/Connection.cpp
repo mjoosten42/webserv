@@ -16,9 +16,9 @@ Connection::Connection() {}
 Connection::Connection(FD m_fd, const Listener *listener, const std::string& peer):
 	m_fd(m_fd), m_listener(listener), m_peer(peer), m_close(false) {}
 
-int Connection::receive(short& events) {
+FD Connection::receive(short& events) {
 	ssize_t bytes_received = WS::read(m_fd);
-	int		source_fd	   = -1;
+	FD		source_fd;
 
 	// LOG(RED "Received: " DEFAULT << bytes_received);
 	switch (bytes_received) {
@@ -61,11 +61,11 @@ int Connection::receive(short& events) {
 
 // Send data back to a client
 // This should only be called if POLLOUT is set
-int Connection::send(short& events) {
+FD Connection::send(short& events) {
 	Response   & response	= m_responses.front();
 	std::string& chunk		= response.getNextChunk();
 	ssize_t		 bytes_sent = WS::write(m_fd, chunk);
-	int			 source_fd	= -1;
+	FD			 source_fd;
 
 	// LOG(RED "Send: " DEFAULT << bytes_sent);
 	switch (bytes_sent) {
