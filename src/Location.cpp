@@ -53,8 +53,6 @@ Location::Location(t_block_directive *constructor_specs, Server *parent):
 		m_client_max_body_size = stringToIntegral<int>(val_from_config);
 
 	getLimitExceptFromConfig(constructor_specs);
-	for (auto except : m_limit_except)
-		LOG(except);
 
 	val_from_config = constructor_specs->fetch_simple("autoindex");
 	if (!val_from_config.empty())
