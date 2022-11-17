@@ -39,13 +39,25 @@ Additionally, most values that are expected within a certain context are initial
 The server block is a block directive where you define a server.
 Listed below are the directives it may contain that can be recognised by the configuration parser.
 
-`server_name <hostname(s)>` - The hostnames of this particular server. The expected value is one or more strings, e.g.
-`server_name www.example.org example.org;`. 
+`server_name <hostname(s)>` - The hostnames of this particular server. The expected value is one or more strings.
+E.g. `server_name www.example.org example.org;`
 When this value is not specified it defaults to ` `.
 
 `listen <port>` - This server will listen at a specifed port TCP on IPv4.
-ex. `listen 8080;`. 
+E.g. `listen 8080;`
 When this value is not specified it defaults to `8080`.
+
+`root <root directory>` - The directory that this server is rooted to, and from where it will serve its files.
+E.g. `root html;`
+When this value is not specified it defaults to `html`.
+
+`client_max_body_size <size>` - The maximum allowed size of the client request body. If zero, it will not be checked.
+E.g. `client_max_body_size 42;`
+When this value is not specified it defaults to `0`.
+
+`autoindex <on|off>` - When the user navigates to a directory, the server will serve an index page if it can find one. If it cannot, it will serve an automatically generated index page, or a 404 error, depending on whether autoindex is on or off respectively.
+E.g. `autoindex on;`
+When this value is not specified it defaults to `off`.
 
 
 ### Location block
