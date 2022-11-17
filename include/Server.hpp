@@ -33,6 +33,7 @@ class Server {
 		bool   isAutoIndex() const;
 		bool   isCGI(int loc_index, const std::string  &ext) const;
 		bool   hasErrorPage(int code) const;
+		bool   hasMethod(int loc_index, methods method) const;
 		bool   isRedirect(int loc_index) const;
 
 	private:
