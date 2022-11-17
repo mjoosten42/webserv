@@ -11,7 +11,7 @@ void Response::sendCustomErrorPage() {
 
 	m_filename	  = m_server->getErrorPage(m_status);
 	m_doneReading = false;
-	handleFile();
+	handleFile(); // Will set status to 200 if successful
 	m_status = tmp;
 	m_chunk	 = getResponseAsString(); // Overwriting old data
 }
