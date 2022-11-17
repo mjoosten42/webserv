@@ -29,7 +29,7 @@ As a trade-off, this permissiveness does require extra diligence from the user i
 
 If the user forgets to close a simple directive with a semicolon, the following simple directive will be considered part of the previous' value - this allows for multiline simple directives. 
 
-If the user enters a key that is not used in the setting up of the server, it will simply be ignored rather than flagged as invalid. This design choice lets us easily add more functionality in future, and allows for a degree of compatibility with standard NGINX configs (though a number of config options have been implemented differently from NGINX where necessary).
+If the user enters a key that is not used in the setting up of the server, it will simply be ignored rather than flagged as invalid. This design choice lets us easily add more functionality in future, and allows for a degree of compatibility with standard NGINX configs (though a number of config options have been implemented differently from NGINX where necessary). This documentation will provide examples of where our implementation does differ from standard NGINX config implementation, so compatibility should not be taken as a hard guarantee.
 
 Additionally, most values that are expected within a certain context are initialised by a default value (in line with the NGINX default), and merely overwritten if they are explicitly expressed in the config file.
 
@@ -39,14 +39,16 @@ Additionally, most values that are expected within a certain context are initial
 The server block is a block directive where you define a server.
 Listed below are the directives it may contain that can be recognised by the configuration parser.
 
-`server_name <hostname(s)>` - the hostnames of this particular server. ex.
+`server_name <hostname(s)>` - The hostnames of this particular server. The expected value is one or more strings, e.g.
 `server_name www.example.org example.org;`
+When this value is not specified it defaults to ` `.
 
-`listen <port>` - this server will listen at a specifed port TCP on IPv4.
+`listen <port>` - This server will listen at a specifed port TCP on IPv4.
 ex. `listen 8080;`
+When this value is not specified it defaults to `8080`.
 
 
-### Location
+### Location block
 The location block looks like this: 
 ```
 location <location> {
