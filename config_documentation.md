@@ -23,13 +23,21 @@ block_type <additional params, such as the block's name> {
 }
 ```
 
-By default, the configuration file is very permissive. E.g. if the user forgets to close a simple directive with a semicolon, the following simple directive will be considered part of the previous' value - this allows for multiline simple directives. If the user enters a key that is not used in the setting up of the server, it will simply be ignored rather than flagged as invalid. This design choice lets us easily add more functionality in future, and allows for a degree of compatibility with standard NGINX configs (though a number of values have been implemented differently where necessary).
+### General Caveats
+By default, the configuration file is very permissive. 
 As a trade-off, this permissiveness does require extra diligence from the user in the formatting of custom configuration files.
+
+If the user forgets to close a simple directive with a semicolon, the following simple directive will be considered part of the previous' value - this allows for multiline simple directives. 
+
+If the user enters a key that is not used in the setting up of the server, it will simply be ignored rather than flagged as invalid. This design choice lets us easily add more functionality in future, and allows for a degree of compatibility with standard NGINX configs (though a number of config options have been implemented differently from NGINX where necessary).
+
+Additionally, most values that are expected within a certain context are initialised by a default value (in line with the NGINX default), and merely overwritten if they are explicitly expressed in the config file.
 
 ## Identifiers
 
 ### Server block
-The server block is where you define the server.
+The server block is a block directive where you define a server.
+Listed below are the directives it may contain that can be recognised by the configuration parser.
 
 `server_name <hostname(s)>` - the hostnames of this particular server. ex.
 `server_name www.example.org example.org;`
