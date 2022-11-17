@@ -1,10 +1,30 @@
 # Config file format guide
 
 ## General
-A typical directive is typically defined as:
-`identifier <value> [more values...];`
+Our configuration file format is very much inspired by the [NGINX config format](http://nginx.org/en/docs/beginners_guide.html#conf_structure).
 
-This config format is very much inspired by the [NGINX config format](http://nginx.org/en/docs/beginners_guide.html#conf_structure).
+It consists of 'simple directives' and 'block directives':
+
+Simple directives are single- or multiline declarations of key value pairs ending in a semicolon.
+The key is separated from the value by white spaces, and the values include anything up to the following semicolon.
+If a closing semicolon is missing, the configuration file is considered invalid.
+
+A typical simple directive could be defined as:
+`identifier-key <value> [more values...];`
+
+Block directives are directives that can contain directives. This means they may contain simple directives, or
+more block directives. A block directive that contains other block directives is called a 'context'. Simple directives or block directives that are not contained by an explicit block directive are considered to be part of the 'main context'.
+Except for the main context, the scope of all block directives must be bounded by curly braces ('{' and '}'). A mismatch of curly braces will render the configuration file invalid.
+
+A typical block directive could be defined as:
+```
+block_type <additional params, such as the block's name> {
+    ... more directives
+}
+```
+
+By default, the configuration file is very permissive. E.g. if the user forgets to close a simple directive with a semicolon, the following simple directive will be considered part of the previous' value - this allows for multiline simple directives. If the user enters a key that is not used in the setting up of the server, it will simply be ignored rather than flagged as invalid. This design choice lets us easily add more functionality in future, and allows for a degree of compatibility with standard NGINX configs (though a number of values have been implemented differently where necessary).
+As a trade-off, this permissiveness does require extra diligence from the user in the formatting of custom configuration files.
 
 ## Identifiers
 
@@ -26,7 +46,7 @@ ex. `root html;` will serve from the server from the `html` directory(relative f
 `autoindex <on|off>` if no index is found, webserv will generate a HTML index with all the files in the folder.
 
 ### Location
-The location block looks like this:
+The location block looks like this: 
 ```
 location <location> {
     ... more directives
