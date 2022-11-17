@@ -8,8 +8,8 @@
 #ifdef DEBUG
 #	include <iostream>
 
-#	define LOG(x) std::cout << std::boolalpha << x << std::endl
-#	define LOG_ERR(x) std::cerr << std::boolalpha << RED << "[ERROR] " << x << DEFAULT << std::endl
+#	define LOG(...) std::cout << std::boolalpha << __VA_ARGS__ << std::endl
+#	define LOG_ERR(...) std::cerr << std::boolalpha << RED << "[ERROR] " << __VA_ARGS__ << DEFAULT << std::endl
 #else
 #	define LOG(x)
 #	define LOG_ERR(x)

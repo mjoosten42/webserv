@@ -14,6 +14,7 @@ SOURCES = \
 	src/Listener.cpp \
 	src/Location.cpp \
 	src/main.cpp \
+	src/methods.cpp \
 	src/MIME.cpp \
 	src/Poller.cpp \
 	src/Request.cpp \

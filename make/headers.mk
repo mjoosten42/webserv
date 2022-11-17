@@ -11,6 +11,7 @@ HEADERS = \
 	include/Listener.hpp \
 	include/Location.hpp \
 	include/logger.hpp \
+	include/methods.hpp \
 	include/MIME.hpp \
 	include/Poller.hpp \
 	include/Request.hpp \

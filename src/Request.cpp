@@ -5,12 +5,9 @@
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
+#include "methods.hpp"
 
-#include <algorithm> // std::min
 #include <string>
-
-const static char *methodStrings[] = { "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH" };
-const static int   methodStringsSize = sizeof(methodStrings) / sizeof(*methodStrings);
 
 bool isHttpVersion(const std::string& str);
 bool isSupportedMethod(methods method);
@@ -184,20 +181,6 @@ size_t Request::getBodyTotal() const {
 	return m_bodyTotal;
 }
 
-std::string Request::getMethodAsString() const {
-	switch (m_method) {
-		case GET:
-			return "GET";
-		case POST:
-			return "POST";
-		case DELETE:
-			return "DELETE";
-		default:
-			LOG_ERR("Invalid method: " << m_state);
-			return "INVALID METHOD";
-	}
-}
-
 std::string Request::getStateAsString() const {
 	switch (m_state) {
 		case STARTLINE:
@@ -218,7 +201,7 @@ std::string Request::getStateAsString() const {
 
 std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << MAGENTA "State: " DEFAULT << request.getStateAsString() << std::endl;
-	os << MAGENTA "Method: " DEFAULT << request.getMethodAsString() << std::endl;
+	os << MAGENTA "Method: " DEFAULT << toString(request.getMethod()) << std::endl;
 	os << MAGENTA "Location: " DEFAULT << request.getLocation() << std::endl;
 	os << MAGENTA "Query string: " DEFAULT << request.getQueryString() << std::endl;
 	os << MAGENTA "Path info: " DEFAULT << request.getPathInfo() << std::endl;

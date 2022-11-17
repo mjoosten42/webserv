@@ -54,7 +54,7 @@ std::string getEventsAsString(short revents) {
 			events += " | ";
 		events += "NVAL";
 	}
-	return events;
+	return "{ " + events + " }";
 }
 
 void setFlag(short& events, int flag) {
@@ -67,8 +67,9 @@ void unsetFlag(short& events, int flag) {
 
 // gets the width of the terminal window
 size_t winSize() {
-	struct winsize w;
-	ioctl(1, TIOCGWINSZ, &w);
+	struct winsize w = { 0, 0, 0, 0 };
+	if (isatty(STDOUT_FILENO))
+		ioctl(1, TIOCGWINSZ, &w);
 	return w.ws_col;
 }
 

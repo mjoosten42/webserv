@@ -9,6 +9,7 @@
 #include "logger.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
+#include "methods.hpp"
 
 #include <sys/socket.h> // setsockopt
 #include <sys/wait.h>	// waitpid
@@ -121,7 +122,7 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 	em["QUERY_STRING"]	 = req.getQueryString();
 	em["REMOTE_ADDR"]	 = peer;
 	em["REMOTE_HOST"]	 = peer;
-	em["REQUEST_METHOD"] = req.getMethodAsString();
+	em["REQUEST_METHOD"] = toString(req.getMethod());
 	em["SCRIPT_NAME"]	 = filename;
 	em["SERVER_NAME"]	 = req.getHost();
 

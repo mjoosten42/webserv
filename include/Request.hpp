@@ -1,11 +1,10 @@
 #pragma once
 
 #include "HTTP.hpp"
+#include "methods.hpp"
 
 #include <iostream>
 #include <string>
-
-enum methods { GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH };
 
 enum state { STARTLINE, HEADERS, BODY, DONE };
 
@@ -28,7 +27,6 @@ class Request: public HTTP {
 		size_t getBodyTotal() const;
 
 		std::string getStateAsString() const;
-		std::string getMethodAsString() const;
 
 	private:
 		void parse();

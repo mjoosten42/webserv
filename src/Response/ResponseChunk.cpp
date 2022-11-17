@@ -8,6 +8,7 @@
 #include "stringutils.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
+#include "methods.hpp"
 
 #include <fcntl.h> // O_RDONLY
 

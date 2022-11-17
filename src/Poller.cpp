@@ -71,7 +71,6 @@ void Poller::pollfdEvent() {
 		if (client.revents & POLLHUP) {
 			pollHup(client);
 			it--;
-			continue;
 		}
 	}
 
@@ -99,13 +98,11 @@ void Poller::pollfdEvent() {
 			acceptClient(m_pollfds[i].fd);
 }
 
-// Let connection read new data
-// Add a source_fd if asked
 void Poller::pollIn(pollfd& client) {
 	Connection& conn	  = m_connections[client.fd];
 	FD			source_fd = conn.receive(client.events);
 
-	if (source_fd != -1) { // A response wants to poll on a file/pipe
+	if (source_fd != -1) { // A response wants to poll on a pipe
 		pollfd source = { source_fd, POLLIN, 0 };
 
 		m_sources.add(source, client.fd);
@@ -113,14 +110,11 @@ void Poller::pollIn(pollfd& client) {
 	}
 }
 
-// Let connection send data
-// If response is done reading from its source_fd, remove it
-// If response is done and wants to close the connection, remove the client
 void Poller::pollOut(pollfd& client) {
 	Connection& conn	  = m_connections[client.fd];
 	FD			source_fd = conn.send(client.events);
 
-	if (source_fd != -1) { // returns source_fd to close
+	if (source_fd != -1) { // A response wants to close its source_fd
 		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
 	}
@@ -128,8 +122,6 @@ void Poller::pollOut(pollfd& client) {
 		removeClient(client.fd);
 }
 
-// Remove all source fds connected to client
-// Remove client
 void Poller::pollHup(pollfd& client) {
 	std::vector<FD> sourcefds = m_sources.getSourceFds(client.fd); // get all source fds dependent on client fd
 
