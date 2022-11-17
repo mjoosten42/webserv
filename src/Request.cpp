@@ -217,16 +217,16 @@ std::string Request::getStateAsString() const {
 #pragma endregion
 
 std::ostream& operator<<(std::ostream& os, const Request& request) {
-	os << RED "State: " DEFAULT << request.getStateAsString() << std::endl;
-	os << RED "Method: " DEFAULT << request.getMethodAsString() << std::endl;
-	os << RED "Location: " DEFAULT << request.getLocation() << std::endl;
-	os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
-	os << RED "Path info: " DEFAULT << request.getPathInfo() << std::endl;
-	// os << RED "Headers: {\n" DEFAULT << request.getHeadersAsString() << RED << "}\n";
-	os << RED "Host: " DEFAULT << request.getHost() << std::endl;
-	os << RED "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
-	// os << RED "Body: " DEFAULT << request.getBody() << std::endl;
-	os << RED "Body total: " DEFAULT << request.getBodyTotal() << std::endl;
-	// os << RED "Status: " DEFAULT << request.getStatus();
+	os << MAGENTA "State: " DEFAULT << request.getStateAsString() << std::endl;
+	os << MAGENTA "Method: " DEFAULT << request.getMethodAsString() << std::endl;
+	os << MAGENTA "Location: " DEFAULT << request.getLocation() << std::endl;
+	os << MAGENTA "Query string: " DEFAULT << request.getQueryString() << std::endl;
+	os << MAGENTA "Path info: " DEFAULT << request.getPathInfo() << std::endl;
+	os << MAGENTA "Headers: {\n" DEFAULT << request.getHeadersAsString() << MAGENTA << "}\n";
+	os << MAGENTA "Host: " DEFAULT << request.getHost() << std::endl;
+	os << MAGENTA "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
+	os << MAGENTA "Body: " DEFAULT << request.getBody() << std::endl;
+	os << MAGENTA "Body total: " DEFAULT << request.getBodyTotal() << std::endl;
+	os << MAGENTA "Status: " DEFAULT << request.getStatus();
 	return os;
 }

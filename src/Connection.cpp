@@ -20,7 +20,7 @@ FD Connection::receive(short& events) {
 	ssize_t bytes_received = WS::read(m_fd);
 	FD		source_fd;
 
-	// LOG(RED "Received: " DEFAULT << bytes_received);
+	LOG(CYAN "Received: " DEFAULT << bytes_received);
 	switch (bytes_received) {
 		case -1:
 			m_close = true;
@@ -28,9 +28,9 @@ FD Connection::receive(short& events) {
 			break;
 		default:
 
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(YELLOW << std::string(winSize(), '-'));
 			// LOG(std::string(buf, bytes_received));
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(std::string(winSize(), '-') << DEFAULT);
 
 			Response& response = getLastResponse();
 			Request & request  = response.getRequest();
@@ -54,7 +54,7 @@ FD Connection::receive(short& events) {
 			}
 
 			if (response.isCGI())
-				response.writeToCGI();
+				response.write();
 	}
 	return source_fd;
 }
@@ -67,16 +67,16 @@ FD Connection::send(short& events) {
 	ssize_t		 bytes_sent = WS::write(m_fd, chunk);
 	FD			 source_fd;
 
-	// LOG(RED "Send: " DEFAULT << bytes_sent);
+	LOG(CYAN "Send: " DEFAULT << bytes_sent);
 	switch (bytes_sent) {
 		case -1:
 			m_close = true;
 			break;
 		default:
 
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(YELLOW << std::string(winSize(), '-'));
 			// LOG(chunk.substr(0, bytes_sent));
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
+			// LOG(std::string(winSize(), '-') << DEFAULT);
 
 			response.trimChunk(bytes_sent);
 			if (response.isDone()) {

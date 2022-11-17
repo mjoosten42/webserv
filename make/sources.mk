@@ -21,6 +21,7 @@ SOURCES = \
 	src/Response/ResponseCGI.cpp \
 	src/Response/ResponseChunk.cpp \
 	src/Response/ResponseErrors.cpp \
+	src/Response/ResponseIO.cpp \
 	src/Server.cpp \
 	src/SourceFds.cpp \
 	src/stringutils.cpp \

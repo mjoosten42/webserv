@@ -72,7 +72,6 @@ void Response::handleDelete() {
 void Response::handleFile() {
 	std::string originalFile = m_filename;
 	bool		isDirectory	 = isDir(m_filename);
-	int			fd;
 
 	if (isDirectory) {
 		if (m_filename.back() != '/')
@@ -80,7 +79,7 @@ void Response::handleFile() {
 		m_filename += m_server->getIndexPage(m_locationIndex);
 	}
 
-	fd = WS::open(m_filename, O_RDONLY);
+	int fd = WS::open(m_filename, O_RDONLY);
 	if (fd == -1)
 		return openError(originalFile, isDirectory);
 
@@ -137,7 +136,7 @@ std::string& Response::getNextChunk() {
 		if (m_isCGI && !m_CGI_DoneProcessingHeaders)
 			getCGIHeaderChunk();
 		else {
-			block = readBlockFromFile();
+			block = read();
 			if (m_isChunked)
 				encodeChunked(block);
 			m_chunk += block;
@@ -149,26 +148,6 @@ std::string& Response::getNextChunk() {
 void Response::encodeChunked(std::string& str) {
 	str.insert(0, toHex(str.length()) + CRLF);
 	str += CRLF;
-}
-
-std::string Response::readBlockFromFile() {
-	ssize_t		bytes_read = WS::read(m_source_fd);
-	std::string block;
-
-	// LOG(RED "Read: " DEFAULT << bytes_read);
-	switch (bytes_read) {
-		case -1:
-		case 0:
-			m_doneReading = true;
-			break;
-		default:
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-			// LOG(std::string(buf, bytes_read));
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-
-			block.append(buf, bytes_read);
-	}
-	return block;
 }
 
 void Response::createIndex(std::string path_to_index) {

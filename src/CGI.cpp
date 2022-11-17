@@ -10,7 +10,6 @@
 #include "syscalls.hpp"
 #include "utils.hpp"
 
-#include <fcntl.h>		// open
 #include <sys/socket.h> // setsockopt
 #include <sys/wait.h>	// waitpid
 
@@ -66,9 +65,6 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 
 	pipeTwo(serverToCgi, cgiToServer);
 
-	set_fd_nonblocking(readfd);
-	set_fd_nonblocking(writefd); // TODO
-
 	pid = fork();
 	switch (pid) {
 		case -1: // failure
@@ -87,8 +83,11 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 			WS::close(serverToCgi[0]);
 			WS::close(cgiToServer[1]);
 
-			readfd	= cgiToServer[0]; // Only assign to FD when successfull,
-			writefd = serverToCgi[1]; // otherwise they will be closes twice...
+			readfd	= cgiToServer[0];
+			writefd = serverToCgi[1];
+
+			set_fd_nonblocking(readfd);
+			set_fd_nonblocking(writefd);
 	}
 }
 

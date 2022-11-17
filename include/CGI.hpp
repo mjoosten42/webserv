@@ -15,8 +15,6 @@ struct Popen {
 		FD	  writefd;
 
 		void my_popen(const std::string& filename, const EnvironmentMap& em);
-
-		void closeFDs();
 };
 
 class CGI {

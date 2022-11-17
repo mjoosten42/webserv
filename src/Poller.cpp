@@ -25,7 +25,7 @@ void Poller::add(const Listener& listener) {
 void Poller::start() {
 	m_active = true;
 
-	LOG(RED "\n----STARTING LOOP----\n" DEFAULT);
+	LOG(BLUE "\n----STARTING LOOP----\n" DEFAULT);
 
 	while (m_active) {
 
@@ -33,10 +33,10 @@ void Poller::start() {
 		std::sort(m_pollfds.begin() + clientsIndex(), m_pollfds.begin() + sourceFdsIndex());
 		std::sort(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end());
 
-		LOG(RED << std::string(winSize(), '#') << DEFAULT);
-		// LOG(RED "Servers: " DEFAULT << getPollFdsAsString(0, clientsIndex()));
-		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
-		LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
+		LOG(CYAN << std::string(winSize(), '#') << DEFAULT);
+		LOG(CYAN "Servers: " DEFAULT << getPollFdsAsString(0, clientsIndex()));
+		LOG(CYAN "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
+		LOG(CYAN "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 
 		int poll_status = WS::poll(m_pollfds);
 		switch (poll_status) {
@@ -51,7 +51,7 @@ void Poller::start() {
 		}
 	}
 
-	LOG(RED "\n----EXITING LOOP----" DEFAULT);
+	LOG(BLUE "\n----EXITING LOOP----" DEFAULT);
 }
 
 void Poller::quit() {
@@ -67,7 +67,7 @@ void Poller::pollfdEvent() {
 		unsetFlag(m_pollfds[i].events, POLLOUT);
 
 		if (client.revents)
-			LOG(RED "Client " DEFAULT << client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
+			LOG(CYAN "Client " DEFAULT << client.fd << CYAN " Get: " DEFAULT << getEventsAsString(client.revents));
 
 		if (client.revents & POLLHUP) {
 			pollHup(client);
@@ -86,7 +86,7 @@ void Poller::pollfdEvent() {
 		FD		client_fd = m_sources.getClientFd(source.fd);
 
 		if (source.revents)
-			LOG(RED "Source " DEFAULT << source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
+			LOG(CYAN "Source " DEFAULT << source.fd << CYAN " Get: " DEFAULT << getEventsAsString(source.revents));
 
 		// If source has POLLIN, set POLLOUT in client
 		// However, source will get POLLIN next loop because client will only read next loop, not this one
@@ -96,8 +96,6 @@ void Poller::pollfdEvent() {
 			unsetFlag(source.events, POLLIN);
 		} else
 			setFlag(source.events, POLLIN);
-		if (source.revents & POLLNVAL) // TODO
-			exit(1);
 	}
 
 	// Loop over the listening sockets for new clients
@@ -161,14 +159,14 @@ void Poller::acceptClient(FD listener_fd) {
 	m_pollfds.insert(m_pollfds.begin() + sourceFdsIndex(), client); // insert after last client
 	m_connections[fd] = Connection(fd, listener, addressToString(peer.sin_addr.s_addr));
 
-	LOG(RED "NEW CLIENT: " DEFAULT << fd);
+	LOG(CYAN "NEW CLIENT: " DEFAULT << fd);
 }
 
 void Poller::removeClient(FD client_fd) {
 	m_pollfds.erase(find(client_fd)); // erase from pollfd vector
 	m_connections.erase(client_fd);	  // erase from connection map
 
-	LOG(RED "CLIENT " DEFAULT << client_fd << RED " LEFT" DEFAULT);
+	LOG(CYAN "CLIENT " DEFAULT << client_fd << CYAN " LEFT" DEFAULT);
 }
 
 size_t Poller::clientsIndex() const {
@@ -184,8 +182,8 @@ std::vector<pollfd>::iterator Poller::find(FD fd) {
 		if (it->fd == fd)
 			return it;
 	LOG_ERR("Fd not found in pollfds: " << fd);
-	LOG_ERR(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
-	LOG_ERR(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
+	LOG_ERR("Clients: " << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
+	LOG_ERR("sourcefds: " << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
 	return m_pollfds.end();
 }
 
