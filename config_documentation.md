@@ -45,7 +45,7 @@ When this value is not specified it defaults to ` `.
 
 `listen <port>` - This server will listen at a specifed port TCP on IPv4.
 E.g. `listen 8080;`
-When this value is not specified it defaults to `8080`.
+When this value is not specified it defaults to `8000`.
 WARNING: NGINX difference - Nginx allows the user to parse the host from the listen option, however we standardly only accept localhost as host.
 
 `root <root directory>` - The directory that this server is rooted to, and from where it will serve its files.
@@ -64,6 +64,10 @@ When this value is not specified it defaults to `off`.
 E.g. `index my_amazing_index.html;`
 When this value is not specified it defaults to `index.html`.
 
+`error_page <code> <page> [<code> <page> ...]` - What 'page' to serve in the event of an error matching HTTP error 'code'.
+E.g. `error_page 404 my_amazing_404_error_page.html;`
+When this value is not specified it defaults to standard error pages for each of the encounterable error codes.
+WARNING: NGINX difference - Nginx allows the user to specify multiple error codes per error page (e.g. `error_page 401 402 403 404 my_amazing_4XX_error_page.html;`). In our config they must be strictly alternating key value pairs, though can be written on multiple lines.
 
 
 
