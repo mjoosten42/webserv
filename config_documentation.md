@@ -46,6 +46,7 @@ When this value is not specified it defaults to ` `.
 `listen <port>` - This server will listen at a specifed port TCP on IPv4.
 E.g. `listen 8080;`
 When this value is not specified it defaults to `8080`.
+WARNING: NGINX difference - Nginx allows the user to parse the host from the listen option, however we standardly only accept localhost as host.
 
 `root <root directory>` - The directory that this server is rooted to, and from where it will serve its files.
 E.g. `root html;`
@@ -55,9 +56,15 @@ When this value is not specified it defaults to `html`.
 E.g. `client_max_body_size 42;`
 When this value is not specified it defaults to `0`.
 
-`autoindex <on|off>` - When the user navigates to a directory, the server will serve an index page if it can find one. If it cannot, it will serve an automatically generated index page, or a 404 error, depending on whether autoindex is on or off respectively.
+`autoindex <on|off>` - When the user navigates to a directory, the server will serve an index page if it can find one in that directory. If it cannot, it will serve an automatically generated index page, or a 404 error, depending on whether autoindex is on or off respectively.
 E.g. `autoindex on;`
 When this value is not specified it defaults to `off`.
+
+`index <file_name>` - When the user navigates to a directory, the server will serve an index page if it can find one in that directory. The filename it looks for is the one specified by 'index'.
+E.g. `index my_amazing_index.html;`
+When this value is not specified it defaults to `index.html`.
+
+
 
 
 ### Location block

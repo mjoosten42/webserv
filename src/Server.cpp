@@ -18,7 +18,7 @@ Server::Server() {
 
 void Server::init() {
 	m_host				   = "127.0.0.1";
-	m_port				   = 8080;
+	m_port				   = 8000;
 	m_root				   = "html";
 	m_client_max_body_size = 0;
 	m_autoindex			   = false;
@@ -84,7 +84,7 @@ static void
 Server::Server(t_block_directive *constructor_specs) {
 	init();
 
-	overwriteIfSpecified("listen", m_port, 8080, constructor_specs);
+	overwriteIfSpecified("listen", m_port, 8000, constructor_specs);
 	overwriteIfSpecified("server_name", m_names, "", constructor_specs);
 	overwriteIfSpecified("root", m_root, "html", constructor_specs);
 	overwriteIfSpecified("client_max_body_size", m_client_max_body_size, 0, constructor_specs);
