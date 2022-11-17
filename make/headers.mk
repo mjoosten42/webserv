@@ -8,6 +8,7 @@ HEADERS = \
 	include/EnvironmentMap.hpp \
 	include/FD.hpp \
 	include/HTTP.hpp \
+	include/IO.hpp \
 	include/Listener.hpp \
 	include/Location.hpp \
 	include/logger.hpp \

@@ -1,14 +1,12 @@
 #pragma once
 
+#include "IO.hpp"
 #include "stringutils.hpp"
 
 #include <algorithm> // transform
 #include <sstream>
 #include <sys/poll.h>
 #include <vector>
-
-bool operator<(const pollfd& lhs, const pollfd& rhs);
-std::ostream& operator<<(std::ostream& os, const pollfd& pfd);
 
 struct KeyValue {
 		const char *key;

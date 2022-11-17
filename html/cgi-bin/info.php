@@ -6,3 +6,4 @@
 	
 	phpinfo(INFO_ENVIRONMENT);
 ?>
+<html> fsafdsff </html>

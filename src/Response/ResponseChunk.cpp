@@ -5,10 +5,10 @@
 #include "buffer.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
+#include "methods.hpp"
 #include "stringutils.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
-#include "methods.hpp"
 
 #include <fcntl.h> // O_RDONLY
 
@@ -26,9 +26,10 @@ void Response::processRequest() {
 
 	if (!m_server->allowsMethod(m_locationIndex, m_request.getMethod()))
 		return sendFail(405, "Method not allowd");
-	
-	if (m_request.getContentLength() > m_server->getCMB())
-		return sendFail(413, "Max body size is " + toString(m_server->getCMB()));
+
+	size_t cmb = m_server->getCMB(m_locationIndex);
+	if (cmb && m_request.getContentLength() > cmb)
+		return sendFail(413, "Max body size is " + toString(cmb));
 
 	if (m_server->isRedirect(m_locationIndex))
 		return sendMoved(m_server->getRedirect(m_locationIndex));
@@ -91,7 +92,7 @@ void Response::handleFile() {
 }
 
 void Response::openError(const std::string& dir, bool isDirectory) {
-	bool autoIndex = m_server->isAutoIndex();
+	bool autoIndex = m_server->isAutoIndex(m_locationIndex);
 
 	switch (errno) {
 		case EACCES:

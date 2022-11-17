@@ -14,14 +14,6 @@
 #include <unistd.h>	   // lseek
 #include <vector>
 
-bool operator<(const pollfd& lhs, const pollfd& rhs) {
-	return lhs.fd < rhs.fd;
-}
-
-std::ostream& operator<<(std::ostream& os, const pollfd& pfd) {
-	return os << pfd.fd;
-}
-
 // perrors and exits.
 void fatal_perror(const char *msg) {
 	perror(msg);

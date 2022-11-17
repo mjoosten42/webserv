@@ -7,9 +7,9 @@
 #include "Server.hpp"
 #include "buffer.hpp"
 #include "logger.hpp"
+#include "methods.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
-#include "methods.hpp"
 
 #include <sys/socket.h> // setsockopt
 #include <sys/wait.h>	// waitpid

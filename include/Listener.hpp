@@ -20,6 +20,8 @@ class Listener {
 		short			   getPort() const;
 		const std::string& getListenAddr() const;
 
+		std::string getListenerAsString(std::string tabs) const;
+
 	private:
 		void setupSocket();
 

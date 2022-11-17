@@ -3,7 +3,6 @@
 #include "HTTP.hpp"
 #include "methods.hpp"
 
-#include <iostream>
 #include <string>
 
 enum state { STARTLINE, HEADERS, BODY, DONE };
@@ -50,5 +49,3 @@ class Request: public HTTP {
 
 		std::string m_errorMsg;
 };
-
-std::ostream& operator<<(std::ostream& os, const Request& request);

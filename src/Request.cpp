@@ -3,9 +3,9 @@
 #include "HTTP.hpp"
 #include "defines.hpp"
 #include "logger.hpp"
+#include "methods.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
-#include "methods.hpp"
 
 #include <string>
 
@@ -83,9 +83,7 @@ void Request::parseStartLine(const std::string& line) {
 }
 
 void Request::parseMethod(const std::string& str) {
-	for (int i = 0; i < methodStringsSize; i++)
-		if (str == methodStrings[i])
-			m_method = static_cast<methods>(i);
+	m_method = toMethod(str);
 	if (m_method == static_cast<methods>(-1))
 		throw ServerException(400, "Incorrect method: " + str);
 	if (!isSupportedMethod(m_method))
@@ -198,18 +196,3 @@ std::string Request::getStateAsString() const {
 }
 
 #pragma endregion
-
-std::ostream& operator<<(std::ostream& os, const Request& request) {
-	os << MAGENTA "State: " DEFAULT << request.getStateAsString() << std::endl;
-	os << MAGENTA "Method: " DEFAULT << toString(request.getMethod()) << std::endl;
-	os << MAGENTA "Location: " DEFAULT << request.getLocation() << std::endl;
-	os << MAGENTA "Query string: " DEFAULT << request.getQueryString() << std::endl;
-	os << MAGENTA "Path info: " DEFAULT << request.getPathInfo() << std::endl;
-	os << MAGENTA "Headers: {\n" DEFAULT << request.getHeadersAsString() << MAGENTA << "}\n";
-	os << MAGENTA "Host: " DEFAULT << request.getHost() << std::endl;
-	os << MAGENTA "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
-	os << MAGENTA "Body: " DEFAULT << request.getBody() << std::endl;
-	os << MAGENTA "Body total: " DEFAULT << request.getBodyTotal() << std::endl;
-	os << MAGENTA "Status: " DEFAULT << request.getStatus();
-	return os;
-}

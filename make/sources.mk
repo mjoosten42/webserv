@@ -11,6 +11,7 @@ SOURCES = \
 	src/EnvironmentMap.cpp \
 	src/FD.cpp \
 	src/HTTP.cpp \
+	src/IO.cpp \
 	src/Listener.cpp \
 	src/Location.cpp \
 	src/main.cpp \

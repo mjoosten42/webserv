@@ -9,7 +9,7 @@
 void Response::sendCustomErrorPage() {
 	int tmp = m_status;
 
-	m_filename	  = m_server->getErrorPage(m_status);
+	m_filename	  = m_server->getErrorPage(m_locationIndex, m_status);
 	m_doneReading = false;
 	handleFile(); // Will set status to 200 if successful
 	m_status = tmp;
@@ -21,7 +21,7 @@ void Response::sendFail(int code, const std::string& msg) {
 	m_doneReading = true;
 	m_isCGI		  = false; // when we have an error, the CGI is no longer active.
 
-	if (m_server->hasErrorPage(m_status)) {
+	if (m_server->hasErrorPage(m_locationIndex, m_status)) {
 		try {
 			return sendCustomErrorPage();
 		} catch (int error) {
@@ -41,7 +41,7 @@ void Response::sendFail(int code, const std::string& msg) {
 
 void Response::sendMoved(const std::string& address) {
 	m_status = 301;
-	if (m_server->hasErrorPage(m_status))
+	if (m_server->hasErrorPage(m_locationIndex, m_status))
 		return sendCustomErrorPage();
 	m_doneReading = true;
 

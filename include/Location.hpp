@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ConfigParser.hpp"
-#include "Request.hpp"
+#include "methods.hpp"
 
 #include <iostream>
 #include <map>
@@ -10,21 +10,27 @@
 class Server;
 
 class Location {
+		friend class Server;
+
 	public:
 		Location();
-		Location(t_block_directive *constructor_specs, Server *parent);
 
-		std::string m_location;
+		void add(t_block_directive *constructor_specs);
 
-		std::string			 m_root; // root html
-		std::string			 m_indexPage; // index index.html
-		std::vector<methods> m_limit_except; // limit_except GET POST
-		std::string			 m_redirect;	 // redirect /cgi-bin/
-		std::vector<std::string> m_CGIs; // cgi php pl
+		template <typename T, typename F>
+		void overwriteIfSpecified(const std::string& search, T& field, t_block_directive *constructor_specs, F fun);
 
-		int	 m_client_max_body_size;
-		bool m_auto_index;
+		std::string getLocationAsString(std::string tabs) const;
 
 	private:
-		void getLimitExceptFromConfig(t_block_directive *constructor_specs);
+		std::string m_location;
+
+		std::string				   m_root;		   // root html
+		std::string				   m_indexPage;	   // index index.html
+		std::map<int, std::string> m_error_pages;  // error_page 404 404.html
+		std::vector<methods>	   m_limit_except; // limit_except GET POST
+		std::string				   m_redirect;	   // redirect /cgi-bin/
+		std::vector<std::string>   m_CGIs;		   // cgi php pl
+		size_t					   m_client_max_body_size;
+		bool					   m_auto_index;
 };

@@ -37,16 +37,18 @@ int main(int argc, const char *argv[]) {
 			return EXIT_FAILURE;
 	}
 
-	signal(SIGINT, signalHandler);
+	// signal(SIGINT, signalHandler);
 	signal(SIGPIPE, signalHandler);
 	signal(SIGCHLD, signalHandler);
 
 	try {
 		listeners = initFromConfig(argv[1]);
 
-		for (auto& listener : listeners)
+		for (auto& listener : listeners) {
+			LOG(listener.getListenerAsString(""));
 			poller.add(listener);
-		
+		}
+
 		poller.start();
 	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
