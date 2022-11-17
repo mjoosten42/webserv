@@ -41,12 +41,10 @@ Listed below are the directives it may contain that can be recognised by the con
 
 `server_name <hostname(s)>` - The hostnames of this particular server. The expected value is one or more strings, e.g.
 `server_name www.example.org example.org;`
-
 When this value is not specified it defaults to ` `.
 
 `listen <port>` - This server will listen at a specifed port TCP on IPv4.
 ex. `listen 8080;`
-
 When this value is not specified it defaults to `8080`.
 
 
