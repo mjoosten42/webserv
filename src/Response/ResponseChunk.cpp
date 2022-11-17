@@ -9,8 +9,7 @@
 #include "syscalls.hpp"
 #include "utils.hpp"
 
-#include <fcntl.h> // open
-#include <sys/socket.h>
+#include <fcntl.h> // O_RDONLY
 
 // GET --> is CGI ? CGI : FILE
 // POST --> CGI
@@ -24,13 +23,15 @@ void Response::processRequest() {
 	if (!isGood(m_request.getStatus()))
 		return sendFail(m_request.getStatus(), m_request.getErrorMsg());
 
+	if (!m_server->allowsMethod(m_locationIndex, m_request.getMethod()))
+		return sendFail(405, "Method not allowd");
+	
 	if (m_request.getContentLength() > m_server->getCMB())
 		return sendFail(413, "Max body size is " + toString(m_server->getCMB()));
 
 	if (m_server->isRedirect(m_locationIndex))
 		return sendMoved(m_server->getRedirect(m_locationIndex));
 
-	// Limit_except is now implemented within the functions called in this try-catch block.
 	try {
 		switch (m_request.getMethod()) {
 			case GET:
@@ -52,8 +53,6 @@ void Response::processRequest() {
 }
 
 void Response::handleDelete() {
-	if (!m_server->hasMethod(m_locationIndex, m_request.getMethod()))
-		throw 405;
 	std::string absolute = WS::realpath(m_filename);
 
 	m_doneReading = true;
@@ -71,8 +70,6 @@ void Response::handleDelete() {
 }
 
 void Response::handleFile() {
-	if (!m_server->hasMethod(m_locationIndex, m_request.getMethod()))
-		throw 405;
 	std::string originalFile = m_filename;
 	bool		isDirectory	 = isDir(m_filename);
 

@@ -7,8 +7,6 @@
 #include <unistd.h> // access
 
 void Response::handleCGI() {
-	if (!m_server->hasMethod(m_locationIndex, m_request.getMethod()))
-		throw 405;
 	if (access(m_filename.c_str(), X_OK) == -1)
 		throw 404;
 

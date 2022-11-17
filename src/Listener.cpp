@@ -64,7 +64,7 @@ void Listener::setupSocket() {
 	if (listen(m_fd, SOMAXCONN) < 0)
 		fatal_perror("listen");
 
-	LOG(BLUE "LISTENER " DEFAULT << m_fd << BLUE " LISTENING ON " DEFAULT << m_listenAddr << ":" << m_port);
+	LOG(GREEN "LISTENER " DEFAULT << m_fd << GREEN " LISTENING ON " DEFAULT << m_listenAddr << ":" << m_port);
 }
 
 #pragma region getters

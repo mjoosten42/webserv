@@ -8,6 +8,7 @@
 #include <vector>
 
 bool operator<(const pollfd& lhs, const pollfd& rhs);
+std::ostream& operator<<(std::ostream& os, const pollfd& pfd);
 
 struct KeyValue {
 		const char *key;
@@ -71,3 +72,16 @@ bool   isGood(int status);
 std::string getExtension(const std::string& filename);
 std::string basename(const std::string& path);
 std::string addressToString(int address);
+
+template <typename InputIt>
+std::string rangeToString(InputIt first, InputIt last) {
+	std::string ret = "{ ";
+	for (; first != last; first++) {
+		ret += toString(*first);
+		if (++first != last)
+			ret += ",";
+		first--;
+		ret += " ";
+	}
+	return ret + "}";
+}

@@ -27,12 +27,9 @@ class Poller {
 		void acceptClient(FD listener_fd);
 		void removeClient(FD index);
 
-		size_t clientsIndex() const;
-		size_t sourceFdsIndex() const;
-
+		std::vector<pollfd>::iterator clientsIndex();
+		std::vector<pollfd>::iterator sourceFdsIndex();
 		std::vector<pollfd>::iterator find(FD fd);
-
-		std::string getPollFdsAsString(size_t first, size_t last) const;
 
 	private:
 		static bool m_active;

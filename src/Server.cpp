@@ -207,7 +207,7 @@ bool Server::isRedirect(int loc_index) const {
 	return loc_index != -1 && !m_locations[loc_index].m_redirect.empty();
 }
 
-bool Server::hasMethod(int loc_index, methods method) const {
+bool Server::allowsMethod(int loc_index, methods method) const {
 	if (loc_index == -1)
 		return true; // Can't limit_except a server block.
 	else {

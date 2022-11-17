@@ -8,16 +8,6 @@
 #include <iostream>
 #include <vector>
 
-// TODO: remove
-#include <sys/resource.h> // setrlimit
-
-void limit_max_open(rlim_t limit) {
-	struct rlimit rlim = { limit, limit };
-
-	if (setrlimit(RLIMIT_NOFILE, &rlim) == -1)
-		perror("setrlimit");
-}
-
 void signalHandler(int signum) {
 	Poller ref;
 
@@ -47,21 +37,19 @@ int main(int argc, const char *argv[]) {
 			return EXIT_FAILURE;
 	}
 
+	signal(SIGINT, signalHandler);
+	signal(SIGPIPE, signalHandler);
+	signal(SIGCHLD, signalHandler);
+
 	try {
 		listeners = initFromConfig(argv[1]);
+
+		for (auto& listener : listeners)
+			poller.add(listener);
+		
+		poller.start();
 	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
-
-	// signal(SIGINT, signalHandler);
-	signal(SIGPIPE, signalHandler);
-	signal(SIGCHLD, signalHandler);
-
-	for (auto& listener : listeners)
-		poller.add(listener);
-
-	// limit_max_open(200);
-
-	poller.start();
 }
