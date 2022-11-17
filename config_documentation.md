@@ -70,6 +70,8 @@ When this value is not specified it defaults to standard error pages for each of
 WARNING: NGINX difference - Nginx allows the user to specify multiple error codes per error page (e.g. `error_page 401 402 403 404 my_amazing_4XX_error_page.html;`). In our config they must be strictly alternating key value pairs, though can be written on multiple lines.
 
 
+//still need to write: cgi
+
 
 ### Location block
 The location block looks like this: 
