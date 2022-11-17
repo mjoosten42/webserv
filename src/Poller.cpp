@@ -8,7 +8,6 @@
 #include "syscalls.hpp"
 #include "utils.hpp"
 
-#include <algorithm>	// TODO
 #include <netinet/in.h> // sockaddr_in
 #include <sys/socket.h> // pollfd
 
@@ -25,18 +24,14 @@ void Poller::add(const Listener& listener) {
 void Poller::start() {
 	m_active = true;
 
-	LOG(RED "\n----STARTING LOOP----\n" DEFAULT);
+	LOG(GREEN "\n----STARTING LOOP----\n" DEFAULT);
 
 	while (m_active) {
 
-		std::sort(m_pollfds.begin(), m_pollfds.begin() + clientsIndex());
-		std::sort(m_pollfds.begin() + clientsIndex(), m_pollfds.begin() + sourceFdsIndex());
-		std::sort(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end());
-
-		LOG(RED << std::string(winSize(), '#') << DEFAULT);
-		// LOG(RED "Servers: " DEFAULT << getPollFdsAsString(0, clientsIndex()));
-		LOG(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
-		LOG(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
+		LOG(CYAN << std::string(winSize(), '#') << DEFAULT);
+		LOG(CYAN "Servers: " DEFAULT << rangeToString(m_pollfds.begin(), clientsIndex()));
+		LOG(CYAN "Clients: " DEFAULT << rangeToString(clientsIndex(), sourceFdsIndex()));
+		LOG(CYAN "sourcefds: " DEFAULT << rangeToString(sourceFdsIndex(), m_pollfds.end()));
 
 		int poll_status = WS::poll(m_pollfds);
 		switch (poll_status) {
@@ -51,7 +46,7 @@ void Poller::start() {
 		}
 	}
 
-	LOG(RED "\n----EXITING LOOP----" DEFAULT);
+	LOG(GREEN "\n----EXITING LOOP----" DEFAULT);
 }
 
 void Poller::quit() {
@@ -61,32 +56,31 @@ void Poller::quit() {
 void Poller::pollfdEvent() {
 
 	// loop over current clients to check if we can read or write
-	for (size_t i = clientsIndex(); i < sourceFdsIndex(); i++) {
-		pollfd& client = m_pollfds[i];
+	for (auto it = clientsIndex(); it != sourceFdsIndex(); it++) {
+		pollfd& client = *it;
 
-		unsetFlag(m_pollfds[i].events, POLLOUT);
+		unsetFlag(client.events, POLLOUT);
 
 		if (client.revents)
-			LOG(RED "Client " DEFAULT << client.fd << RED " Get: " << getEventsAsString(client.revents) << DEFAULT);
+			LOG(CYAN "Client " DEFAULT << client.fd << CYAN " Get: " DEFAULT << getEventsAsString(client.revents));
 
-		if (client.revents & POLLHUP) {
-			pollHup(client);
-			i--;
-			continue;
-		}
 		if (client.revents & POLLIN)
 			pollIn(client);
 		if (client.revents & POLLOUT)
 			pollOut(client);
+		if (client.revents & POLLHUP) {
+			pollHup(client);
+			it--;
+		}
 	}
 
 	// loop over sourcefds. If one has POLLIN, set POLLOUT on it's connection
-	for (size_t i = sourceFdsIndex(); i < m_pollfds.size(); i++) {
-		pollfd& source	  = m_pollfds[i];
+	for (auto it = sourceFdsIndex(); it != m_pollfds.end(); it++) {
+		pollfd& source	  = *it;
 		FD		client_fd = m_sources.getClientFd(source.fd);
 
 		if (source.revents)
-			LOG(RED "Source " DEFAULT << source.fd << RED " Get: " << getEventsAsString(source.revents) << DEFAULT);
+			LOG(CYAN "Source " DEFAULT << source.fd << CYAN " Get: " DEFAULT << getEventsAsString(source.revents));
 
 		// If source has POLLIN, set POLLOUT in client
 		// However, source will get POLLIN next loop because client will only read next loop, not this one
@@ -96,8 +90,6 @@ void Poller::pollfdEvent() {
 			unsetFlag(source.events, POLLIN);
 		} else
 			setFlag(source.events, POLLIN);
-		if (source.revents & POLLNVAL) // TODO
-			exit(1);
 	}
 
 	// Loop over the listening sockets for new clients
@@ -106,13 +98,11 @@ void Poller::pollfdEvent() {
 			acceptClient(m_pollfds[i].fd);
 }
 
-// Let connection read new data
-// Add a source_fd if asked
 void Poller::pollIn(pollfd& client) {
 	Connection& conn	  = m_connections[client.fd];
 	FD			source_fd = conn.receive(client.events);
 
-	if (source_fd != -1) { // A response wants to poll on a file/pipe
+	if (source_fd != -1) { // A response wants to poll on a pipe
 		pollfd source = { source_fd, POLLIN, 0 };
 
 		m_sources.add(source, client.fd);
@@ -120,14 +110,11 @@ void Poller::pollIn(pollfd& client) {
 	}
 }
 
-// Let connection send data
-// If response is done reading from its source_fd, remove it
-// If response is done and wants to close the connection, remove the client
 void Poller::pollOut(pollfd& client) {
 	Connection& conn	  = m_connections[client.fd];
 	FD			source_fd = conn.send(client.events);
 
-	if (source_fd != -1) { // returns source_fd to close
+	if (source_fd != -1) { // A response wants to close its source_fd
 		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
 	}
@@ -135,8 +122,6 @@ void Poller::pollOut(pollfd& client) {
 		removeClient(client.fd);
 }
 
-// Remove all source fds connected to client
-// Remove client
 void Poller::pollHup(pollfd& client) {
 	std::vector<FD> sourcefds = m_sources.getSourceFds(client.fd); // get all source fds dependent on client fd
 
@@ -158,25 +143,25 @@ void Poller::acceptClient(FD listener_fd) {
 	if (fd < 0)
 		return;
 
-	m_pollfds.insert(m_pollfds.begin() + sourceFdsIndex(), client); // insert after last client
+	m_pollfds.insert(sourceFdsIndex(), client); // insert after last client
 	m_connections[fd] = Connection(fd, listener, addressToString(peer.sin_addr.s_addr));
 
-	LOG(RED "NEW CLIENT: " DEFAULT << fd);
+	LOG(CYAN "NEW CLIENT: " DEFAULT << fd);
 }
 
 void Poller::removeClient(FD client_fd) {
 	m_pollfds.erase(find(client_fd)); // erase from pollfd vector
 	m_connections.erase(client_fd);	  // erase from connection map
 
-	LOG(RED "CLIENT " DEFAULT << client_fd << RED " LEFT" DEFAULT);
+	LOG(CYAN "CLIENT " DEFAULT << client_fd << CYAN " LEFT" DEFAULT);
 }
 
-size_t Poller::clientsIndex() const {
-	return m_listeners.size();
+std::vector<pollfd>::iterator Poller::clientsIndex() {
+	return m_pollfds.begin() + m_listeners.size();
 }
 
-size_t Poller::sourceFdsIndex() const {
-	return m_listeners.size() + m_connections.size();
+std::vector<pollfd>::iterator Poller::sourceFdsIndex() {
+	return m_pollfds.begin() + m_listeners.size() + m_connections.size();
 }
 
 std::vector<pollfd>::iterator Poller::find(FD fd) {
@@ -184,19 +169,7 @@ std::vector<pollfd>::iterator Poller::find(FD fd) {
 		if (it->fd == fd)
 			return it;
 	LOG_ERR("Fd not found in pollfds: " << fd);
-	LOG_ERR(RED "Clients: " DEFAULT << getPollFdsAsString(clientsIndex(), sourceFdsIndex()));
-	LOG_ERR(RED "sourcefds: " DEFAULT << getPollFdsAsString(sourceFdsIndex(), m_pollfds.size()));
+	LOG_ERR("Clients: " << rangeToString(clientsIndex(), sourceFdsIndex()));
+	LOG_ERR("sourcefds: " << rangeToString(sourceFdsIndex(), m_pollfds.end()));
 	return m_pollfds.end();
-}
-
-std::string Poller::getPollFdsAsString(size_t first, size_t last) const {
-	std::string PollFds = "{ ";
-	for (; first != last; first++) {
-		PollFds += toString(m_pollfds[first].fd);
-		if (first + 1 != last)
-			PollFds += ",";
-		PollFds += " ";
-	}
-	PollFds += "}";
-	return PollFds;
 }

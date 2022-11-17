@@ -7,8 +7,6 @@
 #include <unistd.h> // access
 
 void Response::handleCGI() {
-	if (!m_server->hasMethod(m_locationIndex, m_request.getMethod()))
-		throw 405;
 	if (access(m_filename.c_str(), X_OK) == -1)
 		throw 404;
 
@@ -26,7 +24,7 @@ void Response::handleCGI() {
 void Response::getCGIHeaderChunk() {
 	std::string line;
 
-	m_saved += readBlockFromFile();
+	m_saved += read();
 
 	// Parse headers line by line
 	while (containsNewline(m_saved)) {
@@ -57,20 +55,5 @@ void Response::getCGIHeaderChunk() {
 			m_chunk += m_saved;
 			m_saved.clear();
 		}
-	}
-}
-
-void Response::writeToCGI() {
-	std::string& body		   = m_request.getBody();
-	int			 fd			   = m_cgi.popen.writefd;
-	ssize_t		 bytes_written = WS::write(fd, body);
-
-	// LOG(RED "Write: " DEFAULT << bytes_written);
-	switch (bytes_written) {
-		case -1:
-			body.clear();
-			break;
-		default:
-			body.erase(0, bytes_written);
 	}
 }

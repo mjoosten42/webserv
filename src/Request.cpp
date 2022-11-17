@@ -5,12 +5,9 @@
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
+#include "methods.hpp"
 
-#include <algorithm> // std::min
 #include <string>
-
-const static char *methodStrings[] = { "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH" };
-const static int   methodStringsSize = sizeof(methodStrings) / sizeof(*methodStrings);
 
 bool isHttpVersion(const std::string& str);
 bool isSupportedMethod(methods method);
@@ -184,20 +181,6 @@ size_t Request::getBodyTotal() const {
 	return m_bodyTotal;
 }
 
-std::string Request::getMethodAsString() const {
-	switch (m_method) {
-		case GET:
-			return "GET";
-		case POST:
-			return "POST";
-		case DELETE:
-			return "DELETE";
-		default:
-			LOG_ERR("Invalid method: " << m_state);
-			return "INVALID METHOD";
-	}
-}
-
 std::string Request::getStateAsString() const {
 	switch (m_state) {
 		case STARTLINE:
@@ -217,16 +200,16 @@ std::string Request::getStateAsString() const {
 #pragma endregion
 
 std::ostream& operator<<(std::ostream& os, const Request& request) {
-	os << RED "State: " DEFAULT << request.getStateAsString() << std::endl;
-	os << RED "Method: " DEFAULT << request.getMethodAsString() << std::endl;
-	os << RED "Location: " DEFAULT << request.getLocation() << std::endl;
-	os << RED "Query string: " DEFAULT << request.getQueryString() << std::endl;
-	os << RED "Path info: " DEFAULT << request.getPathInfo() << std::endl;
-	// os << RED "Headers: {\n" DEFAULT << request.getHeadersAsString() << RED << "}\n";
-	os << RED "Host: " DEFAULT << request.getHost() << std::endl;
-	os << RED "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
-	// os << RED "Body: " DEFAULT << request.getBody() << std::endl;
-	os << RED "Body total: " DEFAULT << request.getBodyTotal() << std::endl;
-	// os << RED "Status: " DEFAULT << request.getStatus();
+	os << MAGENTA "State: " DEFAULT << request.getStateAsString() << std::endl;
+	os << MAGENTA "Method: " DEFAULT << toString(request.getMethod()) << std::endl;
+	os << MAGENTA "Location: " DEFAULT << request.getLocation() << std::endl;
+	os << MAGENTA "Query string: " DEFAULT << request.getQueryString() << std::endl;
+	os << MAGENTA "Path info: " DEFAULT << request.getPathInfo() << std::endl;
+	os << MAGENTA "Headers: {\n" DEFAULT << request.getHeadersAsString() << MAGENTA << "}\n";
+	os << MAGENTA "Host: " DEFAULT << request.getHost() << std::endl;
+	os << MAGENTA "Content-Length: " DEFAULT << request.getContentLength() << std::endl;
+	os << MAGENTA "Body: " DEFAULT << request.getBody() << std::endl;
+	os << MAGENTA "Body total: " DEFAULT << request.getBodyTotal() << std::endl;
+	os << MAGENTA "Status: " DEFAULT << request.getStatus();
 	return os;
 }

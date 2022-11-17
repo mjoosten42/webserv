@@ -19,7 +19,8 @@ class Response: public HTTP {
 		std::string& getNextChunk();
 		void		 trimChunk(ssize_t bytes_sent);
 
-		void writeToCGI();
+		void		write();
+		std::string read();
 
 		bool hasProcessedRequest() const;
 		bool isCGI() const;
@@ -43,8 +44,6 @@ class Response: public HTTP {
 		void addFileHeaders();
 		void getCGIHeaderChunk();
 		void encodeChunked(std::string& str);
-
-		std::string readBlockFromFile();
 
 		void sendCustomErrorPage();
 		void sendFail(int code, const std::string& msg);

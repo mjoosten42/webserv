@@ -14,6 +14,7 @@ SOURCES = \
 	src/Listener.cpp \
 	src/Location.cpp \
 	src/main.cpp \
+	src/methods.cpp \
 	src/MIME.cpp \
 	src/Poller.cpp \
 	src/Request.cpp \
@@ -21,6 +22,7 @@ SOURCES = \
 	src/Response/ResponseCGI.cpp \
 	src/Response/ResponseChunk.cpp \
 	src/Response/ResponseErrors.cpp \
+	src/Response/ResponseIO.cpp \
 	src/Server.cpp \
 	src/SourceFds.cpp \
 	src/stringutils.cpp \

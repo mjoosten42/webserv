@@ -8,9 +8,9 @@
 #include "stringutils.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
+#include "methods.hpp"
 
-#include <fcntl.h> // open
-#include <sys/socket.h>
+#include <fcntl.h> // O_RDONLY
 
 // GET --> is CGI ? CGI : FILE
 // POST --> CGI
@@ -24,13 +24,15 @@ void Response::processRequest() {
 	if (!isGood(m_request.getStatus()))
 		return sendFail(m_request.getStatus(), m_request.getErrorMsg());
 
+	if (!m_server->allowsMethod(m_locationIndex, m_request.getMethod()))
+		return sendFail(405, "Method not allowd");
+	
 	if (m_request.getContentLength() > m_server->getCMB())
 		return sendFail(413, "Max body size is " + toString(m_server->getCMB()));
 
 	if (m_server->isRedirect(m_locationIndex))
 		return sendMoved(m_server->getRedirect(m_locationIndex));
 
-	// Limit_except is now implemented within the functions called in this try-catch block.
 	try {
 		switch (m_request.getMethod()) {
 			case GET:
@@ -52,8 +54,6 @@ void Response::processRequest() {
 }
 
 void Response::handleDelete() {
-	if (!m_server->hasMethod(m_locationIndex, m_request.getMethod()))
-		throw 405;
 	std::string absolute = WS::realpath(m_filename);
 
 	m_doneReading = true;
@@ -71,11 +71,8 @@ void Response::handleDelete() {
 }
 
 void Response::handleFile() {
-	if (!m_server->hasMethod(m_locationIndex, m_request.getMethod()))
-		throw 405;
 	std::string originalFile = m_filename;
 	bool		isDirectory	 = isDir(m_filename);
-	int			fd;
 
 	if (isDirectory) {
 		if (m_filename.back() != '/')
@@ -83,7 +80,7 @@ void Response::handleFile() {
 		m_filename += m_server->getIndexPage(m_locationIndex);
 	}
 
-	fd = WS::open(m_filename, O_RDONLY);
+	int fd = WS::open(m_filename, O_RDONLY);
 	if (fd == -1)
 		return openError(originalFile, isDirectory);
 
@@ -140,7 +137,7 @@ std::string& Response::getNextChunk() {
 		if (m_isCGI && !m_CGI_DoneProcessingHeaders)
 			getCGIHeaderChunk();
 		else {
-			block = readBlockFromFile();
+			block = read();
 			if (m_isChunked)
 				encodeChunked(block);
 			m_chunk += block;
@@ -152,26 +149,6 @@ std::string& Response::getNextChunk() {
 void Response::encodeChunked(std::string& str) {
 	str.insert(0, toHex(str.length()) + CRLF);
 	str += CRLF;
-}
-
-std::string Response::readBlockFromFile() {
-	ssize_t		bytes_read = WS::read(m_source_fd);
-	std::string block;
-
-	// LOG(RED "Read: " DEFAULT << bytes_read);
-	switch (bytes_read) {
-		case -1:
-		case 0:
-			m_doneReading = true;
-			break;
-		default:
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-			// LOG(std::string(buf, bytes_read));
-			// LOG(RED << std::string(winSize(), '-') << DEFAULT);
-
-			block.append(buf, bytes_read);
-	}
-	return block;
 }
 
 void Response::createIndex(std::string path_to_index) {

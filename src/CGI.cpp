@@ -9,8 +9,8 @@
 #include "logger.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
+#include "methods.hpp"
 
-#include <fcntl.h>		// open
 #include <sys/socket.h> // setsockopt
 #include <sys/wait.h>	// waitpid
 
@@ -66,9 +66,6 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 
 	pipeTwo(serverToCgi, cgiToServer);
 
-	set_fd_nonblocking(readfd);
-	set_fd_nonblocking(writefd); // TODO
-
 	pid = fork();
 	switch (pid) {
 		case -1: // failure
@@ -87,8 +84,11 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 			WS::close(serverToCgi[0]);
 			WS::close(cgiToServer[1]);
 
-			readfd	= cgiToServer[0]; // Only assign to FD when successfull,
-			writefd = serverToCgi[1]; // otherwise they will be closes twice...
+			readfd	= cgiToServer[0];
+			writefd = serverToCgi[1];
+
+			set_fd_nonblocking(readfd);
+			set_fd_nonblocking(writefd);
 	}
 }
 
@@ -122,7 +122,7 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 	em["QUERY_STRING"]	 = req.getQueryString();
 	em["REMOTE_ADDR"]	 = peer;
 	em["REMOTE_HOST"]	 = peer;
-	em["REQUEST_METHOD"] = req.getMethodAsString();
+	em["REQUEST_METHOD"] = toString(req.getMethod());
 	em["SCRIPT_NAME"]	 = filename;
 	em["SERVER_NAME"]	 = req.getHost();
 
