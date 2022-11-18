@@ -105,7 +105,10 @@ std::string HTTP::getHeaderValue(const std::string& field) const {
 	std::string copy(field);
 
 	strToLower(copy);
-	return m_headers.find(copy)->second;
+	auto it = m_headers.find(copy);
+	if (it != m_headers.end())
+		return it->second;
+	return "";
 }
 
 std::string HTTP::getHeadersAsString() const {

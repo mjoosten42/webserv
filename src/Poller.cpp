@@ -125,9 +125,7 @@ void Poller::pollOut(pollfd& client) {
 void Poller::pollHup(pollfd& client) {
 	std::vector<FD> sourcefds = m_sources.getSourceFds(client.fd); // get all source fds dependent on client fd
 
-	for (size_t i = 0; i < sourcefds.size(); i++) {
-		FD source_fd = sourcefds[i];
-
+	for (auto& source_fd : sourcefds) {
 		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
 	}

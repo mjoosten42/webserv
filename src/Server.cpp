@@ -13,13 +13,16 @@
 #include <sys/socket.h>
 
 // TODO: default server_name
-Server::Server(): m_host("127.0.0.1"), m_port(8080), m_names({ { "webserv.com" } }), m_locations(1) {}
+Server::Server(): m_host("127.0.0.1"), m_port(8000), m_names({ { "webserv.com" } }), m_locations(1) {}
 
 void Server::add(t_block_directive *constructor_specs) {
 	m_locations.front().add(constructor_specs);
 
+	overwriteIfSpecified("listen", m_port, constructor_specs, stringToIntegral<short>);
+	overwriteIfSpecified("server_name", m_names, constructor_specs, stringSplit);
+
 	for (auto& block : constructor_specs->fetch_matching_blocks("location")) {
-		m_locations.push_back(m_locations.front()); // Copy server default to new last
+		m_locations.push_back(m_locations.front()); // Copy server default to new location
 		m_locations.back().add(block);				// Add config
 	}
 }
@@ -39,7 +42,7 @@ int Server::getLocationIndex(const std::string& address) const {
 		const std::string& loc	   = m_locations[i].m_location;
 		size_t			   matched = match(loc, address); // Amount of characters matched
 
-		if (matched == loc.length()) { // I.E. make sure /index doesn't match /images
+		if (matched == loc.length()) { // Make sure /index doesn't match /images
 			if (matched > longest) {
 				longest = matched;
 				ret		= i;
@@ -47,10 +50,6 @@ int Server::getLocationIndex(const std::string& address) const {
 		}
 	}
 	return (ret);
-}
-
-std::string Server::translateAddressToPath(int loc_index, const std::string& file_address) const {
-	return m_locations[loc_index].m_root + file_address;
 }
 
 bool Server::isCGI(int loc_index, const std::string& ext) const {
@@ -103,7 +102,7 @@ bool Server::isAutoIndex(int loc_index) const {
 }
 
 bool Server::hasErrorPage(int loc_index, int code) const {
-	auto pages = m_locations[loc_index].m_error_pages;
+	auto& pages = m_locations[loc_index].m_error_pages;
 
 	return pages.find(code) != pages.end();
 }

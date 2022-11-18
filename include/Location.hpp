@@ -17,9 +17,6 @@ class Location {
 
 		void add(t_block_directive *constructor_specs);
 
-		template <typename T, typename F>
-		void overwriteIfSpecified(const std::string& search, T& field, t_block_directive *constructor_specs, F fun);
-
 		std::string getLocationAsString(std::string tabs) const;
 
 	private:

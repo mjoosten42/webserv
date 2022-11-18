@@ -18,9 +18,9 @@ static std::vector<Server> initServers(ConfigParser& config) {
 
 static Listener *getListenerByHostPort(std::vector<Listener>& listeners, const std::string& host, const short port) {
 
-	for (std::vector<Listener>::iterator it = listeners.begin(); it != listeners.end(); it++)
-		if (it->getListenAddr() == host && it->getPort() == port)
-			return &*it;
+	for (auto& listener : listeners)
+		if (listener.getListenAddr() == host && listener.getPort() == port)
+			return &listener;
 	return NULL;
 }
 

@@ -20,14 +20,14 @@ OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 export MAKEFLAGS = "-j 4"
 
 DEBUG := 1
-SAN := 0
+SAN := 1
 
 ifeq ($(DEBUG), 1)
 	CXX_FLAGS += -D DEBUG -g 
 endif
 
 ifeq ($(SAN), 1)
-	CXX_FLAGS += -fsanitize=address
+	CXX_FLAGS += -fsanitize=undefined
 endif
 
 INCLUDE = -I $(INC_DIR)

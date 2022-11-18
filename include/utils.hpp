@@ -7,6 +7,7 @@
 #include <sstream>
 #include <sys/poll.h>
 #include <vector>
+#include "ConfigParser.hpp"
 
 struct KeyValue {
 		const char *key;
@@ -82,4 +83,12 @@ std::string rangeToString(InputIt first, InputIt last) {
 		ret += " ";
 	}
 	return ret + "}";
+}
+
+template <typename T, typename F>
+void overwriteIfSpecified(const std::string& search, T& field, t_block_directive *constructor_specs, F fun) {
+	std::string value = constructor_specs->fetch_simple(search);
+
+	if (!value.empty())
+		field = fun(value);
 }

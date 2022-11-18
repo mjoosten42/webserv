@@ -18,8 +18,6 @@ class Server {
 
 		int getLocationIndex(const std::string& address_to_find) const;
 
-		std::string translateAddressToPath(int loc_index, const std::string& file_address) const;
-
 		// Server
 		const std::vector<std::string>& getNames() const;
 		const std::string			  & getHost() const;
@@ -41,7 +39,7 @@ class Server {
 		std::string getServerAsString(std::string tabs) const;
 
 	private:
-		std::string				 m_host;  // the IP address this server listens on. TODO: use inet_addr?
+		std::string				 m_host;  // the IP address this server listens on.
 		short					 m_port;  // port the server listens on
 		std::vector<std::string> m_names; // i.e. example.com www.example.com etc.
 		std::vector<Location>	 m_locations;

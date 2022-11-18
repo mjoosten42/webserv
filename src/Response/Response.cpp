@@ -44,7 +44,7 @@ void Response::addServer(const Server *server) {
 
 void Response::initialize() {
 	m_locationIndex = m_server->getLocationIndex(m_request.getLocation());
-	m_filename		= m_server->translateAddressToPath(m_locationIndex, m_request.getLocation());
+	m_filename		= m_server->getRoot(m_locationIndex) + m_request.getLocation();
 
 	setFlags();
 	addDefaultHeaders();
@@ -57,7 +57,7 @@ void Response::setFlags() {
 	m_isCGI = m_server->isCGI(m_locationIndex, ext);
 	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
 	m_isChunked = m_isCGI;						// CGI is always chunked
-	m_close		= (m_request.hasHeader("Connection") && m_request.getHeaderValue("Connection") == "close");
+	m_close		= (m_request.getHeaderValue("Connection") == "close");
 }
 
 std::string Response::getStatusMessage() const {
