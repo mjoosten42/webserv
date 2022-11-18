@@ -95,8 +95,6 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 
 // https://www.rfc-editor.org/rfc/rfc3875#section-4.1.5
 
-#include <sys/stat.h> // TODO
-
 void CGI::start(const Response& response) {
 	const Request& req = response.m_request;
 	EnvironmentMap em;
@@ -131,11 +129,10 @@ void CGI::start(const Response& response) {
 
 	if (req.getMethod() == POST) {
 		std::string root = response.m_server->getRoot(response.m_locationIndex);
-		std::string dir	 = root + response.m_server->getUploadDir(response.m_locationIndex);
-		LOG("dir: " << dir);
-		mkdir(dir.c_str(), 0644);
-		em["UPLOAD_DIR"] = WS::realpath(dir);
-		LOG("Upload directory: " << em["UPLOAD_DIR"]);
+		std::string dir	 = WS::realpath(root) + response.m_server->getUploadDir(response.m_locationIndex);
+	
+		em["UPLOAD_DIR"] = dir;
+		LOG("Upload directory: " << dir);
 	}
 
 	popen.my_popen(response.m_filename, em);

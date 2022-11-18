@@ -4,6 +4,11 @@ import cgi, os
 
 upload_dir = os.environ["UPLOAD_DIR"]
 
+try:
+	os.makedirs(upload_dir)
+except OSError:
+	""
+
 form = cgi.FieldStorage()
 
 try:
@@ -25,7 +30,6 @@ if fileitem.filename:
 print("Content-Type: text/html")
 print("Location: " + "/uploads/" + fileitem.filename)
 print()
-
    
 print ("""\
 <html>
@@ -34,8 +38,3 @@ print ("""\
    </body>
 </html>
 """ % (message,))
-
-# html/cgi-bin/upload.py
-# html/cgi-bin/. PY wd
-# ../../uploadDir/file
-# uploadDir/file
