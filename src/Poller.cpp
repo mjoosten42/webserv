@@ -29,9 +29,10 @@ void Poller::start() {
 	while (m_active) {
 
 		LOG(CYAN << std::string(winSize(), '#') << DEFAULT);
-		LOG(CYAN "Servers: " DEFAULT << rangeToString(m_pollfds.begin(), clientsIndex()));
-		LOG(CYAN "Clients: " DEFAULT << rangeToString(clientsIndex(), sourceFdsIndex()));
-		LOG(CYAN "sourcefds: " DEFAULT << rangeToString(sourceFdsIndex(), m_pollfds.end()));
+		// LOG(CYAN "Servers: " DEFAULT << rangeToString(m_pollfds.begin(), m_pollfds.begin() + clientsIndex()));
+		LOG(CYAN "Clients: " DEFAULT << rangeToString(m_pollfds.begin() + clientsIndex(),
+													  m_pollfds.begin() + sourceFdsIndex()));
+		LOG(CYAN "sourcefds: " DEFAULT << rangeToString(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end()));
 
 		int poll_status = WS::poll(m_pollfds);
 		switch (poll_status) {
@@ -54,10 +55,16 @@ void Poller::quit() {
 }
 
 void Poller::pollfdEvent() {
+	size_t i = 0; // Use an index because it can't be invalidated
+
+	// Loop over the listening sockets for new clients
+	for (; i != clientsIndex(); i++)
+		if (m_pollfds[i].revents & POLLIN)
+			acceptClient(m_pollfds[i].fd);
 
 	// loop over current clients to check if we can read or write
-	for (auto it = clientsIndex(); it != sourceFdsIndex(); it++) {
-		pollfd& client = *it;
+	for (; i != sourceFdsIndex(); i++) {
+		pollfd& client = m_pollfds[i];
 
 		unsetFlag(client.events, POLLOUT);
 
@@ -70,13 +77,13 @@ void Poller::pollfdEvent() {
 			pollOut(client);
 		if (client.revents & POLLHUP) {
 			pollHup(client);
-			it--;
+			i--;
 		}
 	}
 
 	// loop over sourcefds. If one has POLLIN, set POLLOUT on it's connection
-	for (auto it = sourceFdsIndex(); it != m_pollfds.end(); it++) {
-		pollfd& source	  = *it;
+	for (; i != m_pollfds.size(); i++) {
+		pollfd& source	  = m_pollfds[i];
 		FD		client_fd = m_sources.getClientFd(source.fd);
 
 		if (source.revents)
@@ -91,11 +98,6 @@ void Poller::pollfdEvent() {
 		} else
 			setFlag(source.events, POLLIN);
 	}
-
-	// Loop over the listening sockets for new clients
-	for (size_t i = 0; i < m_listeners.size(); i++)
-		if (m_pollfds[i].revents & POLLIN)
-			acceptClient(m_pollfds[i].fd);
 }
 
 void Poller::pollIn(pollfd& client) {
@@ -141,7 +143,7 @@ void Poller::acceptClient(FD listener_fd) {
 	if (fd < 0)
 		return;
 
-	m_pollfds.insert(sourceFdsIndex(), client); // insert after last client
+	m_pollfds.insert(m_pollfds.begin() + sourceFdsIndex(), client); // insert after last client
 	m_connections[fd] = Connection(fd, listener, addressToString(peer.sin_addr.s_addr));
 
 	LOG(CYAN "NEW CLIENT: " DEFAULT << fd);
@@ -154,12 +156,12 @@ void Poller::removeClient(FD client_fd) {
 	LOG(CYAN "CLIENT " DEFAULT << client_fd << CYAN " LEFT" DEFAULT);
 }
 
-std::vector<pollfd>::iterator Poller::clientsIndex() {
-	return m_pollfds.begin() + m_listeners.size();
+size_t Poller::clientsIndex() {
+	return m_listeners.size();
 }
 
-std::vector<pollfd>::iterator Poller::sourceFdsIndex() {
-	return m_pollfds.begin() + m_listeners.size() + m_connections.size();
+size_t Poller::sourceFdsIndex() {
+	return m_listeners.size() + m_connections.size();
 }
 
 std::vector<pollfd>::iterator Poller::find(FD fd) {
@@ -167,7 +169,8 @@ std::vector<pollfd>::iterator Poller::find(FD fd) {
 		if (it->fd == fd)
 			return it;
 	LOG_ERR("Fd not found in pollfds: " << fd);
-	LOG_ERR("Clients: " << rangeToString(clientsIndex(), sourceFdsIndex()));
-	LOG_ERR("sourcefds: " << rangeToString(sourceFdsIndex(), m_pollfds.end()));
+	LOG_ERR("Servers: " << rangeToString(m_pollfds.begin(), m_pollfds.begin() + clientsIndex()));
+	LOG_ERR("Clients: " << rangeToString(m_pollfds.begin() + clientsIndex(), m_pollfds.begin() + sourceFdsIndex()));
+	LOG_ERR("sourcefds: " << rangeToString(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end()));
 	return m_pollfds.end();
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ConfigParser.hpp"
 #include "IO.hpp"
 #include "stringutils.hpp"
 
@@ -7,7 +8,6 @@
 #include <sstream>
 #include <sys/poll.h>
 #include <vector>
-#include "ConfigParser.hpp"
 
 struct KeyValue {
 		const char *key;

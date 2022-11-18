@@ -19,8 +19,8 @@ class Response: public HTTP {
 		std::string& getNextChunk();
 		void		 trimChunk(ssize_t bytes_sent);
 
-		void		write();
-		std::string read();
+		void		writeToCGI();
+		std::string readBlock();
 
 		bool hasProcessedRequest() const;
 		bool isCGI() const;

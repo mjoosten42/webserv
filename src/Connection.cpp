@@ -54,7 +54,7 @@ FD Connection::receive(short& events) {
 			}
 
 			if (response.isCGI())
-				response.write();
+				response.writeToCGI();
 	}
 	return source_fd;
 }

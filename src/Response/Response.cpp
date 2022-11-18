@@ -32,8 +32,9 @@ const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMes
 Response::Response():
 	HTTP(),
 	m_server(NULL),
-	m_locationIndex(-1),
+	m_locationIndex(0),
 	m_processedRequest(false),
+	m_isChunked(false),
 	m_doneReading(false),
 	m_CGI_DoneProcessingHeaders(false),
 	m_close(false) {}
@@ -56,8 +57,7 @@ void Response::setFlags() {
 
 	m_isCGI = m_server->isCGI(m_locationIndex, ext);
 	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
-	m_isChunked = m_isCGI;						// CGI is always chunked
-	m_close		= (m_request.getHeaderValue("Connection") == "close");
+	m_close = (m_request.getHeaderValue("Connection") == "close");
 }
 
 std::string Response::getStatusMessage() const {

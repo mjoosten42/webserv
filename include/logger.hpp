@@ -1,6 +1,7 @@
 #pragma once
 
 #include "defines.hpp"
+#include "utils.hpp" // winsize
 
 #include <cerrno>	// errno
 #include <string.h> // strerror

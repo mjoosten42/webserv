@@ -1,8 +1,8 @@
 #include "Location.hpp"
 
+#include "methods.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
-#include "methods.hpp"
 
 Location::Location():
 	m_location("/"),
