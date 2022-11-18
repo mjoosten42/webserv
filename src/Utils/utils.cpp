@@ -26,29 +26,6 @@ void set_fd_nonblocking(const int fd) {
 		fatal_perror("fcntl");
 }
 
-std::string getEventsAsString(short revents) {
-	std::string events;
-
-	if (revents & POLLIN)
-		events += "IN";
-	if (revents & POLLOUT) {
-		if (!events.empty())
-			events += " | ";
-		events += "OUT";
-	}
-	if (revents & POLLHUP) {
-		if (!events.empty())
-			events += " | ";
-		events += "HUP";
-	}
-	if (revents & POLLNVAL) {
-		if (!events.empty())
-			events += " | ";
-		events += "NVAL";
-	}
-	return "{ " + events + " }";
-}
-
 void setFlag(short& events, int flag) {
 	events |= flag;
 }
@@ -131,6 +108,5 @@ std::string addressToString(int address) {
 		if (i)
 			str += ".";
 	}
-
 	return str;
 }

@@ -3,11 +3,10 @@
 #include "FD.hpp"
 
 #include <string>
-#include <unistd.h> // pid_t, close, pipe, fork etc.
+#include <unistd.h> // pid_t
 
 class EnvironmentMap;
-class Request;
-class Server;
+class Response;
 
 struct Popen {
 		pid_t pid;
@@ -19,7 +18,7 @@ struct Popen {
 
 class CGI {
 	public:
-		void start(const Request& request, const Server *server, const std::string& filename, const std::string& peer);
+		void start(const Response& response);
 
 	public:
 		Popen popen;

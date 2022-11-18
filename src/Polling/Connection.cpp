@@ -53,7 +53,7 @@ FD Connection::receive(short& events) {
 					setFlag(events, POLLOUT);
 			}
 
-			if (response.isCGI())
+			if (response.isCGI() && !request.getBody().empty())
 				response.writeToCGI();
 	}
 	return source_fd;
@@ -81,7 +81,7 @@ FD Connection::send(short& events) {
 			response.trimChunk(bytes_sent);
 			if (response.isDone()) {
 				m_close |= response.wantsClose();
-				if (response.isCGI())
+				if (response.hadFD())
 					source_fd = response.getSourceFD();
 				m_responses.pop();
 			} else if (!response.isCGI())

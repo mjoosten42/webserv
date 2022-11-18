@@ -12,9 +12,11 @@ void Response::handleCGI() {
 	if (access(m_filename.c_str(), X_OK) == -1)
 		throw 403;
 
-	m_cgi.start(m_request, m_server, m_filename, m_peer);
+	m_cgi.start(*this);
 
 	m_source_fd = m_cgi.popen.readfd;
+
+	m_hadFD = true;
 
 	if (m_request.getMethod() == GET)
 		m_status = 200;
@@ -25,8 +27,6 @@ void Response::handleCGI() {
 // TODO: CGI Status header
 void Response::getCGIHeaderChunk() {
 	std::string line;
-
-	m_saved += readBlock();
 
 	// Parse headers line by line
 	while (containsNewline(m_saved)) {
@@ -53,12 +53,11 @@ void Response::getCGIHeaderChunk() {
 			m_isChunked = true;
 		}
 		if (!m_saved.empty()) {
-			std::string block = m_saved;
 			if (m_isChunked)
-				encodeChunked(block);
-			addToBody(block);
+				encodeChunked(m_saved);
+			addToBody(m_saved);
+			m_saved.clear();
 		}
 		m_chunk = getResponseAsString();
-		m_saved.clear();
 	}
 }

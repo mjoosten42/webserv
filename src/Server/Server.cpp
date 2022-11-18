@@ -36,7 +36,7 @@ void Server::add(t_block_directive *constructor_specs) {
 //  and the name of one of the containing location blocks.
 int Server::getLocationIndex(const std::string& address) const {
 	size_t longest = 0;
-	int	   ret;
+	int	   ret	   = 0;
 
 	for (size_t i = 0; i < m_locations.size(); i++) {
 		const std::string& loc	   = m_locations[i].m_location;
@@ -91,6 +91,10 @@ const std::string& Server::getRedirect(int loc_index) const {
 
 const std::string& Server::getErrorPage(int loc_index, int code) const {
 	return m_locations[loc_index].m_error_pages.at(code);
+}
+
+const std::string& Server::getUploadDir(int loc_index) const {
+	return m_locations[loc_index].m_uploadDir;
 }
 
 size_t Server::getCMB(int loc_index) const {

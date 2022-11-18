@@ -71,14 +71,15 @@ void Poller::pollfdEvent() {
 		if (client.revents)
 			LOG(CYAN "Client " DEFAULT << client.fd << CYAN " Get: " DEFAULT << getEventsAsString(client.revents));
 
+		if (client.revents & POLLHUP) {
+			pollHup(client);
+			i--;
+			continue;
+		}
 		if (client.revents & POLLIN)
 			pollIn(client);
 		if (client.revents & POLLOUT)
 			pollOut(client);
-		if (client.revents & POLLHUP) {
-			pollHup(client);
-			i--;
-		}
 	}
 
 	// loop over sourcefds. If one has POLLIN, set POLLOUT on it's connection
@@ -142,6 +143,8 @@ void Poller::acceptClient(FD listener_fd) {
 
 	if (fd < 0)
 		return;
+
+	WS::fcntl(fd);
 
 	m_pollfds.insert(m_pollfds.begin() + sourceFdsIndex(), client); // insert after last client
 	m_connections[fd] = Connection(fd, listener, addressToString(peer.sin_addr.s_addr));

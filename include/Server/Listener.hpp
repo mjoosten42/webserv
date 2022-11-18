@@ -1,23 +1,22 @@
 #pragma once
 
+#include "Server.hpp"
+
 #include <map>
 #include <string>
 #include <vector>
-
-class Server;
 
 // This class is basically a 'socket' class that can associate multiple servers with the same socket
 class Listener {
 	public:
 		Listener();
 		Listener(const std::string& listenAddress, short port);
-		~Listener();
 
-		void		  addServer(const Server		 &server);
-		const Server& getServerByHost(const std::string& host) const;
+		void addServer(const Server& server);
 
 		int				   getFD() const;
 		short			   getPort() const;
+		const Server	 & getServerByHost(const std::string	 &host) const;
 		const std::string& getListenAddr() const;
 
 		std::string getListenerAsString(std::string tabs) const;

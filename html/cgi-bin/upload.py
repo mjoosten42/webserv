@@ -4,11 +4,6 @@ import cgi, os
 
 upload_dir = os.environ["UPLOAD_DIR"]
 
-try:
-	os.makedirs(upload_dir)
-except:
-	exit(1)
-
 form = cgi.FieldStorage()
 
 try:
@@ -39,3 +34,8 @@ print ("""\
    </body>
 </html>
 """ % (message,))
+
+# html/cgi-bin/upload.py
+# html/cgi-bin/. PY wd
+# ../../uploadDir/file
+# uploadDir/file

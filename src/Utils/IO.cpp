@@ -77,6 +77,7 @@ std::string Location::getLocationAsString(std::string tabs) const {
 	ret += tabs + "\tlimit_except " + rangeToString(m_limit_except.begin(), m_limit_except.end()) + "\n";
 	ret += tabs + "\tredirect " + m_redirect + "\n";
 	ret += tabs + "\tcgi " + rangeToString(m_CGIs.begin(), m_CGIs.end()) + "\n";
+	ret += tabs + "\tupload " + m_uploadDir + "\n";
 	ret += tabs + "\tclient_max_body_size " + toString(m_client_max_body_size) + "\n";
 	ret += tabs + "\tautoindex " + (m_auto_index ? "on" : "off") + "\n";
 	return ret + tabs + "}";

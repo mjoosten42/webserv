@@ -1,31 +1,31 @@
 SOURCES = \
-	src/AutoIndex.cpp \
-	src/buf.cpp \
-	src/CGI.cpp \
+	src/CGI/CGI.cpp \
+	src/CGI/EnvironmentMap.cpp \
 	src/Config/CheckValidity.cpp \
 	src/Config/DebugPrint.cpp \
 	src/Config/FiniteStateMachine.cpp \
 	src/Config/init.cpp \
 	src/Config/Parser.cpp \
-	src/Connection.cpp \
-	src/EnvironmentMap.cpp \
-	src/FD.cpp \
-	src/HTTP.cpp \
-	src/IO.cpp \
-	src/Listener.cpp \
-	src/Location.cpp \
+	src/Handling/AutoIndex.cpp \
+	src/Handling/buf.cpp \
+	src/Handling/HTTP.cpp \
+	src/Handling/Request.cpp \
+	src/Handling/Response/Response.cpp \
+	src/Handling/Response/ResponseCGI.cpp \
+	src/Handling/Response/ResponseChunk.cpp \
+	src/Handling/Response/ResponseErrors.cpp \
+	src/Handling/Response/ResponseIO.cpp \
 	src/main.cpp \
-	src/methods.cpp \
-	src/MIME.cpp \
-	src/Poller.cpp \
-	src/Request.cpp \
-	src/Response/Response.cpp \
-	src/Response/ResponseCGI.cpp \
-	src/Response/ResponseChunk.cpp \
-	src/Response/ResponseErrors.cpp \
-	src/Response/ResponseIO.cpp \
-	src/Server.cpp \
-	src/SourceFds.cpp \
-	src/stringutils.cpp \
-	src/syscalls.cpp \
-	src/utils.cpp \
+	src/Polling/Connection.cpp \
+	src/Polling/Poller.cpp \
+	src/Polling/SourceFds.cpp \
+	src/Server/Listener.cpp \
+	src/Server/Location.cpp \
+	src/Server/Server.cpp \
+	src/Utils/FD.cpp \
+	src/Utils/IO.cpp \
+	src/Utils/methods.cpp \
+	src/Utils/MIME.cpp \
+	src/Utils/stringutils.cpp \
+	src/Utils/syscalls.cpp \
+	src/Utils/utils.cpp \

@@ -5,7 +5,6 @@ CXX = c++
 CXX_FLAGS = -Wall -Werror -Wextra -std=c++11 -MMD -MP -Wold-style-cast -Wpedantic -Wno-unknown-pragmas
 
 SRC_DIR = src
-INC_DIR = include
 OBJ_DIR = obj
 
 TEST_NAME = test_bin
@@ -14,6 +13,8 @@ SOURCES =
 include make/sources.mk
 HEADERS =
 include make/headers.mk
+INCLUDE = 
+include make/include.mk
 
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 
@@ -24,13 +25,12 @@ SAN := 1
 
 ifeq ($(DEBUG), 1)
 	CXX_FLAGS += -D DEBUG -g 
+	ifeq ($(SAN), 1)
+		CXX_FLAGS += -fsanitize=undefined
+	endif
+else
+	CXX_FLAGS += -O2
 endif
-
-ifeq ($(SAN), 1)
-	CXX_FLAGS += -fsanitize=undefined
-endif
-
-INCLUDE = -I $(INC_DIR)
 
 all: $(NAME)
 

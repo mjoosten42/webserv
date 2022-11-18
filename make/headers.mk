@@ -1,24 +1,24 @@
 HEADERS = \
-	include/AutoIndex.hpp \
-	include/buffer.hpp \
-	include/CGI.hpp \
+	include/CGI/CGI.hpp \
+	include/CGI/EnvironmentMap.hpp \
 	include/ConfigParser.hpp \
-	include/Connection.hpp \
 	include/defines.hpp \
-	include/EnvironmentMap.hpp \
-	include/FD.hpp \
-	include/HTTP.hpp \
-	include/IO.hpp \
-	include/Listener.hpp \
-	include/Location.hpp \
+	include/Handling/AutoIndex.hpp \
+	include/Handling/buffer.hpp \
+	include/Handling/HTTP.hpp \
+	include/Handling/Request.hpp \
+	include/Handling/Response.hpp \
 	include/logger.hpp \
-	include/methods.hpp \
-	include/MIME.hpp \
-	include/Poller.hpp \
-	include/Request.hpp \
-	include/Response.hpp \
-	include/Server.hpp \
-	include/SourceFds.hpp \
-	include/stringutils.hpp \
-	include/syscalls.hpp \
-	include/utils.hpp \
+	include/Polling/Connection.hpp \
+	include/Polling/Poller.hpp \
+	include/Polling/SourceFds.hpp \
+	include/Server/Listener.hpp \
+	include/Server/Location.hpp \
+	include/Server/Server.hpp \
+	include/Utils/FD.hpp \
+	include/Utils/IO.hpp \
+	include/Utils/methods.hpp \
+	include/Utils/MIME.hpp \
+	include/Utils/stringutils.hpp \
+	include/Utils/syscalls.hpp \
+	include/Utils/utils.hpp \

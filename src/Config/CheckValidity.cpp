@@ -9,7 +9,6 @@ void ConfigParser::check_validity(std::vector<std::string>& config) {
 	discard_comments(config);
 	check_braces_error(config);
 	check_semicolon_error(config);
-	return;
 }
 
 void ConfigParser::check_braces_error(std::vector<std::string>& config) {
@@ -87,5 +86,4 @@ void ConfigParser::throw_config_error(std::vector<std::string>			& config,
 	msg					   = msg + " on line " + error_line;
 	msg					   = msg + "\nLINE " + error_line + ": " + *file_it;
 	throw(std::invalid_argument(msg));
-	return;
 }

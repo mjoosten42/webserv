@@ -17,8 +17,8 @@ namespace WS {
 int open(const std::string& path, int flags) {
 	int ret = ::open(path.c_str(), flags);
 
-	if (ret == -1)
-		LOG_ERR("open(\"" << path << "\"): " << strerror(errno));
+	// if (ret == -1)
+	// 	LOG_ERR("open(\"" << path << "\"): " << strerror(errno));
 	return ret;
 }
 
@@ -27,6 +27,14 @@ int close(int fd) {
 
 	if (ret == -1)
 		perror("close");
+	return ret;
+}
+
+int fcntl(int fd) {
+	int ret = ::fcntl(fd, F_SETFL, O_NONBLOCK);
+
+	if (ret == -1)
+		LOG_ERR("fcntl(" << fd << "): " << strerror(errno));
 	return ret;
 }
 
@@ -88,10 +96,7 @@ int accept(int fd, sockaddr *peer) {
 	int		  ret  = ::accept(fd, peer, &size);
 
 	if (ret == -1)
-		LOG_ERR("accept(\"" << fd << "\"): " << strerror(errno)); // TODO: throw
-	else
-		set_fd_nonblocking(ret);
-
+		LOG_ERR("accept(" << fd << "): " << strerror(errno)); // TODO: throw
 	return ret;
 }
 

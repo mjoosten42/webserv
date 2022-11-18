@@ -34,6 +34,7 @@ Response::Response():
 	m_server(NULL),
 	m_locationIndex(0),
 	m_processedRequest(false),
+	m_hadFD(false),
 	m_isChunked(false),
 	m_doneReading(false),
 	m_CGI_DoneProcessingHeaders(false),
@@ -117,4 +118,8 @@ bool Response::hasProcessedRequest() const {
 
 bool Response::isCGI() const {
 	return m_isCGI;
+}
+
+bool Response::hadFD() const {
+	return m_hadFD;
 }

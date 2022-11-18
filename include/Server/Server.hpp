@@ -28,6 +28,7 @@ class Server {
 		const std::string& getIndexPage(int loc_index) const;
 		const std::string& getRedirect(int loc_index) const;
 		const std::string& getErrorPage(int loc_index, int code) const;
+		const std::string& getUploadDir(int loc_index) const;
 		size_t			   getCMB(int loc_index) const;
 
 		bool allowsMethod(int loc_index, methods method) const;

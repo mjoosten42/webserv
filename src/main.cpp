@@ -1,6 +1,6 @@
 #include "ConfigParser.hpp"
+#include "Listener.hpp"
 #include "Poller.hpp"
-#include "Server.hpp"
 #include "logger.hpp"
 #include "syscalls.hpp"
 
@@ -45,7 +45,7 @@ int main(int argc, const char *argv[]) {
 		listeners = initFromConfig(argv[1]);
 
 		for (auto& listener : listeners) {
-			LOG(listener.getListenerAsString(""));
+			LOG(GREEN << listener.getListenerAsString("") << DEFAULT);
 			poller.add(listener);
 		}
 

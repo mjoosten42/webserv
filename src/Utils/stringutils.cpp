@@ -53,3 +53,26 @@ std::vector<std::string> stringSplit(const std::string& s) {
 	}
 	return (ret);
 }
+
+std::string getEventsAsString(short revents) {
+	std::string events;
+
+	if (revents & POLLIN)
+		events += "IN";
+	if (revents & POLLOUT) {
+		if (!events.empty())
+			events += " | ";
+		events += "OUT";
+	}
+	if (revents & POLLHUP) {
+		if (!events.empty())
+			events += " | ";
+		events += "HUP";
+	}
+	if (revents & POLLNVAL) {
+		if (!events.empty())
+			events += " | ";
+		events += "NVAL";
+	}
+	return "{ " + events + " }";
+}

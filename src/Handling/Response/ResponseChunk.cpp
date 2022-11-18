@@ -133,13 +133,14 @@ bool Response::isDone() const {
 
 std::string& Response::getNextChunk() {
 	if (!m_doneReading && m_chunk.size() < BUFFER_SIZE) {
+		m_saved += readBlock();
 		if (m_isCGI && !m_CGI_DoneProcessingHeaders)
 			getCGIHeaderChunk();
 		else {
-			std::string block = readBlock();
 			if (m_isChunked)
-				encodeChunked(block);
-			m_chunk += block;
+				encodeChunked(m_saved);
+			m_chunk += m_saved;
+			m_saved.clear();
 		}
 	}
 	return m_chunk;

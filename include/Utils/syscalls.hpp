@@ -15,6 +15,7 @@ namespace WS {
 // Fds
 int open(const std::string& path, int flags);
 int close(int fd);
+int fcntl(int fd);
 
 // I.O.
 ssize_t write(int fd, const std::string& str);

@@ -9,6 +9,7 @@ Location::Location():
 	m_root("html"),
 	m_indexPage("index.html"),
 	m_limit_except({ GET, POST, DELETE }),
+	m_uploadDir("/uploads"),
 	m_client_max_body_size(0),
 	m_auto_index(false) {}
 
@@ -54,4 +55,5 @@ void Location::add(t_block_directive *constructor_specs) {
 	overwriteIfSpecified("cgi", m_CGIs, constructor_specs, stringSplit);
 	overwriteIfSpecified("error_page", m_error_pages, constructor_specs, toMap);
 	overwriteIfSpecified("autoindex", m_auto_index, constructor_specs, toBool);
+	overwriteIfSpecified("upload", m_uploadDir, constructor_specs, copy);
 }

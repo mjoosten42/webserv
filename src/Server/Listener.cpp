@@ -5,17 +5,16 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
-#include <arpa/inet.h>
-#include <netinet/in.h>
+#include <arpa/inet.h>	// inet_addr
+#include <fcntl.h>		// fcntl
+#include <netinet/in.h> // sockaddr_in
 #include <sys/socket.h>
 
-Listener::Listener(): m_fd(-1), m_port(-1) {}
+Listener::Listener() {}
 
-Listener::Listener(const std::string& listenAddress, short port): m_fd(-1), m_listenAddr(listenAddress), m_port(port) {
+Listener::Listener(const std::string& listenAddress, short port): m_listenAddr(listenAddress), m_port(port) {
 	setupSocket();
 }
-
-Listener::~Listener() {}
 
 void Listener::addServer(const Server& server) {
 	auto names = server.getNames();
@@ -53,7 +52,8 @@ void Listener::setupSocket() {
 	if (setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(enabled)) < 0)
 		fatal_perror("setsockopt");
 
-	set_fd_nonblocking(m_fd);
+	if (fcntl(m_fd, F_SETFL, O_NONBLOCK) == -1)
+		fatal_perror("fcntl");
 
 	// "Assign name to socket" = link socket_fd we configured to the server's
 	//	socket information

@@ -28,6 +28,7 @@ class Location {
 		std::vector<methods>	   m_limit_except; // limit_except GET POST
 		std::string				   m_redirect;	   // redirect /cgi-bin/
 		std::vector<std::string>   m_CGIs;		   // cgi php pl
+		std::string				   m_uploadDir;	   // upload /uploads
 		size_t					   m_client_max_body_size;
 		bool					   m_auto_index;
 };

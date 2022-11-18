@@ -13,6 +13,7 @@
 
 #include <sys/socket.h> // setsockopt
 #include <sys/wait.h>	// waitpid
+#include <unistd.h>		// fork
 
 static void closePipe(int pfds[2]) {
 	WS::close(pfds[0]);
@@ -81,22 +82,23 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 			my_exec(serverToCgi[0], cgiToServer[1], filename, em);
 			break;
 		default: // parent
-			WS::close(serverToCgi[0]);
 			WS::close(cgiToServer[1]);
+			WS::close(serverToCgi[0]);
+
+			WS::fcntl(cgiToServer[0]);
+			WS::fcntl(serverToCgi[1]);
 
 			readfd	= cgiToServer[0];
 			writefd = serverToCgi[1];
-
-			set_fd_nonblocking(readfd);
-			set_fd_nonblocking(writefd);
 	}
 }
 
 // https://www.rfc-editor.org/rfc/rfc3875#section-4.1.5
 
-// TODO: Set correct path
-void CGI::start(const Request& req, const Server *server, const std::string& filename, const std::string& peer) {
+#include <sys/stat.h> // TODO
 
+void CGI::start(const Response& response) {
+	const Request& req = response.m_request;
 	EnvironmentMap em;
 
 	em.addEnv();
@@ -117,21 +119,24 @@ void CGI::start(const Request& req, const Server *server, const std::string& fil
 		em["CONTENT_TYPE"] = req.getHeaderValue("Content-Type");
 
 	em["PATH_INFO"]		  = req.getPathInfo();
-	em["PATH_TRANSLATED"] = ""; // TODO
+	em["PATH_TRANSLATED"] = req.getPathInfo();
 
 	em["QUERY_STRING"]	 = req.getQueryString();
-	em["REMOTE_ADDR"]	 = peer;
-	em["REMOTE_HOST"]	 = peer;
+	em["REMOTE_ADDR"]	 = response.m_peer;
+	em["REMOTE_HOST"]	 = response.m_peer;
 	em["REQUEST_METHOD"] = toString(req.getMethod());
-	em["SCRIPT_NAME"]	 = filename;
+	em["SCRIPT_NAME"]	 = response.m_filename;
 	em["SERVER_NAME"]	 = req.getHost();
+	em["SERVER_PORT"]	 = toString(response.m_server->getPort());
 
-	// TODO: when multiple ports, it should be the listener's port.
-	// M: an incoming connection can only have one port right?
-	em["SERVER_PORT"] = toString(server->getPort());
+	if (req.getMethod() == POST) {
+		std::string root = response.m_server->getRoot(response.m_locationIndex);
+		std::string dir	 = root + response.m_server->getUploadDir(response.m_locationIndex);
+		LOG("dir: " << dir);
+		mkdir(dir.c_str(), 0644);
+		em["UPLOAD_DIR"] = WS::realpath(dir);
+		LOG("Upload directory: " << em["UPLOAD_DIR"]);
+	}
 
-	if (req.getMethod() == POST)
-		em["UPLOAD_DIR"] = WS::realpath("html") + "/uploads/"; // TODO
-
-	popen.my_popen(filename, em);
+	popen.my_popen(response.m_filename, em);
 }

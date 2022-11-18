@@ -3,12 +3,13 @@
 #include "CGI.hpp"
 #include "HTTP.hpp"
 #include "Request.hpp"
+#include "Server.hpp"
 
 #include <string>
 
-class Server;
-
 class Response: public HTTP {
+		friend class CGI;
+
 	public:
 		Response();
 
@@ -26,6 +27,7 @@ class Response: public HTTP {
 		bool isCGI() const;
 		bool isDone() const;
 		bool wantsClose() const;
+		bool hadFD() const;
 
 		const Server *getServer() const;
 		Request		& getRequest();
@@ -71,8 +73,9 @@ class Response: public HTTP {
 
 		bool m_processedRequest;
 		bool m_isCGI; // true if it is a CGI request
+		bool m_hadFD; // Necessary to remove pollers source_fd if CGI misbehaves
 		bool m_isChunked;
-		bool m_doneReading;				  // true if all data from readfd has been read.
+		bool m_doneReading;				  // true if all data from source fd has been read.
 		bool m_CGI_DoneProcessingHeaders; // true if done parsing CGI headers
 		bool m_close;					  // Wants to close
 };

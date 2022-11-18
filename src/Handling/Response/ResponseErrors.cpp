@@ -17,9 +17,8 @@ void Response::sendCustomErrorPage() {
 }
 
 void Response::sendFail(int code, const std::string& msg) {
-	m_status	  = code;
-	m_doneReading = true;
-	m_isCGI		  = false; // when we have an error, the CGI is no longer active.
+	m_status = code;
+	m_isCGI	 = false; // when we have an error, the CGI is no longer active.
 
 	if (m_server->hasErrorPage(m_locationIndex, m_status)) {
 		try {
@@ -28,6 +27,8 @@ void Response::sendFail(int code, const std::string& msg) {
 			m_status = error;
 		}
 	}
+
+	m_doneReading = true;
 
 	addHeader("Content-Type", "text/html");
 

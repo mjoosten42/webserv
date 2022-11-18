@@ -13,6 +13,8 @@ unsigned int countAndTrimLeadingWhiteSpace(std::string& s);
 
 std::vector<std::string> stringSplit(const std::string& s);
 
+std::string getEventsAsString(short events);
+
 template <typename T>
 std::string toString(const T& value) {
 	std::stringstream ss;
