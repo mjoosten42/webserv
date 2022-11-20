@@ -101,13 +101,17 @@ The following directives can only be specified at a location-level, not within t
 E.g. `redirect `[`https://www.youtube.com/watch?v=dQw4w9WgXcQ`](https://www.youtube.com/watch?v=dQw4w9WgXcQ)`;`
 When this value is not specified no redirection is performed.
 
-`cgi <file extensions>` - when in this location a file with the ending file extentions is called, it won't serve it normally but instead will execute it using [Common Gateway Interface](https://en.wikipedia.org/wiki/Common_Gateway_Interface).
-ex. `cgi pl;` will use `.pl` files for CGI.
+`cgi <file extensions>` - When in this location and a file ending in the specified file extension is called, the server won't serve the file normally but instead will execute it using [Common Gateway Interface](https://en.wikipedia.org/wiki/Common_Gateway_Interface). Multiple extensions may be specified in the conifg, if multiple file types are to be handled.
+E.g. `cgi pl;`, which will use `.pl` files for CGI.
+When this value is not specified, no CGI calls will be made.
+WARNING: NGINX difference - This directive is entirely different from nginx's implementation, as it has no CGI but instead uses something called [FastCGI](https://en.wikipedia.org/wiki/FastCGI).
 
-`limit_except <HTTP methods>` - specifies which HTTP methods are allowed for this route.
-ex. `limit_except GET POST;`
+`limit_except <HTTP methods>` - This specifies which HTTP methods are allowed for this route. Any other methods will be disallowed. If the user attempts a disallowed method at this location, a 405 Method Not Allowed error is returned.
+E.g. `limit_except GET POST;`
+When this value is not specified, it defaults to allowing `GET POST DELETE`.
+WARNING: NGINX difference - The nginx implementation of this directive is as a block directive, allowing the config file to differentiate different permissions for different IP addresses. Our implementation is as a simple directive, applying the same rules to all visitors of a location block.
 
-// write: upload
+//TODO Upload?
 
 Example:
 ```
