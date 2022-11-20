@@ -98,7 +98,7 @@ client_max_body_size
 The following directives can only be specified at a location-level, not within the context of a server:
 
 `redirect <location to redirect to>` - When the user navigates to this location, they will be sent on to a different location with a 301 Moved Permanently HTTP status code. The location they are sent to is determined by the URL specified.
-E.g. [`redirect https://www.youtube.com/watch?v=dQw4w9WgXcQ;`](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+E.g. `redirect `[`https://www.youtube.com/watch?v=dQw4w9WgXcQ`](https://www.youtube.com/watch?v=dQw4w9WgXcQ)`;`
 When this value is not specified no redirection is performed.
 
 `cgi <file extensions>` - when in this location a file with the ending file extentions is called, it won't serve it normally but instead will execute it using [Common Gateway Interface](https://en.wikipedia.org/wiki/Common_Gateway_Interface).
