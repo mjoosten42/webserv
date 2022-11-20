@@ -41,60 +41,59 @@ Listed below are the directives it may contain that can be recognised by the con
 
 `server_name <hostname(s)>` - The hostnames of this particular server. The expected value is one or more strings.
 E.g. `server_name www.example.org example.org;`
-When this value is not specified it defaults to ` `.
+When this value is not specified it defaults to ` ` (an empty string).
 
 `listen <port>` - This server will listen at a specifed port TCP on IPv4.
 E.g. `listen 8080;`
 When this value is not specified it defaults to `8000`.
 WARNING: NGINX difference - Nginx allows the user to parse the host from the listen option, however we standardly only accept localhost as host.
 
-`root <root directory>` - The directory that this server is rooted to, and from where it will serve its files.
+`root <root directory>` - The directory that this server is rooted to, and from where it will serve its files. This path is relative to the webserv's directory.
 E.g. `root html;`
 When this value is not specified it defaults to `html`.
 
 `client_max_body_size <size>` - The maximum allowed size of the client request body. If zero, it will not be checked.
-E.g. `client_max_body_size 42;`
-When this value is not specified it defaults to `0`.
+E.g. `client_max_body_size 1024;`
+When this value is not specified it defaults to `0` (meaning it will not be checked).
 
-`autoindex <on|off>` - When the user navigates to a directory, the server will serve an index page if it can find one in that directory. If it cannot, it will serve an automatically generated index page, or a 404 error, depending on whether autoindex is on or off respectively.
+`autoindex <on|off>` - When the user navigates to a directory, the server will serve an index page if it can find one in that directory. If it cannot, it will serve an automatically generated HTML index page listing all the files in that directory, or a 404 error, depending on whether autoindex is on or off respectively.
 E.g. `autoindex on;`
 When this value is not specified it defaults to `off`.
 
-`index <file_name>` - When the user navigates to a directory, the server will serve an index page if it can find one in that directory. The filename it looks for is the one specified by 'index'.
+`index <file_name>` - When the user navigates to a directory, the server will serve an index page if it can find one in that directory. The filename it looks for to use as an index is the one specified by this directive. This takes precedence over auto-indexing, if this option is also enabled.
 E.g. `index my_amazing_index.html;`
 When this value is not specified it defaults to `index.html`.
 
-`error_page <code> <page> [<code> <page> ...]` - What 'page' to serve in the event of an error matching HTTP error 'code'.
+`error_page <HTTP error status code> <filename to host> [<code> <page> ...]` - What page to serve in the event of an HTTP error matching the specified code.
 E.g. `error_page 404 my_amazing_404_error_page.html;`
 When this value is not specified it defaults to standard error pages for each of the encounterable error codes.
 WARNING: NGINX difference - Nginx allows the user to specify multiple error codes per error page (e.g. `error_page 401 402 403 404 my_amazing_4XX_error_page.html;`). In our config they must be strictly alternating key value pairs, though can be written on multiple lines.
 
 
-//still need to write: cgi
-
-
 ### Location block
-The location block looks like this: 
+The location block is a block directive that only exists within the context of a server block. Internally, it can be understood as a(n indirect) subdirectory of the server's root directory, but with its own set of rules and settings. These may overwrtie those inherited from the server context, resulting in location-specific behaviour. Whenever a user navigates to this part of the server, that specific location block's rules will apply. When the server tries to determine what location block the user is in, it looks for the longest possible match between the address the user navigated to, and the root + name of a location block it recognises from the config file.
+
+In the configuration file it may look something like this: 
 ```
-location <location> {
+location </name_of_subdirectory> {
     ... more directives
 }
 ```
 
-It will specify the behaviour specific to the location specified.
+The hierarchy for determining what rules apply to a location block is:
+directives explicitly listed in that location block > 
+directives explicitly listed in the parent server block >
+default values for that directive.
 
-All of the following directives can also be placed in the server block. If a property isn't specified in a location block, then it will look in the parent server block for a value. If there none is found, the default value is used.
+As the location block inherits many of its directives from a parent server block, but can also overwrite them, the following directives may be specified in either a location block or a server block. To understand their individual usage, please refer to the above section on server blocks.
 
-`error_page <HTTP error status code> <filename to host>` - serve custom error page on said error. Default none.
-ex. `error_page 404 not_found.html;`
-
-`root <root directory to serve from>` - from this directory the root is served. Defaults to `html`.
-ex. `root html;` will serve from the server from the `html` directory(relative from the webserv's directory)
-
-`autoindex <on|off>` if no index is found, webserv will generate a HTML index with all the files in the folder. Default is `off`.
-
-`index <filename>` - this is the default index for this location. This file will be served when the location is requested without a filename. When omitted, defaults to `index.html`
-ex. `index hello.html;`
+```
+root
+index
+autoindex
+error_page
+client_max_body_size
+```
 
 `redirect <location to redirect to>` - when this location is hit, it will do a 301 Moved Permanently to the URL specified.
 ex. `redirect https://www.youtube.com/watch?v=dQw4w9WgXcQ;`
@@ -105,8 +104,7 @@ ex. `cgi pl;` will use `.pl` files for CGI.
 `limit_except <HTTP methods>` - specifies which HTTP methods are allowed for this route.
 ex. `limit_except GET POST;`
 
-`client_max_body_size <max body size in bytes>` - defines the maximum body size a client request can have. Defaults to unlimited.
-ex. `client_max_body_size 1024;`
+// write: upload
 
 Example:
 ```
