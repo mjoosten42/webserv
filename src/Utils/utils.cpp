@@ -1,6 +1,5 @@
 #include "utils.hpp"
 
-#include "buffer.hpp" // path
 #include "logger.hpp"
 
 #include <arpa/inet.h> // ntohl
@@ -10,7 +9,6 @@
 #include <stdlib.h>	   // exit
 #include <string>
 #include <sys/ioctl.h> // ioctl
-#include <sys/stat.h>  // stat
 #include <unistd.h>	   // lseek
 #include <vector>
 
