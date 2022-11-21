@@ -97,7 +97,7 @@ $(TEST_NAME): $(TEST_OBJ) $(OBJ_WITHOUT_MAIN)
 	$(CXX) $(TEST_CXXFLAGS) -o $@ $^
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp $(TEST_HEADERS) | $(TEST_OBJ_DIR)
-	$(CXX) -c $(TEST_CXXFLAGS) -I $(INC_DIR) -I $(TEST_DIR) -o $@ $<
+	$(CXX) -c $(TEST_CXXFLAGS) $(INCLUDE) -I $(TEST_DIR) -o $@ $<
 
 $(TEST_OBJ_DIR):
 	mkdir $@
