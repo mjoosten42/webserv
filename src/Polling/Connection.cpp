@@ -13,10 +13,10 @@
 
 Connection::Connection() {}
 
-Connection::Connection(FD m_fd, const Listener *listener, const std::string& peer):
+Connection::Connection(FD m_fd, const Listener *listener, const std::string &peer):
 	m_fd(m_fd), m_listener(listener), m_peer(peer), m_close(false) {}
 
-FD Connection::receive(short& events) {
+FD Connection::receive(short &events) {
 	ssize_t bytes_received = WS::read(m_fd);
 	FD		source_fd;
 
@@ -32,8 +32,8 @@ FD Connection::receive(short& events) {
 			// LOG(std::string(buf, bytes_received));
 			// LOG(std::string(winSize(), '-') << DEFAULT);
 
-			Response& response = getLastResponse();
-			Request & request  = response.getRequest();
+			Response &response = getLastResponse();
+			Request	 &request  = response.getRequest();
 
 			request.append(buf, bytes_received);
 
@@ -61,9 +61,9 @@ FD Connection::receive(short& events) {
 
 // Send data back to a client
 // This should only be called if POLLOUT is set
-FD Connection::send(short& events) {
-	Response   & response	= m_responses.front();
-	std::string& chunk		= response.getNextChunk();
+FD Connection::send(short &events) {
+	Response	&response	= m_responses.front();
+	std::string &chunk		= response.getNextChunk();
 	ssize_t		 bytes_sent = WS::write(m_fd, chunk);
 	FD			 source_fd;
 
@@ -90,7 +90,7 @@ FD Connection::send(short& events) {
 	return source_fd;
 }
 
-Response& Connection::getLastResponse() {
+Response &Connection::getLastResponse() {
 	if (m_responses.empty() || m_responses.back().getRequest().getState() == DONE)
 		m_responses.push(Response());
 	return m_responses.back();

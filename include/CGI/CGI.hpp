@@ -13,12 +13,12 @@ struct Popen {
 		FD	  readfd;
 		FD	  writefd;
 
-		void my_popen(const std::string& filename, const EnvironmentMap& em);
+		void my_popen(const std::string &filename, const EnvironmentMap &em);
 };
 
 class CGI {
 	public:
-		void start(const Response& response);
+		void start(const Response &response);
 
 	public:
 		Popen popen;

@@ -4,6 +4,6 @@
 
 namespace MIME {
 
-std::string fromFileName(const std::string& filename);
+std::string fromFileName(const std::string &filename);
 
 } // namespace MIME

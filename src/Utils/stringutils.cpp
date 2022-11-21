@@ -4,43 +4,31 @@
 #include "utils.hpp"
 
 // converts an ASCII string to lowercase
-void strToLower(std::string& str) {
+void strToLower(std::string &str) {
 	transformBeginEnd(str, ::tolower);
 }
 
 // converts an ASCII string to uppercase
-void strToUpper(std::string& str) {
+void strToUpper(std::string &str) {
 	transformBeginEnd(str, ::toupper);
 }
 
-std::string trimLeadingWhiteSpace(const std::string& s) {
-	size_t		start = s.find_first_not_of(IFS);
-	std::string ret	  = "";
+void trimLeadingWhiteSpace(std::string &str) {
+	size_t start = str.find_first_not_of(IFS);
+
 	if (start != std::string::npos)
-		ret = s.substr(start);
-	return (ret);
+		str.erase(0, start);
 }
 
-unsigned int countAndTrimLeadingWhiteSpace(std::string& s) {
-	size_t start = s.find_first_not_of(IFS);
-	if (start != std::string::npos) {
-		s = s.substr(start);
-		return (start);
-	}
-	return (0);
-}
-
-std::string trimTrailingWhiteSpace(const std::string& s) {
-	size_t		end = s.find_last_not_of(IFS);
-	std::string ret;
+void trimTrailingWhiteSpace(std::string &str) {
+	size_t end = str.find_last_not_of(IFS);
 
 	if (end != std::string::npos)
-		ret = s.substr(0, end + 1);
-	return (ret);
+		str.erase(end);
 }
 
 // splits a string on whitespace chars.
-std::vector<std::string> stringSplit(const std::string& s) {
+std::vector<std::string> stringSplit(const std::string &s) {
 	std::vector<std::string> ret;
 	size_t					 begin = 0;
 	size_t					 end   = 0;

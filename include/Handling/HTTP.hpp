@@ -8,22 +8,22 @@ class HTTP {
 	public:
 		static std::string capitalizeFieldPretty(std::string field);
 
-		void parseHeader(const std::string& line);
+		void parseHeader(const std::string &line);
 
 		void addToBody(const char *buf, ssize_t size);
-		void addToBody(const std::string& str);
-		void addHeader(const std::string& field, const std::string& value);
-		bool hasHeader(const std::string& field) const;
+		void addToBody(const std::string &str);
+		void addHeader(const std::string &field, const std::string &value);
+		bool hasHeader(const std::string &field) const;
 
-		bool		containsNewline(const std::string		&str);
-		size_t		findNewline(const std::string	  &str, size_t begin = 0);
+		bool		containsNewline(const std::string &str);
+		size_t		findNewline(const std::string &str, size_t begin = 0);
 		std::string getNextLine();
 
 		int				   getStatus() const;
-		std::string		 & getBody();
-		const std::string& getBody() const;
+		std::string		  &getBody();
+		const std::string &getBody() const;
 
-		std::string getHeaderValue(const std::string& field) const;
+		std::string getHeaderValue(const std::string &field) const;
 		std::string getHeadersAsString() const;
 
 	protected:
@@ -36,7 +36,7 @@ class HTTP {
 
 		class ServerException: public std::exception {
 			public:
-				ServerException(int error, const std::string& str) throw(): code(error), msg(str) {};
+				ServerException(int error, const std::string &str) throw(): code(error), msg(str) {};
 				~ServerException() throw() {};
 
 				const char *what() const throw() { return msg.c_str(); }

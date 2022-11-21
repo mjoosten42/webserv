@@ -22,11 +22,11 @@ std::string HTTP::capitalizeFieldPretty(std::string field) {
 	return field;
 }
 
-bool HTTP::containsNewline(const std::string& str) {
+bool HTTP::containsNewline(const std::string &str) {
 	return str.find(CRLF) != str.npos || str.find("\n") != str.npos;
 }
 
-size_t HTTP::findNewline(const std::string& str, size_t begin) {
+size_t HTTP::findNewline(const std::string &str, size_t begin) {
 	size_t pos = str.find(CRLF, begin);
 
 	if (pos != std::string::npos)
@@ -45,7 +45,7 @@ std::string HTTP::getNextLine() {
 	return line;
 }
 
-void HTTP::parseHeader(const std::string& line) {
+void HTTP::parseHeader(const std::string &line) {
 	std::pair<std::string, std::string> header;
 	size_t								pos = line.find_first_of(IFS);
 
@@ -62,7 +62,7 @@ void HTTP::parseHeader(const std::string& line) {
 		throw ServerException(400, "Duplicate headers: " + line);
 }
 
-void HTTP::addToBody(const std::string& str) {
+void HTTP::addToBody(const std::string &str) {
 	m_body += str;
 }
 
@@ -70,7 +70,7 @@ void HTTP::addToBody(const char *buf, ssize_t size) {
 	m_body.append(buf, size);
 }
 
-void HTTP::addHeader(const std::string& field, const std::string& value) {
+void HTTP::addHeader(const std::string &field, const std::string &value) {
 	std::string copy(field);
 
 	if (hasHeader(field)) {
@@ -82,7 +82,7 @@ void HTTP::addHeader(const std::string& field, const std::string& value) {
 	m_headers[copy] = value;
 }
 
-bool HTTP::hasHeader(const std::string& field) const {
+bool HTTP::hasHeader(const std::string &field) const {
 	std::string copy(field);
 
 	strToLower(copy);
@@ -93,15 +93,15 @@ int HTTP::getStatus() const {
 	return m_status;
 }
 
-std::string& HTTP::getBody() {
+std::string &HTTP::getBody() {
 	return m_body;
 }
 
-const std::string& HTTP::getBody() const {
+const std::string &HTTP::getBody() const {
 	return m_body;
 }
 
-std::string HTTP::getHeaderValue(const std::string& field) const {
+std::string HTTP::getHeaderValue(const std::string &field) const {
 	std::string copy(field);
 
 	strToLower(copy);

@@ -24,11 +24,11 @@ void set_fd_nonblocking(const int fd) {
 		fatal_perror("fcntl");
 }
 
-void setFlag(short& events, int flag) {
+void setFlag(short &events, int flag) {
 	events |= flag;
 }
 
-void unsetFlag(short& events, int flag) {
+void unsetFlag(short &events, int flag) {
 	events &= ~flag;
 }
 
@@ -40,19 +40,7 @@ size_t winSize() {
 	return w.ws_col;
 }
 
-off_t fileSize(int fd) {
-	off_t size = lseek(fd, 0, SEEK_END);
-
-	if (size == -1) {
-		LOG_ERR("lseek: " << strerror(errno));
-		throw 500;
-	}
-	lseek(fd, 0, SEEK_SET); // set back to start
-
-	return size;
-}
-
-size_t match(const std::string first, const std::string& second) {
+size_t match(const std::string first, const std::string &second) {
 	size_t len = 0;
 
 	while (len < first.length() && len < second.length()) {
@@ -63,39 +51,8 @@ size_t match(const std::string first, const std::string& second) {
 	return len;
 }
 
-std::string getExtension(const std::string& filename) {
-	size_t dot = filename.find_last_of('.');
-
-	if (dot != filename.npos)
-		return filename.substr(dot + 1);
-	return "";
-}
-
-bool isDir(const std::string& path) {
-	DIR *dir = opendir(path.c_str());
-
-	if (!dir)
-		return false;
-	if (closedir(dir) == -1)
-		perror("closedir");
-	return true;
-}
-
 bool isGood(int status) {
 	return status < 400;
-}
-
-std::string basename(const std::string& path) {
-	std::string base = path;
-
-	if (base.back() == '/')
-		base.pop_back();
-
-	size_t pos = base.find_last_of("/");
-
-	if (pos != std::string::npos)
-		return base.substr(pos);
-	return path;
 }
 
 std::string addressToString(int address) {

@@ -3,11 +3,10 @@
 #include "logger.hpp"
 #include "stringutils.hpp"
 
-#include <algorithm> // TODO
 #include <sys/poll.h>
 #include <vector>
 
-void SourceFds::add(const pollfd& pollfd, FD client_fd) {
+void SourceFds::add(const pollfd &pollfd, FD client_fd) {
 	m_sourceFds.push_back(std::make_pair(pollfd.fd, client_fd));
 	std::sort(m_sourceFds.begin(), m_sourceFds.end());
 }
@@ -26,7 +25,7 @@ void SourceFds::remove(FD source_fd) {
 }
 
 FD SourceFds::getClientFd(FD source_fd) {
-	for (auto& sourceFd : m_sourceFds)
+	for (auto &sourceFd : m_sourceFds)
 		if (sourceFd.first == source_fd)
 			return sourceFd.second;
 	LOG_ERR("Client not found for source " << source_fd);
@@ -38,7 +37,7 @@ FD SourceFds::getClientFd(FD source_fd) {
 std::vector<FD> SourceFds::getSourceFds(FD client_fd) {
 	std::vector<FD> fds;
 
-	for (auto& sourceFd : m_sourceFds)
+	for (auto &sourceFd : m_sourceFds)
 		if (sourceFd.second == client_fd)
 			fds.push_back(sourceFd.first);
 	return fds;
@@ -46,7 +45,7 @@ std::vector<FD> SourceFds::getSourceFds(FD client_fd) {
 
 std::string SourceFds::getSourceFdsAsString() {
 	std::string str = "SourceFds: {";
-	for (auto& sourceFd : m_sourceFds)
+	for (auto &sourceFd : m_sourceFds)
 		str += "\n\t{ " + toString(sourceFd.first) + ", " + toString(sourceFd.second) + " }";
 	str += "\n}";
 	return str;

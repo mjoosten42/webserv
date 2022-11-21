@@ -9,7 +9,7 @@
 
 class SourceFds {
 	public:
-		void add(const pollfd& pollfd, FD client_fd);
+		void add(const pollfd &pollfd, FD client_fd);
 		void remove(FD source_fd);
 
 		FD				getClientFd(FD source_fd);

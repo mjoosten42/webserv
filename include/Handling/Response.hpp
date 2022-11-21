@@ -17,7 +17,7 @@ class Response: public HTTP {
 		void addServer(const Server *server);
 		void initialize();
 
-		std::string& getNextChunk();
+		std::string &getNextChunk();
 		void		 trimChunk(ssize_t bytes_sent);
 
 		std::string readBlock();
@@ -29,7 +29,7 @@ class Response: public HTTP {
 		bool wantsClose() const;
 		bool hadFD() const;
 
-		Request& getRequest();
+		Request &getRequest();
 		FD		 getSourceFD() const;
 
 	private:
@@ -44,11 +44,13 @@ class Response: public HTTP {
 
 		void addFileHeaders();
 		void getCGIHeaderChunk();
-		void encodeChunked(std::string& str);
+		void parseCGIHeaders();
+		void processCGIHeaders();
+		void encodeChunked(std::string &str);
 
 		void sendCustomErrorPage();
-		void sendFail(int code, const std::string& msg);
-		void sendMoved(const std::string& redirect);
+		void sendFail(int code, const std::string &msg);
+		void sendMoved(const std::string &redirect);
 
 		void createIndex(std::string path_to_index);
 

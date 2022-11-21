@@ -12,20 +12,20 @@
 
 Listener::Listener() {}
 
-Listener::Listener(const std::string& listenAddress, short port): m_listenAddr(listenAddress), m_port(port) {
+Listener::Listener(const std::string &listenAddress, short port): m_listenAddr(listenAddress), m_port(port) {
 	setupSocket();
 }
 
-void Listener::addServer(const Server& server) {
+void Listener::addServer(const Server &server) {
 	auto names = server.getNames();
 
 	m_servers.push_back(server);
 
-	for (auto& name : names)
+	for (auto &name : names)
 		m_hostToServer[name] = &(m_servers.back());
 }
 
-const Server& Listener::getServerByHost(const std::string& host) const {
+const Server &Listener::getServerByHost(const std::string &host) const {
 	// try to find it. Otherwise, use the first server.
 	auto it = m_hostToServer.find(host);
 	if (it != m_hostToServer.end())
@@ -77,7 +77,7 @@ short Listener::getPort() const {
 	return m_port;
 }
 
-const std::string& Listener::getListenAddr() const {
+const std::string &Listener::getListenAddr() const {
 	return m_listenAddr;
 }
 

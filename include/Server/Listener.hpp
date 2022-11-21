@@ -10,14 +10,14 @@
 class Listener {
 	public:
 		Listener();
-		Listener(const std::string& listenAddress, short port);
+		Listener(const std::string &listenAddress, short port);
 
-		void addServer(const Server& server);
+		void addServer(const Server &server);
 
 		int				   getFD() const;
 		short			   getPort() const;
-		const Server	 & getServerByHost(const std::string	 &host) const;
-		const std::string& getListenAddr() const;
+		const Server	  &getServerByHost(const std::string &host) const;
+		const std::string &getListenAddr() const;
 
 		std::string getListenerAsString(std::string tabs) const;
 

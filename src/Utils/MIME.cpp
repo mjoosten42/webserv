@@ -1,5 +1,6 @@
 #include "MIME.hpp"
 
+#include "file.hpp" // extension
 #include "stringutils.hpp"
 #include "utils.hpp"
 
@@ -362,15 +363,15 @@ const static KeyValue entries[] = { { "*3gpp", "audio/3gpp" },
 
 const static int entriesSize = sizeof(entries) / sizeof(*entries);
 
-std::string fromFileName(const std::string& filename) {
-	std::string extension = getExtension(filename);
+std::string fromFileName(const std::string &filename) {
+	std::string ext = extension(filename);
 
-	if (extension.empty())
+	if (ext.empty())
 		return DEFAULT_MIME_TYPE;
 
-	strToLower(extension);
+	strToLower(ext);
 
-	const char *result = binarySearchKeyValue(extension, entries, entriesSize);
+	const char *result = binarySearchKeyValue(ext, entries, entriesSize);
 	if (result == NULL)
 		return DEFAULT_MIME_TYPE;
 	return result;

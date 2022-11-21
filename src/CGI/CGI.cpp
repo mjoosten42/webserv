@@ -46,7 +46,7 @@ static void dupTwo(int in_fd, int out_fd) {
 	WS::close(out_fd);
 }
 
-static void my_exec(int infd, int outfd, const std::string& filename, const EnvironmentMap& em) {
+static void my_exec(int infd, int outfd, const std::string &filename, const EnvironmentMap &em) {
 	dupTwo(infd, outfd);
 
 	if (WS::chdir(filename.substr(0, filename.find_last_of("/"))) == -1)
@@ -62,7 +62,7 @@ static void my_exec(int infd, int outfd, const std::string& filename, const Envi
 }
 
 // back to minishell ayy
-void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
+void Popen::my_popen(const std::string &filename, const EnvironmentMap &em) {
 	int serverToCgi[2];
 	int cgiToServer[2];
 
@@ -96,8 +96,8 @@ void Popen::my_popen(const std::string& filename, const EnvironmentMap& em) {
 
 // https://www.rfc-editor.org/rfc/rfc3875#section-4.1.5
 
-void CGI::start(const Response& response) {
-	const Request& req = response.m_request;
+void CGI::start(const Response &response) {
+	const Request &req = response.m_request;
 	EnvironmentMap em;
 
 	em.addEnv();

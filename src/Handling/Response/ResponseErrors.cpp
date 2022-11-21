@@ -9,14 +9,14 @@
 void Response::sendCustomErrorPage() {
 	int tmp = m_status;
 
-	m_filename	  = m_server->getErrorPage(m_locationIndex, m_status);
+	m_filename	  = m_server->getRoot(m_locationIndex) + m_server->getErrorPage(m_locationIndex, m_status);
 	m_doneReading = false;
 	handleFile(); // Will set status to 200 if successful
 	m_status = tmp;
 	m_chunk	 = getResponseAsString(); // Overwriting old data
 }
 
-void Response::sendFail(int code, const std::string& msg) {
+void Response::sendFail(int code, const std::string &msg) {
 	m_status = code;
 	m_isCGI	 = false; // when we have an error, the CGI is no longer active.
 
@@ -35,12 +35,12 @@ void Response::sendFail(int code, const std::string& msg) {
 	addToBody("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>");
 	addToBody("<title>" + toString(m_status) + " " + getStatusMessage() + "</title></head>");
 	addToBody("<body><h1>" + toString(m_status) + " " + getStatusMessage() + "</h1>" CRLF);
-	addToBody("<p>oops something went wrong: <b>" + msg + "</b></p></body></html>" CRLF);
+	addToBody("<p>Oops something went wrong: <b>" + msg + "</b></p></body></html>" CRLF);
 
 	m_chunk = getResponseAsString();
 }
 
-void Response::sendMoved(const std::string& address) {
+void Response::sendMoved(const std::string &address) {
 	m_status = 301;
 	if (m_server->hasErrorPage(m_locationIndex, m_status))
 		return sendCustomErrorPage();

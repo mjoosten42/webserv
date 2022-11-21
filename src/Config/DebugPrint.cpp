@@ -15,10 +15,10 @@ std::string ConfigParser::getBlockAsString(t_block_directive b, std::string tabs
 		str += " " + b.additional_params;
 	str += " {\n";
 
-	for (auto& simple : b.simple_directives)
+	for (auto &simple : b.simple_directives)
 		str += getSimpleAsString(simple, tabs + "\t");
 
-	for (auto& block : b.block_directives)
+	for (auto &block : b.block_directives)
 		str += getBlockAsString(block, tabs + "\t");
 
 	return str + tabs + "}\n";

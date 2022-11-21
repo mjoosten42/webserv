@@ -13,7 +13,7 @@ FD::FD(int fd): m_fd(fd) {
 	increase();
 }
 
-FD::FD(const FD& other): m_fd(other.m_fd) {
+FD::FD(const FD &other): m_fd(other.m_fd) {
 	increase();
 }
 
@@ -21,7 +21,7 @@ FD::~FD() {
 	decrease();
 }
 
-FD& FD::operator=(const FD& rhs) {
+FD &FD::operator=(const FD &rhs) {
 	decrease();
 	m_fd = rhs.m_fd;
 	increase();

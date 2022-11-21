@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-static std::vector<Server> initServers(ConfigParser& config) {
+static std::vector<Server> initServers(ConfigParser &config) {
 	std::vector<t_block_directive *> server_config_blocks = config.m_main_context.fetch_matching_blocks("server");
 	std::vector<Server>				 servers(server_config_blocks.size()); // Default construct all servers
 
@@ -16,9 +16,9 @@ static std::vector<Server> initServers(ConfigParser& config) {
 	return servers;
 }
 
-static Listener *getListenerByHostPort(std::vector<Listener>& listeners, const std::string& host, const short port) {
+static Listener *getListenerByHostPort(std::vector<Listener> &listeners, const std::string &host, const short port) {
 
-	for (auto& listener : listeners)
+	for (auto &listener : listeners)
 		if (listener.getListenAddr() == host && listener.getPort() == port)
 			return &listener;
 	return NULL;
@@ -30,7 +30,7 @@ std::vector<Listener> initFromConfig(const char *file) {
 	std::vector<Listener> listeners;
 	std::vector<Server>	  servers = initServers(config);
 
-	for (auto& server : servers) {
+	for (auto &server : servers) {
 		Listener *listener = getListenerByHostPort(listeners, server.getHost(), server.getPort());
 
 		if (!listener) {

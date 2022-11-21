@@ -14,14 +14,6 @@
 
 namespace WS {
 
-int open(const std::string& path, int flags) {
-	int ret = ::open(path.c_str(), flags);
-
-	// if (ret == -1)
-	// 	LOG_ERR("open(\"" << path << "\"): " << strerror(errno));
-	return ret;
-}
-
 int close(int fd) {
 	int ret = ::close(fd);
 
@@ -46,7 +38,7 @@ ssize_t read(int fd) {
 	return ret;
 }
 
-ssize_t write(int fd, const std::string& str) {
+ssize_t write(int fd, const std::string &str) {
 	ssize_t ret = ::write(fd, str.data(), str.length());
 
 	if (ret == -1)
@@ -63,7 +55,7 @@ pid_t wait() {
 	return ret;
 }
 
-int chdir(const std::string& path) {
+int chdir(const std::string &path) {
 	int ret = ::chdir(path.c_str());
 
 	if (ret == -1)
@@ -71,7 +63,7 @@ int chdir(const std::string& path) {
 	return ret;
 }
 
-int execve(const std::string& path, char *const argv[], const EnvironmentMap& em) {
+int execve(const std::string &path, char *const argv[], const EnvironmentMap &em) {
 	int ret = ::execve(path.c_str(), argv, em.toCharpp());
 
 	if (ret == -1)
@@ -79,7 +71,7 @@ int execve(const std::string& path, char *const argv[], const EnvironmentMap& em
 	return ret; // always -1
 }
 
-int poll(std::vector<pollfd>& pollfds) {
+int poll(std::vector<pollfd> &pollfds) {
 	int ret = ::poll(pollfds.data(), static_cast<nfds_t>(pollfds.size()), -1);
 
 	if (ret == -1) {
@@ -96,11 +88,11 @@ int accept(int fd, sockaddr *peer) {
 	int		  ret  = ::accept(fd, peer, &size);
 
 	if (ret == -1)
-		LOG_ERR("accept(" << fd << "): " << strerror(errno)); // TODO: throw
+		LOG_ERR("accept(" << fd << "): " << strerror(errno));
 	return ret;
 }
 
-std::string realpath(const std::string& relative_path) {
+std::string realpath(const std::string &relative_path) {
 	const char *ret = ::realpath(relative_path.c_str(), path);
 
 	if (!ret) {

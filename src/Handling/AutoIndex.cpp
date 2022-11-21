@@ -1,5 +1,6 @@
 #include "AutoIndex.hpp"
 
+#include "file.hpp" // basename
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
@@ -16,7 +17,7 @@ std::vector<Entry> recursivePathCount(const std::string directory) {
 		return (paths);
 	while ((contents = readdir(derp)) != NULL) {
 		name = contents->d_name;
-		if (*(name.begin()) == '.') // Skip current, up and hidden
+		if (name.front() == '.') // Skip current, up and hidden
 			continue;
 		entry.name = name;
 		if (contents->d_type == DT_DIR) {
@@ -30,13 +31,13 @@ std::vector<Entry> recursivePathCount(const std::string directory) {
 	return paths;
 }
 
-std::string Entry::toString(const std::string& path) const {
+std::string Entry::toString(const std::string &path) const {
 	std::string ret = "<li>\n";
 
 	ret += "<a href=\"" + path + name + "\">" + basename(name) + "</a>\n";
 	if (!subdir.empty()) {
 		ret += "<ul>\n";
-		for (auto& entry : subdir)
+		for (auto &entry : subdir)
 			ret += entry.toString(path + name);
 		ret += "</ul>\n";
 	}

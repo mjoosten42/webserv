@@ -14,8 +14,10 @@ HEADERS = \
 	include/Polling/SourceFds.hpp \
 	include/Server/Listener.hpp \
 	include/Server/Location.hpp \
+	include/Server/overwrite.hpp \
 	include/Server/Server.hpp \
 	include/Utils/FD.hpp \
+	include/Utils/file.hpp \
 	include/Utils/IO.hpp \
 	include/Utils/methods.hpp \
 	include/Utils/MIME.hpp \

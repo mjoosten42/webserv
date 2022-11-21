@@ -70,7 +70,7 @@ PackConstructorInitializers: NextLine
 QualifierAlignment: Custom
 QualifierOrder: [ "const", "static", "type"]
 PointerAlignment: Right
-ReferenceAlignment: Left
+ReferenceAlignment: Right
 
 SeparateDefinitionBlocks: Always
 SortIncludes: CaseSensitive

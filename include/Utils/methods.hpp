@@ -10,4 +10,4 @@ const static char *methodStrings[] = {
 const static int methodStringsSize = sizeof(methodStrings) / sizeof(*methodStrings);
 
 std::string toString(methods method);
-methods		toMethod(const std::string	  &str);
+methods		toMethod(const std::string &str);

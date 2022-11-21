@@ -3,6 +3,7 @@
 #include "MIME.hpp"
 #include "Server.hpp"
 #include "defines.hpp"
+#include "file.hpp" // extension
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
@@ -57,7 +58,7 @@ void Response::initialize() {
 
 // Set to true if applicable
 void Response::setFlags() {
-	std::string ext = getExtension(m_filename);
+	std::string ext = extension(m_filename);
 
 	m_isCGI = (m_server->isCGI(m_locationIndex, ext) || m_request.getMethod() == POST);
 	m_close = (m_request.getHeaderValue("Connection") == "close");
@@ -97,7 +98,7 @@ void Response::addDefaultHeaders() {
 		addHeader("Host", m_request.getHost());
 }
 
-Request& Response::getRequest() {
+Request &Response::getRequest() {
 	return m_request;
 }
 

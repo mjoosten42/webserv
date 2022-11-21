@@ -8,10 +8,10 @@ class FD {
 	public:
 		FD();
 		FD(int fd);
-		FD(const FD& other);
+		FD(const FD &other);
 		~FD();
 
-		FD& operator=(const FD& rhs);
+		FD &operator=(const FD &rhs);
 
 		operator int() const; // Implicit conversion
 

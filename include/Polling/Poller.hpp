@@ -12,7 +12,7 @@
 
 class Poller {
 	public:
-		void add(const Listener& listener);
+		void add(const Listener &listener);
 
 		void start();
 		void quit();
@@ -20,9 +20,9 @@ class Poller {
 	private:
 		void pollfdEvent();
 
-		void pollIn(pollfd& pollfd);
-		void pollOut(pollfd& pollfd);
-		void pollHup(pollfd& pollfd);
+		void pollIn(pollfd &pollfd);
+		void pollOut(pollfd &pollfd);
+		void pollHup(pollfd &pollfd);
 
 		void acceptClient(FD listener_fd);
 		void removeClient(FD index);

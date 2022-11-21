@@ -21,8 +21,10 @@ SOURCES = \
 	src/Polling/SourceFds.cpp \
 	src/Server/Listener.cpp \
 	src/Server/Location.cpp \
+	src/Server/overwrite.cpp \
 	src/Server/Server.cpp \
 	src/Utils/FD.cpp \
+	src/Utils/file.cpp \
 	src/Utils/IO.cpp \
 	src/Utils/methods.cpp \
 	src/Utils/MIME.cpp \

@@ -16,11 +16,11 @@ class Request: public HTTP {
 		state	getState() const;
 		methods getMethod() const;
 
-		const std::string& getHost() const;
-		const std::string& getLocation() const;
-		const std::string& getQueryString() const;
-		const std::string& getPathInfo() const;
-		const std::string& getErrorMsg() const;
+		const std::string &getHost() const;
+		const std::string &getLocation() const;
+		const std::string &getQueryString() const;
+		const std::string &getPathInfo() const;
+		const std::string &getErrorMsg() const;
 
 		size_t getContentLength() const;
 		size_t getBodyTotal() const;
@@ -31,10 +31,10 @@ class Request: public HTTP {
 		void parse();
 		void checkSpecialHeaders();
 
-		void parseStartLine(const std::string& line);
-		void parseMethod(const std::string& str);
-		void parseURI(const std::string& str);
-		void parseHTTPVersion(const std::string& str);
+		void parseStartLine(const std::string &line);
+		void parseMethod(const std::string &str);
+		void parseURI(const std::string &str);
+		void parseHTTPVersion(const std::string &str);
 
 	private:
 		state		m_state;

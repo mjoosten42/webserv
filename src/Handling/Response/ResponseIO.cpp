@@ -25,7 +25,7 @@ std::string Response::readBlock() {
 }
 
 void Response::writeToCGI() {
-	std::string& body		   = m_request.getBody();
+	std::string &body		   = m_request.getBody();
 	int			 fd			   = m_cgi.popen.writefd;
 	ssize_t		 bytes_written = WS::write(fd, body);
 

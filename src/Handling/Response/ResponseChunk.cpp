@@ -1,9 +1,10 @@
 #include "AutoIndex.hpp"
-#include "MIME.hpp" // TODO: remove
+#include "MIME.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
 #include "buffer.hpp"
 #include "defines.hpp"
+#include "file.hpp" // filesize, isDir
 #include "logger.hpp"
 #include "methods.hpp"
 #include "stringutils.hpp"
@@ -75,7 +76,7 @@ void Response::handleDelete() {
 }
 
 void Response::handleFile() {
-	int fd = WS::open(m_filename, O_RDONLY);
+	int fd = open(m_filename.c_str(), O_RDONLY);
 
 	if (fd == -1)
 		return openError();
@@ -127,7 +128,7 @@ bool Response::isDone() const {
 	return m_doneReading && m_chunk.empty();
 }
 
-std::string& Response::getNextChunk() {
+std::string &Response::getNextChunk() {
 	if (!m_doneReading && m_chunk.size() < BUFFER_SIZE) {
 		m_saved += readBlock();
 		if (m_isCGI && !m_CGI_DoneProcessingHeaders)
@@ -142,7 +143,7 @@ std::string& Response::getNextChunk() {
 	return m_chunk;
 }
 
-void Response::encodeChunked(std::string& str) {
+void Response::encodeChunked(std::string &str) {
 	str.insert(0, toHex(str.length()) + CRLF);
 	str += CRLF;
 }
@@ -157,7 +158,7 @@ void Response::createIndex(std::string path_to_index) {
 	addToBody("<head><meta charset='utf-8'><title>" + title + "</title></head>\n");
 	addToBody("<h1>" + title + "</h1>\n<ul>");
 
-	for (auto& entry : root.subdir)
+	for (auto &entry : root.subdir)
 		addToBody(entry.toString());
 
 	addToBody("</ul></body></html>");

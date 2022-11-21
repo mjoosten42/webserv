@@ -28,7 +28,6 @@ if fileitem.filename:
 		print("open: " + fn)
 
 print("Content-Type: text/html")
-print("Location: " + "/uploads/" + fileitem.filename)
 print()
    
 print ("""\

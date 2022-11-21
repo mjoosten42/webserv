@@ -4,19 +4,18 @@
 #include <string>
 #include <vector>
 
-void strToLower(std::string& str);
-void strToUpper(std::string& str);
+void strToLower(std::string &str);
+void strToUpper(std::string &str);
 
-std::string	 trimLeadingWhiteSpace(const std::string &s);
-std::string	 trimTrailingWhiteSpace(const std::string &s);
-unsigned int countAndTrimLeadingWhiteSpace(std::string& s);
+void trimLeadingWhiteSpace(std::string &str);
+void trimTrailingWhiteSpace(std::string &str);
 
-std::vector<std::string> stringSplit(const std::string& s);
+std::vector<std::string> stringSplit(const std::string &s);
 
 std::string getEventsAsString(short events);
 
 template <typename T>
-std::string toString(const T& value) {
+std::string toString(const T &value) {
 	std::stringstream ss;
 
 	ss << value;
@@ -24,7 +23,7 @@ std::string toString(const T& value) {
 }
 
 template <typename T>
-std::string toHex(const T& value) {
+std::string toHex(const T &value) {
 	std::stringstream ss;
 
 	ss << std::hex << value;

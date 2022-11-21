@@ -7,7 +7,7 @@ class EnvironmentMap {
 	public:
 		void addEnv();
 
-		std::string& operator[](const std::string& key);
+		std::string &operator[](const std::string &key);
 
 		char **toCharpp() const;
 

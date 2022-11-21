@@ -8,7 +8,7 @@ std::string toString(methods method) {
 	return methodStrings[static_cast<size_t>(method)];
 }
 
-methods toMethod(const std::string& str) {
+methods toMethod(const std::string &str) {
 	for (int i = 0; i < methodStringsSize; i++)
 		if (str == methodStrings[i])
 			return static_cast<methods>(i);

@@ -6,7 +6,7 @@
 #include <string.h> // strdup(sighs...)
 #include <string>
 
-std::string& EnvironmentMap::operator[](const std::string& key) {
+std::string &EnvironmentMap::operator[](const std::string &key) {
 	return m_map[key];
 }
 
@@ -17,12 +17,12 @@ char **EnvironmentMap::toCharpp() const {
 
 	try {
 		ret = new char *[m_map.size() + 1];
-	} catch (std::exception& e) {
+	} catch (std::exception &e) {
 		LOG_ERR(e.what());
 		return NULL;
 	}
 
-	for (auto& envVar : m_map) {
+	for (auto &envVar : m_map) {
 		std::string entry = envVar.first + "=" + envVar.second;
 		ret[i++]		  = strdup(entry.c_str());
 	}

@@ -14,26 +14,26 @@
 #include <utility>
 #include <vector>
 
-std::ostream& operator<<(std::ostream& os, const pollfd& pfd) {
+std::ostream &operator<<(std::ostream &os, const pollfd &pfd) {
 	return os << pfd.fd;
 }
 
-std::ostream& operator<<(std::ostream& os, const std::pair<int, std::string>& pair) {
+std::ostream &operator<<(std::ostream &os, const std::pair<int, std::string> &pair) {
 	return os << "{ " << pair.first << ", " << pair.second << " }";
 }
 
-std::ostream& operator<<(std::ostream& os, const std::pair<methods, bool>& limit_except) {
+std::ostream &operator<<(std::ostream &os, const std::pair<methods, bool> &limit_except) {
 	return os << toString(limit_except.first);
 }
 
-std::ostream& operator<<(std::ostream& os, const std::vector<methods>& methods) {
+std::ostream &operator<<(std::ostream &os, const std::vector<methods> &methods) {
 	os << "{ ";
 	for (auto method : methods)
 		os << toString(method) << " ";
 	return os << " }";
 }
 
-std::ostream& operator<<(std::ostream& os, const Request& request) {
+std::ostream &operator<<(std::ostream &os, const Request &request) {
 	os << MAGENTA "State: " DEFAULT << request.getStateAsString() << std::endl;
 	os << MAGENTA "Method: " DEFAULT << toString(request.getMethod()) << std::endl;
 	os << MAGENTA "Location: " DEFAULT << request.getLocation() << std::endl;

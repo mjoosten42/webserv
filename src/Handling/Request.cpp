@@ -9,7 +9,7 @@
 
 #include <string>
 
-bool isHttpVersion(const std::string& str);
+bool isHttpVersion(const std::string &str);
 bool isSupportedMethod(methods method);
 
 Request::Request(): m_state(STARTLINE), m_method(INVALID), m_contentLength(0), m_bodyTotal(0) {}
@@ -20,7 +20,7 @@ void Request::append(const char *buf, ssize_t size) {
 	try {
 		parse();
 		m_status = 200;
-	} catch (const ServerException& e) {
+	} catch (const ServerException &e) {
 		m_state	   = DONE;
 		m_status   = e.code;
 		m_errorMsg = e.what();
@@ -66,7 +66,7 @@ void Request::parse() {
 }
 
 // TODO: unit test this
-void Request::parseStartLine(const std::string& line) {
+void Request::parseStartLine(const std::string &line) {
 	const char				*errorMessages[] = { "Missing startline", "Missing location", "Missing HTTP version" };
 	std::vector<std::string> strs			 = stringSplit(line);
 
@@ -82,7 +82,7 @@ void Request::parseStartLine(const std::string& line) {
 	parseHTTPVersion(strs[2]);
 }
 
-void Request::parseMethod(const std::string& str) {
+void Request::parseMethod(const std::string &str) {
 	m_method = toMethod(str);
 	if (m_method == INVALID)
 		throw ServerException(400, "Incorrect method: " + str);
@@ -90,7 +90,7 @@ void Request::parseMethod(const std::string& str) {
 		throw ServerException(501, "Unsupported method: " + str);
 }
 
-void Request::parseURI(const std::string& str) {
+void Request::parseURI(const std::string &str) {
 	if (str.find("..") != std::string::npos)
 		throw ServerException(400, "Location contains \"..\": " + str);
 
@@ -114,7 +114,7 @@ void Request::parseURI(const std::string& str) {
 	}
 }
 
-void Request::parseHTTPVersion(const std::string& str) {
+void Request::parseHTTPVersion(const std::string &str) {
 	if (!isHttpVersion(str))
 		throw ServerException(400, "Invalid HTTP version: " + str);
 	if (str != HTTP_VERSION)
@@ -132,12 +132,12 @@ void Request::checkSpecialHeaders() {
 
 	try {
 		m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("Content-Length"));
-	} catch (std::exception& e) {
+	} catch (std::exception &e) {
 		throw ServerException(400, "Content-Length too big: " + getHeaderValue("Content-Length"));
 	}
 }
 
-bool isHttpVersion(const std::string& str) {
+bool isHttpVersion(const std::string &str) {
 	return !str.compare(0, 5, "HTTP/") && std::isdigit(str[5]) && str[6] == '.' && std::isdigit(str[7]);
 }
 
@@ -147,23 +147,23 @@ bool isSupportedMethod(methods method) {
 
 #pragma region accessors
 
-const std::string& Request::getLocation() const {
+const std::string &Request::getLocation() const {
 	return m_location;
 }
 
-const std::string& Request::getPathInfo() const {
+const std::string &Request::getPathInfo() const {
 	return m_pathInfo;
 }
 
-const std::string& Request::getQueryString() const {
+const std::string &Request::getQueryString() const {
 	return m_queryString;
 }
 
-const std::string& Request::getHost() const {
+const std::string &Request::getHost() const {
 	return m_host;
 }
 
-const std::string& Request::getErrorMsg() const {
+const std::string &Request::getErrorMsg() const {
 	return m_errorMsg;
 }
 

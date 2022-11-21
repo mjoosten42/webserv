@@ -8,7 +8,7 @@ struct Entry {
 		std::string		   name;
 		std::vector<Entry> subdir;
 
-		std::string toString(const std::string& path = "") const;
+		std::string toString(const std::string &path = "") const;
 };
 
 std::vector<Entry> recursivePathCount(const std::string directory);

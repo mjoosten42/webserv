@@ -15,8 +15,7 @@ void Response::handleCGI() {
 	m_cgi.start(*this);
 
 	m_source_fd = m_cgi.popen.readfd;
-
-	m_hadFD = true;
+	m_hadFD		= true;
 
 	if (m_request.getMethod() == GET)
 		m_status = 200;
@@ -24,42 +23,47 @@ void Response::handleCGI() {
 		m_status = 201;
 }
 
-// TODO: CGI Status header
 void Response::getCGIHeaderChunk() {
-	std::string line;
-
-	// Parse headers line by line
-	while (containsNewline(m_saved)) {
-		line = getNextLine();
-		if (line.empty()) {
-			m_CGI_DoneProcessingHeaders = true;
-			break;
-		}
-		try {
-			parseHeader(line);
-		} catch (const ServerException& e) {
-			LOG("CGI header exception: " << line);
-			sendFail(e.code, e.what());
-			break;
-		}
-	}
+	parseCGIHeaders();
 
 	if (m_doneReading && !m_CGI_DoneProcessingHeaders) // CGI exited before completing respones
 		return sendFail(502, "CGI exited before completing headers");
 
-	if (m_CGI_DoneProcessingHeaders) { // CGI finished sending headers
-		if (!hasHeader("Content-Length") && !hasHeader("Transfer-Encoding")) {
-			addHeader("Transfer-Encoding", "Chunked");
-			m_isChunked = true;
+	if (m_CGI_DoneProcessingHeaders) // CGI finished sending headers
+		processCGIHeaders();
+}
+
+// Parse headers line by line
+void Response::parseCGIHeaders() {
+	std::string line;
+
+	while (containsNewline(m_saved)) {
+		line = getNextLine();
+		if (line.empty()) {
+			m_CGI_DoneProcessingHeaders = true;
+			return;
 		}
-		if (!m_saved.empty()) {
-			if (m_isChunked)
-				encodeChunked(m_saved);
-			addToBody(m_saved);
-			m_saved.clear();
+		try {
+			parseHeader(line);
+		} catch (const ServerException &e) {
+			LOG("CGI header exception: " << line);
+			return sendFail(e.code, e.what());
 		}
-		m_chunk = getResponseAsString();
 	}
 }
 
-// void Response::parseCGIHeaders
+void Response::processCGIHeaders() {
+	if (!hasHeader("Content-Length") && !hasHeader("Transfer-Encoding")) {
+		addHeader("Transfer-Encoding", "Chunked");
+		m_isChunked = true;
+	}
+
+	if (!m_saved.empty()) {
+		if (m_isChunked)
+			encodeChunked(m_saved);
+		addToBody(m_saved);
+		m_saved.clear();
+	}
+
+	m_chunk = getResponseAsString();
+}

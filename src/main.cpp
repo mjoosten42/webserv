@@ -44,13 +44,13 @@ int main(int argc, const char *argv[]) {
 	try {
 		listeners = initFromConfig(argv[1]);
 
-		for (auto& listener : listeners) {
+		for (auto &listener : listeners) {
 			LOG(GREEN << listener.getListenerAsString("") << DEFAULT);
 			poller.add(listener);
 		}
 
 		poller.start();
-	} catch (std::exception& e) {
+	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
