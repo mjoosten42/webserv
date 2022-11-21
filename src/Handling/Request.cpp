@@ -12,7 +12,7 @@
 bool isHttpVersion(const std::string& str);
 bool isSupportedMethod(methods method);
 
-Request::Request(): m_state(STARTLINE), m_method(static_cast<methods>(-1)), m_contentLength(0), m_bodyTotal(0) {}
+Request::Request(): m_state(STARTLINE), m_method(INVALID), m_contentLength(0), m_bodyTotal(0) {}
 
 void Request::append(const char *buf, ssize_t size) {
 	m_saved.append(buf, size);
@@ -84,7 +84,7 @@ void Request::parseStartLine(const std::string& line) {
 
 void Request::parseMethod(const std::string& str) {
 	m_method = toMethod(str);
-	if (m_method == static_cast<methods>(-1))
+	if (m_method == INVALID)
 		throw ServerException(400, "Incorrect method: " + str);
 	if (!isSupportedMethod(m_method))
 		throw ServerException(501, "Unsupported method: " + str);
@@ -129,8 +129,7 @@ void Request::checkSpecialHeaders() {
 			throw ServerException(400, "Empty host header");
 	} else
 		throw ServerException(400, "Missing host header");
-	if (hasHeader("Content-Length"))
-		m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("Content-Length"));
+	m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("Content-Length"));
 }
 
 bool isHttpVersion(const std::string& str) {
@@ -191,7 +190,7 @@ std::string Request::getStateAsString() const {
 			return "DONE";
 		default:
 			LOG_ERR("Invalid state: " << m_state);
-			return "INVALID STATE";
+			return "INVALID";
 	}
 }
 

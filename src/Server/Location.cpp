@@ -22,7 +22,7 @@ std::vector<methods> toMethods(const std::string& str) {
 
 	for (auto& str : stringSplit(str)) {
 		methods method = toMethod(str);
-		if (method != static_cast<methods>(-1))
+		if (method != INVALID)
 			vec.push_back(method);
 	}
 	return vec;

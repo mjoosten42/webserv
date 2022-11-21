@@ -20,8 +20,8 @@ class Response: public HTTP {
 		std::string& getNextChunk();
 		void		 trimChunk(ssize_t bytes_sent);
 
-		void		writeToCGI();
 		std::string readBlock();
+		void		writeToCGI();
 
 		bool hasProcessedRequest() const;
 		bool isCGI() const;
@@ -29,9 +29,8 @@ class Response: public HTTP {
 		bool wantsClose() const;
 		bool hadFD() const;
 
-		const Server *getServer() const;
-		Request		& getRequest();
-		int			  getSourceFD() const;
+		Request& getRequest();
+		FD		 getSourceFD() const;
 
 	private:
 		void setFlags();
@@ -41,7 +40,7 @@ class Response: public HTTP {
 		void handleCGI();
 		void handleDelete();
 
-		void openError(const std::string& dir, bool isDirectory);
+		void openError();
 
 		void addFileHeaders();
 		void getCGIHeaderChunk();

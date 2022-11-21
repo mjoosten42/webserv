@@ -27,20 +27,23 @@ void Poller::start() {
 	LOG(GREEN "\n----STARTING LOOP----\n" DEFAULT);
 
 	while (m_active) {
+		auto clientIt = m_pollfds.begin() + clientsIndex();
+		auto sourceIt = m_pollfds.begin() + sourceFdsIndex();
 
 		LOG(CYAN << std::string(winSize(), '#') << DEFAULT);
-		// LOG(CYAN "Servers: " DEFAULT << rangeToString(m_pollfds.begin(), m_pollfds.begin() + clientsIndex()));
-		LOG(CYAN "Clients: " DEFAULT << rangeToString(m_pollfds.begin() + clientsIndex(),
-													  m_pollfds.begin() + sourceFdsIndex()));
-		LOG(CYAN "sourcefds: " DEFAULT << rangeToString(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end()));
+		LOG(CYAN "Servers: " DEFAULT << rangeToString(m_pollfds.begin(), clientIt));
+		LOG(CYAN "Clients: " DEFAULT << rangeToString(clientIt, sourceIt));
+		LOG(CYAN "sourcefds: " DEFAULT << rangeToString(sourceIt, m_pollfds.end()));
 
 		int poll_status = WS::poll(m_pollfds);
 		switch (poll_status) {
 			case -1:
 				if (errno == EINTR) // SIGCHLD
 					continue;
-				exit(EXIT_FAILURE); // TODO: throw?
-			case 0:					// Poll is blocking
+				perror("poll");
+				exit(EXIT_FAILURE);
+			case 0: // Poll is blocking
+				LOG_ERR("Poll returned zero");
 				break;
 			default:
 				pollfdEvent();

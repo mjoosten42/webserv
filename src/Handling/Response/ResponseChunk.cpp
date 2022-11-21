@@ -34,6 +34,9 @@ void Response::processRequest() {
 	if (m_server->isRedirect(m_locationIndex))
 		return sendMoved(m_server->getRedirect(m_locationIndex));
 
+	if (isDir(m_filename))
+		return sendMoved(m_request.getLocation() + '/');
+
 	try {
 		switch (m_request.getMethod()) {
 			case GET:
@@ -72,18 +75,10 @@ void Response::handleDelete() {
 }
 
 void Response::handleFile() {
-	std::string originalFile = m_filename;
-	bool		isDirectory	 = isDir(m_filename);
-
-	if (isDirectory) {
-		if (m_filename.back() != '/')
-			return sendMoved(m_request.getLocation() + "/");
-		m_filename += m_server->getIndexPage(m_locationIndex);
-	}
-
 	int fd = WS::open(m_filename, O_RDONLY);
+
 	if (fd == -1)
-		return openError(originalFile, isDirectory);
+		return openError();
 
 	m_source_fd = fd;
 	addFileHeaders();
@@ -91,15 +86,16 @@ void Response::handleFile() {
 	m_chunk	 = getResponseAsString();
 }
 
-void Response::openError(const std::string& dir, bool isDirectory) {
-	bool autoIndex = m_server->isAutoIndex(m_locationIndex);
+void Response::openError() {
+	std::string dir		  = m_server->getRoot(m_locationIndex) + m_request.getLocation();
+	bool		autoIndex = m_server->isAutoIndex(m_locationIndex);
 
 	switch (errno) {
 		case EACCES:
 			throw 403;
 		case ENOENT:
 		case ENOTDIR:
-			if (isDirectory && autoIndex)
+			if (isDir(dir) && autoIndex)
 				return createIndex(dir);
 			throw 404;
 		case EMFILE:

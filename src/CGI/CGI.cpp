@@ -57,6 +57,7 @@ static void my_exec(int infd, int outfd, const std::string& filename, const Envi
 						   NULL }; // Werror type qualifiers ignored on cast result type
 
 	WS::execve(copy, args, em);
+	perror("execve");
 	exit(EXIT_FAILURE);
 }
 
@@ -130,7 +131,7 @@ void CGI::start(const Response& response) {
 	if (req.getMethod() == POST) {
 		std::string root = response.m_server->getRoot(response.m_locationIndex);
 		std::string dir	 = WS::realpath(root) + response.m_server->getUploadDir(response.m_locationIndex);
-	
+
 		em["UPLOAD_DIR"] = dir;
 		LOG("Upload directory: " << dir);
 	}

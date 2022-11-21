@@ -48,16 +48,20 @@ void Response::initialize() {
 	m_locationIndex = m_server->getLocationIndex(m_request.getLocation());
 	m_filename		= m_server->getRoot(m_locationIndex) + m_request.getLocation();
 
+	LOG("Location: " << m_locationIndex);
+	if (!m_request.getLocation().empty())
+		if (m_request.getLocation().back() == '/')
+			m_filename += m_server->getIndexPage(m_locationIndex);
+
 	setFlags();
 	addDefaultHeaders();
 }
 
 // Set to true if applicable
 void Response::setFlags() {
-	std::string ext = getExtension(m_request.getLocation());
+	std::string ext = getExtension(m_filename);
 
-	m_isCGI = m_server->isCGI(m_locationIndex, ext);
-	m_isCGI |= (m_request.getMethod() == POST); // POST is always CGI
+	m_isCGI = (m_server->isCGI(m_locationIndex, ext) || m_request.getMethod() == POST);
 	m_close = (m_request.getHeaderValue("Connection") == "close");
 }
 
@@ -66,8 +70,7 @@ std::string Response::getStatusMessage() const {
 	if (msg != NULL)
 		return msg;
 	LOG_ERR("Status code not found: " << m_status);
-	exit(EXIT_FAILURE);
-	return ("");
+	return "Status code not found " + toString(m_status);
 }
 
 std::string Response::getStatusLine() const {
@@ -100,15 +103,11 @@ Request& Response::getRequest() {
 	return m_request;
 }
 
-const Server *Response::getServer() const {
-	return m_server;
-}
-
 bool Response::wantsClose() const {
 	return m_close;
 }
 
-int Response::getSourceFD() const {
+FD Response::getSourceFD() const {
 	return m_source_fd;
 }
 
