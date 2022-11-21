@@ -69,6 +69,9 @@ E.g. `error_page 404 my_amazing_404_error_page.html;`
 When this value is not specified it defaults to standard error pages for each of the encounterable error codes.
 WARNING: NGINX difference - Nginx allows the user to specify multiple error codes per error page (e.g. `error_page 401 402 403 404 my_amazing_4XX_error_page.html;`). In our config they must be strictly alternating key value pairs, though can be written on multiple lines.
 
+`upload <directory_name>` - What directory the server will upload files to. If the directory does not exist, a CGI error is returned when the user attempts to upload a file.
+E.g. `upload /uploads`
+WARNING: NGINX difference - This is not an nginx setting, but one included for the sake of meeting the project's requirements.
 
 ### Location block
 The location block is a block directive that only exists within the context of a server block. Internally, it can be understood as a(n indirect) subdirectory of the server's root directory, but with its own set of rules and settings. These may overwrtie those inherited from the server context, resulting in location-specific behaviour. Whenever a user navigates to this part of the server, that specific location block's rules will apply. When the server tries to determine what location block the user is in, it looks for the longest possible match between the address the user navigated to, and the root + name of a location block it recognises from the config file.
@@ -110,8 +113,6 @@ WARNING: NGINX difference - This directive is entirely different from nginx's im
 E.g. `limit_except GET POST;`
 When this value is not specified, it defaults to allowing `GET POST DELETE`.
 WARNING: NGINX difference - The nginx implementation of this directive is as a block directive, allowing the config file to differentiate different permissions for different IP addresses. Our implementation is as a simple directive, applying the same rules to all visitors of a location block.
-
-//TODO Upload?
 
 Example:
 ```
