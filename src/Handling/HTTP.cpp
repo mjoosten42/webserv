@@ -26,7 +26,7 @@ bool HTTP::containsNewline(const std::string& str) {
 	return str.find(CRLF) != str.npos || str.find("\n") != str.npos;
 }
 
-size_t HTTP::findNewline(const std::string str, size_t begin) {
+size_t HTTP::findNewline(const std::string& str, size_t begin) {
 	size_t pos = str.find(CRLF, begin);
 
 	if (pos != std::string::npos)

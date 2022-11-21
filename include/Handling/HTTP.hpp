@@ -16,7 +16,7 @@ class HTTP {
 		bool hasHeader(const std::string& field) const;
 
 		bool		containsNewline(const std::string		&str);
-		size_t		findNewline(const std::string str, size_t begin = 0);
+		size_t		findNewline(const std::string	  &str, size_t begin = 0);
 		std::string getNextLine();
 
 		int				   getStatus() const;
@@ -28,8 +28,9 @@ class HTTP {
 
 	protected:
 		std::map<std::string, std::string> m_headers; // the key value pair. Note: keys should always be lowercase!
-		std::string						   m_body;
-		std::string						   m_saved;
+
+		std::string m_body;
+		std::string m_saved; // Save incomplete headers
 
 		int m_status;
 

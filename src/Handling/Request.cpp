@@ -129,7 +129,12 @@ void Request::checkSpecialHeaders() {
 			throw ServerException(400, "Empty host header");
 	} else
 		throw ServerException(400, "Missing host header");
-	m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("Content-Length"));
+
+	try {
+		m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("Content-Length"));
+	} catch (std::exception& e) {
+		throw ServerException(400, "Content-Length too big: " + getHeaderValue("Content-Length"));
+	}
 }
 
 bool isHttpVersion(const std::string& str) {

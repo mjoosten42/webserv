@@ -32,7 +32,6 @@ const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMes
 Response::Response():
 	HTTP(),
 	m_server(NULL),
-	m_locationIndex(0),
 	m_processedRequest(false),
 	m_hadFD(false),
 	m_isChunked(false),
@@ -48,7 +47,6 @@ void Response::initialize() {
 	m_locationIndex = m_server->getLocationIndex(m_request.getLocation());
 	m_filename		= m_server->getRoot(m_locationIndex) + m_request.getLocation();
 
-	LOG("Location: " << m_locationIndex);
 	if (!m_request.getLocation().empty())
 		if (m_request.getLocation().back() == '/')
 			m_filename += m_server->getIndexPage(m_locationIndex);

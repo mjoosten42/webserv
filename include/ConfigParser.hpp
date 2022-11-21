@@ -25,15 +25,17 @@ typedef struct s_simple_directive {
 typedef struct s_block_directive t_block_directive;
 
 struct s_block_directive {
-		std::string						 name;
-		std::string						 additional_params;
-		std::vector<t_simple_directive>	 simple_directives;
-		std::vector<t_block_directive>	 block_directives;
-		t_block_directive				*parent_context;
+		std::string						name;
+		std::string						additional_params;
+		std::vector<t_simple_directive> simple_directives;
+		std::vector<t_block_directive>	block_directives;
+		t_block_directive			   *parent_context;
+
 		std::vector<t_block_directive *> fetch_matching_blocks(const std::string& blocks_to_fetch);
-		std::string						 fetch_simple(const std::string						&key);
-		std::vector<std::string>		 fetch_simple_all(const std::string		   &key);
-		std::string						 fetch_simple_recursive(const std::string					  &key);
+
+		std::string				 fetch_simple(const std::string				&key);
+		std::vector<std::string> fetch_simple_all(const std::string& key);
+		std::string				 fetch_simple_recursive(const std::string			  &key);
 
 	private:
 		void recurse_blocks(std::vector<t_block_directive *>& ret, const std::string& blocks_to_fetch);

@@ -6,6 +6,7 @@
 
 #include <algorithm> // transform
 #include <sstream>
+#include <stdexcept>
 #include <sys/poll.h>
 #include <vector>
 
@@ -57,6 +58,8 @@ T stringToIntegral(const std::string& number) {
 	if (number.empty())
 		return T();
 	ss >> value;
+	if (ss.fail())
+		throw std::overflow_error("Number too big: " + toString(number));
 	return value;
 }
 

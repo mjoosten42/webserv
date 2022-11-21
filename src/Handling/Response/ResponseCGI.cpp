@@ -61,3 +61,5 @@ void Response::getCGIHeaderChunk() {
 		m_chunk = getResponseAsString();
 	}
 }
+
+// void Response::parseCGIHeaders
