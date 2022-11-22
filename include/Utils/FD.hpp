@@ -15,6 +15,8 @@ class FD {
 
 		operator int() const; // Implicit conversion
 
+		void close();
+
 	private:
 		void increase();
 		void decrease();

@@ -32,6 +32,10 @@ FD::operator int() const {
 	return m_fd;
 }
 
+void FD::close() {
+	*this = -1;
+}
+
 void FD::increase() {
 	m_references[m_fd]++;
 }

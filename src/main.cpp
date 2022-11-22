@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 
+// Note: do not write anything
 void signalHandler(int signum) {
 	Poller ref;
 
@@ -16,7 +17,6 @@ void signalHandler(int signum) {
 			ref.quit();
 			break;
 		case SIGPIPE: // CGI exited with write data remaining
-			LOG("SIGPIPE");
 			break;
 		case SIGCHLD: // CGI exited
 			WS::wait();
@@ -37,7 +37,7 @@ int main(int argc, const char *argv[]) {
 			return EXIT_FAILURE;
 	}
 
-	// signal(SIGINT, signalHandler);
+	signal(SIGINT, signalHandler);
 	signal(SIGPIPE, signalHandler);
 	signal(SIGCHLD, signalHandler);
 

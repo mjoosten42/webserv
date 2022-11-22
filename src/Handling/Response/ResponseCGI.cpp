@@ -26,10 +26,10 @@ void Response::handleCGI() {
 void Response::getCGIHeaderChunk() {
 	parseCGIHeaders();
 
-	if (m_doneReading && !m_CGI_DoneProcessingHeaders) // CGI exited before completing respones
+	if (m_doneReading && !m_headersDone) // CGI exited before completing respones
 		return sendFail(502, "CGI exited before completing headers");
 
-	if (m_CGI_DoneProcessingHeaders) // CGI finished sending headers
+	if (m_headersDone) // CGI finished sending headers
 		processCGIHeaders();
 }
 
@@ -40,7 +40,7 @@ void Response::parseCGIHeaders() {
 	while (containsNewline(m_saved)) {
 		line = getNextLine();
 		if (line.empty()) {
-			m_CGI_DoneProcessingHeaders = true;
+			m_headersDone = true;
 			return;
 		}
 		try {

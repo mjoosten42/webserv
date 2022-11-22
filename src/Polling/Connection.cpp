@@ -37,7 +37,7 @@ FD Connection::receive(short &events) {
 
 			request.append(buf, bytes_received);
 
-			// LOG(request);
+			LOG(request);
 
 			if (request.getState() == STARTLINE || request.getState() == HEADERS)
 				break;

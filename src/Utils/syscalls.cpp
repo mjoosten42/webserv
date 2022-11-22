@@ -22,14 +22,6 @@ int close(int fd) {
 	return ret;
 }
 
-int fcntl(int fd) {
-	int ret = ::fcntl(fd, F_SETFL, O_NONBLOCK);
-
-	if (ret == -1)
-		LOG_ERR("fcntl(" << fd << "): " << strerror(errno));
-	return ret;
-}
-
 ssize_t read(int fd) {
 	ssize_t ret = ::read(fd, buf, BUFFER_SIZE);
 
@@ -74,12 +66,10 @@ int execve(const std::string &path, char *const argv[], const EnvironmentMap &em
 int poll(std::vector<pollfd> &pollfds) {
 	int ret = ::poll(pollfds.data(), static_cast<nfds_t>(pollfds.size()), -1);
 
-	if (ret == -1) {
-		if (errno != EINTR) // Caused by SIGCHLD
-			LOG_ERR("poll: " << strerror(errno));
-	}
+	if (ret == -1 && errno != EINTR) // SIGCHLD causes EINTR
+		LOG_ERR("poll: " << strerror(errno));
 	if (ret == 0)
-		LOG_ERR("poll returned 0");
+		LOG_ERR("poll returned zero");
 	return ret;
 }
 

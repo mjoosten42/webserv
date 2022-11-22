@@ -41,4 +41,6 @@ void Response::writeToCGI() {
 
 			body.erase(0, bytes_written);
 	}
+	if (m_request.getBodyTotal() == m_request.getContentLength())
+		m_cgi.popen.writefd.close();
 }

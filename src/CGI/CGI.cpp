@@ -86,8 +86,8 @@ void Popen::my_popen(const std::string &filename, const EnvironmentMap &em) {
 			WS::close(cgiToServer[1]);
 			WS::close(serverToCgi[0]);
 
-			WS::fcntl(cgiToServer[0]);
-			WS::fcntl(serverToCgi[1]);
+			set_fd_nonblocking(cgiToServer[0]);
+			set_fd_nonblocking(serverToCgi[1]);
 
 			readfd	= cgiToServer[0];
 			writefd = serverToCgi[1];
@@ -133,7 +133,6 @@ void CGI::start(const Response &response) {
 		std::string dir	 = WS::realpath(root) + response.m_server->getUploadDir(response.m_locationIndex);
 
 		em["UPLOAD_DIR"] = dir;
-		LOG("Upload directory: " << dir);
 	}
 
 	popen.my_popen(response.m_filename, em);

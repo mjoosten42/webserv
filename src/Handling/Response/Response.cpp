@@ -34,10 +34,11 @@ Response::Response():
 	HTTP(),
 	m_server(NULL),
 	m_processedRequest(false),
+	m_isCGI(false),
 	m_hadFD(false),
 	m_isChunked(false),
 	m_doneReading(false),
-	m_CGI_DoneProcessingHeaders(false),
+	m_headersDone(false),
 	m_close(false) {}
 
 void Response::addServer(const Server *server) {
@@ -56,12 +57,17 @@ void Response::initialize() {
 	addDefaultHeaders();
 }
 
-// Set to true if applicable
 void Response::setFlags() {
 	std::string ext = extension(m_filename);
 
 	m_isCGI = (m_server->isCGI(m_locationIndex, ext));
 	m_close = (m_request.getHeaderValue("Connection") == "close");
+}
+
+void Response::addDefaultHeaders() {
+	addHeader("Server", SERVER_SOFTWARE);
+	if (m_request.hasHeader("Host"))
+		addHeader("Host", m_request.getHost());
 }
 
 std::string Response::getStatusMessage() const {
@@ -92,22 +98,16 @@ std::string Response::getResponseAsString() {
 	return response;
 }
 
-void Response::addDefaultHeaders() {
-	addHeader("Server", SERVER_SOFTWARE);
-	if (m_request.hasHeader("Host"))
-		addHeader("Host", m_request.getHost());
-}
-
 Request &Response::getRequest() {
 	return m_request;
 }
 
-bool Response::wantsClose() const {
-	return m_close;
-}
-
 FD Response::getSourceFD() const {
 	return m_source_fd;
+}
+
+bool Response::wantsClose() const {
+	return m_close;
 }
 
 bool Response::hasProcessedRequest() const {

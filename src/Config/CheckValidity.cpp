@@ -1,6 +1,5 @@
 #include "ConfigParser.hpp"
 #include "defines.hpp" // IFS
-#include "logger.hpp"  // TODO
 #include "stringutils.hpp"
 #include "utils.hpp"
 

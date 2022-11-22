@@ -14,7 +14,6 @@ namespace WS {
 
 // Fds
 int close(int fd);
-int fcntl(int fd);
 
 // I.O.
 ssize_t write(int fd, const std::string &str);

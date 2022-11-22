@@ -27,24 +27,20 @@ void Poller::start() {
 	LOG(GREEN "\n----STARTING LOOP----\n" DEFAULT);
 
 	while (m_active) {
-		auto clientIt = m_pollfds.begin() + clientsIndex();
-		auto sourceIt = m_pollfds.begin() + sourceFdsIndex();
-
 		LOG(CYAN << std::string(winSize(), '#') << DEFAULT);
-		LOG(CYAN "Servers: " DEFAULT << rangeToString(m_pollfds.begin(), clientIt));
-		LOG(CYAN "Clients: " DEFAULT << rangeToString(clientIt, sourceIt));
-		LOG(CYAN "sourcefds: " DEFAULT << rangeToString(sourceIt, m_pollfds.end()));
+		LOG(CYAN "Servers: " DEFAULT << rangeToString(m_pollfds.begin(), m_pollfds.begin() + clientsIndex()));
+		LOG(CYAN "Clients: " DEFAULT << rangeToString(m_pollfds.begin() + clientsIndex(),
+													  m_pollfds.begin() + sourceFdsIndex()));
+		LOG(CYAN "sourcefds: " DEFAULT << rangeToString(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end()));
 
 		int poll_status = WS::poll(m_pollfds);
 		switch (poll_status) {
 			case -1:
 				if (errno == EINTR) // SIGCHLD
 					continue;
-				perror("poll");
-				exit(EXIT_FAILURE);
+				fatal_perror("poll");
 			case 0: // Poll is blocking
-				LOG_ERR("Poll returned zero");
-				break;
+				exit(EXIT_FAILURE);
 			default:
 				pollfdEvent();
 		}
@@ -147,7 +143,7 @@ void Poller::acceptClient(FD listener_fd) {
 	if (fd < 0)
 		return;
 
-	WS::fcntl(fd);
+	set_fd_nonblocking(fd);
 
 	m_pollfds.insert(m_pollfds.begin() + sourceFdsIndex(), client); // insert after last client
 	m_connections[fd] = Connection(fd, listener, addressToString(peer.sin_addr.s_addr));

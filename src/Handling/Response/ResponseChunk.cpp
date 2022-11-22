@@ -17,7 +17,7 @@ bool Response::isDone() const {
 std::string &Response::getNextChunk() {
 	if (!m_doneReading && m_chunk.size() < BUFFER_SIZE) {
 		m_saved += readBlock();
-		if (m_isCGI && !m_CGI_DoneProcessingHeaders)
+		if (m_isCGI && !m_headersDone)
 			getCGIHeaderChunk();
 		else {
 			if (m_isChunked)
@@ -34,7 +34,7 @@ void Response::encodeChunked(std::string &str) {
 	str += CRLF;
 }
 
-void Response::createIndex(std::string path_to_index) {
+void Response::createIndex(const std::string &path_to_index) {
 	Entry		root  = { m_request.getLocation(), recursivePathCount(path_to_index) };
 	std::string title = "Index of directory: " + root.name;
 
