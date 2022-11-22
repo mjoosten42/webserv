@@ -18,4 +18,4 @@ void overwriteIfSpecified(const std::string &search, T &field, t_block_directive
 bool					   toBool(const std::string &str);
 std::string				   copy(const std::string &str);
 std::vector<methods>	   toMethods(const std::string &str);
-std::map<int, std::string> toMap(const std::string &str);
+std::map<unsigned int, std::string> toMap(const std::string &str);

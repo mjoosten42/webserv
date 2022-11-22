@@ -86,13 +86,13 @@ void ConfigParser::check_overflow_errors(std::vector<std::string>			&config,
 										 const t_simple_directive			&to_check) {
 	try {
 		if (to_check.name == "listen")
-			stringToIntegral<short>(to_check.params);
+			stringToIntegral<unsigned short>(to_check.params);
 		if (to_check.name == "client_max_body_size")
 			stringToIntegral<size_t>(to_check.params);
 		if (to_check.name == "error_page") {
 			std::vector<std::string> args = stringSplit(to_check.params);
 			for (auto it = args.begin(); it < args.end(); it += 2)
-				stringToIntegral<int>(*it);
+				stringToIntegral<unsigned int>(*it);
 		}
 	} catch (std::exception &e) {
 		throw_config_error(config, file_it, "Value too large for \"" + to_check.name + "\" directive");

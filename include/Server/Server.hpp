@@ -42,7 +42,7 @@ class Server {
 
 	private:
 		std::string				 m_host;  // the IP address this server listens on.
-		short					 m_port;  // port the server listens on
+		unsigned short					 m_port;  // port the server listens on
 		std::vector<std::string> m_names; // i.e. example.com www.example.com etc.
 		std::vector<Location>	 m_locations;
 };
