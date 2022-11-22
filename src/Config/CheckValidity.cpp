@@ -1,6 +1,7 @@
 #include "ConfigParser.hpp"
 #include "defines.hpp" // IFS
 #include "stringutils.hpp"
+#include "utils.hpp"
 
 #include <stack>
 #include <string>
@@ -82,6 +83,25 @@ void ConfigParser::discard_empty(std::vector<std::string> &config) {
 		if (pos == std::string::npos)
 			config.erase(config.begin() + i--);
 	}
+}
+
+void ConfigParser::check_known_directives_for_errors(std::vector<std::string>			&config,
+													 std::vector<std::string>::iterator &file_it,
+													 const t_simple_directive			&to_check) {
+	try {
+		if (to_check.name == "listen")
+			stringToIntegral<short>(to_check.params);
+		if (to_check.name == "client_max_body_size")
+			stringToIntegral<size_t>(to_check.params);
+		if (to_check.name == "error_page") {
+			std::vector<std::string> args = stringSplit(to_check.params);
+			for (auto it = args.begin(); it < args.end(); it += 2)
+				stringToIntegral<int>(*it);
+		}
+	} catch (std::exception &e) {
+		throw_config_error(config, file_it, "Value too large for \"" + to_check.name + "\" directive");
+	}
+	return;
 }
 
 void ConfigParser::throw_config_error(std::vector<std::string>			 &config,
