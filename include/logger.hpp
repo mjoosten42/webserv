@@ -1,10 +1,8 @@
 #pragma once
 
 #include "defines.hpp"
-#include "utils.hpp" // winsize
 
-#include <cerrno>	// errno
-#include <string.h> // strerror
+#include <iostream>
 
 #define LOG_ERR(...) std::cerr << std::boolalpha << RED << "[ERROR] " << __VA_ARGS__ << DEFAULT << std::endl
 

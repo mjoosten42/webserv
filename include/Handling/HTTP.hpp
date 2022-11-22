@@ -18,6 +18,7 @@ class HTTP {
 		bool		containsNewline(const std::string &str);
 		size_t		findNewline(const std::string &str, size_t begin = 0);
 		std::string getNextLine();
+		bool		isGood();
 
 		int				   getStatus() const;
 		std::string		  &getBody();

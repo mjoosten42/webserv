@@ -53,9 +53,9 @@ class ConfigParser {
 		void discard_empty(std::vector<std::string> &config);
 		void check_braces_error(std::vector<std::string> &config);
 		void check_semicolon_error(std::vector<std::string> &config);
-		void check_known_directives_for_errors(std::vector<std::string>			  &config,
-											   std::vector<std::string>::iterator &file_it,
-											   const t_simple_directive			  &to_check);
+		void check_overflow_errors(std::vector<std::string>			  &config,
+								   std::vector<std::string>::iterator &file_it,
+								   const t_simple_directive			  &to_check);
 		void throw_config_error(std::vector<std::string>		   &config,
 								std::vector<std::string>::iterator &file_it,
 								const std::string				   &reason);

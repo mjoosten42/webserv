@@ -42,25 +42,25 @@ void ConfigParser::check_semicolon_error(std::vector<std::string> &config) {
 
 	for (auto file_it = config.begin(); file_it != config.end(); ++file_it) {
 		size_t pos = file_it->find_first_of(m_tokens, 0, SIZE);
-		if (!file_it->empty()) {
-			if (pos == std::string::npos)
-				missing_semicolon.push(file_it);
-			else {
-				switch (file_it->at(pos)) {
-					case (';'):
-						while (!missing_semicolon.empty())
-							missing_semicolon.pop();
-						break;
-					case ('{'):
-					case ('}'):
-						if (!missing_semicolon.empty()) {
-							file_it = missing_semicolon.top();
-							throw_config_error(config, file_it, "No closing semicolon for statement");
-						}
-						break;
-					default:
-						continue;
-				}
+		if (file_it->empty())
+			continue;
+		if (pos == std::string::npos)
+			missing_semicolon.push(file_it);
+		else {
+			switch (file_it->at(pos)) {
+				case (';'):
+					while (!missing_semicolon.empty())
+						missing_semicolon.pop();
+					break;
+				case ('{'):
+				case ('}'):
+					if (!missing_semicolon.empty()) {
+						file_it = missing_semicolon.top();
+						throw_config_error(config, file_it, "No closing semicolon for statement");
+					}
+					break;
+				default:
+					continue;
 			}
 		}
 	}
@@ -82,9 +82,9 @@ void ConfigParser::discard_empty(std::vector<std::string> &config) {
 	}
 }
 
-void ConfigParser::check_known_directives_for_errors(std::vector<std::string>			&config,
-													 std::vector<std::string>::iterator &file_it,
-													 const t_simple_directive			&to_check) {
+void ConfigParser::check_overflow_errors(std::vector<std::string>			&config,
+										 std::vector<std::string>::iterator &file_it,
+										 const t_simple_directive			&to_check) {
 	try {
 		if (to_check.name == "listen")
 			stringToIntegral<short>(to_check.params);

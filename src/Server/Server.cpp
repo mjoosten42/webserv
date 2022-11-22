@@ -121,4 +121,10 @@ bool Server::allowsMethod(int loc_index, methods method) const {
 	return std::find(methods.begin(), methods.end(), method) != methods.end();
 }
 
+std::string Server::getAllowedMethodsAsString(int loc_index) const {
+	auto &le = m_locations[loc_index].m_limit_except;
+
+	return rangeToString(le.begin(), le.end());
+}
+
 #pragma endregion

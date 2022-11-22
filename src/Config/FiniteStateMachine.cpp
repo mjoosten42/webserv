@@ -51,7 +51,7 @@ void ConfigParser::state_simpledirective(t_block_directive				   **context,
 		std::string reason = "No parameters for directive \"" + tmp.name + "\"";
 		throw_config_error(file, it, reason);
 	}
-	check_known_directives_for_errors(file, it, tmp);
+	check_overflow_errors(file, it, tmp);
 	(*context)->simple_directives.push_back(tmp);
 	return;
 }

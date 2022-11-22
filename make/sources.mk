@@ -14,6 +14,7 @@ SOURCES = \
 	src/Handling/Response/ResponseCGI.cpp \
 	src/Handling/Response/ResponseChunk.cpp \
 	src/Handling/Response/ResponseErrors.cpp \
+	src/Handling/Response/ResponseHandling.cpp \
 	src/Handling/Response/ResponseIO.cpp \
 	src/main.cpp \
 	src/Polling/Connection.cpp \

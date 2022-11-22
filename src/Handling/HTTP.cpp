@@ -45,6 +45,10 @@ std::string HTTP::getNextLine() {
 	return line;
 }
 
+bool HTTP::isGood() {
+	return m_status < 400;
+}
+
 void HTTP::parseHeader(const std::string &line) {
 	std::pair<std::string, std::string> header;
 	size_t								pos = line.find_first_of(IFS);

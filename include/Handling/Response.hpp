@@ -38,7 +38,6 @@ class Response: public HTTP {
 
 		void handleFile();
 		void handleCGI();
-		void handleDelete();
 
 		void openError();
 

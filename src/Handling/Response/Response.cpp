@@ -60,7 +60,7 @@ void Response::initialize() {
 void Response::setFlags() {
 	std::string ext = extension(m_filename);
 
-	m_isCGI = (m_server->isCGI(m_locationIndex, ext) || m_request.getMethod() == POST);
+	m_isCGI = (m_server->isCGI(m_locationIndex, ext));
 	m_close = (m_request.getHeaderValue("Connection") == "close");
 }
 

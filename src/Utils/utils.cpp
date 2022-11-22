@@ -51,10 +51,6 @@ size_t match(const std::string first, const std::string &second) {
 	return len;
 }
 
-bool isGood(int status) {
-	return status < 400;
-}
-
 std::string addressToString(int address) {
 	std::string str;
 

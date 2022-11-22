@@ -65,7 +65,6 @@ T stringToIntegral(const std::string &number) {
 
 size_t winSize();
 size_t match(const std::string first, const std::string &second);
-bool   isGood(int status);
 
 std::string addressToString(int address);
 

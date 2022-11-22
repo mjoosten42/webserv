@@ -38,7 +38,7 @@ std::string extension(const std::string &filename) {
 std::string basename(const std::string &path) {
 	std::string base = path;
 
-	if (base.back() == '/')
+	while (!base.empty() && base.back() == '/')
 		base.pop_back();
 
 	size_t pos = base.find_last_of("/");

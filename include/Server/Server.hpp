@@ -38,6 +38,7 @@ class Server {
 		bool isCGI(int loc_index, const std::string &ext) const;
 
 		std::string getServerAsString(std::string tabs) const;
+		std::string getAllowedMethodsAsString(int loc_index) const;
 
 	private:
 		std::string				 m_host;  // the IP address this server listens on.
