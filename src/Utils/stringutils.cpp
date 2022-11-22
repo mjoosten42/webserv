@@ -13,18 +13,15 @@ void strToUpper(std::string &str) {
 	transformBeginEnd(str, ::toupper);
 }
 
-void trimLeadingWhiteSpace(std::string &str) {
-	size_t start = str.find_first_not_of(IFS);
+void trim(std::string &str, const std::string &set) {
+	size_t start = str.find_first_not_of(set);
+	size_t end	 = str.find_last_not_of(set) + 1;
+
+	if (end != std::string::npos)
+		str.resize(end);
 
 	if (start != std::string::npos)
 		str.erase(0, start);
-}
-
-void trimTrailingWhiteSpace(std::string &str) {
-	size_t end = str.find_last_not_of(IFS);
-
-	if (end != std::string::npos)
-		str.erase(end);
 }
 
 // splits a string on whitespace chars.

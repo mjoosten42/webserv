@@ -4,11 +4,11 @@ std::string ConfigParser::getConfigAsString() {
 	return getBlockAsString(m_main_context, "");
 }
 
-std::string ConfigParser::getSimpleAsString(t_simple_directive simple, std::string tabs) {
+std::string ConfigParser::getSimpleAsString(const t_simple_directive &simple, const std::string &tabs) {
 	return tabs + simple.name + "\t" + simple.params + ";\n";
 }
 
-std::string ConfigParser::getBlockAsString(t_block_directive b, std::string tabs) {
+std::string ConfigParser::getBlockAsString(const t_block_directive &b, const std::string &tabs) {
 	std::string str = tabs + b.name;
 
 	if (!b.additional_params.empty())

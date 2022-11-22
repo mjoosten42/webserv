@@ -6,9 +6,7 @@
 
 void strToLower(std::string &str);
 void strToUpper(std::string &str);
-
-void trimLeadingWhiteSpace(std::string &str);
-void trimTrailingWhiteSpace(std::string &str);
+void trim(std::string &str, const std::string &set);
 
 std::vector<std::string> stringSplit(const std::string &s);
 

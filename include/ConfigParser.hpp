@@ -33,9 +33,7 @@ struct s_block_directive {
 
 		std::vector<t_block_directive *> fetch_matching_blocks(const std::string &blocks_to_fetch);
 
-		std::string				 fetch_simple(const std::string &key);
-		std::vector<std::string> fetch_simple_all(const std::string &key);
-		std::string				 fetch_simple_recursive(const std::string &key);
+		std::string fetch_simple(const std::string &key);
 
 	private:
 		void recurse_blocks(std::vector<t_block_directive *> &ret, const std::string &blocks_to_fetch);
@@ -60,7 +58,7 @@ class ConfigParser {
 											   const t_simple_directive			  &to_check);
 		void throw_config_error(std::vector<std::string>		   &config,
 								std::vector<std::string>::iterator &file_it,
-								std::string							reason);
+								const std::string				   &reason);
 
 	private: //	Finite state machine
 		void finite_state_machine(std::vector<std::string> &file);
@@ -76,8 +74,8 @@ class ConfigParser {
 
 	public: // Debug printing
 		std::string getConfigAsString();
-		std::string getSimpleAsString(t_simple_directive s, std::string tabs);
-		std::string getBlockAsString(t_block_directive b, std::string tabs);
+		std::string getSimpleAsString(const t_simple_directive &s, const std::string &tabs);
+		std::string getBlockAsString(const t_block_directive &b, const std::string &tabs);
 };
 
 // Initialising of Listeners based on config:
