@@ -95,7 +95,7 @@ void ConfigParser::check_overflow_errors(std::vector<std::string>			&config,
 				stringToIntegral<unsigned int>(*it);
 		}
 	} catch (std::exception &e) {
-		throw_config_error(config, file_it, "Value too large for \"" + to_check.name + "\" directive");
+		throw_config_error(config, file_it, "Value too large (or negative) for \"" + to_check.name + "\" directive");
 	}
 	return;
 }
