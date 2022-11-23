@@ -27,7 +27,7 @@ class Listener {
 	private:
 		int									  m_fd;
 		std::string							  m_listenAddr; // aka Host
-		short								  m_port;
+		unsigned short						  m_port;
 		std::vector<Server>					  m_servers;
 		std::map<std::string, const Server *> m_hostToServer;
 };

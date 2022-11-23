@@ -20,7 +20,7 @@ class HTTP {
 		std::string getNextLine();
 		bool		isGood();
 
-		int				   getStatus() const;
+		unsigned int	   getStatus() const;
 		std::string		  &getBody();
 		const std::string &getBody() const;
 
@@ -33,7 +33,7 @@ class HTTP {
 		std::string m_body;
 		std::string m_saved; // Save incomplete headers
 
-		int m_status;
+		unsigned int m_status;
 
 		class ServerException: public std::exception {
 			public:
@@ -42,7 +42,7 @@ class HTTP {
 
 				const char *what() const throw() { return msg.c_str(); }
 
-				const int		  code;
-				const std::string msg;
+				const unsigned int code;
+				const std::string  msg;
 		};
 };

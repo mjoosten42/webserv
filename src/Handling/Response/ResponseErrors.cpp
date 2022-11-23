@@ -7,7 +7,7 @@
 // SendFail and SendMoved set m_status themselves, to save lines
 
 void Response::sendCustomErrorPage() {
-	int tmp = m_status;
+	unsigned int tmp = m_status;
 
 	m_filename	  = m_server->getRoot(m_locationIndex) + m_server->getErrorPage(m_locationIndex, m_status);
 	m_doneReading = false;
@@ -16,7 +16,7 @@ void Response::sendCustomErrorPage() {
 	m_chunk	 = getResponseAsString(); // Overwriting old data
 }
 
-void Response::sendFail(int code, const std::string &msg) {
+void Response::sendFail(unsigned int code, const std::string &msg) {
 	m_status = code;
 	m_isCGI	 = false; // when we have an error, the CGI is no longer active.
 

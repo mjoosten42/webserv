@@ -24,6 +24,9 @@ TEST_CASE( "Configs", "[Config]")
     REQUIRE(!listeners.empty());
     // Error page is a number larger than max int
     // Error page is a negative number
+    // Port max ushort
+    // Error page max uint
+    // CMB max size_t
 
 
     // Negative port
@@ -36,4 +39,6 @@ TEST_CASE( "Configs", "[Config]")
     REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid4.conf") == 1);
     // Negative Error Page in location
     REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid5.conf") == 1);
+
+
 }

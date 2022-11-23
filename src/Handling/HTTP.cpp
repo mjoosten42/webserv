@@ -93,7 +93,7 @@ bool HTTP::hasHeader(const std::string &field) const {
 	return m_headers.find(copy) != m_headers.end();
 }
 
-int HTTP::getStatus() const {
+unsigned int HTTP::getStatus() const {
 	return m_status;
 }
 

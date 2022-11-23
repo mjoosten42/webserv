@@ -9,8 +9,8 @@
 #include "utils.hpp"
 
 struct Status {
-		int			key;
-		const char *value;
+		unsigned int key;
+		const char	*value;
 };
 
 const static Status statusMessages[] = { { 200, "OK" },

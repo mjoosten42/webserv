@@ -89,7 +89,7 @@ const std::string &Server::getRedirect(int loc_index) const {
 	return m_locations[loc_index].m_redirect;
 }
 
-const std::string &Server::getErrorPage(int loc_index, int code) const {
+const std::string &Server::getErrorPage(int loc_index, unsigned int code) const {
 	return m_locations[loc_index].m_error_pages.at(code);
 }
 
@@ -105,7 +105,7 @@ bool Server::isAutoIndex(int loc_index) const {
 	return m_locations[loc_index].m_auto_index;
 }
 
-bool Server::hasErrorPage(int loc_index, int code) const {
+bool Server::hasErrorPage(int loc_index, unsigned int code) const {
 	auto &pages = m_locations[loc_index].m_error_pages;
 
 	return pages.find(code) != pages.end();
