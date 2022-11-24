@@ -51,6 +51,15 @@ TEST_CASE( "Configs", "[Config]")
     // Error page larger than max uint in location
     REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid9.conf") == 1);
     // Error page larger than max uint in server
-    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid10.conf") == 1);    
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid10.conf") == 1);
 
+    //Invalid brace-pairing
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid11.conf") == 1);
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid12.conf") == 1);
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid13.conf") == 1);
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid14.conf") == 1);
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid15.conf") == 1);
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid16.conf") == 1);
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid17.conf") == 1);
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid18.conf") == 1);
 }
