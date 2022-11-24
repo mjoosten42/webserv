@@ -24,11 +24,12 @@ TEST_CASE( "Configs", "[Config]")
     REQUIRE(!listeners.empty());
     // Error page is a number larger than max int
     // Error page is a negative number
-    // Port max ushort
-    // Error page max uint
-    // CMB max size_t
+    // Port max ushort 65535
+    // Error page max uint 4294967295
+    // CMB max size_t 18446744073709551615
 
 
+    // Numeric vals - negatives
     // Negative port
     REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid1.conf") == 1);
     // Negative CMB in server
@@ -40,5 +41,16 @@ TEST_CASE( "Configs", "[Config]")
     // Negative Error Page in location
     REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid5.conf") == 1);
 
+    // Numeric vals - overflows
+    // Port larger than max ushort
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid6.conf") == 1);
+    // CMB larger than max size_t in server
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid7.conf") == 1);
+    // CMB larger than max size_t in location
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid8.conf") == 1);
+    // Error page larger than max uint in location
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid9.conf") == 1);
+    // Error page larger than max uint in server
+    REQUIRE(try_invalid_config(config_root_dir + "invalid_configs/invalid10.conf") == 1);    
 
 }
