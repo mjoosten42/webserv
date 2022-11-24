@@ -93,6 +93,13 @@ bool HTTP::hasHeader(const std::string &field) const {
 	return m_headers.find(copy) != m_headers.end();
 }
 
+void HTTP::removeHeader(const std::string &field) {
+	std::string copy(field);
+
+	strToLower(copy);
+	m_headers.erase(copy);
+}
+
 unsigned int HTTP::getStatus() const {
 	return m_status;
 }
@@ -105,7 +112,7 @@ const std::string &HTTP::getBody() const {
 	return m_body;
 }
 
-std::string HTTP::getHeaderValue(const std::string &field) const {
+std::string HTTP::getHeader(const std::string &field) const {
 	std::string copy(field);
 
 	strToLower(copy);
@@ -115,10 +122,10 @@ std::string HTTP::getHeaderValue(const std::string &field) const {
 	return "";
 }
 
-std::string HTTP::getHeadersAsString() const {
+std::string HTTP::getHeadersAsString(const std::string &tabs) const {
 	std::string headers;
 
 	for (auto header : m_headers)
-		headers += capitalizeFieldPretty(header.first) + ": " + header.second + CRLF;
+		headers += tabs + capitalizeFieldPretty(header.first) + ": " + header.second + CRLF;
 	return headers;
 }

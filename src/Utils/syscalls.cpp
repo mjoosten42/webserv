@@ -34,7 +34,8 @@ ssize_t write(int fd, const std::string &str) {
 	ssize_t ret = ::write(fd, str.data(), str.length());
 
 	if (ret == -1)
-		LOG_ERR("write(" << fd << "): " << strerror(errno));
+		if (errno != EPIPE)
+			LOG_ERR("write(" << fd << "): " << strerror(errno));
 	return ret;
 }
 

@@ -24,6 +24,7 @@ void Request::append(const char *buf, ssize_t size) {
 		m_state	   = DONE;
 		m_status   = e.code;
 		m_errorMsg = e.what();
+		m_saved.clear();
 	}
 }
 
@@ -91,13 +92,16 @@ void Request::parseMethod(const std::string &str) {
 }
 
 void Request::parseURI(const std::string &str) {
-	if (str.find("..") != std::string::npos)
-		throw ServerException(400, "Location contains \"..\": " + str);
+	if (str.size() >= 1 && str.front() != '/')
+		throw ServerException(400, "Location doesn't start with \"/\": " + str);
 
 	size_t dot	 = str.find('.');
 	size_t extra = str.find_first_of("/?", dot);
 
 	m_location = str.substr(0, extra);
+
+	if (m_location.find("..") != std::string::npos)
+		throw ServerException(400, "Location contains \"..\": " + str);
 
 	if (extra != std::string::npos) {
 		size_t qm = str.find('?', extra);
@@ -123,7 +127,7 @@ void Request::parseHTTPVersion(const std::string &str) {
 
 void Request::checkSpecialHeaders() {
 	if (hasHeader("Host")) {
-		std::string hostHeader = getHeaderValue("Host");
+		std::string hostHeader = getHeader("Host");
 		m_host				   = hostHeader.substr(0, hostHeader.find(':'));
 		if (m_host.empty())
 			throw ServerException(400, "Empty host header");
@@ -131,9 +135,9 @@ void Request::checkSpecialHeaders() {
 		throw ServerException(400, "Missing host header");
 
 	try {
-		m_contentLength = stringToIntegral<std::size_t>(getHeaderValue("Content-Length"));
+		m_contentLength = stringToIntegral<std::size_t>(getHeader("Content-Length"));
 	} catch (std::exception &e) {
-		throw ServerException(400, "Content-Length too big: " + getHeaderValue("Content-Length"));
+		throw ServerException(400, "Content-Length too big: " + getHeader("Content-Length"));
 	}
 }
 

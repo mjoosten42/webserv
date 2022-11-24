@@ -61,7 +61,7 @@ void Response::setFlags() {
 	std::string ext = extension(m_filename);
 
 	m_isCGI = (m_server->isCGI(m_locationIndex, ext));
-	m_close = (m_request.getHeaderValue("Connection") == "close");
+	m_close = (m_request.getHeader("Connection") == "close");
 }
 
 void Response::addDefaultHeaders() {
@@ -75,7 +75,7 @@ std::string Response::getStatusMessage() const {
 	if (msg != NULL)
 		return msg;
 	LOG_ERR("Status code not found: " << m_status);
-	return "Status code not found " + toString(m_status);
+	return "Unknown Status: " + toString(m_status);
 }
 
 std::string Response::getStatusLine() const {
@@ -120,4 +120,8 @@ bool Response::isCGI() const {
 
 bool Response::hadFD() const {
 	return m_hadFD;
+}
+
+bool Response::isDone() const {
+	return m_doneReading && m_chunk.empty();
 }

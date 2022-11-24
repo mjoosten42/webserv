@@ -38,9 +38,10 @@ void Poller::start() {
 			case -1:
 				if (errno == EINTR) // SIGCHLD
 					continue;
-				fatal_perror("poll");
+				perror("poll");
 			case 0: // Poll is blocking
-				exit(EXIT_FAILURE);
+				m_active = false;
+				break;
 			default:
 				pollfdEvent();
 		}
@@ -78,7 +79,8 @@ void Poller::pollfdEvent() {
 		if (client.revents & POLLIN)
 			pollIn(client);
 		if (client.revents & POLLOUT)
-			pollOut(client);
+			if (pollOut(client))
+				i--;
 	}
 
 	// loop over sourcefds. If one has POLLIN, set POLLOUT on it's connection
@@ -112,16 +114,20 @@ void Poller::pollIn(pollfd &client) {
 	}
 }
 
-void Poller::pollOut(pollfd &client) {
+bool Poller::pollOut(pollfd &client) {
 	Connection &conn	  = m_connections[client.fd];
 	FD			source_fd = conn.send(client.events);
+	bool		closed	  = false;
 
 	if (source_fd != -1) { // A response wants to close its source_fd
 		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
 	}
-	if (conn.wantsClose())
+	if (conn.wantsClose()) {
 		removeClient(client.fd);
+		closed = true;
+	}
+	return closed;
 }
 
 void Poller::pollHup(pollfd &client) {
