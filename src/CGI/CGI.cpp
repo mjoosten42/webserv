@@ -5,7 +5,6 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
-#include "buffer.hpp"
 #include "file.hpp" // basename
 #include "logger.hpp"
 #include "methods.hpp"
@@ -122,14 +121,13 @@ void CGI::start(const Response &response) {
 
 	em["PATH_INFO"]		  = req.getPathInfo();
 	em["PATH_TRANSLATED"] = req.getPathInfo();
-
-	em["QUERY_STRING"]	 = req.getQueryString();
-	em["REMOTE_ADDR"]	 = response.m_peer;
-	em["REMOTE_HOST"]	 = response.m_peer;
-	em["REQUEST_METHOD"] = toString(req.getMethod());
-	em["SCRIPT_NAME"]	 = response.m_filename;
-	em["SERVER_NAME"]	 = req.getHost();
-	em["SERVER_PORT"]	 = toString(response.m_server->getPort());
+	em["QUERY_STRING"]	  = req.getQueryString();
+	em["REMOTE_ADDR"]	  = response.m_peer;
+	em["REMOTE_HOST"]	  = response.m_peer;
+	em["REQUEST_METHOD"]  = toString(req.getMethod());
+	em["SCRIPT_NAME"]	  = response.m_filename;
+	em["SERVER_NAME"]	  = req.getHost();
+	em["SERVER_PORT"]	  = toString(response.m_server->getPort());
 
 	if (req.getMethod() == POST) {
 		std::string root = response.m_server->getRoot(response.m_locationIndex);

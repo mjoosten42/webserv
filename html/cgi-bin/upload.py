@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, cgi, os
+import cgi, os
 
 def printAndExit(code, msg):
 	print("Content-Type: text/plain")
@@ -12,6 +12,7 @@ def printAndExit(code, msg):
 method = os.environ["REQUEST_METHOD"]
 if method != "POST":
 	printAndExit(405, "Request method is " +  method + ", must be POST")
+
 upload_dir = os.environ["UPLOAD_DIR"]
 
 if not os.path.isdir(upload_dir):
@@ -27,15 +28,16 @@ try:
 except:
 	printAndExit(400, "No key names \"file\"")
 
+message = ""
 if fileitem.filename:
 	fn = os.path.basename(fileitem.filename)
 	try:
 		f = open(upload_dir + "/" + fn, 'wb')
 		f.write(fileitem.file.read())
 		f.close()
-		message = 'The file "' + fn + '" was uploaded successfully'
 	except OSError as error:
 		printAndExit(403, error)
+	message = 'The file "' + fn + '" was uploaded successfully'
 
 print("Content-Type: text/html")
 print("Status: 201")

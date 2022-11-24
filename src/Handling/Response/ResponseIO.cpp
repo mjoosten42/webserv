@@ -1,6 +1,8 @@
 #include "Response.hpp"
+#include "buffer.hpp" // buf
 #include "logger.hpp"
 #include "syscalls.hpp"
+#include "utils.hpp" // winSize
 
 #include <string>
 

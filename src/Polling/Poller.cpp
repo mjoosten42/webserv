@@ -124,6 +124,7 @@ bool Poller::pollOut(pollfd &client) {
 		m_pollfds.erase(find(source_fd));
 	}
 	if (conn.wantsClose()) {
+		removeSources(client.fd);
 		removeClient(client.fd);
 		closed = true;
 	}
@@ -131,13 +132,17 @@ bool Poller::pollOut(pollfd &client) {
 }
 
 void Poller::pollHup(pollfd &client) {
-	std::vector<FD> sourcefds = m_sources.getSourceFds(client.fd); // get all source fds dependent on client fd
+	removeSources(client.fd);
+	removeClient(client.fd);
+}
+
+void Poller::removeSources(FD client) {
+	std::vector<FD> sourcefds = m_sources.getSourceFds(client); // get all source fds dependent on client fd
 
 	for (auto &source_fd : sourcefds) {
-		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
+		m_sources.remove(source_fd);
 	}
-	removeClient(client.fd);
 }
 
 void Poller::acceptClient(FD listener_fd) {
@@ -179,6 +184,7 @@ std::vector<pollfd>::iterator Poller::find(FD fd) {
 	LOG_ERR("Fd not found in pollfds: " << fd);
 	LOG_ERR("Servers: " << rangeToString(m_pollfds.begin(), m_pollfds.begin() + clientsIndex()));
 	LOG_ERR("Clients: " << rangeToString(m_pollfds.begin() + clientsIndex(), m_pollfds.begin() + sourceFdsIndex()));
-	LOG_ERR("sourcefds: " << rangeToString(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end()));
+	LOG_ERR("Sources: " << rangeToString(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end()));
+	LOG_ERR(m_sources.getSourceFdsAsString());
 	return m_pollfds.end();
 }

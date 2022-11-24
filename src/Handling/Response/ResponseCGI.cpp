@@ -18,10 +18,7 @@ void Response::handleCGI() {
 	m_source_fd = m_cgi.popen.readfd;
 	m_hadFD		= true;
 
-	if (m_request.getMethod() == GET)
-		m_status = 200;
-	else
-		m_status = 201;
+	m_status = 200;
 }
 
 void Response::getCGIHeaderChunk() {
