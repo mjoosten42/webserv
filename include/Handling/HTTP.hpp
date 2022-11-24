@@ -36,6 +36,7 @@ class HTTP {
 
 		unsigned int m_status;
 
+	public:
 		class ServerException: public std::exception {
 			public:
 				ServerException(int error, const std::string &str) throw(): code(error), msg(str) {};

@@ -51,16 +51,25 @@ bool HTTP::isGood() {
 
 void HTTP::parseHeader(const std::string &line) {
 	std::pair<std::string, std::string> header;
-	size_t								pos = line.find_first_of(IFS);
+	size_t								pos = line.find_first_of(':') + 1;
 
 	header.first = line.substr(0, pos);
-	if (pos != std::string::npos)
-		header.second = line.substr(line.find_first_not_of(IFS, pos));
 
 	if (header.first.back() != ':')
-		throw ServerException(400, "Header field must end in ':' : " + line);
+		throw ServerException(400, "Header field must end in ':' : " + line);	
+	
 	header.first.pop_back();
+	if (!isHTTPToken(header.first)) {
+		throw ServerException(400, "Header field is an invalid HTTP token: " + header.first);
+	}
+
 	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so lowercase them.
+
+	if (pos != std::string::npos) {
+		header.second = line.substr(line.find_first_not_of(SPACE_AND_TAB, pos));
+		header.second = header.second.substr(0, header.second.find_last_not_of(SPACE_AND_TAB) + 1);
+	}
+
 	auto insert = m_headers.insert(header);
 	if (!insert.second)
 		throw ServerException(400, "Duplicate headers: " + line);

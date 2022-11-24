@@ -4,6 +4,7 @@
 #define CRLF "\r\n"
 
 #define IFS " \n\r\t\f\v"
+#define SPACE_AND_TAB " \t"
 
 // Terminal colors
 #define DEFAULT "\033[0m"

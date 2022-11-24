@@ -13,6 +13,7 @@ void strToUpper(std::string &str) {
 	transformBeginEnd(str, ::toupper);
 }
 
+// trims str leading and trailing characters from set
 void trim(std::string &str, const std::string &set) {
 	size_t start = str.find_first_not_of(set);
 	size_t end	 = str.find_last_not_of(set) + 1;
@@ -60,4 +61,18 @@ std::string getEventsAsString(short revents) {
 		events += "NVAL";
 	}
 	return "{ " + events + " }";
+}
+
+#define HTTP_SEPERATORS ("()<>@,;:\\\"/[]?={} \t")
+
+// returns true if the string complies to a HTTP token as specified in RFC2616.
+// basically, a word.
+bool isHTTPToken(const std::string& str)
+{
+	for (auto c : str) {
+		if (!isascii(c) || std::string(HTTP_SEPERATORS).find(c) != std::string::npos) {
+			return false;
+		}
+	}
+	return true;
 }

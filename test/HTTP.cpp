@@ -38,3 +38,29 @@ TEST_CASE( "HTTP getHeadersAsString", "[HTTP]") {
 	REQUIRE( h.getHeadersAsString() == "Hi: mINEcraft\r\nLength: 22222\r\nYeet: amogus\r\n" );
 
 }
+
+
+TEST_CASE( "HTTP parseHeader", "[HTTP]") {
+
+	HTTP h;
+
+	h.parseHeader("derp: yeet");
+	REQUIRE( h.getHeader("derp") == "yeet" );
+
+	h.parseHeader("hallo:wereld");
+	REQUIRE( h.getHeader("hallo") == "wereld" );
+
+	h.parseHeader("hallo2:  \t    wereld        \t  ");
+	REQUIRE( h.getHeader("hallo2") == "wereld" );
+
+	h.parseHeader("h:  \t    wereld");
+	REQUIRE( h.getHeader("h") == "wereld" );
+
+	h.parseHeader("h2:wereld \t\t ");
+	REQUIRE( h.getHeader("h2") == "wereld" );
+
+	REQUIRE_THROWS_MATCHES( h.parseHeader("h yeet"), HTTP::ServerException, Catch::Matchers::Message("Header field must end in ':' : h yeet"));
+
+	REQUIRE_THROWS_MATCHES( h.parseHeader("h : yeet"), HTTP::ServerException, Catch::Matchers::Message("Header field is an invalid HTTP token: h "));
+
+}
