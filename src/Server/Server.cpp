@@ -3,15 +3,11 @@
 #include "IO.hpp"
 #include "Location.hpp"
 #include "defines.hpp"
-#include "logger.hpp"
 #include "overwrite.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
 
-#include <algorithm>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include <algorithm> // sort
 
 Server::Server(): m_host("127.0.0.1"), m_port(8000), m_names({ { "webserv.com" } }), m_locations(1) {}
 
@@ -25,6 +21,12 @@ void Server::add(t_block_directive *constructor_specs) {
 		m_locations.push_back(m_locations.front()); // Copy server default to new location
 		m_locations.back().add(block);				// Add config
 	}
+
+	// Overwrite default '/' with configs '/' if provided
+	std::sort(m_locations.begin(), m_locations.end());
+	if (m_locations.size() >= 2)
+		if (m_locations[1].getLocation() == "/")
+			m_locations.erase(m_locations.begin());
 }
 
 // For clarity:
@@ -42,7 +44,7 @@ int Server::getLocationIndex(const std::string &address) const {
 		const std::string &loc	   = m_locations[i].m_location;
 		size_t			   matched = match(loc, address); // Amount of characters matched
 
-		if (matched == loc.length()) { // Make sure /index doesn't match /images
+		if (matched == loc.length()) { // Make sure /index.html doesn't match /images
 			if (matched > longest) {
 				longest = matched;
 				ret		= i;

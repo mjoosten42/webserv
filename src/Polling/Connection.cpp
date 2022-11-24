@@ -4,7 +4,7 @@
 #include "Listener.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#include "buffer.hpp"
+#include "buffer.hpp" // buf
 #include "logger.hpp"
 #include "syscalls.hpp"
 #include "utils.hpp"
@@ -37,7 +37,7 @@ FD Connection::receive(short &events) {
 
 			request.append(buf, bytes_received);
 
-			LOG(request);
+			// LOG(request);
 
 			if (request.getState() == STARTLINE || request.getState() == HEADERS)
 				break;

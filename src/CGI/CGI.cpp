@@ -5,7 +5,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
-#include "buffer.hpp"
+#include "file.hpp" // basename
 #include "logger.hpp"
 #include "methods.hpp"
 #include "syscalls.hpp"
@@ -36,13 +36,15 @@ static void pipeTwo(int serverToCgi[2], int CgiToServer[2]) {
 
 static void dupTwo(int in_fd, int out_fd) {
 	if (dup2(in_fd, STDIN_FILENO) == -1)
-		exit(EXIT_FAILURE);
-	WS::close(in_fd);
+		fatal_perror("dup2");
 
-	if (dup2(out_fd, STDOUT_FILENO) == -1) {
-		WS::close(STDIN_FILENO);
-		exit(EXIT_FAILURE);
-	}
+	if (dup2(out_fd, STDOUT_FILENO) == -1)
+		fatal_perror("dup2");
+
+	if (dup2(out_fd, STDERR_FILENO) == -1)
+		fatal_perror("dup2");
+
+	WS::close(in_fd);
 	WS::close(out_fd);
 }
 
@@ -52,7 +54,7 @@ static void my_exec(int infd, int outfd, const std::string &filename, const Envi
 	if (WS::chdir(filename.substr(0, filename.find_last_of("/"))) == -1)
 		exit(EXIT_FAILURE);
 
-	std::string copy   = filename.substr(filename.find_last_of("/") + 1);
+	std::string copy   = basename(filename);
 	char *const args[] = { const_cast<char *const>(copy.c_str()),
 						   NULL }; // Werror type qualifiers ignored on cast result type
 
@@ -115,18 +117,17 @@ void CGI::start(const Response &response) {
 		em["CONTENT_LENGTH"] = toString(req.getContentLength());
 
 	if (req.hasHeader("Content-Type"))
-		em["CONTENT_TYPE"] = req.getHeaderValue("Content-Type");
+		em["CONTENT_TYPE"] = req.getHeader("Content-Type");
 
 	em["PATH_INFO"]		  = req.getPathInfo();
 	em["PATH_TRANSLATED"] = req.getPathInfo();
-
-	em["QUERY_STRING"]	 = req.getQueryString();
-	em["REMOTE_ADDR"]	 = response.m_peer;
-	em["REMOTE_HOST"]	 = response.m_peer;
-	em["REQUEST_METHOD"] = toString(req.getMethod());
-	em["SCRIPT_NAME"]	 = response.m_filename;
-	em["SERVER_NAME"]	 = req.getHost();
-	em["SERVER_PORT"]	 = toString(response.m_server->getPort());
+	em["QUERY_STRING"]	  = req.getQueryString();
+	em["REMOTE_ADDR"]	  = response.m_peer;
+	em["REMOTE_HOST"]	  = response.m_peer;
+	em["REQUEST_METHOD"]  = toString(req.getMethod());
+	em["SCRIPT_NAME"]	  = response.m_filename;
+	em["SERVER_NAME"]	  = req.getHost();
+	em["SERVER_PORT"]	  = toString(response.m_server->getPort());
 
 	if (req.getMethod() == POST) {
 		std::string root = response.m_server->getRoot(response.m_locationIndex);

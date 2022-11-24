@@ -21,11 +21,13 @@ class Poller {
 		void pollfdEvent();
 
 		void pollIn(pollfd &pollfd);
-		void pollOut(pollfd &pollfd);
+		bool pollOut(pollfd &pollfd);
 		void pollHup(pollfd &pollfd);
 
 		void acceptClient(FD listener_fd);
 		void removeClient(FD index);
+
+		void removeSources(FD client);
 
 		size_t clientsIndex();
 		size_t sourceFdsIndex();

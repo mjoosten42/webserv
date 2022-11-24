@@ -17,7 +17,11 @@ class Location {
 
 		void add(t_block_directive *constructor_specs);
 
+		const std::string &getLocation() const;
+
 		std::string getLocationAsString(std::string tabs) const;
+
+		friend bool operator<(const Location &lhs, const Location &rhs);
 
 	private:
 		std::string m_location;

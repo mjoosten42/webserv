@@ -38,9 +38,10 @@ void Poller::start() {
 			case -1:
 				if (errno == EINTR) // SIGCHLD
 					continue;
-				fatal_perror("poll");
+				perror("poll");
 			case 0: // Poll is blocking
-				exit(EXIT_FAILURE);
+				m_active = false;
+				break;
 			default:
 				pollfdEvent();
 		}
@@ -78,7 +79,8 @@ void Poller::pollfdEvent() {
 		if (client.revents & POLLIN)
 			pollIn(client);
 		if (client.revents & POLLOUT)
-			pollOut(client);
+			if (pollOut(client))
+				i--;
 	}
 
 	// loop over sourcefds. If one has POLLIN, set POLLOUT on it's connection
@@ -112,26 +114,35 @@ void Poller::pollIn(pollfd &client) {
 	}
 }
 
-void Poller::pollOut(pollfd &client) {
+bool Poller::pollOut(pollfd &client) {
 	Connection &conn	  = m_connections[client.fd];
 	FD			source_fd = conn.send(client.events);
+	bool		closed	  = false;
 
 	if (source_fd != -1) { // A response wants to close its source_fd
 		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
 	}
-	if (conn.wantsClose())
+	if (conn.wantsClose()) {
+		removeSources(client.fd);
 		removeClient(client.fd);
+		closed = true;
+	}
+	return closed;
 }
 
 void Poller::pollHup(pollfd &client) {
-	std::vector<FD> sourcefds = m_sources.getSourceFds(client.fd); // get all source fds dependent on client fd
+	removeSources(client.fd);
+	removeClient(client.fd);
+}
+
+void Poller::removeSources(FD client) {
+	std::vector<FD> sourcefds = m_sources.getSourceFds(client); // get all source fds dependent on client fd
 
 	for (auto &source_fd : sourcefds) {
-		m_sources.remove(source_fd);
 		m_pollfds.erase(find(source_fd));
+		m_sources.remove(source_fd);
 	}
-	removeClient(client.fd);
 }
 
 void Poller::acceptClient(FD listener_fd) {
@@ -173,6 +184,7 @@ std::vector<pollfd>::iterator Poller::find(FD fd) {
 	LOG_ERR("Fd not found in pollfds: " << fd);
 	LOG_ERR("Servers: " << rangeToString(m_pollfds.begin(), m_pollfds.begin() + clientsIndex()));
 	LOG_ERR("Clients: " << rangeToString(m_pollfds.begin() + clientsIndex(), m_pollfds.begin() + sourceFdsIndex()));
-	LOG_ERR("sourcefds: " << rangeToString(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end()));
+	LOG_ERR("Sources: " << rangeToString(m_pollfds.begin() + sourceFdsIndex(), m_pollfds.end()));
+	LOG_ERR(m_sources.getSourceFdsAsString());
 	return m_pollfds.end();
 }

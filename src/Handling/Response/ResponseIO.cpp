@@ -1,6 +1,8 @@
 #include "Response.hpp"
+#include "buffer.hpp" // buf
 #include "logger.hpp"
 #include "syscalls.hpp"
+#include "utils.hpp" // winSize
 
 #include <string>
 
@@ -32,7 +34,6 @@ void Response::writeToCGI() {
 	LOG(CYAN "Write: " DEFAULT << bytes_written);
 	switch (bytes_written) {
 		case -1:
-			body.clear();
 			break;
 		default:
 			// LOG(YELLOW << std::string(winSize(), '-'));
