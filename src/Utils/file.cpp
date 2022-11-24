@@ -44,6 +44,6 @@ std::string basename(const std::string &path) {
 	size_t pos = base.find_last_of("/");
 
 	if (pos != std::string::npos)
-		return base.substr(pos);
+		return base.substr(pos + 1);
 	return path;
 }

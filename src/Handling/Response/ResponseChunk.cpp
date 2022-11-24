@@ -10,10 +10,6 @@ void Response::trimChunk(ssize_t bytes_sent) {
 	m_chunk.erase(0, bytes_sent);
 }
 
-bool Response::isDone() const {
-	return m_doneReading && m_chunk.empty();
-}
-
 std::string &Response::getNextChunk() {
 	if (!m_doneReading && m_chunk.size() < BUFFER_SIZE) {
 		m_saved += readBlock();

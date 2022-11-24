@@ -13,6 +13,6 @@ TEST_CASE( "Request generic", "[Request]") {
 	easySend(r, "GET / HTTP/1.1\r\ndERP:     cool\r\nHOST: yeet\r\n\r\n");
 	REQUIRE( r.getMethod() == GET );
 	REQUIRE( r.getLocation() == "/" );
-	REQUIRE( r.getHeaderValue("derp") == "cool" );
+	REQUIRE( r.getHeader("derp") == "cool" );
 	REQUIRE( r.getHost() == "yeet" );
 }

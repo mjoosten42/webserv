@@ -32,7 +32,6 @@ void Response::writeToCGI() {
 	LOG(CYAN "Write: " DEFAULT << bytes_written);
 	switch (bytes_written) {
 		case -1:
-			body.clear();
 			break;
 		default:
 			// LOG(YELLOW << std::string(winSize(), '-'));

@@ -2,6 +2,7 @@
 #include "Server.hpp"
 #include "logger.hpp"
 #include "syscalls.hpp"
+#include "utils.hpp" // stringToIntegral
 
 #include <string>
 #include <unistd.h> // access
@@ -24,7 +25,11 @@ void Response::handleCGI() {
 }
 
 void Response::getCGIHeaderChunk() {
-	parseCGIHeaders();
+	try {
+		parseCGIHeaders();
+	} catch (const ServerException &e) {
+		return sendFail(502, e.what());
+	}
 
 	if (m_doneReading && !m_headersDone) // CGI exited before completing respones
 		return sendFail(502, "CGI exited before completing headers");
@@ -43,16 +48,21 @@ void Response::parseCGIHeaders() {
 			m_headersDone = true;
 			return;
 		}
-		try {
-			parseHeader(line);
-		} catch (const ServerException &e) {
-			LOG("CGI header exception: " << line);
-			return sendFail(e.code, e.what());
-		}
+		parseHeader(line);
 	}
 }
 
 void Response::processCGIHeaders() {
+	if (hasHeader("Status")) {
+		std::string status = getHeader("Status");
+		removeHeader("Status");
+		try {
+			m_status = stringToIntegral<unsigned int>(status);
+		} catch (std::exception &e) {
+			return sendFail(502, "Status is not a HTTP code: " + status);
+		}
+	}
+
 	if (!hasHeader("Content-Length") && !hasHeader("Transfer-Encoding")) {
 		addHeader("Transfer-Encoding", "Chunked");
 		m_isChunked = true;

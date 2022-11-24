@@ -21,9 +21,9 @@ TEST_CASE( "HTTP addHeader", "[HTTP]") {
 	HTTP h;
 
 	h.addHeader("YeEt", "amogus");
-	REQUIRE( h.getHeaderValue("yeet") == "amogus" );
+	REQUIRE( h.getHeader("yeet") == "amogus" );
 	h.addHeader("hi", "minecraft");
-	REQUIRE( h.getHeaderValue("hi") == "minecraft" );
+	REQUIRE( h.getHeader("hi") == "minecraft" );
 
 }
 
