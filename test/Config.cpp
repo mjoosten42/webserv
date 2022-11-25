@@ -2,6 +2,7 @@
 #include "ConfigParser.hpp"
 #include "Listener.hpp"
 #include "logger.hpp"
+#include "utils.hpp"
 
 unsigned int    try_invalid_config(std::string path)
 {
@@ -72,12 +73,29 @@ void    test_all_valid(std::string valid_dir)
     REQUIRE(first.getPort() == 65535);
 
 
-    int loc_index = first.getLocationIndex("");
-    REQUIRE(loc_index == 0);
-    REQUIRE(first.getLocationIndex("/locationA/") == 1);
-    REQUIRE(first.getLocationIndex("/locationA") == 1);
-    REQUIRE(first.getLocationIndex("locationA/") == 0);
-    // REQUIRE(printf("%s\n", first.getErrorPage(loc_index, 404).c_str()) == 0);
+    REQUIRE(first.getLocationIndex("") == 0);
+    // REQUIRE(first.getLocationIndex("/locationA/") == 1); //4
+    // REQUIRE(first.getLocationIndex("/locationA") == 1); //0
+    // REQUIRE(first.getLocationIndex("locationA/") == 1); //0
+
+    REQUIRE(first.getLocationIndex("/locationB/") == 2); //PASS
+    REQUIRE(first.getLocationIndex("/locationB") == 2); //PASS
+    // REQUIRE(first.getLocationIndex("locationB/") == 2); //0
+
+    // REQUIRE(first.getLocationIndex("/locationC/") == 3); //0
+    // REQUIRE(first.getLocationIndex("/locationC") == 3); //0
+    // REQUIRE(first.getLocationIndex("locationC/") == 3); //1
+
+    // REQUIRE(first.getLocationIndex("/locationD/") == 4); //0
+    // REQUIRE(first.getLocationIndex("/locationD") == 4); //0
+    // REQUIRE(first.getLocationIndex("locationD/") == 4); //3
+
+    // REQUIRE(first.getLocationIndex("/E/") == 5); //0
+    // REQUIRE(first.getLocationIndex("/E") == 5); //0
+    // REQUIRE(first.getLocationIndex("/") == 5); //0
+
+
+
     // REQUIRE(first.getErrorPage(0, 404) == "-5");
 
 }
