@@ -132,6 +132,7 @@ bool Response::isStatus(const std::string &status) const {
 			int code = stringToIntegral<int>(status);
 			return binarySearchKeyValue(code, statusMessages, statusMessagesSize) != NULL;
 		}
-	} catch (...) {	}
+	} catch (...) {
+	}
 	return false;
 }
