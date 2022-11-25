@@ -76,6 +76,8 @@ WARNING: NGINX difference - This is not an nginx setting, but one included for t
 ### Location block
 The location block is a block directive that only exists within the context of a server block. Internally, it can be understood as a(n indirect) subdirectory of the server's root directory, but with its own set of rules and settings. These may overwrtie those inherited from the server context, resulting in location-specific behaviour. Whenever a user navigates to this part of the server, that specific location block's rules will apply. When the server tries to determine what location block the user is in, it looks for the longest possible match between the address the user navigated to, and the root + name of a location block it recognises from the config file.
 
+//TODO : Write about correct way to format location block's name.
+
 In the configuration file it may look something like this: 
 ```
 location </name_of_subdirectory> {
