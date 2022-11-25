@@ -98,9 +98,9 @@ void    test_all_valid(std::string valid_dir)
 
 TEST_CASE( "Configs", "[Config]")
 {
-    std::string config_root_dir = "./test/Config/conf_files/";
+    std::string config_root_dir = "./test/Config/";
 
-    test_all_invalid(config_root_dir + "invalid_configs/");
-    test_all_valid(config_root_dir + "valid_configs/");
+    test_all_invalid(config_root_dir + "invalid/");
+    test_all_valid(config_root_dir + "valid/");
 
 }

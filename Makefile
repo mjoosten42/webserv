@@ -86,6 +86,7 @@ upload:
 TEST_NAME = catch
 TEST_DIR = test
 TEST_OBJ_DIR = $(TEST_DIR)/obj_test
+TEST_CXXFLAGS = -std=c++14 -Wall -Wextra
 
 TEST_SRCS=$(notdir $(wildcard $(TEST_DIR)/*.cpp))
 TEST_HEADERS=$(wildcard $(TEST_DIR)/*.hpp)
@@ -93,10 +94,10 @@ TEST_OBJ=$(TEST_SRCS:%.cpp=$(TEST_OBJ_DIR)/%.o)
 OBJ_WITHOUT_MAIN = $(filter-out $(OBJ_DIR)/$(SRC_DIR)/main.o, $(OBJECTS))
 
 $(TEST_NAME): $(TEST_OBJ) $(OBJ_WITHOUT_MAIN)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(TEST_CXXFLAGS) -o $@ $^
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp $(TEST_HEADERS) | $(TEST_OBJ_DIR)
-	$(CXX) -c $(CXXFLAGS) $(INCLUDE) -I $(TEST_DIR) -o $@ $<
+	$(CXX) -c $(TEST_CXXFLAGS) $(INCLUDE) -I $(TEST_DIR) -o $@ $<
 
 $(TEST_OBJ_DIR):
 	mkdir $@

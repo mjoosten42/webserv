@@ -3,6 +3,7 @@
 #include "stringutils.hpp"
 #include "utils.hpp"
 
+#include <algorithm> //min
 #include <stack>
 #include <string>
 #include <vector>
@@ -79,19 +80,22 @@ void ConfigParser::discard_empty() {
 }
 
 void ConfigParser::check_overflow_errors(size_t line, const simple_directive &to_check) {
+	int val = 0;
 	try {
 		if (to_check.name == "listen")
-			stringToIntegral<unsigned short>(to_check.params);
+			val = stringToIntegral<short>(to_check.params);
 		if (to_check.name == "client_max_body_size")
 			stringToIntegral<size_t>(to_check.params);
 		if (to_check.name == "error_page") {
 			std::vector<std::string> args = stringSplit(to_check.params);
 			for (auto it = args.begin(); it < args.end(); it += 2)
-				stringToIntegral<unsigned int>(*it);
+				val = std::min((stringToIntegral<int>(*it)), val);
 		}
 	} catch (std::exception &e) {
-		throw_config_error(line, "Value too large (or negative) for \"" + to_check.name + "\" directive");
+		throw_config_error(line, "Value too large for \"" + to_check.name + "\" directive");
 	}
+	if (val < 0)
+		throw_config_error(line, "Negative value for \"" + to_check.name + "\" directive");
 	return;
 }
 
