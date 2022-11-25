@@ -17,7 +17,10 @@ Location::Location():
 void Location::add(t_block_directive *constructor_specs) {
 	if (!constructor_specs->additional_params.empty())
 		m_location = constructor_specs->additional_params;
-
+	if (m_location.back() == '/')
+		m_location.pop_back();
+	if (m_location.front() != '/')
+		m_location.insert(m_location.begin(), '/');
 	overwriteIfSpecified("cgi", m_CGIs, constructor_specs, stringSplit);
 	overwriteIfSpecified("root", m_root, constructor_specs, copy);
 	overwriteIfSpecified("index", m_indexPage, constructor_specs, copy);
