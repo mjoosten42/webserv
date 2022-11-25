@@ -19,10 +19,10 @@ struct KeyValue {
 // The entries is an array of structs with a key and value.
 // Size is the length of the array.
 template <class Key, class Value>
-const char *binarySearchKeyValue(Key key, Value entries[], ssize_t size) {
+const char *binarySearchKeyValue(Key key, Value entries[], size_t size) {
 	size_t pivot = size / 2;
-	size_t min	 = 0;
-	size_t max	 = size - 1;
+	size_t min	  = 0;
+	size_t max	  = size - 1;
 
 	if (key >= entries[min].key && key <= entries[max].key) {
 		while (min <= max) {

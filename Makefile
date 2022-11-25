@@ -20,7 +20,7 @@ OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 export MAKEFLAGS = "-j 4"
 
 DEBUG := 1
-SAN := 1
+SAN := 0
 
 ifeq ($(DEBUG), 1)
 	CXX_FLAGS += -D DEBUG -g3

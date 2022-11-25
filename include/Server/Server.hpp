@@ -21,7 +21,7 @@ class Server {
 		// Server
 		const std::vector<std::string> &getNames() const;
 		const std::string			   &getHost() const;
-		short							getPort() const;
+		unsigned short					getPort() const;
 
 		// Location
 		const std::string &getRoot(int loc_index) const;

@@ -73,7 +73,7 @@ const std::string &Server::getHost() const {
 	return m_host;
 }
 
-short Server::getPort() const {
+unsigned short Server::getPort() const {
 	return m_port;
 }
 

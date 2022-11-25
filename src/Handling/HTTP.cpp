@@ -49,18 +49,27 @@ bool HTTP::isGood() {
 	return m_status < 400;
 }
 
+// parses a HTTP header and puts it into m_headers. NOTE: multiline headers are not supported.
 void HTTP::parseHeader(const std::string &line) {
 	std::pair<std::string, std::string> header;
-	size_t								pos = line.find_first_of(IFS);
+	size_t								colonPos = line.find_first_of(':');
 
-	header.first = line.substr(0, pos);
-	if (pos != std::string::npos)
-		header.second = line.substr(line.find_first_not_of(IFS, pos));
-
-	if (header.first.back() != ':')
+	if (colonPos == std::string::npos)
 		throw ServerException(400, "Header field must end in ':' : " + line);
-	header.first.pop_back();
+
+	// colonPos can never be string::npos from here
+	header.first = line.substr(0, colonPos);
+	if (!isHTTPToken(header.first))
+		throw ServerException(400, "Header field is an invalid HTTP token: " + header.first);
+
 	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so lowercase them.
+
+	size_t valueStartPos = line.find_first_not_of(SPACE_AND_TAB, colonPos + 1);
+	if (valueStartPos != std::string::npos) {
+		header.second = line.substr(valueStartPos);
+		header.second.erase(header.second.find_last_not_of(SPACE_AND_TAB) + 1, std::string::npos);
+	}
+
 	auto insert = m_headers.insert(header);
 	if (!insert.second)
 		throw ServerException(400, "Duplicate headers: " + line);
