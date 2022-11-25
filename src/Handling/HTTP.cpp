@@ -109,7 +109,7 @@ void HTTP::removeHeader(const std::string &field) {
 	m_headers.erase(copy);
 }
 
-unsigned int HTTP::getStatus() const {
+int HTTP::getStatus() const {
 	return m_status;
 }
 

@@ -4,9 +4,9 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
-unsigned int    try_invalid_config(std::string path)
+size_t  try_invalid_config(const std::string& path)
 {
-    unsigned int caught_exceptions = 0;
+    size_t caught_exceptions = 0;
     std::vector<Listener> listeners;
     try{
         listeners = initFromConfig(path.c_str());

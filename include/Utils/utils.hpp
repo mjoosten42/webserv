@@ -19,21 +19,21 @@ struct KeyValue {
 // The entries is an array of structs with a key and value.
 // Size is the length of the array.
 template <class Key, class Value>
-const char *binarySearchKeyValue(Key key, Value entries[], ssize_t size) {
-	ssize_t pivot = size / 2;
-	ssize_t min	  = 0;
-	ssize_t max	  = size - 1;
+const char *binarySearchKeyValue(Key key, Value entries[], size_t size) {
+	size_t pivot = size / 2;
+	size_t min	  = 0;
+	size_t max	  = size - 1;
 
-	while (min <= max) {
-		if (key < entries[pivot].key) {
-			max = pivot - 1;
-		} else if (key > entries[pivot].key) {
-			min = pivot + 1;
-		} else {
-			// key == entries[pivot].key is implied
-			return entries[pivot].value;
+	if (key >= entries[min].key && key <= entries[max].key) {
+		while (min <= max) {
+			if (key < entries[pivot].key)
+				max = pivot - 1;
+			else if (key > entries[pivot].key)
+				min = pivot + 1;
+			else // key == entries[pivot].key is implied
+				return entries[pivot].value;
+			pivot = (min + max) / 2;
 		}
-		pivot = (min + max) / 2;
 	}
 	return NULL;
 }

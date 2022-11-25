@@ -34,14 +34,14 @@ const Server &Listener::getServerByHost(const std::string &host) const {
 }
 
 void Listener::setupSocket() {
-	// SET UP SOCKET //
 
-	// Specify server socket info: IPv4 protocol family, port in correct
-	//	endianness, IP address
+	// TODO: for fuzzer
+	return ;
+
+	// Specify server socket info: IPv4 protocol family, port in correctendianness, IP address
 	sockaddr_in server = { 0, AF_INET, htons(m_port), { inet_addr(m_listenAddr.c_str()) }, { 0 } };
 
-	// Setup socket_fd: specify domain (IPv4), communication type, and
-	//	protocol (default for socket)
+	// Setup socket_fd: specify domain (IPv4), communication type, and	protocol (default for socket)
 	m_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_fd == -1)
 		fatal_perror("socket");
@@ -55,8 +55,7 @@ void Listener::setupSocket() {
 	if (fcntl(m_fd, F_SETFL, O_NONBLOCK) == -1)
 		fatal_perror("fcntl");
 
-	// "Assign name to socket" = link socket_fd we configured to the server's
-	//	socket information
+	// "Assign name to socket" = link socket_fd we configured to the server'ssocket information
 	if (bind(m_fd, reinterpret_cast<sockaddr *>(&server), sizeof(server)) < 0)
 		fatal_perror("bind");
 

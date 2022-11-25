@@ -2,67 +2,59 @@
 #include "defines.hpp" // IFS
 #include "stringutils.hpp"
 
-void ConfigParser::finite_state_machine(std::vector<std::string> &file) {
-	t_block_directive				  *context = &m_main_context;
-	std::vector<std::string>::iterator it;
+void ConfigParser::finite_state_machine() {
+	block_directive *context = &m_main_context;
 
-	for (it = file.begin(); it != file.end(); ++it) {
-		size_t pos = it->find_first_of(m_tokens, 0, SIZE);
-		if (!it->empty()) {
-			if (pos == std::string::npos)
-				state_simpledirective(&context, it, file); // Enables multi-line simple directives
-			else {
-				switch ((*it)[pos]) {
-					case (';'):
-						state_simpledirective(&context, it, file);
-						break;
-					case ('{'):
-						state_openblock(&context, it);
-						break;
-					case ('}'):
-						state_closeblock(&context);
-						break;
-					default:
-						continue;
-				}
-			}
+	for (size_t i = 0; i != config.size(); i++) {
+		std::string &line = config[i];
+		size_t		 pos  = line.find_first_of(m_tokens, 0, SIZE);
+
+		if (pos == std::string::npos)
+			throw_config_error(i, "Missing semicolon");
+
+		switch (line[pos]) {
+			case (';'):
+				state_simpledirective(&context, line, i);
+				break;
+			case ('{'):
+				state_openblock(&context, line);
+				break;
+			case ('}'):
+				state_closeblock(&context);
+				break;
+			default:
+				continue;
 		}
 	}
 }
 
-void ConfigParser::state_simpledirective(t_block_directive				   **context,
-										 std::vector<std::string>::iterator &it,
-										 std::vector<std::string>			&file) {
-	t_simple_directive	  tmp;
-	std::string::iterator str_i = it->begin();
-	std::string			 *field = &(tmp.name);
-	while (*str_i != m_tokens[SEMICOLON] && str_i != it->end()) {
-		if (std::isspace(*str_i) && field == &(tmp.name))
-			field = &(tmp.params);
-		*field += *str_i;
-		str_i++;
-		if (str_i == it->end()) {
-			++it;
-			str_i = it->begin();
-		}
+void ConfigParser::state_simpledirective(block_directive **context, const std::string &line, size_t i) {
+	simple_directive tmp;
+	size_t			 pos = line.find_first_of(IFS);
+
+	tmp.name = line.substr(0, pos);
+
+	if (pos != std::string::npos) {
+		pos = line.find_first_not_of(IFS, pos);
+		if (pos != std::string::npos)
+			tmp.params = line.substr(pos);
 	}
 	trim(tmp.params, IFS);
 	if (tmp.params.empty()) {
 		std::string reason = "No parameters for directive \"" + tmp.name + "\"";
-		throw_config_error(file, it, reason);
+		throw_config_error(i, reason);
 	}
-	check_overflow_errors(file, it, tmp);
+	check_overflow_errors(i, tmp);
 	(*context)->simple_directives.push_back(tmp);
-	return;
 }
 
-void ConfigParser::state_openblock(t_block_directive **context, std::vector<std::string>::iterator &it) {
-	t_block_directive	  tmp;
-	std::string::iterator str_i;
-	std::string			 *field = &(tmp.name);
-	tmp.parent_context			= *context;
+void ConfigParser::state_openblock(block_directive **context, const std::string &line) {
+	block_directive				tmp;
+	std::string::const_iterator str_i = line.begin();
+	std::string				   *field = &(tmp.name);
+	tmp.parent_context				  = *context;
 
-	for (str_i = it->begin(); str_i != it->end() && *str_i != m_tokens[OPEN_BRACE]; ++str_i) {
+	for (; str_i != line.end() && *str_i != m_tokens[OPEN_BRACE]; ++str_i) {
 		if (std::isspace(*str_i) && field == &(tmp.name))
 			field = &(tmp.additional_params);
 		*field += *str_i;
@@ -72,7 +64,7 @@ void ConfigParser::state_openblock(t_block_directive **context, std::vector<std:
 	(*context) = &((*context)->block_directives.back());
 }
 
-void ConfigParser::state_closeblock(t_block_directive **context) {
+void ConfigParser::state_closeblock(block_directive **context) {
 	if ((*context)->parent_context != NULL)
 		(*context) = (*context)->parent_context;
 }

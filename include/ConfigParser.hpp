@@ -17,66 +17,64 @@
 
 class Listener;
 
-typedef struct s_simple_directive {
+struct simple_directive {
 		std::string name;
 		std::string params;
-} t_simple_directive;
+};
 
-typedef struct s_block_directive t_block_directive;
+struct block_directive {	
+		std::string					  name;
+		std::string					  additional_params;
+		std::vector<simple_directive> simple_directives;
+		std::vector<block_directive>  block_directives;
+		struct block_directive		 *parent_context;
 
-struct s_block_directive {
-		std::string						name;
-		std::string						additional_params;
-		std::vector<t_simple_directive> simple_directives;
-		std::vector<t_block_directive>	block_directives;
-		t_block_directive			   *parent_context;
-
-		std::vector<t_block_directive *> fetch_matching_blocks(const std::string &blocks_to_fetch);
+		std::vector<struct block_directive *> fetch_matching_blocks(const std::string &blocks_to_fetch);
 
 		std::string fetch_simple(const std::string &key);
 
 	private:
-		void recurse_blocks(std::vector<t_block_directive *> &ret, const std::string &blocks_to_fetch);
+		void recurse_blocks(std::vector<struct block_directive *> &ret, const std::string &blocks_to_fetch);
 };
 
 class ConfigParser {
 	public:
 		ConfigParser(const char *path);
-		std::vector<std::string> readFile(const char *path);
+		ConfigParser(const std::string& data); // Fuzzing
 
 	public:
-		t_block_directive m_main_context;
+		block_directive m_main_context;
 
-	private: // Checking validity
-		void check_validity(std::vector<std::string> &config);
-		void discard_comments(std::vector<std::string> &config);
-		void discard_empty(std::vector<std::string> &config);
-		void check_braces_error(std::vector<std::string> &config);
-		void check_semicolon_error(std::vector<std::string> &config);
-		void check_overflow_errors(std::vector<std::string>			  &config,
-								   std::vector<std::string>::iterator &file_it,
-								   const t_simple_directive			  &to_check);
-		void throw_config_error(std::vector<std::string>		   &config,
-								std::vector<std::string>::iterator &file_it,
-								const std::string				   &reason);
+	private:
+		void readFile(const char *path);
 
-	private: //	Finite state machine
-		void finite_state_machine(std::vector<std::string> &file);
-		void state_openblock(t_block_directive **context, std::vector<std::string>::iterator &it);
-		void state_closeblock(t_block_directive **context);
-		void state_simpledirective(t_block_directive				 **context,
-								   std::vector<std::string>::iterator &it,
-								   std::vector<std::string>			  &file);
+		// Checking validity
+		void check_validity();
+		void discard_comments();
+		void discard_empty();
+		void check_braces_error();
+		void check_semicolon_error();
+		void check_overflow_errors(size_t line, const simple_directive &to_check);
+		void throw_config_error(size_t line, const std::string &reason);
+
+		//	Finite state machine
+		void finite_state_machine();
+		void state_simpledirective(block_directive **context, const std::string &line, size_t i);
+		void state_openblock(block_directive **context, const std::string &line);
+		void state_closeblock(block_directive **context);
 
 		enum Token { SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
 
-		char m_tokens[SIZE];
+		static char m_tokens[SIZE];
+
+		std::vector<std::string> config;
 
 	public: // Debug printing
 		std::string getConfigAsString();
-		std::string getSimpleAsString(const t_simple_directive &s, const std::string &tabs);
-		std::string getBlockAsString(const t_block_directive &b, const std::string &tabs);
+		std::string getSimpleAsString(const simple_directive &s, const std::string &tabs);
+		std::string getBlockAsString(const block_directive &b, const std::string &tabs);
 };
 
 // Initialising of Listeners based on config:
 std::vector<Listener> initFromConfig(const char *path);
+std::vector<Listener> initFromConfig(const std::string& data); // Fuzzer
