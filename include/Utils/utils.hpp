@@ -21,8 +21,8 @@ struct KeyValue {
 template <class Key, class Value>
 const char *binarySearchKeyValue(Key key, Value entries[], ssize_t size) {
 	ssize_t pivot = size / 2;
-	ssize_t min	 = 0;
-	ssize_t max	 = size - 1;
+	ssize_t min	  = 0;
+	ssize_t max	  = size - 1;
 
 	while (min <= max) {
 		if (key < entries[pivot].key) {

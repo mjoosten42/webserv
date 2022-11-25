@@ -59,9 +59,8 @@ void HTTP::parseHeader(const std::string &line) {
 
 	// colonPos can never be string::npos from here
 	header.first = line.substr(0, colonPos);
-	if (!isHTTPToken(header.first)) {
+	if (!isHTTPToken(header.first))
 		throw ServerException(400, "Header field is an invalid HTTP token: " + header.first);
-	}
 
 	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so lowercase them.
 
