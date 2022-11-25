@@ -112,7 +112,7 @@ FUZZ_NAME = $(FUZZ_DIR)/fuzzer
 fuzz: $(FUZZ_NAME)
 
 dofuzz:
-	(cd $(FUZZ_DIR) && ./fuzzer -dict=dict)
+	(cd $(FUZZ_DIR) && ./fuzzer CORPUS configs -dict=dict)
 	mv $(FUZZ_DIR)/crash-*  crash
 
 merge:

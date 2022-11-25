@@ -13,7 +13,6 @@
 Listener::Listener() {}
 
 Listener::Listener(const std::string &listenAddress, short port): m_listenAddr(listenAddress), m_port(port) {
-	setupSocket();
 }
 
 void Listener::addServer(const Server &server) {
@@ -34,9 +33,6 @@ const Server &Listener::getServerByHost(const std::string &host) const {
 }
 
 void Listener::setupSocket() {
-
-	// TODO: for fuzzer
-	return ;
 
 	// Specify server socket info: IPv4 protocol family, port in correctendianness, IP address
 	sockaddr_in server = { 0, AF_INET, htons(m_port), { inet_addr(m_listenAddr.c_str()) }, { 0 } };
