@@ -24,6 +24,9 @@ void Poller::add(const Listener &listener) {
 void Poller::start() {
 	m_active = true;
 
+	for (auto& pair : m_listeners)
+		pair.second.setupSocket();
+	
 	LOG(GREEN "\n----STARTING LOOP----\n" DEFAULT);
 
 	while (m_active) {

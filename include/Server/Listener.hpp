@@ -13,6 +13,7 @@ class Listener {
 		Listener(const std::string &listenAddress, short port);
 
 		void addServer(const Server &server);
+		void setupSocket();
 
 		int				   getFD() const;
 		short			   getPort() const;
@@ -20,9 +21,6 @@ class Listener {
 		const std::string &getListenAddr() const;
 
 		std::string getListenerAsString(std::string tabs) const;
-
-	private:
-		void setupSocket();
 
 	private:
 		int									  m_fd;

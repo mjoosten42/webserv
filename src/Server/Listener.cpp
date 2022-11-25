@@ -13,7 +13,6 @@
 Listener::Listener() {}
 
 Listener::Listener(const std::string &listenAddress, short port): m_listenAddr(listenAddress), m_port(port) {
-	setupSocket();
 }
 
 void Listener::addServer(const Server &server) {
