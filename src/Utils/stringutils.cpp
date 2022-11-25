@@ -75,5 +75,5 @@ bool isHTTPToken(const std::string& str)
 			return false;
 		}
 	}
-	return true;
+	return !str.empty();
 }
