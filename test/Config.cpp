@@ -57,20 +57,36 @@ void    test_all_invalid(std::string invalid_dir)
     return;
 }
 
+void    test_all_valid(std::string valid_dir)
+{
+    std::vector<Listener> listeners;
+    // Random valid config
+    listeners = initFromConfig( (valid_dir + "valid1.conf").c_str());
+    REQUIRE(!listeners.empty());
+    // Default config
+    listeners = initFromConfig("./default.conf");
+    REQUIRE(!listeners.empty());
+    // Limit testing (max vals for port, cmb, error pages etc, multi-line directives, the whole shebang)
+    listeners = initFromConfig( (valid_dir + "valid2.conf").c_str());
+    Server first = (listeners.front()).getServerByHost("");
+    REQUIRE(first.getPort() == 65535);
+
+
+    int loc_index = first.getLocationIndex("");
+    REQUIRE(loc_index == 0);
+    REQUIRE(first.getLocationIndex("/locationA/") == 1);
+    REQUIRE(first.getLocationIndex("/locationA") == 1);
+    REQUIRE(first.getLocationIndex("locationA/") == 0);
+    // REQUIRE(printf("%s\n", first.getErrorPage(loc_index, 404).c_str()) == 0);
+    // REQUIRE(first.getErrorPage(0, 404) == "-5");
+
+}
+
 TEST_CASE( "Configs", "[Config]")
 {
     std::string config_root_dir = "./test/Config/conf_files/";
-    std::vector<Listener> listeners;
-    // Valid config
-    listeners = initFromConfig( (config_root_dir + "valid_configs/valid1.conf").c_str());
-    REQUIRE(!listeners.empty());
-    // Error page is a number larger than max int
-    // Error page is a negative number
-    // Port max ushort 65535
-    // Error page max uint 4294967295
-    // CMB max size_t 18446744073709551615
-    // Multi-line simple directive
 
     test_all_invalid(config_root_dir + "invalid_configs/");
+    test_all_valid(config_root_dir + "valid_configs/");
 
 }
