@@ -8,7 +8,7 @@
 #include <vector>
 
 template <typename T, typename F>
-void overwriteIfSpecified(const std::string &search, T &field, t_block_directive *constructor_specs, F fun) {
+void overwriteIfSpecified(const std::string &search, T &field, block_directive *constructor_specs, F fun) {
 	std::string value = constructor_specs->fetch_simple(search);
 
 	if (!value.empty())

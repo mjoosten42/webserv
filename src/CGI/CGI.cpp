@@ -11,8 +11,6 @@
 #include "syscalls.hpp"
 #include "utils.hpp"
 
-#include <sys/socket.h> // setsockopt
-#include <sys/wait.h>	// waitpid
 #include <unistd.h>		// fork
 
 static void closePipe(int pfds[2]) {

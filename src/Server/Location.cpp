@@ -14,7 +14,7 @@ Location::Location():
 	m_client_max_body_size(0),
 	m_auto_index(false) {}
 
-void Location::add(t_block_directive *constructor_specs) {
+void Location::add(block_directive *constructor_specs) {
 	if (!constructor_specs->additional_params.empty())
 		m_location = constructor_specs->additional_params;
 

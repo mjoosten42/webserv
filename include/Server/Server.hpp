@@ -14,7 +14,7 @@ class Server {
 	public:
 		Server();
 
-		void add(t_block_directive *constructor_specs);
+		void add(block_directive *constructor_specs);
 
 		int getLocationIndex(const std::string &address_to_find) const;
 

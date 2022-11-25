@@ -7,7 +7,6 @@ CXX_FLAGS = -Wall -Werror -Wextra -std=c++11 -MMD -MP -Wold-style-cast -Wpedanti
 SRC_DIR = src
 OBJ_DIR = obj
 
-TEST_NAME = test_bin
 
 SOURCES =
 include make/sources.mk
@@ -24,9 +23,9 @@ DEBUG := 1
 SAN := 1
 
 ifeq ($(DEBUG), 1)
-	CXX_FLAGS += -D DEBUG -g 
+	CXX_FLAGS += -D DEBUG -g3
 	ifeq ($(SAN), 1)
-		CXX_FLAGS += -fsanitize=undefined
+		CXX_FLAGS += -fsanitize=address,undefined
 	endif
 else
 	CXX_FLAGS += -O2
@@ -84,7 +83,7 @@ upload:
 # 			testing				#
 # ============================= #
 
-TEST_CXXFLAGS = -std=c++14 -Wall -Wextra
+TEST_NAME = catch
 TEST_DIR = test
 TEST_OBJ_DIR = $(TEST_DIR)/obj_test
 
@@ -94,10 +93,10 @@ TEST_OBJ=$(TEST_SRCS:%.cpp=$(TEST_OBJ_DIR)/%.o)
 OBJ_WITHOUT_MAIN = $(filter-out $(OBJ_DIR)/$(SRC_DIR)/main.o, $(OBJECTS))
 
 $(TEST_NAME): $(TEST_OBJ) $(OBJ_WITHOUT_MAIN)
-	$(CXX) $(TEST_CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp $(TEST_HEADERS) | $(TEST_OBJ_DIR)
-	$(CXX) -c $(TEST_CXXFLAGS) $(INCLUDE) -I $(TEST_DIR) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(INCLUDE) -I $(TEST_DIR) -o $@ $<
 
 $(TEST_OBJ_DIR):
 	mkdir $@
@@ -106,5 +105,24 @@ test: $(TEST_NAME)
 	./$(TEST_NAME)
 
 .PHONY: test test_exe
+
+FUZZ_DIR = fuzzer
+FUZZ_NAME = $(FUZZ_DIR)/fuzzer
+
+fuzz: $(FUZZ_NAME)
+
+dofuzz:
+	(cd $(FUZZ_DIR) && ./fuzzer -dict=dict)
+	mv $(FUZZ_DIR)/crash-*  crash
+
+merge:
+	mkdir -p $(FUZZ_DIR)/Corpus
+	./$(FUZZ_NAME) -merge=1 $(FUZZ_DIR)/configs $(FUZZ_DIR)/Corpus
+
+$(FUZZ_NAME): $(OBJ_WITHOUT_MAIN) $(FUZZ_DIR)/fuzzer.o
+	$(CXX) $(CXXFLAGS) -fsanitize=fuzzer,address -o $@ $^
+
+$(FUZZ_DIR)/fuzzer.o: $(FUZZ_DIR)/fuzzer.cpp
+	$(CXX) -c $(CXXFLAGS) -fsanitize=fuzzer,address $(INCLUDE) -o $@ $<
 
 -include $(OBJECTS:.o=.d)

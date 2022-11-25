@@ -11,7 +11,7 @@
 
 Server::Server(): m_host("127.0.0.1"), m_port(8000), m_names({ { "webserv.com" } }), m_locations(1) {}
 
-void Server::add(t_block_directive *constructor_specs) {
+void Server::add(block_directive *constructor_specs) {
 	m_locations.front().add(constructor_specs);
 
 	overwriteIfSpecified("listen", m_port, constructor_specs, stringToIntegral<short>);

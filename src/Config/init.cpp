@@ -1,14 +1,13 @@
 #include "ConfigParser.hpp"
 #include "Listener.hpp"
 #include "Server.hpp"
-#include "logger.hpp"
 
 #include <string>
 #include <vector>
 
 static std::vector<Server> initServers(ConfigParser &config) {
-	std::vector<t_block_directive *> server_config_blocks = config.m_main_context.fetch_matching_blocks("server");
-	std::vector<Server>				 servers(server_config_blocks.size()); // Default construct all servers
+	std::vector<block_directive *> server_config_blocks = config.m_main_context.fetch_matching_blocks("server");
+	std::vector<Server>			   servers(server_config_blocks.size()); // Default construct all servers
 
 	for (size_t i = 0; i != servers.size(); i++)
 		servers[i].add(server_config_blocks[i]);
@@ -41,5 +40,29 @@ std::vector<Listener> initFromConfig(const char *file) {
 		listener->addServer(server);
 	}
 
+	if (listeners.empty())
+		throw std::invalid_argument("No servers");
+	return listeners;
+}
+
+// TODO: remove
+std::vector<Listener> initFromConfig(const std::string& data) {
+	ConfigParser		  config(data);
+	std::vector<Listener> listeners;
+	std::vector<Server>	  servers = initServers(config);
+
+	for (auto &server : servers) {
+		Listener *listener = getListenerByHostPort(listeners, server.getHost(), server.getPort());
+
+		if (!listener) {
+			listeners.push_back(Listener(server.getHost(), server.getPort()));
+			listener = &listeners.back();
+		}
+
+		listener->addServer(server);
+	}
+
+	if (listeners.empty())
+		throw std::invalid_argument("No servers");
 	return listeners;
 }
