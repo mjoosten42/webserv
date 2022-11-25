@@ -67,6 +67,7 @@ std::string getEventsAsString(short revents) {
 
 // returns true if the string complies to a HTTP token as specified in RFC2616.
 // basically, a word.
+// IDEA: maybe use a LUT instead for performance?
 bool isHTTPToken(const std::string& str)
 {
 	for (auto c : str) {

@@ -47,6 +47,8 @@ TEST_CASE( "HTTP parseHeader", "[HTTP]") {
 	h.parseHeader("derp: yeet");
 	REQUIRE( h.getHeader("derp") == "yeet" );
 
+	REQUIRE_THROWS( h.parseHeader("derp: yeet") );
+
 	h.parseHeader("hallo:wereld");
 	REQUIRE( h.getHeader("hallo") == "wereld" );
 
@@ -62,5 +64,7 @@ TEST_CASE( "HTTP parseHeader", "[HTTP]") {
 	REQUIRE_THROWS_MATCHES( h.parseHeader("h yeet"), HTTP::ServerException, Catch::Matchers::Message("Header field must end in ':' : h yeet"));
 
 	REQUIRE_THROWS_MATCHES( h.parseHeader("h : yeet"), HTTP::ServerException, Catch::Matchers::Message("Header field is an invalid HTTP token: h "));
+
+	REQUIRE_THROWS_MATCHES( h.parseHeader("h[: yeet"), HTTP::ServerException, Catch::Matchers::Message("Header field is an invalid HTTP token: h["));
 
 }

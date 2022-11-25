@@ -49,6 +49,7 @@ bool HTTP::isGood() {
 	return m_status < 400;
 }
 
+// parses a HTTP header and puts it into m_headers. NOTE: multiline headers are not supported.
 void HTTP::parseHeader(const std::string &line) {
 	std::pair<std::string, std::string> header;
 	size_t								pos = line.find_first_of(':') + 1;
@@ -67,7 +68,7 @@ void HTTP::parseHeader(const std::string &line) {
 
 	if (pos != std::string::npos) {
 		header.second = line.substr(line.find_first_not_of(SPACE_AND_TAB, pos));
-		header.second = header.second.substr(0, header.second.find_last_not_of(SPACE_AND_TAB) + 1);
+		header.second.erase(header.second.find_last_not_of(SPACE_AND_TAB) + 1, std::string::npos);
 	}
 
 	auto insert = m_headers.insert(header);
