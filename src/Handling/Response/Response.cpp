@@ -9,8 +9,8 @@
 #include "utils.hpp"
 
 struct Status {
-		unsigned int key;
-		const char	*value;
+		int			key;
+		const char *value;
 };
 
 const static Status statusMessages[] = { { 200, "OK" },
@@ -124,4 +124,14 @@ bool Response::hadFD() const {
 
 bool Response::isDone() const {
 	return m_doneReading && m_chunk.empty();
+}
+
+bool Response::isStatus(const std::string &status) const {
+	try {
+		if (status.find_first_not_of("0123456789") == std::string::npos) {
+			int code = stringToIntegral<int>(status);
+			return binarySearchKeyValue(code, statusMessages, statusMessagesSize) != NULL;
+		}
+	} catch (...) {	}
+	return false;
 }

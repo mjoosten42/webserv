@@ -3,9 +3,9 @@
 #include "Listener.hpp"
 #include "logger.hpp"
 
-unsigned int    try_invalid_config(std::string path)
+size_t  try_invalid_config(const std::string& path)
 {
-    unsigned int caught_exceptions = 0;
+    size_t caught_exceptions = 0;
     std::vector<Listener> listeners;
     try{
         listeners = initFromConfig(path.c_str());
@@ -27,6 +27,12 @@ TEST_CASE( "Configs", "[Config]")
     // Port max ushort
     // Error page max uint
     // CMB max size_t
+
+    // M: alternative
+    // for (size_t i = 1; i <= 5; i++) {
+    //     std::string path = config_root_dir + "invalid_configs/invalid" + toString(i) + ".conf";
+    //     REQUIRE_THROWS(initFromConfig(path.c_str()));
+    // }
 
 
     // Negative port

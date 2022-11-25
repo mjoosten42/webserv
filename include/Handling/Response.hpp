@@ -51,8 +51,10 @@ class Response: public HTTP {
 
 		// Abnormal statuses
 		void sendCustomErrorPage();
-		void sendFail(unsigned int code, const std::string &msg);
+		void sendFail(int code, const std::string &msg);
 		void sendMoved(const std::string &redirect);
+
+		bool isStatus(const std::string &) const;
 
 		std::string getStatusLine() const;
 		std::string getStatusMessage() const;

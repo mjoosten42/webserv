@@ -14,7 +14,7 @@ Server::Server(): m_host("127.0.0.1"), m_port(8000), m_names({ { "webserv.com" }
 void Server::add(t_block_directive *constructor_specs) {
 	m_locations.front().add(constructor_specs);
 
-	overwriteIfSpecified("listen", m_port, constructor_specs, stringToIntegral<unsigned short>);
+	overwriteIfSpecified("listen", m_port, constructor_specs, stringToIntegral<short>);
 	overwriteIfSpecified("server_name", m_names, constructor_specs, stringSplit);
 
 	for (auto &block : constructor_specs->fetch_matching_blocks("location")) {
@@ -91,7 +91,7 @@ const std::string &Server::getRedirect(int loc_index) const {
 	return m_locations[loc_index].m_redirect;
 }
 
-const std::string &Server::getErrorPage(int loc_index, unsigned int code) const {
+const std::string &Server::getErrorPage(int loc_index, int code) const {
 	return m_locations[loc_index].m_error_pages.at(code);
 }
 
@@ -107,7 +107,7 @@ bool Server::isAutoIndex(int loc_index) const {
 	return m_locations[loc_index].m_auto_index;
 }
 
-bool Server::hasErrorPage(int loc_index, unsigned int code) const {
+bool Server::hasErrorPage(int loc_index, int code) const {
 	auto &pages = m_locations[loc_index].m_error_pages;
 
 	return pages.find(code) != pages.end();

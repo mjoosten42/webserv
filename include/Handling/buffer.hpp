@@ -1,6 +1,6 @@
 #pragma once
 
-#define BUFFER_SIZE 1
+#define BUFFER_SIZE 0xFFFF
 
 extern char buf[];
 extern char path[];

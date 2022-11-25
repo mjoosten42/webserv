@@ -53,11 +53,10 @@ void Response::processCGIHeaders() {
 	if (hasHeader("Status")) {
 		std::string status = getHeader("Status");
 		removeHeader("Status");
-		try {
-			m_status = stringToIntegral<unsigned int>(status);
-		} catch (std::exception &e) {
+		LOG("Str: " << status);
+		if (!isStatus(status))
 			return sendFail(502, "Status is not a HTTP code: " + status);
-		}
+		m_status = stringToIntegral<int>(status);
 	}
 
 	if (!hasHeader("Content-Length") && !hasHeader("Transfer-Encoding")) {
