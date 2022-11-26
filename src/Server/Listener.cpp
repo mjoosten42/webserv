@@ -10,6 +10,11 @@
 #include <netinet/in.h> // sockaddr_in
 #include <sys/socket.h>
 
+static void throw_perror(const char *msg) {
+	perror(msg);
+	throw std::invalid_argument(msg);
+}
+
 Listener::Listener() {}
 
 Listener::Listener(const std::string &listenAddress, short port): m_listenAddr(listenAddress), m_port(port) {
@@ -44,26 +49,26 @@ void Listener::setupSocket() {
 	// Setup socket_fd: specify domain (IPv4), communication type, and	protocol (default for socket)
 	m_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_fd == -1)
-		fatal_perror("socket");
+		throw_perror("socket");
 
 	// On socket_fd, applied at socket level (SOL_SOCKET), set option
 	// SO_REUSEADDR (allow bind() to reuse local addresses), to be enabled
 	const socklen_t enabled = 1;
 	if (setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(enabled)) < 0)
-		fatal_perror("setsockopt");
+		throw_perror("setsockopt");
 
 	if (fcntl(m_fd, F_SETFL, O_NONBLOCK) == -1)
-		fatal_perror("fcntl");
+		throw_perror("fcntl");
 
 	// "Assign name to socket" = link socket_fd we configured to the server'ssocket information
 	if (bind(m_fd, reinterpret_cast<sockaddr *>(&server), sizeof(server)) < 0)
-		fatal_perror("bind");
+		throw_perror("bind");
 }
 
 void Listener::listen() {
 	// Listens on socket, accepting at most 128 connections
 	if (::listen(m_fd, SOMAXCONN) < 0)
-		fatal_perror("listen");
+		throw_perror("listen");
 
 	LOG(GREEN "LISTENER " DEFAULT << m_fd << GREEN " LISTENING ON " DEFAULT << m_listenAddr << ":" << m_port);
 }

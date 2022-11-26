@@ -113,12 +113,13 @@ FUZZ_NAME = $(FUZZ_DIR)/fuzzer
 fuzz: $(FUZZ_NAME)
 
 dofuzz:
+	mkdir -p $(FUZZ_DIR)/CORPUS
 	(cd $(FUZZ_DIR) && ./fuzzer CORPUS configs -dict=dict)
 	mv $(FUZZ_DIR)/crash-*  crash
 
 merge:
 	mkdir -p $(FUZZ_DIR)/Corpus
-	./$(FUZZ_NAME) -merge=1 $(FUZZ_DIR)/configs $(FUZZ_DIR)/Corpus
+	./$(FUZZ_NAME) -merge=1 $(FUZZ_DIR)/CORPUS $(FUZZ_DIR)/CORPUS
 
 $(FUZZ_NAME): $(OBJ_WITHOUT_MAIN) $(FUZZ_DIR)/fuzzer.o
 	$(CXX) $(CXXFLAGS) -fsanitize=fuzzer,address -o $@ $^
