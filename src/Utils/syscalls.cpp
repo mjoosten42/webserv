@@ -7,6 +7,7 @@
 
 #include <fcntl.h>	// open
 #include <stdlib.h> // realpath
+#include <string.h> // strerror
 #include <string>
 #include <sys/socket.h> // recv, send, accept
 #include <sys/wait.h>	// wait

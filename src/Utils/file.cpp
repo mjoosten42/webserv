@@ -3,6 +3,7 @@
 #include "logger.hpp"
 
 #include <dirent.h> // opendir, closedir, DIR
+#include <string.h> // strerror
 #include <unistd.h> // lseek, off_t
 
 bool isDir(const std::string &path) {

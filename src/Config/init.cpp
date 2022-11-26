@@ -46,7 +46,7 @@ std::vector<Listener> initFromConfig(const char *file) {
 }
 
 // TODO: remove
-std::vector<Listener> initFromConfig(const std::string& data) {
+std::vector<Listener> initFromConfig(const std::string &data) {
 	ConfigParser		  config(data);
 	std::vector<Listener> listeners;
 	std::vector<Server>	  servers = initServers(config);

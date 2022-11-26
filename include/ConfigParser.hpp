@@ -22,7 +22,7 @@ struct simple_directive {
 		std::string params;
 };
 
-struct block_directive {	
+struct block_directive {
 		std::string					  name;
 		std::string					  additional_params;
 		std::vector<simple_directive> simple_directives;
@@ -40,7 +40,7 @@ struct block_directive {
 class ConfigParser {
 	public:
 		ConfigParser(const char *path);
-		ConfigParser(const std::string& data); // Fuzzing
+		ConfigParser(const std::string &data); // Fuzzing
 
 	public:
 		block_directive m_main_context;
@@ -77,4 +77,4 @@ class ConfigParser {
 
 // Initialising of Listeners based on config:
 std::vector<Listener> initFromConfig(const char *path);
-std::vector<Listener> initFromConfig(const std::string& data); // Fuzzer
+std::vector<Listener> initFromConfig(const std::string &data); // Fuzzer

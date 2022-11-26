@@ -11,7 +11,7 @@
 #include "syscalls.hpp"
 #include "utils.hpp"
 
-#include <unistd.h>		// fork
+#include <unistd.h> // fork
 
 static void closePipe(int pfds[2]) {
 	WS::close(pfds[0]);
@@ -53,7 +53,7 @@ static void my_exec(int infd, int outfd, const std::string &filename, const Envi
 		exit(EXIT_FAILURE);
 
 	std::string copy   = basename(filename);
-	char *const args[] = { const_cast<char *const>(copy.c_str()),
+	char *const args[] = { const_cast<char *>(copy.c_str()),
 						   NULL }; // Werror type qualifiers ignored on cast result type
 
 	WS::execve(copy, args, em);

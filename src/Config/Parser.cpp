@@ -6,17 +6,17 @@
 char ConfigParser::m_tokens[SIZE] = { ';', '#', '{', '}' };
 
 ConfigParser::ConfigParser(const char *path) {
-	m_main_context.name = "main";
+	m_main_context.name			  = "main";
 	m_main_context.parent_context = NULL;
-	
+
 	readFile(path);
 	check_validity(); // Will throw exception incase of invalid config.
 	finite_state_machine();
 }
 
-ConfigParser::ConfigParser(const std::string& data) {
+ConfigParser::ConfigParser(const std::string &data) {
 	std::stringstream stream(data);
-	std::string line;
+	std::string		  line;
 	while (std::getline(stream, line))
 		config.push_back(line);
 
@@ -28,9 +28,8 @@ void ConfigParser::readFile(const char *path) {
 	std::ifstream conf_stream(path);
 
 	if (!conf_stream.is_open()) {
-		std::string error = "open: ";
-		error += strerror(errno);
-		throw std::invalid_argument(error);
+		perror("open");
+		throw std::invalid_argument("File could not be opened");
 	}
 
 	while (conf_stream.good()) {

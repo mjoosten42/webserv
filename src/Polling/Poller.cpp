@@ -24,9 +24,9 @@ void Poller::add(const Listener &listener) {
 void Poller::start() {
 	m_active = true;
 
-	for (auto& pair : m_listeners)
-		pair.second.setupSocket();
-	
+	for (auto &pair : m_listeners)
+		pair.second.listen();
+
 	LOG(GREEN "\n----STARTING LOOP----\n" DEFAULT);
 
 	while (m_active) {
@@ -42,6 +42,7 @@ void Poller::start() {
 				if (errno == EINTR) // SIGCHLD
 					continue;
 				perror("poll");
+				// fall through
 			case 0: // Poll is blocking
 				m_active = false;
 				break;
@@ -149,8 +150,8 @@ void Poller::removeSources(FD client) {
 }
 
 void Poller::acceptClient(FD listener_fd) {
+	sockaddr_in		peer;
 	const Listener *listener = &m_listeners[listener_fd];
-	sockaddr_in		peer	 = { sizeof(sockaddr_in), AF_INET, 0, { 0 }, { 0 } };
 	FD				fd		 = WS::accept(listener_fd, reinterpret_cast<sockaddr *>(&peer));
 	pollfd			client	 = { fd, POLLIN, 0 };
 

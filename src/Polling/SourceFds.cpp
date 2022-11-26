@@ -8,7 +8,6 @@
 
 void SourceFds::add(const pollfd &pollfd, FD client_fd) {
 	m_sourceFds.push_back(std::make_pair(pollfd.fd, client_fd));
-	std::sort(m_sourceFds.begin(), m_sourceFds.end());
 }
 
 void SourceFds::remove(FD source_fd) {
@@ -21,7 +20,6 @@ void SourceFds::remove(FD source_fd) {
 	}
 	LOG_ERR("Source not found during removal: " << source_fd);
 	LOG_ERR(getSourceFdsAsString());
-	exit(1);
 }
 
 FD SourceFds::getClientFd(FD source_fd) {
@@ -30,7 +28,6 @@ FD SourceFds::getClientFd(FD source_fd) {
 			return sourceFd.second;
 	LOG_ERR("Client not found for source " << source_fd);
 	LOG_ERR(getSourceFdsAsString());
-	exit(1);
 	return -1;
 }
 

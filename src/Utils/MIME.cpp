@@ -8,7 +8,7 @@
 
 namespace MIME {
 
-//#define DEFAULT_MIME_TYPE "application/octet-stream"
+// #define DEFAULT_MIME_TYPE "application/octet-stream"
 #define DEFAULT_MIME_TYPE "text/plain"
 
 // source: https://github.com/lasselukkari/MimeTypes/blob/7ee73f229e8dc04bc653559b45c0659efae854e7/MimeTypes.cpp

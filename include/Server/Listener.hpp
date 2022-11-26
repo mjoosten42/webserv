@@ -14,6 +14,7 @@ class Listener {
 
 		void addServer(const Server &server);
 		void setupSocket();
+		void listen();
 
 		int				   getFD() const;
 		short			   getPort() const;
