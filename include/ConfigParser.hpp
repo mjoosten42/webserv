@@ -33,7 +33,6 @@ struct block_directive {
 
 		std::string fetch_simple(const std::string &key);
 
-	private:
 		void recurse_blocks(std::vector<struct block_directive *> &ret, const std::string &blocks_to_fetch);
 };
 
@@ -62,6 +61,8 @@ class ConfigParser {
 		void state_simpledirective(block_directive **context, const std::string &line, size_t i);
 		void state_openblock(block_directive **context, const std::string &line);
 		void state_closeblock(block_directive **context);
+
+		bool isAllowedDirective(const std::string &str) const;
 
 		enum Token { SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
 

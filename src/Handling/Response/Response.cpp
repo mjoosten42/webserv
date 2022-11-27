@@ -2,8 +2,8 @@
 
 #include "MIME.hpp"
 #include "Server.hpp"
-#include "defines.hpp"
-#include "file.hpp" // extension
+#include "defines.hpp" // CRLF, SIZEOF_ARRAY
+#include "file.hpp"	   // extension
 #include "logger.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
@@ -27,8 +27,6 @@ const static Status statusMessages[] = { { 200, "OK" },
 										 { 502, "Bad Gateway" },
 										 { 503, "Service Unavailable" },
 										 { 505, "HTTP Version Not Supported" } };
-
-const static int statusMessagesSize = sizeof(statusMessages) / sizeof(*statusMessages);
 
 Response::Response():
 	HTTP(),
@@ -71,7 +69,7 @@ void Response::addDefaultHeaders() {
 }
 
 std::string Response::getStatusMessage() const {
-	const char *msg = binarySearchKeyValue(m_status, statusMessages, statusMessagesSize);
+	const char *msg = binarySearchKeyValue(m_status, statusMessages, SIZEOF_ARRAY(statusMessages));
 	if (msg != NULL)
 		return msg;
 	LOG_ERR("Status code not found: " << m_status);
@@ -130,7 +128,7 @@ bool Response::isStatus(const std::string &status) const {
 	try {
 		if (status.find_first_not_of("0123456789") == std::string::npos) {
 			int code = stringToIntegral<int>(status);
-			return binarySearchKeyValue(code, statusMessages, statusMessagesSize) != NULL;
+			return binarySearchKeyValue(code, statusMessages, SIZEOF_ARRAY(statusMessages)) != NULL;
 		}
 	} catch (...) {
 	}

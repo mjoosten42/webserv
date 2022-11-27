@@ -114,11 +114,11 @@ fuzz: $(FUZZ_NAME)
 
 dofuzz:
 	mkdir -p $(FUZZ_DIR)/CORPUS
-	(cd $(FUZZ_DIR) && ./fuzzer CORPUS configs -dict=dict)
-	mv $(FUZZ_DIR)/crash-*  crash
+	-(cd $(FUZZ_DIR) && ./fuzzer CORPUS configs -dict=dict)
+	shell(mv $(FUZZ_DIR)/crash/* crash.conf)
 
 merge:
-	mkdir -p $(FUZZ_DIR)/Corpus
+	mkdir -p $(FUZZ_DIR)/CORPUS
 	./$(FUZZ_NAME) -merge=1 $(FUZZ_DIR)/CORPUS $(FUZZ_DIR)/CORPUS
 
 $(FUZZ_NAME): $(OBJ_WITHOUT_MAIN) $(FUZZ_DIR)/fuzzer.o

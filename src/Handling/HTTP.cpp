@@ -64,10 +64,10 @@ void HTTP::parseHeader(const std::string &line) {
 
 	strToLower(header.first); // HTTP/1.1 headers are case-insensitive, so lowercase them.
 
-	size_t valueStartPos = line.find_first_not_of(SPACE_AND_TAB, colonPos + 1);
+	size_t valueStartPos = line.find_first_not_of(IFS, colonPos + 1);
 	if (valueStartPos != std::string::npos) {
 		header.second = line.substr(valueStartPos);
-		header.second.erase(header.second.find_last_not_of(SPACE_AND_TAB) + 1, std::string::npos);
+		header.second.erase(header.second.find_last_not_of(IFS) + 1, std::string::npos);
 	}
 
 	auto insert = m_headers.insert(header);

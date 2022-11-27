@@ -17,6 +17,7 @@ ConfigParser::ConfigParser(const char *path) {
 ConfigParser::ConfigParser(const std::string &data) {
 	std::stringstream stream(data);
 	std::string		  line;
+
 	while (std::getline(stream, line))
 		config.push_back(line);
 
@@ -48,7 +49,7 @@ std::vector<block_directive *> block_directive::fetch_matching_blocks(const std:
 
 void block_directive::recurse_blocks(std::vector<block_directive *> &ret, const std::string &blocks_to_fetch) {
 	for (auto &block : block_directives) {
-		if (!block.name.compare(blocks_to_fetch))
+		if (block.name == blocks_to_fetch)
 			ret.push_back(&block);
 		block.recurse_blocks(ret, blocks_to_fetch);
 	}

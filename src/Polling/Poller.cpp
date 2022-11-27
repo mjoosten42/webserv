@@ -42,7 +42,6 @@ void Poller::start() {
 				if (errno == EINTR) // SIGCHLD
 					continue;
 				perror("poll");
-				// fall through
 			case 0: // Poll is blocking
 				m_active = false;
 				break;

@@ -3,8 +3,11 @@
 // HTTP RFC newline
 #define CRLF "\r\n"
 
+// Whitespace
 #define IFS " \n\r\t\f\v"
-#define SPACE_AND_TAB " \t"
+
+// Size of array literal
+#define SIZEOF_ARRAY(x) (sizeof(x) / sizeof(*x))
 
 // Terminal colors
 #define DEFAULT "\033[0m"
