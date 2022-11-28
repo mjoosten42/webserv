@@ -66,7 +66,6 @@ void Request::parse() {
 	}
 }
 
-// TODO: unit test this
 void Request::parseStartLine(const std::string &line) {
 	const char				*errorMessages[] = { "Missing startline", "Missing location", "Missing HTTP version" };
 	std::vector<std::string> strs			 = stringSplit(line);
