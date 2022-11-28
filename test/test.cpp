@@ -15,3 +15,9 @@ TEST_CASE( "string lowercase", "[string]" ) {
 	strToLower(derp);
 	REQUIRE( derp == std::string("derp123") );
 }
+
+TEST_CASE( "toHex", "[string]" ) {
+	int derp = 2147483647;
+
+	REQUIRE( toHex(derp) == "7fffffff" );
+}

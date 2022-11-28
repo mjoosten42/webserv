@@ -5,7 +5,7 @@ Our configuration file format is very much inspired by the [NGINX config format]
 
 It consists of 'simple directives' and 'block directives':
 
-Simple directives are single- or multiline declarations of key value pairs ending in a semicolon.
+Simple directives are single-line declarations of key value pairs ending in a semicolon.
 The key is separated from the value by white spaces, and the values include anything up to the following semicolon.
 If a closing semicolon is missing, the configuration file is considered invalid.
 
@@ -23,13 +23,8 @@ block_type <additional params, such as the block's name> {
 }
 ```
 
-### General Caveats
-By default, the configuration file is very permissive. 
-As a trade-off, this permissiveness does require extra diligence from the user in the formatting of custom configuration files.
-
-If the user forgets to close a simple directive with a semicolon, the following simple directive will be considered part of the previous' value - this allows for multiline simple directives. 
-
-If the user enters a key that is not used in the setting up of the server, it will simply be ignored rather than flagged as invalid. This design choice lets us easily add more functionality in future, and allows for a degree of compatibility with standard NGINX configs (though a number of config options have been implemented differently from NGINX where necessary). This documentation will provide examples of where our implementation does differ from standard NGINX config implementation, so compatibility should not be taken as a hard guarantee.
+### Compatibility with NGINX
+Though we have taken NGINX as a standard, this documentation will provide examples of where our implementation does differ. Compatibility should not be taken as a hard guarantee. An unrecognised directive will throw an error, which includes many of the NGINX directives we did not implement.
 
 Additionally, most values that are expected within a certain context are initialised by a default value (in line with the NGINX default), and merely overwritten if they are explicitly expressed in the config file.
 
@@ -66,8 +61,8 @@ When this value is not specified it defaults to `index.html`.
 
 `error_page <HTTP error status code> </filename to host> [<code> </page> ...]` - What page to serve in the event of an HTTP error matching the specified code. Pay attention that the page name should start with a '/'.
 E.g. `error_page 404 /my_amazing_404_error_page.html;`
-When this value is not specified it defaults to standard error pages for each of the encounterable error codes.
-WARNING: NGINX difference - Nginx allows the user to specify multiple error codes per error page (e.g. `error_page 401 402 403 404 /my_amazing_4XX_error_page.html;`). In our config they must be strictly alternating key value pairs, though can be written on multiple lines.
+When this value is not specified it defaults to standard error pages for each of the encounterable error codes. If this value is specified at both the server and location level, the location will only serve those specified in that block and will not additionally inherit from the server.
+WARNING: NGINX difference - Nginx allows the user to specify multiple error codes per error page (e.g. `error_page 401 402 403 404 /my_amazing_4XX_error_page.html;`). In our config they must be strictly alternating key value pairs.
 
 `upload <directory_name>` - What directory the server will upload files to. If the directory does not exist, a CGI error is returned when the user attempts to upload a file.
 E.g. `upload /uploads`
@@ -75,9 +70,7 @@ WARNING: NGINX difference - This is not an nginx setting, but one included for t
 
 ### Location block
 The location block is a block directive that only exists within the context of a server block. Internally, it can be understood as a(n indirect) subdirectory of the server's root directory, but with its own set of rules and settings. These may overwrtie those inherited from the server context, resulting in location-specific behaviour. Whenever a user navigates to this part of the server, that specific location block's rules will apply. When the server tries to determine what location block the user is in, it looks for the longest possible match between the address the user navigated to, and the root + name of a location block it recognises from the config file.
-
-//TODO : Write about correct way to format location block's name.
-//TODO : Disallow multiline comments.
+The name of a location block must always start with a backslash '/' character in order to form a valid filepath.
 
 In the configuration file it may look something like this: 
 ```
@@ -99,6 +92,7 @@ index
 autoindex
 error_page
 client_max_body_size
+upload
 ```
 
 The following directives can only be specified at a location-level, not within the context of a server:
