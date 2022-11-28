@@ -73,11 +73,14 @@ void    test_all_valid(std::string valid_dir)
 
     // Location Index
     REQUIRE(first.getLocationIndex("") == 0);
-    REQUIRE(first.getLocationIndex("/locationA/") == 4);
-    REQUIRE(first.getLocationIndex("/locationB/") == 2);
+	int A = first.getLocationIndex("/locationA/");
+    REQUIRE(A == 2);
+	int B = first.getLocationIndex("/locationB/");
+    REQUIRE( B == 1);
+	int inheritor = first.getLocationIndex("/inheritsFromServer");
+	REQUIRE( inheritor == 3);
     REQUIRE(first.getLocationIndex("/E/") == 0);
     REQUIRE(first.getLocationIndex("/") == 0);
-    REQUIRE(first.getLocationIndex("/inheritsFromServer/") == 5);
 
     //Server only
     REQUIRE(first.getPort() == 32767);
@@ -88,16 +91,16 @@ void    test_all_valid(std::string valid_dir)
     //Server and Location
 
     REQUIRE(first.getRoot(0) == "iamroot");
-    REQUIRE(first.getRoot(5) == "iamroot");
-    REQUIRE(first.getRoot(2) == "alsoroot");
+    REQUIRE(first.getRoot(inheritor) == "iamroot");
+    REQUIRE(first.getRoot(B) == "alsoroot");
 
     REQUIRE(first.isAutoIndex(0) == true);
-    REQUIRE(first.isAutoIndex(5) == true);
-    REQUIRE(first.isAutoIndex(2) == false);
+    REQUIRE(first.isAutoIndex(inheritor) == true);
+    REQUIRE(first.isAutoIndex(B) == false);
 
     REQUIRE(first.getIndexPage(0) == "my_index.html");
-    REQUIRE(first.getIndexPage(5) == "my_index.html");
-    REQUIRE(first.getIndexPage(2) == "not_my_index.html");
+    REQUIRE(first.getIndexPage(inheritor) == "my_index.html");
+    REQUIRE(first.getIndexPage(B) == "not_my_index.html");
 
     REQUIRE(first.getErrorPage(0, 404) == "-5");
     REQUIRE(first.getErrorPage(0, 405) == "2147483647");
@@ -105,51 +108,51 @@ void    test_all_valid(std::string valid_dir)
     REQUIRE(first.getErrorPage(0, 407) == "18446744073709551616");
     REQUIRE(first.getErrorPage(0, 2147483647) == "2147483647.html");
 
-    REQUIRE(first.getErrorPage(5, 404) == "-5");
-    REQUIRE(first.getErrorPage(5, 405) == "2147483647");
-    REQUIRE(first.getErrorPage(5, 406) == "99999999999999");
-    REQUIRE(first.getErrorPage(5, 407) == "18446744073709551616");
-    REQUIRE(first.getErrorPage(5, 2147483647) == "2147483647.html");
+    REQUIRE(first.getErrorPage(inheritor, 404) == "-5");
+    REQUIRE(first.getErrorPage(inheritor, 405) == "2147483647");
+    REQUIRE(first.getErrorPage(inheritor, 406) == "99999999999999");
+    REQUIRE(first.getErrorPage(inheritor, 407) == "18446744073709551616");
+    REQUIRE(first.getErrorPage(inheritor, 2147483647) == "2147483647.html");
 
-    REQUIRE(first.getErrorPage(4, 504) == "-5");
-    REQUIRE(first.getErrorPage(4, 505) == "2147483647");
-    REQUIRE(first.getErrorPage(4, 506) == "99999999999999");
-    REQUIRE(first.getErrorPage(4, 507) == "18446744073709551616");
-    REQUIRE(first.getErrorPage(4, 2147483647) == "2147483647.html");
+    REQUIRE(first.getErrorPage(A, 504) == "-5");
+    REQUIRE(first.getErrorPage(A, 505) == "2147483647");
+    REQUIRE(first.getErrorPage(A, 506) == "99999999999999");
+    REQUIRE(first.getErrorPage(A, 507) == "18446744073709551616");
+    REQUIRE(first.getErrorPage(A, 2147483647) == "2147483647.html");
 
     REQUIRE(first.hasErrorPage(0, 504) == false);
-    REQUIRE(first.hasErrorPage(5, 504) == false);
-    REQUIRE(first.hasErrorPage(4, 404) == false);
+    REQUIRE(first.hasErrorPage(inheritor, 504) == false);
+    REQUIRE(first.hasErrorPage(A, 404) == false);
 
     size_t max_cmb = 18446744073709551615U;
     REQUIRE(first.getCMB(0) == max_cmb); //server
-    REQUIRE(first.getCMB(5) == max_cmb); //location that inherits
-    REQUIRE(first.getCMB(4) == max_cmb); //location that sets its own cmb
-    REQUIRE(first.getCMB(2) == 0); //location that sets its own cmb
+    REQUIRE(first.getCMB(inheritor) == max_cmb); //location that inherits
+    REQUIRE(first.getCMB(A) == max_cmb); //location that sets its own cmb
+    REQUIRE(first.getCMB(B) == 0); //location that sets its own cmb
 
 
     REQUIRE(first.getUploadDir(0) == "amogus_storage");
-    REQUIRE(first.getUploadDir(5) == "amogus_storage");
-    REQUIRE(first.getUploadDir(4) == "amogus_storage");
-    REQUIRE(first.getUploadDir(2) == "not_amogus_storage");
+    REQUIRE(first.getUploadDir(inheritor) == "amogus_storage");
+    REQUIRE(first.getUploadDir(A) == "amogus_storage");
+    REQUIRE(first.getUploadDir(B) == "not_amogus_storage");
 
     //Location only
 
-    // REQUIRE(first.isRedirect(0) == false);
-    // REQUIRE(first.isRedirect(5) == false);
-    // REQUIRE(first.isRedirect(4) == false);
-    REQUIRE(first.isRedirect(2) == true);
-    REQUIRE(first.getRedirect(2) == "/locationA");
+    REQUIRE(first.isRedirect(0) == false);
+    REQUIRE(first.isRedirect(inheritor) == false);
+    REQUIRE(first.isRedirect(A) == false);
+    REQUIRE(first.isRedirect(B) == true);
+    REQUIRE(first.getRedirect(B) == "/locationA");
     
-    // REQUIRE(first.isCGI(0, "pl") == false);
-    // REQUIRE(first.isCGI(5, "pl") == false);
-    REQUIRE(first.isCGI(4, "pl") == true);
-    REQUIRE(first.isCGI(4, "p") == false);
-    REQUIRE(first.isCGI(4, "pll") == false);
+    REQUIRE(first.isCGI(0, "pl") == false);
+    REQUIRE(first.isCGI(inheritor, "pl") == false);
+    REQUIRE(first.isCGI(A, "pl") == true);
+    REQUIRE(first.isCGI(A, "p") == false);
+    REQUIRE(first.isCGI(A, "pll") == false);
 
-    // REQUIRE(first.getAllowedMethodsAsString(0) == "{ GET, POST, DELETE }");
-    REQUIRE(first.getAllowedMethodsAsString(4) == "{ POST, DELETE }");
-    REQUIRE(first.getAllowedMethodsAsString(2) == "{ GET }");
+    REQUIRE(first.getAllowedMethodsAsString(0) == "{ GET, POST, DELETE }");
+    REQUIRE(first.getAllowedMethodsAsString(A) == "{ POST, DELETE }");
+    REQUIRE(first.getAllowedMethodsAsString(B) == "{ GET }");
 
     
 }
