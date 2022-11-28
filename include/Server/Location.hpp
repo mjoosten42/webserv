@@ -17,9 +17,6 @@ class Location {
 
 		void add(block_directive *constructor_specs);
 
-		bool isAllowedLocationDirective(const std::string &str) const;
-		bool hasOnlyAllowedDirectives(block_directive *constructor_specs) const;
-
 		const std::string &getLocation() const;
 
 		std::string getLocationAsString(std::string tabs = "") const;

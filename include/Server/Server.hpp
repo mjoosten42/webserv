@@ -40,8 +40,8 @@ class Server {
 		std::string getServerAsString(std::string tabs = "") const;
 		std::string getAllowedMethodsAsString(int loc_index) const;
 
-		bool isAllowedServerDirective(const std::string &str) const;
-		bool hasOnlyAllowedDirectives(block_directive *constructor_specs) const;
+		bool isAllowedContextDirective(const std::string &str, const char** list) const;
+		bool hasOnlyAllowedDirectives(block_directive *constructor_specs, const char** list) const;
 
 	private:
 		std::string				 m_host;  // the IP address this server listens on.

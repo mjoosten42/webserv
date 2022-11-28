@@ -15,10 +15,16 @@ const static char *server_directives[] = {
 	// "cgi", "redirect", "limit_except"
 };
 
+const static char *location_directives[] = {
+	"root",		"client_max_body_size", "autoindex", "index", "error_page", "upload", "cgi",
+	"redirect", "limit_except"
+	// "server_name", "listen",
+};
+
 Server::Server(): m_host("127.0.0.1"), m_port(8000), m_names({ { "webserv.com" } }), m_locations(1) {}
 
 void Server::add(block_directive *constructor_specs) {
-	hasOnlyAllowedDirectives(constructor_specs); // will throw if not
+	hasOnlyAllowedDirectives(constructor_specs, server_directives); // will throw if not
 	m_locations.front().add(constructor_specs);
 
 	overwriteIfSpecified("listen", m_port, constructor_specs, stringToIntegral<short>);
@@ -26,7 +32,7 @@ void Server::add(block_directive *constructor_specs) {
 
 	for (auto &block : constructor_specs->fetch_matching_blocks("location")) {
 		m_locations.push_back(m_locations.front()); // Copy server default to new location
-		m_locations.back().hasOnlyAllowedDirectives(block);
+		hasOnlyAllowedDirectives(block, location_directives);
 		m_locations.back().add(block);				// Add config
 	}
 
@@ -68,17 +74,20 @@ bool Server::isCGI(int loc_index, const std::string &ext) const {
 	return std::find(CGIs.begin(), CGIs.end(), ext) != CGIs.end();
 }
 
-bool Server::isAllowedServerDirective(const std::string &str) const {
-	for (size_t i = 0; i < SIZEOF_ARRAY(server_directives); i++)
-		if (str == server_directives[i])
+bool Server::isAllowedContextDirective(const std::string &str, const char** list) const {
+	size_t len = (list == server_directives) ? SIZEOF_ARRAY(server_directives) : SIZEOF_ARRAY(location_directives);
+	for (size_t i = 0; i < len; i++)
+	{
+		if (str == list[i])
 			return true;
+	}
 	return false;
 }
 
-bool Server::hasOnlyAllowedDirectives(block_directive *constructor_specs) const {
+bool Server::hasOnlyAllowedDirectives(block_directive *constructor_specs, const char** list) const {
 	auto it = constructor_specs->simple_directives.begin();
 	for (; it != constructor_specs->simple_directives.end(); ++it)
-		if (!isAllowedServerDirective(it->name))
+		if (!isAllowedContextDirective(it->name, list))
 			throw(std::invalid_argument("Directive \"" + it->name + "\" is not allowed in this context."));
 	return true;
 }
