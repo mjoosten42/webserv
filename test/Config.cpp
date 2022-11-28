@@ -102,6 +102,13 @@ void    test_all_valid(std::string valid_dir)
     REQUIRE(first.getErrorPage(4, 507) == "18446744073709551616");
     REQUIRE(first.getErrorPage(4, 2147483647) == "2147483647.html");
 
+    REQUIRE(*(first.getNames().begin()) == "www.example.org");
+    REQUIRE((first.getNames().back()) == "example.org");
+
+    REQUIRE(first.getRoot(0) == "iamroot");
+    REQUIRE(first.getRoot(4) == "iamroot");
+    REQUIRE(first.getRoot(2) == "alsoroot");
+
 }
 
 TEST_CASE( "Configs", "[Config]")
