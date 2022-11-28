@@ -32,8 +32,6 @@ struct block_directive {
 		std::vector<struct block_directive *> fetch_matching_blocks(const std::string &blocks_to_fetch);
 
 		std::string fetch_simple(const std::string &key);
-
-		void recurse_blocks(std::vector<struct block_directive *> &ret, const std::string &blocks_to_fetch);
 };
 
 class ConfigParser {
@@ -45,7 +43,10 @@ class ConfigParser {
 		block_directive m_main_context;
 
 	private:
-		void readFile(const char *path);
+		void init();
+
+		std::vector<std::string> readData(const std::string &data);
+		std::vector<std::string> readFile(const char *path);
 
 		// Checking validity
 		void check_validity();

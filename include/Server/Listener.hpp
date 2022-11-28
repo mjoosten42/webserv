@@ -22,7 +22,7 @@ class Listener {
 		const Server	  &getServerByHost(const std::string &host) const;
 		const std::string &getListenAddr() const;
 
-		std::string getListenerAsString(std::string tabs) const;
+		std::string getListenerAsString(std::string tabs = "") const;
 
 	private:
 		FD									  m_fd;

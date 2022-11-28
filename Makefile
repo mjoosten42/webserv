@@ -1,29 +1,30 @@
-NAME = webserv
+NAME := webserv
+TEST := catch
+FUZZ := fuzzer
 
 CXX = c++
 
-CXX_FLAGS = -Wall -Werror -Wextra -std=c++11 -MMD -MP -Wold-style-cast -Wpedantic -Wno-unknown-pragmas
+CXX_FLAGS := -Wall -Werror -Wextra -std=c++11 -MMD -MP -Wold-style-cast -Wpedantic -Wno-unknown-pragmas
 
 SRC_DIR = src
 OBJ_DIR = obj
-
-
-SOURCES =
-include make/sources.mk
-HEADERS =
-include make/headers.mk
-INCLUDE = 
-include make/include.mk
-
-OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
+TEST_DIR = test
 
 export MAKEFLAGS = "-j 4"
 
+include make/sources.mk
+include make/headers.mk
+include make/include.mk
+
+.SECONDEXPANSION:
+
+OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
+
 DEBUG := 1
-SAN := 0
+SAN := 1
 
 ifeq ($(DEBUG), 1)
-	CXX_FLAGS += -D DEBUG -g3
+	CXX_FLAGS += -Og -D DEBUG -g3
 	ifeq ($(SAN), 1)
 		CXX_FLAGS += -fsanitize=address,undefined
 	endif
@@ -33,7 +34,19 @@ endif
 
 all: $(NAME)
 
-$(NAME): $(OBJECTS)
+$(NAME): SOURCES += $(SRC_DIR)/main.cpp
+$(NAME): $$(OBJECTS)
+	$(CXX) $(CXX_FLAGS) -o $@ $^
+
+$(TEST): SOURCES += $(wildcard $(TEST_DIR)/*.cpp)
+$(TEST): INCLUDE += -I $(TEST_DIR)
+$(TEST): CXX_FLAGS += -std=c++14 -fprofile-instr-generate -fcoverage-mapping
+$(TEST): $$(OBJECTS)
+	$(CXX) $(CXX_FLAGS) -o $@ $^
+
+$(FUZZ): SOURCES += $(SRC_DIR)/fuzzer.cpp
+$(FUZZ): CXX_FLAGS += -g3 -fsanitize=fuzzer -fprofile-instr-generate -fcoverage-mapping
+$(FUZZ): $$(OBJECTS)
 	$(CXX) $(CXX_FLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
@@ -44,10 +57,11 @@ $(OBJ_DIR):
 	mkdir -p $@
 
 clean:
-	$(RM) -r $(OBJ_DIR) $(TEST_OBJ_DIR)
+	$(RM) -r $(OBJ_DIR)
 
 fclean: clean
-	$(RM) $(NAME) $(TEST_NAME)
+	$(RM) $(NAME) $(TEST) $(FUZZ)
+	$(RM) $(wildcard *_profdata)
 
 re:
 	make fclean
@@ -67,64 +81,64 @@ print:
 format: files
 	clang-format -i $(SOURCES) $(HEADERS)
 
+.PHONY: all clean fclean re run files print format
+
+# ============================= #
+# 			webserver			#
+# ============================= #
+
+FILE := lorem_ipsum
+
 siege:
 	siege -iR siege.conf
 
 lsof:
 	lsof -c webserv | tail +8
 
-FILE := lorem_ipsum
 upload:
 	curl localhost:8080/cgi-bin/upload.py -F "userfile=@$(FILE)" -H "Expect:" -v
 
-.PHONY: all clean fclean re run files print format siege lsof
+.PHONY: siege lsof upload
 
 # ============================= #
 # 			testing				#
 # ============================= #
 
-TEST_NAME = catch
-TEST_DIR = test
-TEST_OBJ_DIR = $(TEST_DIR)/obj_test
-TEST_CXXFLAGS = -std=c++14 -Wall -Wextra
+test: $(TEST)
+	LLVM_PROFILE_FILE="$(TEST).profraw" ./$(TEST)
+	llvm-profdata merge -sparse $(TEST).profraw -o $(TEST)_profdata
+	$(RM) $(TEST).profraw
 
-TEST_SRCS=$(notdir $(wildcard $(TEST_DIR)/*.cpp))
-TEST_HEADERS=$(wildcard $(TEST_DIR)/*.hpp)
-TEST_OBJ=$(TEST_SRCS:%.cpp=$(TEST_OBJ_DIR)/%.o)
-OBJ_WITHOUT_MAIN = $(filter-out $(OBJ_DIR)/$(SRC_DIR)/main.o, $(OBJECTS))
+.PHONY: test
 
-$(TEST_NAME): $(TEST_OBJ) $(OBJ_WITHOUT_MAIN)
-	$(CXX) $(TEST_CXXFLAGS) -o $@ $^
+# ============================= #
+# 			fuzzing				#
+# ============================= #
 
-$(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp $(TEST_HEADERS) | $(TEST_OBJ_DIR)
-	$(CXX) -c $(TEST_CXXFLAGS) $(INCLUDE) -I $(TEST_DIR) -o $@ $<
-
-$(TEST_OBJ_DIR):
-	mkdir $@
-
-test: $(TEST_NAME)
-	./$(TEST_NAME)
-
-.PHONY: test test_exe
-
-FUZZ_DIR = fuzzer
-FUZZ_NAME = $(FUZZ_DIR)/fuzzer
-
-fuzz: $(FUZZ_NAME)
-
-dofuzz:
-	mkdir -p $(FUZZ_DIR)/CORPUS
-	-(cd $(FUZZ_DIR) && ./fuzzer CORPUS configs -dict=dict)
-	shell(mv $(FUZZ_DIR)/crash/* crash.conf)
+fuzz: $(FUZZ)
+	mkdir -p CORPUS
+	-(LLVM_PROFILE_FILE="$(FUZZ).profraw" ASAN_OPTIONS=detect_container_overflow=0 ./$(FUZZ) CORPUS configs -dict=dict -jobs=4 -workers=4 -only_ascii=1 -use_value_profile=1)
+	llvm-profdata merge -sparse $(FUZZ).profraw -o $(FUZZ)_profdata
+	$(RM) $(FUZZ).profraw
+	$(RM) $(wildcard fuzz-*.log)
 
 merge:
-	mkdir -p $(FUZZ_DIR)/CORPUS
-	./$(FUZZ_NAME) -merge=1 $(FUZZ_DIR)/CORPUS $(FUZZ_DIR)/CORPUS
+	ASAN_OPTIONS=detect_container_overflow=0 ./$(FUZZ) -merge=1 CORPUS CORPUS
 
-$(FUZZ_NAME): $(OBJ_WITHOUT_MAIN) $(FUZZ_DIR)/fuzzer.o
-	$(CXX) $(CXXFLAGS) -fsanitize=fuzzer,address -o $@ $^
+.PHONY: fuzz merge
 
-$(FUZZ_DIR)/fuzzer.o: $(FUZZ_DIR)/fuzzer.cpp
-	$(CXX) -c $(CXXFLAGS) -fsanitize=fuzzer,address $(INCLUDE) -o $@ $<
+# ============================= #
+# 			coverage			#
+# ============================= #
+
+PROF := $(TEST)
+
+show:
+	llvm-cov show ./$(PROF) -instr-profile=$(PROF)_profdata
+
+report:
+	llvm-cov report ./$(PROF) -instr-profile=$(PROF)_profdata
+
+.PHONY: show report
 
 -include $(OBJECTS:.o=.d)

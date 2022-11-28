@@ -1,4 +1,4 @@
-INCLUDE = \
+INCLUDE := \
 	 -I include \
 	 -I include/CGI \
 	 -I include/Handling \

@@ -1,4 +1,4 @@
-HEADERS = \
+HEADERS := \
 	include/CGI/CGI.hpp \
 	include/CGI/EnvironmentMap.hpp \
 	include/ConfigParser.hpp \

@@ -2,3 +2,7 @@ webserv
 obj
 .vscode
 html/postfile
+CORPUS
+catch
+fuzzer
+configs
