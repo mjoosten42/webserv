@@ -1,7 +1,7 @@
-INCLUDE = \
+INCLUDE := \
 	 -I include \
+	 -I include/CGI \
+	 -I include/Handling \
+	 -I include/Polling \
 	 -I include/Server \
 	 -I include/Utils \
-	 -I include/Handling \
-	 -I include/CGI \
-	 -I include/Polling \

@@ -6,7 +6,7 @@
 #include "Response.hpp"
 #include "buffer.hpp" // buf
 #include "logger.hpp"
-#include "syscalls.hpp"
+#include "syscalls.hpp" // WS::read, WS::write
 #include "utils.hpp"
 
 #include <queue>
@@ -24,7 +24,8 @@ FD Connection::receive(short &events) {
 	switch (bytes_received) {
 		case -1:
 			m_close = true;
-		case 0: // No data although POLLIN
+		case 0: // EOF? Differs in mac/linux
+			unsetFlag(events, POLLIN);
 			break;
 		default:
 

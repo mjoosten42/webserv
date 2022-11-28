@@ -2,6 +2,22 @@
 
 #include "EnvironmentMap.hpp"
 
+void free_array(char **array) {
+	char** start = array;
+
+	while (*array)
+		free(*array++);
+	free(start);
+}
+
+TEST_CASE( "EnvironmentMap addEnv", "[EnvironmentMap]" ) {
+	EnvironmentMap ev;
+
+	ev.addEnv();
+
+	REQUIRE(ev["USER"] != "");
+}
+
 TEST_CASE( "EnvironmentMap toCharpp", "[EnvironmentMap]" ) {
 	EnvironmentMap ev;
 
@@ -13,8 +29,5 @@ TEST_CASE( "EnvironmentMap toCharpp", "[EnvironmentMap]" ) {
 	REQUIRE(std::string(envp[0]) == "NAME=yeet");
 	REQUIRE(std::string(envp[1]) == "VERSION=1.2");
 	REQUIRE(envp[2] == nullptr);
-	free(envp[0]);
-	free(envp[1]);
-	free(envp[2]);
-	free(envp);
+	free_array(envp);
 }

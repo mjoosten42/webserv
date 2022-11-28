@@ -37,7 +37,7 @@ class Server {
 		bool isRedirect(int loc_index) const;
 		bool isCGI(int loc_index, const std::string &ext) const;
 
-		std::string getServerAsString(std::string tabs) const;
+		std::string getServerAsString(std::string tabs = "") const;
 		std::string getAllowedMethodsAsString(int loc_index) const;
 
 	private:

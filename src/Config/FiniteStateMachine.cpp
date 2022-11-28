@@ -1,7 +1,7 @@
 #include "ConfigParser.hpp"
 #include "defines.hpp"	   // IFS
+#include "logger.hpp"	   // TODO
 #include "stringutils.hpp" // trim
-#include "logger.hpp" // TODO
 
 const static char *directives[] = {
 	"listen",		"server_name",		   "cgi", "root", "index", "upload", "redirect", "autoindex", "error_page",

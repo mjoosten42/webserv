@@ -45,7 +45,7 @@ int main(int argc, const char *argv[]) {
 		listeners = initFromConfig(argv[1]);
 
 		for (auto &listener : listeners) {
-			LOG(GREEN << listener.getListenerAsString("") << DEFAULT);
+			LOG(GREEN << listener.getListenerAsString() << DEFAULT);
 			poller.add(listener);
 		}
 
