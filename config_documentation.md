@@ -61,8 +61,8 @@ When this value is not specified it defaults to `index.html`.
 
 `error_page <HTTP error status code> </filename to host> [<code> </page> ...]` - What page to serve in the event of an HTTP error matching the specified code. Pay attention that the page name should start with a '/'.
 E.g. `error_page 404 /my_amazing_404_error_page.html;`
-When this value is not specified it defaults to standard error pages for each of the encounterable error codes.
-WARNING: NGINX difference - Nginx allows the user to specify multiple error codes per error page (e.g. `error_page 401 402 403 404 /my_amazing_4XX_error_page.html;`). In our config they must be strictly alternating key value pairs, though can be written on multiple lines.
+When this value is not specified it defaults to standard error pages for each of the encounterable error codes. If this value is specified at both the server and location level, the location will only serve those specified in that block and will not additionally inherit from the server.
+WARNING: NGINX difference - Nginx allows the user to specify multiple error codes per error page (e.g. `error_page 401 402 403 404 /my_amazing_4XX_error_page.html;`). In our config they must be strictly alternating key value pairs.
 
 `upload <directory_name>` - What directory the server will upload files to. If the directory does not exist, a CGI error is returned when the user attempts to upload a file.
 E.g. `upload /uploads`

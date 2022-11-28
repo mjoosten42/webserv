@@ -117,6 +117,10 @@ void    test_all_valid(std::string valid_dir)
     REQUIRE(first.getErrorPage(4, 507) == "18446744073709551616");
     REQUIRE(first.getErrorPage(4, 2147483647) == "2147483647.html");
 
+    REQUIRE(first.hasErrorPage(0, 504) == false);
+    REQUIRE(first.hasErrorPage(5, 504) == false);
+    REQUIRE(first.hasErrorPage(4, 404) == false);
+
     size_t max_cmb = 18446744073709551615U;
     REQUIRE(first.getCMB(0) == max_cmb); //server
     REQUIRE(first.getCMB(5) == max_cmb); //location that inherits
