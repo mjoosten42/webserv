@@ -55,6 +55,23 @@ void    test_all_invalid(std::string invalid_dir)
     //Missing semicolons
     REQUIRE(try_invalid_config(invalid_dir + "invalid19.conf") == 1);
     REQUIRE(try_invalid_config(invalid_dir + "invalid20.conf") == 1);
+
+	//Nonsense directives
+	REQUIRE(try_invalid_config(invalid_dir + "invalid21.conf") == 1);
+	REQUIRE(try_invalid_config(invalid_dir + "invalid22.conf") == 1);
+
+	//Directives in the wrong context
+	// Location directives in server
+	REQUIRE(try_invalid_config(invalid_dir + "invalid23.conf") == 1);
+	REQUIRE(try_invalid_config(invalid_dir + "invalid24.conf") == 1);
+	REQUIRE(try_invalid_config(invalid_dir + "invalid25.conf") == 1);
+	// Server directives in location
+	REQUIRE(try_invalid_config(invalid_dir + "invalid26.conf") == 1);
+	REQUIRE(try_invalid_config(invalid_dir + "invalid27.conf") == 1);
+
+	//Location block name does not start with '/'
+	REQUIRE(try_invalid_config(invalid_dir + "invalid28.conf") == 1);
+	// REQUIRE(try_invalid_config(invalid_dir + "invalid29.conf") == 1); // do we want to allow empty location block? treat as root? or throw error?
     return;
 }
 
@@ -153,7 +170,6 @@ void    test_all_valid(std::string valid_dir)
     REQUIRE(first.getAllowedMethodsAsString(0) == "{ GET, POST, DELETE }");
     REQUIRE(first.getAllowedMethodsAsString(A) == "{ POST, DELETE }");
     REQUIRE(first.getAllowedMethodsAsString(B) == "{ GET }");
-
     
 }
 
