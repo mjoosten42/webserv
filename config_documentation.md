@@ -24,7 +24,7 @@ block_type <additional params, such as the block's name> {
 ```
 
 ### Compatibility with NGINX
-Though we have taken NGINX as a standard, this documentation will provide examples of where our implementation does differ. Compatibility should not be taken as a hard guarantee.
+Though we have taken NGINX as a standard, this documentation will provide examples of where our implementation does differ. Compatibility should not be taken as a hard guarantee. An unrecognised directive will throw an error, which includes many of the NGINX directives we did not implement.
 
 Additionally, most values that are expected within a certain context are initialised by a default value (in line with the NGINX default), and merely overwritten if they are explicitly expressed in the config file.
 
