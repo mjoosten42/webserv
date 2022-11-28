@@ -125,6 +125,12 @@ void    test_all_valid(std::string valid_dir)
     REQUIRE(first.isAutoIndex(5) == true);
     REQUIRE(first.isAutoIndex(2) == false);
 
+    size_t max_cmb = 18446744073709551615U;
+    REQUIRE(first.getCMB(0) == max_cmb); //server
+    REQUIRE(first.getCMB(5) == max_cmb); //location that inherits
+    REQUIRE(first.getCMB(4) == max_cmb); //location that sets its own cmb
+    REQUIRE(first.getCMB(2) == 0); //location that sets its own cmb
+    
 }
 
 TEST_CASE( "Configs", "[Config]")

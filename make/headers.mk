@@ -1,26 +1,26 @@
 HEADERS = \
+	include/CGI/CGI.hpp \
+	include/CGI/EnvironmentMap.hpp \
 	include/ConfigParser.hpp \
-	include/logger.hpp \
-	include/Server/Location.hpp \
-	include/Server/Server.hpp \
-	include/Server/overwrite.hpp \
-	include/Server/Listener.hpp \
-	include/Utils/methods.hpp \
-	include/Utils/utils.hpp \
-	include/Utils/IO.hpp \
-	include/Utils/syscalls.hpp \
-	include/Utils/MIME.hpp \
-	include/Utils/stringutils.hpp \
-	include/Utils/file.hpp \
-	include/Utils/FD.hpp \
+	include/defines.hpp \
+	include/Handling/AutoIndex.hpp \
+	include/Handling/buffer.hpp \
 	include/Handling/HTTP.hpp \
 	include/Handling/Request.hpp \
-	include/Handling/buffer.hpp \
 	include/Handling/Response.hpp \
-	include/Handling/AutoIndex.hpp \
-	include/CGI/EnvironmentMap.hpp \
-	include/CGI/CGI.hpp \
-	include/defines.hpp \
-	include/Polling/SourceFds.hpp \
+	include/logger.hpp \
 	include/Polling/Connection.hpp \
 	include/Polling/Poller.hpp \
+	include/Polling/SourceFds.hpp \
+	include/Server/Listener.hpp \
+	include/Server/Location.hpp \
+	include/Server/overwrite.hpp \
+	include/Server/Server.hpp \
+	include/Utils/FD.hpp \
+	include/Utils/file.hpp \
+	include/Utils/IO.hpp \
+	include/Utils/methods.hpp \
+	include/Utils/MIME.hpp \
+	include/Utils/stringutils.hpp \
+	include/Utils/syscalls.hpp \
+	include/Utils/utils.hpp \
