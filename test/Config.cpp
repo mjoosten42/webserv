@@ -141,7 +141,15 @@ void    test_all_valid(std::string valid_dir)
     REQUIRE(first.isRedirect(2) == true);
     REQUIRE(first.getRedirect(2) == "/locationA");
     
+    REQUIRE(first.isCGI(0, "pl") == false);
+    REQUIRE(first.isCGI(5, "pl") == false);
+    REQUIRE(first.isCGI(4, "pl") == true);
+    REQUIRE(first.isCGI(4, "p") == false);
+    REQUIRE(first.isCGI(4, "pll") == false);
 
+    REQUIRE(first.getAllowedMethodsAsString(0) == "{ GET, POST, DELETE }");
+    REQUIRE(first.getAllowedMethodsAsString(4) == "{ POST, DELETE }");
+    REQUIRE(first.getAllowedMethodsAsString(2) == "{ GET }");
 
     
 }
