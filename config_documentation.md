@@ -92,6 +92,7 @@ index
 autoindex
 error_page
 client_max_body_size
+upload
 ```
 
 The following directives can only be specified at a location-level, not within the context of a server:

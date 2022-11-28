@@ -70,27 +70,34 @@ void    test_all_valid(std::string valid_dir)
     // Limit testing (max vals for port, cmb, error pages etc, multi-line directives, the whole shebang)
     listeners = initFromConfig( (valid_dir + "valid2.conf").c_str());
     Server first = (listeners.front()).getServerByHost("");
-    REQUIRE(first.getPort() == 32767);
 
-
+    // Location Index
     REQUIRE(first.getLocationIndex("") == 0);
     REQUIRE(first.getLocationIndex("/locationA/") == 4);
-    // REQUIRE(first.getLocationIndex("/locationA") == 4);
-
     REQUIRE(first.getLocationIndex("/locationB/") == 2);
-    // REQUIRE(first.getLocationIndex("/locationB") == 2);
-
-    // REQUIRE(first.getLocationIndex("/locationC/") == 3);
-    // REQUIRE(first.getLocationIndex("/locationC") == 3);
-
-    // REQUIRE(first.getLocationIndex("/locationD/") == 4);
-    // REQUIRE(first.getLocationIndex("/locationD") == 4);
-
     REQUIRE(first.getLocationIndex("/E/") == 0);
-    // REQUIRE(first.getLocationIndex("/E") == 0);
     REQUIRE(first.getLocationIndex("/") == 0);
-
     REQUIRE(first.getLocationIndex("/inheritsFromServer/") == 5);
+
+    //Server only
+    REQUIRE(first.getPort() == 32767);
+
+    REQUIRE(*(first.getNames().begin()) == "www.example.org");
+    REQUIRE((first.getNames().back()) == "example.org");
+
+    //Server and Location
+
+    REQUIRE(first.getRoot(0) == "iamroot");
+    REQUIRE(first.getRoot(5) == "iamroot");
+    REQUIRE(first.getRoot(2) == "alsoroot");
+
+    REQUIRE(first.isAutoIndex(0) == true);
+    REQUIRE(first.isAutoIndex(5) == true);
+    REQUIRE(first.isAutoIndex(2) == false);
+
+    REQUIRE(first.getIndexPage(0) == "my_index.html");
+    REQUIRE(first.getIndexPage(5) == "my_index.html");
+    REQUIRE(first.getIndexPage(2) == "not_my_index.html");
 
     REQUIRE(first.getErrorPage(0, 404) == "-5");
     REQUIRE(first.getErrorPage(0, 405) == "2147483647");
@@ -110,26 +117,23 @@ void    test_all_valid(std::string valid_dir)
     REQUIRE(first.getErrorPage(4, 507) == "18446744073709551616");
     REQUIRE(first.getErrorPage(4, 2147483647) == "2147483647.html");
 
-    REQUIRE(*(first.getNames().begin()) == "www.example.org");
-    REQUIRE((first.getNames().back()) == "example.org");
-
-    REQUIRE(first.getRoot(0) == "iamroot");
-    REQUIRE(first.getRoot(5) == "iamroot");
-    REQUIRE(first.getRoot(2) == "alsoroot");
-
-    REQUIRE(first.getIndexPage(0) == "my_index.html");
-    REQUIRE(first.getIndexPage(5) == "my_index.html");
-    REQUIRE(first.getIndexPage(2) == "not_my_index.html");
-
-    REQUIRE(first.isAutoIndex(0) == true);
-    REQUIRE(first.isAutoIndex(5) == true);
-    REQUIRE(first.isAutoIndex(2) == false);
-
     size_t max_cmb = 18446744073709551615U;
     REQUIRE(first.getCMB(0) == max_cmb); //server
     REQUIRE(first.getCMB(5) == max_cmb); //location that inherits
     REQUIRE(first.getCMB(4) == max_cmb); //location that sets its own cmb
     REQUIRE(first.getCMB(2) == 0); //location that sets its own cmb
+
+
+    REQUIRE(first.getUploadDir(0) == "amogus_storage");
+    REQUIRE(first.getUploadDir(5) == "amogus_storage");
+    REQUIRE(first.getUploadDir(4) == "amogus_storage");
+    REQUIRE(first.getUploadDir(2) == "not_amogus_storage");
+
+    //Location only
+
+    
+
+
     
 }
 
