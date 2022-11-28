@@ -75,10 +75,10 @@ void    test_all_valid(std::string valid_dir)
 
     REQUIRE(first.getLocationIndex("") == 0);
     REQUIRE(first.getLocationIndex("/locationA/") == 4);
-    REQUIRE(first.getLocationIndex("/locationA") == 4);
+    // REQUIRE(first.getLocationIndex("/locationA") == 4);
 
     REQUIRE(first.getLocationIndex("/locationB/") == 2);
-    REQUIRE(first.getLocationIndex("/locationB") == 2);
+    // REQUIRE(first.getLocationIndex("/locationB") == 2);
 
     // REQUIRE(first.getLocationIndex("/locationC/") == 3);
     // REQUIRE(first.getLocationIndex("/locationC") == 3);
@@ -90,9 +90,17 @@ void    test_all_valid(std::string valid_dir)
     // REQUIRE(first.getLocationIndex("/E") == 0);
     REQUIRE(first.getLocationIndex("/") == 0);
 
+    REQUIRE(first.getErrorPage(0, 404) == "-5");
+    REQUIRE(first.getErrorPage(0, 405) == "2147483647");
+    REQUIRE(first.getErrorPage(0, 406) == "99999999999999");
+    REQUIRE(first.getErrorPage(0, 407) == "18446744073709551616");
+    REQUIRE(first.getErrorPage(0, 2147483647) == "2147483647.html");
 
-
-    // REQUIRE(first.getErrorPage(0, 404) == "-5");
+    REQUIRE(first.getErrorPage(4, 504) == "-5");
+    REQUIRE(first.getErrorPage(4, 505) == "2147483647");
+    REQUIRE(first.getErrorPage(4, 506) == "99999999999999");
+    REQUIRE(first.getErrorPage(4, 507) == "18446744073709551616");
+    REQUIRE(first.getErrorPage(4, 2147483647) == "2147483647.html");
 
 }
 
