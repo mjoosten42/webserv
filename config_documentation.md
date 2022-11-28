@@ -23,11 +23,8 @@ block_type <additional params, such as the block's name> {
 }
 ```
 
-### General Caveats
-By default, the configuration file is very permissive. 
-As a trade-off, this permissiveness does require extra diligence from the user in the formatting of custom configuration files.
-
-If the user enters a key that is not used in the setting up of the server, it will simply be ignored rather than flagged as invalid. This design choice lets us easily add more functionality in future, and allows for a degree of compatibility with standard NGINX configs (though a number of config options have been implemented differently from NGINX where necessary). This documentation will provide examples of where our implementation does differ from standard NGINX config implementation, so compatibility should not be taken as a hard guarantee.
+### Compatibility with NGINX
+Though we have taken NGINX as a standard, this documentation will provide examples of where our implementation does differ. Compatibility should not be taken as a hard guarantee.
 
 Additionally, most values that are expected within a certain context are initialised by a default value (in line with the NGINX default), and merely overwritten if they are explicitly expressed in the config file.
 
