@@ -5,7 +5,7 @@ Our configuration file format is very much inspired by the [NGINX config format]
 
 It consists of 'simple directives' and 'block directives':
 
-Simple directives are single- or multiline declarations of key value pairs ending in a semicolon.
+Simple directives are single-line declarations of key value pairs ending in a semicolon.
 The key is separated from the value by white spaces, and the values include anything up to the following semicolon.
 If a closing semicolon is missing, the configuration file is considered invalid.
 
@@ -26,8 +26,6 @@ block_type <additional params, such as the block's name> {
 ### General Caveats
 By default, the configuration file is very permissive. 
 As a trade-off, this permissiveness does require extra diligence from the user in the formatting of custom configuration files.
-
-If the user forgets to close a simple directive with a semicolon, the following simple directive will be considered part of the previous' value - this allows for multiline simple directives. 
 
 If the user enters a key that is not used in the setting up of the server, it will simply be ignored rather than flagged as invalid. This design choice lets us easily add more functionality in future, and allows for a degree of compatibility with standard NGINX configs (though a number of config options have been implemented differently from NGINX where necessary). This documentation will provide examples of where our implementation does differ from standard NGINX config implementation, so compatibility should not be taken as a hard guarantee.
 
@@ -75,9 +73,7 @@ WARNING: NGINX difference - This is not an nginx setting, but one included for t
 
 ### Location block
 The location block is a block directive that only exists within the context of a server block. Internally, it can be understood as a(n indirect) subdirectory of the server's root directory, but with its own set of rules and settings. These may overwrtie those inherited from the server context, resulting in location-specific behaviour. Whenever a user navigates to this part of the server, that specific location block's rules will apply. When the server tries to determine what location block the user is in, it looks for the longest possible match between the address the user navigated to, and the root + name of a location block it recognises from the config file.
-
-//TODO : Write about correct way to format location block's name.
-//TODO : Disallow multiline comments.
+The name of a location block must always start with a backslash '/' character in order to form a valid filepath.
 
 In the configuration file it may look something like this: 
 ```
