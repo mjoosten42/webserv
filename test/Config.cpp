@@ -135,6 +135,11 @@ void    test_all_valid(std::string valid_dir)
 
     //Location only
 
+    REQUIRE(first.isRedirect(0) == false);
+    REQUIRE(first.isRedirect(5) == false);
+    REQUIRE(first.isRedirect(4) == false);
+    REQUIRE(first.isRedirect(2) == true);
+    REQUIRE(first.getRedirect(2) == "/locationA");
     
 
 
