@@ -9,9 +9,16 @@
 
 #include <algorithm> // sort
 
+const static char *server_directives[] = {
+	"server_name", "listen",	 "root",  "client_max_body_size", "autoindex",
+	"index",	   "error_page", "upload"
+	// "cgi", "redirect", "limit_except"
+};
+
 Server::Server(): m_host("127.0.0.1"), m_port(8000), m_names({ { "webserv.com" } }), m_locations(1) {}
 
 void Server::add(block_directive *constructor_specs) {
+	hasOnlyAllowedDirectives(constructor_specs); // will throw if not
 	m_locations.front().add(constructor_specs);
 
 	overwriteIfSpecified("listen", m_port, constructor_specs, stringToIntegral<short>);
@@ -19,6 +26,7 @@ void Server::add(block_directive *constructor_specs) {
 
 	for (auto &block : constructor_specs->fetch_matching_blocks("location")) {
 		m_locations.push_back(m_locations.front()); // Copy server default to new location
+		m_locations.back().hasOnlyAllowedDirectives(block);
 		m_locations.back().add(block);				// Add config
 	}
 
@@ -58,6 +66,21 @@ bool Server::isCGI(int loc_index, const std::string &ext) const {
 	auto CGIs = m_locations[loc_index].m_CGIs;
 
 	return std::find(CGIs.begin(), CGIs.end(), ext) != CGIs.end();
+}
+
+bool Server::isAllowedServerDirective(const std::string &str) const {
+	for (size_t i = 0; i < SIZEOF_ARRAY(server_directives); i++)
+		if (str == server_directives[i])
+			return true;
+	return false;
+}
+
+bool Server::hasOnlyAllowedDirectives(block_directive *constructor_specs) const {
+	auto it = constructor_specs->simple_directives.begin();
+	for (; it != constructor_specs->simple_directives.end(); ++it)
+		if (!isAllowedServerDirective(it->name))
+			throw(std::invalid_argument("Directive \"" + it->name + "\" is not allowed in this context."));
+	return true;
 }
 
 #pragma region getters

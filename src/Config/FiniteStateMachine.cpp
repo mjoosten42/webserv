@@ -3,11 +3,6 @@
 #include "logger.hpp"	   // TODO
 #include "stringutils.hpp" // trim
 
-const static char *directives[] = {
-	"listen",		"server_name",		   "cgi", "root", "index", "upload", "redirect", "autoindex", "error_page",
-	"limit_except", "client_max_body_size"
-};
-
 void ConfigParser::finite_state_machine() {
 	block_directive *context = &m_main_context;
 
@@ -42,9 +37,6 @@ void ConfigParser::state_simpledirective(block_directive **context, const std::s
 
 	tmp.name = line.substr(0, pos);
 
-	if (!isAllowedDirective(tmp.name))
-		throw_config_error(i, "Unknown directive");
-
 	if (pos != std::string::npos) {
 		pos = line.find_first_not_of(IFS, pos);
 		if (pos != std::string::npos) {
@@ -77,11 +69,4 @@ void ConfigParser::state_openblock(block_directive **context, const std::string 
 void ConfigParser::state_closeblock(block_directive **context) {
 	if ((*context)->parent_context != NULL)
 		(*context) = (*context)->parent_context;
-}
-
-bool ConfigParser::isAllowedDirective(const std::string &str) const {
-	for (size_t i = 0; i < SIZEOF_ARRAY(directives); i++)
-		if (str == directives[i])
-			return true;
-	return false;
 }

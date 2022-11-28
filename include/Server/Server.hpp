@@ -40,6 +40,9 @@ class Server {
 		std::string getServerAsString(std::string tabs) const;
 		std::string getAllowedMethodsAsString(int loc_index) const;
 
+		bool isAllowedServerDirective(const std::string &str) const;
+		bool hasOnlyAllowedDirectives(block_directive *constructor_specs) const;
+
 	private:
 		std::string				 m_host;  // the IP address this server listens on.
 		short					 m_port;  // port the server listens on
