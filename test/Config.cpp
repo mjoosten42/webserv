@@ -90,11 +90,19 @@ void    test_all_valid(std::string valid_dir)
     // REQUIRE(first.getLocationIndex("/E") == 0);
     REQUIRE(first.getLocationIndex("/") == 0);
 
+    REQUIRE(first.getLocationIndex("/inheritsFromServer/") == 5);
+
     REQUIRE(first.getErrorPage(0, 404) == "-5");
     REQUIRE(first.getErrorPage(0, 405) == "2147483647");
     REQUIRE(first.getErrorPage(0, 406) == "99999999999999");
     REQUIRE(first.getErrorPage(0, 407) == "18446744073709551616");
     REQUIRE(first.getErrorPage(0, 2147483647) == "2147483647.html");
+
+    REQUIRE(first.getErrorPage(5, 404) == "-5");
+    REQUIRE(first.getErrorPage(5, 405) == "2147483647");
+    REQUIRE(first.getErrorPage(5, 406) == "99999999999999");
+    REQUIRE(first.getErrorPage(5, 407) == "18446744073709551616");
+    REQUIRE(first.getErrorPage(5, 2147483647) == "2147483647.html");
 
     REQUIRE(first.getErrorPage(4, 504) == "-5");
     REQUIRE(first.getErrorPage(4, 505) == "2147483647");
@@ -106,8 +114,16 @@ void    test_all_valid(std::string valid_dir)
     REQUIRE((first.getNames().back()) == "example.org");
 
     REQUIRE(first.getRoot(0) == "iamroot");
-    REQUIRE(first.getRoot(4) == "iamroot");
+    REQUIRE(first.getRoot(5) == "iamroot");
     REQUIRE(first.getRoot(2) == "alsoroot");
+
+    REQUIRE(first.getIndexPage(0) == "my_index.html");
+    REQUIRE(first.getIndexPage(5) == "my_index.html");
+    REQUIRE(first.getIndexPage(2) == "not_my_index.html");
+
+    REQUIRE(first.isAutoIndex(0) == true);
+    REQUIRE(first.isAutoIndex(5) == true);
+    REQUIRE(first.isAutoIndex(2) == false);
 
 }
 
