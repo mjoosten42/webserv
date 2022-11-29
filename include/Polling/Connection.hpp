@@ -8,14 +8,15 @@
 #include <queue>
 
 class Listener;
+class Poller;
 
 class Connection {
 	public:
 		Connection();
-		Connection(FD fd, const Listener *listener, const std::string &peer);
+		Connection(FD fd, const Listener *listener, Poller *poller, const std::string &peer);
 
-		FD receive(short &events);
-		FD send(short &events);
+		short receive();
+		short send();
 
 		bool wantsClose() const;
 
@@ -25,8 +26,10 @@ class Connection {
 	private:
 		FD m_fd;
 
+		const Listener *m_listener;
+		Poller		   *m_poller;
+
 		std::queue<Response> m_responses;
-		const Listener		*m_listener;
 		std::string			 m_peer;
 		bool				 m_close;
 };

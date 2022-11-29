@@ -20,7 +20,7 @@ include make/include.mk
 
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 
-DEBUG := 0
+DEBUG := 1
 SAN := 1
 
 ifeq ($(DEBUG), 1)

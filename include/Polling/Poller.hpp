@@ -20,17 +20,10 @@ class Poller {
 	private:
 		void pollfdEvent();
 
-		void pollIn(pollfd &pollfd);
-		bool pollOut(pollfd &pollfd);
-		void pollHup(pollfd &pollfd);
-
 		void acceptClient(FD listener_fd);
 		void removeClient(FD index);
 
-		void removeSources(FD client);
-
 		size_t clientsIndex();
-		size_t sourceFdsIndex();
 
 		std::vector<pollfd>::iterator find(FD fd);
 
@@ -40,5 +33,4 @@ class Poller {
 		std::vector<pollfd>		 m_pollfds;		// the array of pollfd structs
 		std::map<FD, Listener>	 m_listeners;	// map server fd with corresponding listener
 		std::map<FD, Connection> m_connections; // map client fd to its handler
-		SourceFds				 m_sources;		// map source fds to client fds and vice versa.
 };

@@ -22,6 +22,9 @@ std::string Response::readBlock() {
 			// LOG(std::string(winSize(), '-') << DEFAULT);
 
 			block.append(buf, bytes_read);
+
+			if (!m_isCGI && bytes_read < BUFFER_SIZE)
+				m_doneReading = true;
 	}
 	return block;
 }

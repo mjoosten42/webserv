@@ -52,10 +52,10 @@ void Listener::setupSocket() {
 }
 
 void Listener::listen() {
-	sockaddr_in server;										 // Specify server socket info:
-	server.sin_family = AF_INET;							 // IPv4 protocol family
-	server.sin_port	  = htons(m_port);						 // port in correct endianness
-	server.sin_addr	  = { inet_addr(m_listenAddr.c_str()) }; // IP address
+	sockaddr_in server;										  // Specify server socket info:
+	server.sin_family	   = AF_INET;						  // IPv4 protocol family
+	server.sin_port		   = htons(m_port);					  // port in correct endianness
+	server.sin_addr.s_addr = inet_addr(m_listenAddr.c_str()); // IP address
 
 	// "Assign name to socket" = link socket_fd we configured to the server'ssocket information
 	if (bind(m_fd, reinterpret_cast<sockaddr *>(&server), sizeof(server)) < 0)

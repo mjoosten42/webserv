@@ -2,6 +2,7 @@
 
 #include "FD.hpp"
 #include "Listener.hpp"
+#include "Poller.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "buffer.hpp" // buf
@@ -13,19 +14,20 @@
 
 Connection::Connection() {}
 
-Connection::Connection(FD m_fd, const Listener *listener, const std::string &peer):
-	m_fd(m_fd), m_listener(listener), m_peer(peer), m_close(false) {}
+Connection::Connection(FD fd, const Listener *listener, Poller *poller, const std::string &peer):
+	m_fd(fd), m_listener(listener), m_poller(poller), m_peer(peer), m_close(false) {
+	(void)m_poller;
+}
 
-FD Connection::receive(short &events) {
+short Connection::receive() {
 	ssize_t bytes_received = WS::read(m_fd);
-	FD		source_fd;
+	short	flag		   = POLLIN;
 
 	LOG(CYAN "Received: " DEFAULT << bytes_received);
 	switch (bytes_received) {
 		case -1:
 			m_close = true;
 		case 0: // EOF? Differs in mac/linux
-			unsetFlag(events, POLLIN);
 			break;
 		default:
 
@@ -48,25 +50,21 @@ FD Connection::receive(short &events) {
 				response.addServer(&m_listener->getServerByHost(request.getHost()));
 				response.processRequest();
 
-				if (response.isCGI())
-					source_fd = response.getSourceFD();
-				else
-					setFlag(events, POLLOUT);
+				if (!response.isCGI())
+					flag |= POLLOUT;
 			}
-
-			if (response.isCGI() && !request.getBody().empty())
-				response.writeToCGI();
 	}
-	return source_fd;
+	LOG(CYAN "recv: returning " DEFAULT << getEventsAsString(flag));
+	return flag;
 }
 
 // Send data back to a client
 // This should only be called if POLLOUT is set
-FD Connection::send(short &events) {
+short Connection::send() {
 	Response	&response	= m_responses.front();
 	std::string &chunk		= response.getNextChunk();
 	ssize_t		 bytes_sent = WS::write(m_fd, chunk);
-	FD			 source_fd;
+	short		 flag		= 0;
 
 	LOG(CYAN "Send: " DEFAULT << bytes_sent);
 	switch (bytes_sent) {
@@ -82,13 +80,14 @@ FD Connection::send(short &events) {
 			response.trimChunk(bytes_sent);
 			if (response.isDone()) {
 				m_close |= response.wantsClose();
-				if (response.hadFD())
-					source_fd = response.getSourceFD();
 				m_responses.pop();
-			} else if (!response.isCGI())
-				setFlag(events, POLLOUT);
+			}
+
+			if (!m_responses.empty())
+				flag |= POLLOUT;
 	}
-	return source_fd;
+	LOG(CYAN "send: returning " DEFAULT << getEventsAsString(flag));
+	return flag;
 }
 
 Response &Connection::getLastResponse() {
