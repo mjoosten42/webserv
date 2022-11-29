@@ -48,4 +48,7 @@ class Request: public HTTP {
 		size_t		m_bodyTotal;
 
 		std::string m_errorMsg;
+
+		// for the unit tester
+		friend class TesterHelper;
 };

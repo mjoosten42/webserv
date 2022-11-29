@@ -66,7 +66,6 @@ void Request::parse() {
 	}
 }
 
-// TODO: unit test this
 void Request::parseStartLine(const std::string &line) {
 	const char				*errorMessages[] = { "Missing startline", "Missing location", "Missing HTTP version" };
 	std::vector<std::string> strs			 = stringSplit(line);
@@ -96,6 +95,10 @@ void Request::parseURI(const std::string &str) {
 		throw ServerException(400, "Location doesn't start with \"/\": " + str);
 
 	size_t dot	 = str.find('.');
+
+	if (dot == std::string::npos)
+		dot = 1;
+
 	size_t extra = str.find_first_of("/?", dot);
 
 	m_location = str.substr(0, extra);
