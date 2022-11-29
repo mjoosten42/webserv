@@ -24,7 +24,7 @@ DEBUG := 1
 SAN := 1
 
 ifeq ($(DEBUG), 1)
-	CXX_FLAGS += -Og -D DEBUG -g3
+	CXX_FLAGS += -O0 -D DEBUG -g3
 	ifeq ($(SAN), 1)
 		CXX_FLAGS += -fsanitize=address,undefined
 	endif
@@ -87,7 +87,7 @@ format: files
 # 			webserver			#
 # ============================= #
 
-FILE := lorem_ipsum
+FILE ?= lorem_ipsum
 
 siege:
 	siege -iR siege.conf
@@ -117,7 +117,9 @@ test: $(TEST)
 
 fuzz: $(FUZZ)
 	mkdir -p CORPUS
-	-(LLVM_PROFILE_FILE="$(FUZZ).profraw" ASAN_OPTIONS=detect_container_overflow=0 ./$(FUZZ) CORPUS configs -dict=dict -jobs=4 -workers=4 -only_ascii=1 -use_value_profile=1)
+	LLVM_PROFILE_FILE="$(FUZZ).profraw" ASAN_OPTIONS=detect_container_overflow=0 ./$(FUZZ) CORPUS configs -dict=dict -jobs=4 -workers=4 -only_ascii=1 -use_value_profile=1
+
+fuzzpost:
 	llvm-profdata merge -sparse $(FUZZ).profraw -o $(FUZZ)_profdata
 	$(RM) $(FUZZ).profraw
 	$(RM) $(wildcard fuzz-*.log)
@@ -131,7 +133,7 @@ merge:
 # 			coverage			#
 # ============================= #
 
-PROF := $(TEST)
+PROF ?= $(TEST)
 
 show:
 	llvm-cov show ./$(PROF) -instr-profile=$(PROF)_profdata

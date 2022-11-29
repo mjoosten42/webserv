@@ -80,9 +80,9 @@ void Poller::pollfdEvent() {
 			continue;
 		}
 		if (client.revents & POLLIN)
-			pollIn(client);
-		if (client.revents & POLLOUT)
-			if (pollOut(client))
+			pollIn(client); // Can invalidate client ref
+		if (m_pollfds[i].revents & POLLOUT)
+			if (pollOut(m_pollfds[i]))
 				i--;
 	}
 
