@@ -25,9 +25,8 @@ class Listener {
 		std::string getListenerAsString(std::string tabs = "") const;
 
 	private:
-		FD									  m_fd;
-		std::string							  m_listenAddr; // aka Host
-		short								  m_port;
-		std::vector<Server>					  m_servers;
-		std::map<std::string, const Server *> m_hostToServer;
+		FD					m_fd;
+		std::string			m_listenAddr; // aka Host
+		short				m_port;
+		std::vector<Server> m_servers;
 };

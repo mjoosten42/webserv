@@ -23,16 +23,14 @@ Listener::Listener(const std::string &listenAddress, short port): m_listenAddr(l
 
 void Listener::addServer(const Server &server) {
 	m_servers.push_back(server);
-
-	for (auto &name : server.getNames())
-		m_hostToServer[name] = &(m_servers.back());
 }
 
 const Server &Listener::getServerByHost(const std::string &host) const {
 	// try to find it. Otherwise, use the first server.
-	auto it = m_hostToServer.find(host);
-	if (it != m_hostToServer.end())
-		return *(it->second);
+	for (auto &server : m_servers)
+		for (auto &name : server.getNames())
+			if (name == host)
+				return server;
 	return m_servers.front();
 }
 
