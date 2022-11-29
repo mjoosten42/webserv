@@ -63,8 +63,6 @@ class ConfigParser {
 		void state_openblock(block_directive **context, const std::string &line);
 		void state_closeblock(block_directive **context);
 
-		bool isAllowedDirective(const std::string &str) const;
-
 		enum Token { SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };
 
 		static char m_tokens[SIZE];
