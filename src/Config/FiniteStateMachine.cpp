@@ -1,6 +1,5 @@
 #include "ConfigParser.hpp"
 #include "defines.hpp"	   // IFS
-#include "logger.hpp"	   // TODO
 #include "stringutils.hpp" // trim
 
 void ConfigParser::finite_state_machine() {

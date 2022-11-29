@@ -45,7 +45,7 @@ std::vector<Listener> initFromConfig(const char *file) {
 	return listeners;
 }
 
-// TODO: remove
+// Fuzzer
 std::vector<Listener> initFromConfig(const std::string &data) {
 	ConfigParser		  config(data);
 	std::vector<Listener> listeners;
