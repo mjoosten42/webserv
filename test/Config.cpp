@@ -71,7 +71,7 @@ void    test_all_invalid(std::string invalid_dir)
 
 	//Location block name does not start with '/'
 	REQUIRE(try_invalid_config(invalid_dir + "invalid28.conf") == 1);
-	// REQUIRE(try_invalid_config(invalid_dir + "invalid29.conf") == 1); // do we want to allow empty location block? treat as root? or throw error?
+	REQUIRE(try_invalid_config(invalid_dir + "invalid29.conf") == 1); // do we want to allow empty location block? treat as root? or throw error?
     return;
 }
 

@@ -32,6 +32,8 @@ void Server::add(block_directive *constructor_specs) {
 
 	for (auto &block : constructor_specs->fetch_matching_blocks("location")) {
 		m_locations.push_back(m_locations.front()); // Copy server default to new location
+		if(block->additional_params.empty())
+			throw (std::invalid_argument("All location blocks must have a name."));
 		hasOnlyAllowedDirectives(block, location_directives);
 		m_locations.back().add(block);				// Add config
 	}
