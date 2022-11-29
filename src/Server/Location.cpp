@@ -18,8 +18,9 @@ Location::Location():
 void Location::add(block_directive *constructor_specs) {
 	if (!constructor_specs->additional_params.empty())
 		m_location = constructor_specs->additional_params;
+
 	if (m_location.front() != '/')
-		throw (std::invalid_argument("Location blocks must start with a leading '/'."));
+		throw(std::invalid_argument("Location blocks must start with a leading '/'."));
 
 	overwriteIfSpecified("cgi", m_CGIs, constructor_specs, stringSplit);
 	overwriteIfSpecified("root", m_root, constructor_specs, copy);

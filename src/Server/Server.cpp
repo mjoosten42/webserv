@@ -32,10 +32,10 @@ void Server::add(block_directive *constructor_specs) {
 
 	for (auto &block : constructor_specs->fetch_matching_blocks("location")) {
 		m_locations.push_back(m_locations.front()); // Copy server default to new location
-		if(block->additional_params.empty())
-			throw (std::invalid_argument("All location blocks must have a name."));
+		if (block->additional_params.empty())
+			throw(std::invalid_argument("All location blocks must have a name."));
 		hasOnlyAllowedDirectives(block, location_directives);
-		m_locations.back().add(block);				// Add config
+		m_locations.back().add(block); // Add config
 	}
 
 	// Overwrite default '/' with configs '/' if provided
@@ -76,17 +76,15 @@ bool Server::isCGI(int loc_index, const std::string &ext) const {
 	return std::find(CGIs.begin(), CGIs.end(), ext) != CGIs.end();
 }
 
-bool Server::isAllowedContextDirective(const std::string &str, const char** list) const {
+bool Server::isAllowedContextDirective(const std::string &str, const char **list) const {
 	size_t len = (list == server_directives) ? SIZEOF_ARRAY(server_directives) : SIZEOF_ARRAY(location_directives);
 	for (size_t i = 0; i < len; i++)
-	{
 		if (str == list[i])
 			return true;
-	}
 	return false;
 }
 
-bool Server::hasOnlyAllowedDirectives(block_directive *constructor_specs, const char** list) const {
+bool Server::hasOnlyAllowedDirectives(block_directive *constructor_specs, const char **list) const {
 	auto it = constructor_specs->simple_directives.begin();
 	for (; it != constructor_specs->simple_directives.end(); ++it)
 		if (!isAllowedContextDirective(it->name, list))

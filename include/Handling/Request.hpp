@@ -33,7 +33,7 @@ class Request: public HTTP {
 
 		void parseStartLine(const std::string &line);
 		void parseMethod(const std::string &str);
-		void parseURI(const std::string &str);
+		void parseURI(std::string &str);
 		void parseHTTPVersion(const std::string &str);
 
 	private:

@@ -90,35 +90,27 @@ void Request::parseMethod(const std::string &str) {
 		throw ServerException(501, "Unsupported method: " + str);
 }
 
-void Request::parseURI(const std::string &str) {
+void Request::parseURI(std::string &str) {
 	if (str.size() >= 1 && str.front() != '/')
 		throw ServerException(400, "Location doesn't start with \"/\": " + str);
 
+	size_t qm = str.find_first_of("?");
+
+	if (qm != std::string::npos && str.size() > qm) {
+		m_queryString = str.substr(qm + 1);
+		str.erase(qm);
+	}
+
 	size_t dot	 = str.find('.');
+	size_t slash = str.find_first_of("/", dot);
 
-	if (dot == std::string::npos)
-		dot = 1;
-
-	size_t extra = str.find_first_of("/?", dot);
-
-	m_location = str.substr(0, extra);
+	m_location = str.substr(0, slash);
 
 	if (m_location.find("..") != std::string::npos)
 		throw ServerException(400, "Location contains \"..\": " + str);
 
-	if (extra != std::string::npos) {
-		size_t qm = str.find('?', extra);
-
-		if (str[extra] == '/') {
-			m_pathInfo = str.substr(extra, qm - extra);
-
-			if (qm != std::string::npos && str.size() > qm)
-				m_queryString = str.substr(qm + 1);
-		}
-
-		if (str[extra] == '?' && str.size() > qm)
-			m_queryString = str.substr(qm + 1);
-	}
+	if (slash != std::string::npos)
+		m_pathInfo = str.substr(slash);
 }
 
 void Request::parseHTTPVersion(const std::string &str) {
