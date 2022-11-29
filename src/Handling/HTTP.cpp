@@ -67,7 +67,7 @@ void HTTP::parseHeader(const std::string &line) {
 	size_t valueStartPos = line.find_first_not_of(IFS, colonPos + 1);
 	if (valueStartPos != std::string::npos) {
 		header.second = line.substr(valueStartPos);
-		header.second.erase(header.second.find_last_not_of(IFS) + 1, std::string::npos);
+		header.second.erase(header.second.find_last_not_of(IFS) + 1);
 	}
 
 	auto insert = m_headers.insert(header);
@@ -85,11 +85,6 @@ void HTTP::addToBody(const char *buf, ssize_t size) {
 
 void HTTP::addHeader(const std::string &field, const std::string &value) {
 	std::string copy(field);
-
-	if (hasHeader(field)) {
-		LOG_ERR("Overwriting Header: " << field);
-		LOG_ERR("Current headers: {\n" << getHeadersAsString() << "}");
-	}
 
 	strToLower(copy);
 	m_headers[copy] = value;
