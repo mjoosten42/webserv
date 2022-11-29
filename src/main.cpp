@@ -51,7 +51,7 @@ int main(int argc, const char *argv[]) {
 
 		poller.start();
 	} catch (std::exception &e) {
-		std::cerr << "Config error: " << e.what() << std::endl;
+		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
 }
