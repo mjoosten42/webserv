@@ -6,6 +6,7 @@
 #include "overwrite.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
+#include "logger.hpp"
 
 #include <algorithm> // sort
 
@@ -30,12 +31,14 @@ void Server::add(block_directive *constructor_specs) {
 	overwriteIfSpecified("listen", m_port, constructor_specs, stringToIntegral<short>);
 	overwriteIfSpecified("server_name", m_names, constructor_specs, stringSplit);
 
-	for (auto &block : constructor_specs->fetch_matching_blocks("location")) {
+	for (auto &block : constructor_specs->block_directives) {
+		if (block.name != "location")
+			continue;
 		m_locations.push_back(m_locations.front()); // Copy server default to new location
-		if (block->additional_params.empty())
+		if (block.additional_params.empty())
 			throw(std::invalid_argument("All location blocks must have a name."));
-		hasOnlyAllowedDirectives(block, location_directives);
-		m_locations.back().add(block); // Add config
+		hasOnlyAllowedDirectives(&block, location_directives);
+		m_locations.back().add(&block); // Add config
 	}
 
 	// Overwrite default '/' with configs '/' if provided
