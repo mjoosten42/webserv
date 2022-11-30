@@ -68,8 +68,9 @@ int execve(const std::string &path, char *const argv[], const EnvironmentMap &em
 int poll(std::vector<pollfd> &pollfds) {
 	int ret = ::poll(pollfds.data(), static_cast<nfds_t>(pollfds.size()), -1);
 
-	if (ret == -1 && errno != EINTR) // SIGCHLD causes EINTR
-		LOG_ERR("poll: " << strerror(errno));
+	if (ret == -1)
+		if (errno != EINTR) // SIGCHLD causes EINTR
+			LOG_ERR("poll: " << strerror(errno));
 	if (ret == 0)
 		LOG_ERR("poll returned zero");
 	return ret;

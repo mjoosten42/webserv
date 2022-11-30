@@ -23,8 +23,9 @@ std::string Response::readBlock() {
 
 			block.append(buf, bytes_read);
 
-			if (!m_isCGI && bytes_read < BUFFER_SIZE)
-				m_doneReading = true;
+			if (!m_isCGI && !m_isChunked)
+				if (bytes_read < BUFFER_SIZE)
+					m_doneReading = true;
 	}
 	return block;
 }

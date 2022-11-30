@@ -57,6 +57,7 @@ void Poller::quit() {
 
 void Poller::pollfdEvent() {
 	std::vector<int> toAdd;
+	std::vector<int> toRemove;
 	size_t			 i = 0; // Use an index because it can't be invalidated
 
 	// Loop over the listening sockets for new clients
@@ -69,28 +70,30 @@ void Poller::pollfdEvent() {
 		pollfd	   &client = m_pollfds[i];
 		Connection &conn   = m_connections[client.fd];
 
-		if (client.events)
+		if (client.revents) {
 			LOG(CYAN "Client " DEFAULT << client.fd << CYAN " Set: " DEFAULT << getEventsAsString(client.events));
-		if (client.revents)
 			LOG(CYAN "Client " DEFAULT << client.fd << CYAN " Get: " DEFAULT << getEventsAsString(client.revents));
-	
-		client.events = 0;
+		
+			client.events = 0;
+		
+			if (client.revents & POLLIN && !(client.revents & POLLHUP))
+				client.events |= conn.receive();
 
-		if (m_pollfds[i].revents & POLLIN)
-			m_pollfds[i].events |= conn.receive();
+			if (client.revents & POLLOUT)
+				client.events |= conn.send();
 
-		if (m_pollfds[i].revents & POLLOUT)
-			m_pollfds[i].events |= conn.send();
+			if (client.revents & POLLHUP || conn.wantsClose())
+				toRemove.push_back(client.fd);
 
-		if (m_pollfds[i].revents & POLLHUP || conn.wantsClose()) {
-			removeClient(m_pollfds[i].fd);
-			i--;
-			continue;
+			LOG(CYAN "Client " DEFAULT << client.fd << CYAN " Final events: " DEFAULT << getEventsAsString(client.events));
 		}
 	}
 
 	for (auto fd : toAdd)
 		acceptClient(fd);
+	
+	for (auto fd : toRemove)
+		removeClient(fd);
 }
 
 void Poller::acceptClient(FD listener_fd) {

@@ -7,10 +7,10 @@
 #include "Response.hpp"
 #include "buffer.hpp" // buf
 #include "logger.hpp"
-#include "syscalls.hpp" // WS::read, WS::write
 #include "utils.hpp"
 
 #include <queue>
+#include <sys/socket.h> // recv, send
 
 Connection::Connection() {}
 
@@ -20,14 +20,15 @@ Connection::Connection(FD fd, const Listener *listener, Poller *poller, const st
 }
 
 short Connection::receive() {
-	ssize_t bytes_received = WS::read(m_fd);
-	short	flag		   = POLLIN;
+	ssize_t bytes_received = ::recv(m_fd, buf, BUFFER_SIZE, 0);
+	short	flag		   = 0;
 
 	LOG(CYAN "Received: " DEFAULT << bytes_received);
 	switch (bytes_received) {
 		case -1:
+			perror("recv");
+		case 0:
 			m_close = true;
-		case 0: // EOF? Differs in mac/linux
 			break;
 		default:
 
@@ -42,8 +43,10 @@ short Connection::receive() {
 
 			// LOG(request);
 
-			if (request.getState() == STARTLINE || request.getState() == HEADERS)
+			if (request.getState() == STARTLINE || request.getState() == HEADERS) {
+				flag |= POLLIN;
 				break;
+			}
 
 			if (!response.hasProcessedRequest()) { // Do once
 				response.m_peer = m_peer;
@@ -53,8 +56,11 @@ short Connection::receive() {
 				if (!response.isCGI())
 					flag |= POLLOUT;
 			}
+
+			if (request.getBody().size() < BUFFER_SIZE)
+				flag |= POLLIN;
 	}
-	LOG(CYAN "recv: returning " DEFAULT << getEventsAsString(flag));
+	LOG(CYAN "Returning " DEFAULT << getEventsAsString(flag));
 	return flag;
 }
 
@@ -63,14 +69,16 @@ short Connection::receive() {
 short Connection::send() {
 	Response	&response	= m_responses.front();
 	std::string &chunk		= response.getNextChunk();
-	ssize_t		 bytes_sent = WS::write(m_fd, chunk);
+	ssize_t		 bytes_sent = ::send(m_fd, chunk.data(), chunk.size(), 0);
 	short		 flag		= 0;
 
 	LOG(CYAN "Send: " DEFAULT << bytes_sent);
 	switch (bytes_sent) {
 		case -1:
+			perror("send");
+		case 0:
 			m_close = true;
-			break;
+			break ;
 		default:
 
 			// LOG(YELLOW << std::string(winSize(), '-'));
@@ -83,10 +91,12 @@ short Connection::send() {
 				m_responses.pop();
 			}
 
-			if (!m_responses.empty())
+			if (m_responses.empty())
+				flag |= POLLIN;
+			else
 				flag |= POLLOUT;
 	}
-	LOG(CYAN "send: returning " DEFAULT << getEventsAsString(flag));
+	LOG(CYAN "Returning " DEFAULT << getEventsAsString(flag));
 	return flag;
 }
 

@@ -16,15 +16,12 @@ void signalHandler(int signum) {
 		case SIGINT: // Allow graceful exit
 			ref.quit();
 			break;
-		case SIGPIPE: // CGI exited with write data remaining
-			break;
 		case SIGCHLD: // CGI exited
 			WS::wait();
 	}
 }
 
 int main(int argc, const char *argv[]) {
-	std::vector<Listener> listeners;
 	Poller				  poller;
 
 	switch (argc) {
@@ -38,13 +35,11 @@ int main(int argc, const char *argv[]) {
 	}
 
 	signal(SIGINT, signalHandler);
-	signal(SIGPIPE, signalHandler);
 	signal(SIGCHLD, signalHandler);
+	signal(SIGPIPE, SIG_IGN);
 
 	try {
-		listeners = initFromConfig(argv[1]);
-
-		for (auto &listener : listeners) {
+		for (auto &listener : initFromConfig(argv[1])) {
 			LOG(GREEN << listener.getListenerAsString() << DEFAULT);
 			poller.add(listener);
 		}

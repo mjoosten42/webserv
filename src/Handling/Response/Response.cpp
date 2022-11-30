@@ -60,6 +60,8 @@ void Response::setFlags() {
 
 	m_isCGI = (m_server->isCGI(m_locationIndex, ext));
 	m_close = (m_request.getHeader("Connection") == "close");
+
+	m_isCGI = false; // TODO
 }
 
 void Response::addDefaultHeaders() {
