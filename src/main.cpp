@@ -22,7 +22,7 @@ void signalHandler(int signum) {
 }
 
 int main(int argc, const char *argv[]) {
-	Poller				  poller;
+	Poller poller;
 
 	switch (argc) {
 		case 1:

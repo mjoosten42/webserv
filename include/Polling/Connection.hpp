@@ -4,7 +4,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 
-#include <netinet/in.h>
+#include <memory> // shared_ptr
 #include <queue>
 
 class Listener;
@@ -13,12 +13,13 @@ class Poller;
 class Connection {
 	public:
 		Connection();
-		Connection(FD fd, const Listener *listener, Poller *poller, const std::string &peer);
+		Connection(FD fd, const Listener *listener, Poller *poller);
 
 		short receive();
 		short send();
 
-		bool wantsClose() const;
+		int getFD() const;
+		int getFirstReadFD() const;
 
 	private:
 		Response &getLastResponse();
@@ -29,7 +30,5 @@ class Connection {
 		const Listener *m_listener;
 		Poller		   *m_poller;
 
-		std::queue<Response> m_responses;
-		std::string			 m_peer;
-		bool				 m_close;
+		std::queue<std::shared_ptr<Response> > m_responses;
 };

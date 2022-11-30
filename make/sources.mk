@@ -15,7 +15,6 @@ SOURCES := \
 	src/Handling//Response/ResponseChunk.cpp \
 	src/Handling//Response/ResponseErrors.cpp \
 	src/Handling//Response/ResponseHandling.cpp \
-	src/Handling//Response/ResponseIO.cpp \
 	src/Polling//Connection.cpp \
 	src/Polling//Poller.cpp \
 	src/Polling//SourceFds.cpp \

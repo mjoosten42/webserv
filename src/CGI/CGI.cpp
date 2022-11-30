@@ -110,6 +110,8 @@ void CGI::start(const Response &response) {
 	// em["AUTH_TYPE"];
 	// em["REMOTE_IDENT"];
 	// em["REMOTE_USER"];
+	// em["REMOTE_ADDR"];
+	// em["REMOTE_HOST"];
 
 	if (req.getContentLength() > 0)
 		em["CONTENT_LENGTH"] = toString(req.getContentLength());
@@ -120,8 +122,6 @@ void CGI::start(const Response &response) {
 	em["PATH_INFO"]		  = req.getPathInfo();
 	em["PATH_TRANSLATED"] = req.getPathInfo();
 	em["QUERY_STRING"]	  = req.getQueryString();
-	em["REMOTE_ADDR"]	  = response.m_peer;
-	em["REMOTE_HOST"]	  = response.m_peer;
 	em["REQUEST_METHOD"]  = toString(req.getMethod());
 	em["SCRIPT_NAME"]	  = response.m_filename;
 	em["SERVER_NAME"]	  = req.getHost();

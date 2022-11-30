@@ -79,7 +79,7 @@ print:
 	@echo "---OBJECTS: $(OBJECTS)" | xargs -n1
 
 format: files
-	clang-format -i $(SOURCES) $(HEADERS)
+	clang-format -i $(SOURCES) $(HEADERS) $(wildcard $(SRC_DIR)/*.cpp)
 
 .PHONY: all clean fclean re run files print format
 

@@ -1,8 +1,9 @@
 #include "AutoIndex.hpp"
 #include "Response.hpp"
-#include "buffer.hpp"  // BUFFER_SIZE
+#include "buffer.hpp"  // buf, BUFFER_SIZE
 #include "defines.hpp" // CRLF
-#include "utils.hpp"   // toHex
+#include "logger.hpp"
+#include "utils.hpp" // toHex
 
 #include <string>
 
@@ -10,16 +11,19 @@ void Response::trimChunk(ssize_t bytes_sent) {
 	m_chunk.erase(0, bytes_sent);
 }
 
-std::string &Response::getNextChunk() {
+const std::string &Response::getNextChunk() {
 	if (!m_doneReading && m_chunk.size() < BUFFER_SIZE) {
-		m_saved += readBlock();
-		if (m_isCGI && !m_headersDone)
-			getCGIHeaderChunk();
-		else {
-			if (m_isChunked)
-				encodeChunked(m_saved);
-			m_chunk += m_saved;
-			m_saved.clear();
+		if (m_isCGI) {
+			if (!m_headersDone)
+				getCGIHeaderChunk();
+			else {
+				if (m_isChunked)
+					encodeChunked(m_saved);
+				m_chunk += m_saved;
+				m_saved.clear();
+			}
+		} else {
+			readFromFile();
 		}
 	}
 	return m_chunk;
@@ -49,4 +53,35 @@ void Response::createIndex(const std::string &path_to_index) {
 	m_status	  = 200;
 
 	m_chunk = getResponseAsString();
+}
+
+short Response::readFromFile() {
+	ssize_t bytes_read = ::read(m_source_fd, buf, BUFFER_SIZE);
+
+	LOG(CYAN "Read: " DEFAULT << bytes_read);
+	switch (bytes_read) {
+		case -1:
+			perror("read");
+		case 0:
+			m_doneReading = true;
+			break;
+		default:
+			// LOG(YELLOW << std::string(winSize(), '-'));
+			// LOG(std::string(buf, bytes_read));
+			// LOG(std::string(winSize(), '-') << DEFAULT);
+
+			addToChunk(bytes_read);
+
+			if (bytes_read < BUFFER_SIZE) {
+				addToChunk(0);
+				m_doneReading = true;
+			}
+	}
+	return 0;
+}
+
+void Response::addToChunk(ssize_t size) {
+	m_chunk += toHex(size) + CRLF;
+	m_chunk.append(buf, size);
+	m_chunk += CRLF;
 }

@@ -16,20 +16,23 @@ class Response: public HTTP {
 		void processRequest();
 		void addServer(const Server *server);
 
-		std::string &getNextChunk();
-		void		 trimChunk(ssize_t bytes_sent);
+		const std::string &getNextChunk();
+		void			   trimChunk(ssize_t bytes_sent);
+		void			   setDoneReading();
 
-		std::string readBlock();
-		void		writeToCGI();
+		short readFromFile();
+		short readFromCGI();
+		short writeToCGI();
 
 		bool hasProcessedRequest() const;
 		bool isCGI() const;
 		bool isDone() const;
 		bool wantsClose() const;
-		bool hadFD() const;
 
 		Request &getRequest();
-		FD		 getSourceFD() const;
+
+		int getWriteFD() const;
+		int getReadFD() const;
 
 	private:
 		void initialize();
@@ -41,6 +44,7 @@ class Response: public HTTP {
 		void openError();
 		void addFileHeaders();
 		void createIndex(const std::string &path_to_index);
+		void addToChunk(ssize_t size);
 
 		// CGI
 		void handleCGI();
@@ -60,9 +64,6 @@ class Response: public HTTP {
 		std::string getStatusMessage() const;
 		std::string getResponseAsString();
 
-	public:
-		std::string m_peer; // Client info, (always 127.0.0.1 in our case)
-
 	private:
 		const Server *m_server; // Config options
 		Request		  m_request;
@@ -76,7 +77,6 @@ class Response: public HTTP {
 
 		bool m_processedRequest; // One-time lock
 		bool m_isCGI;			 // CGI or static file
-		bool m_hadFD;			 // Used to remove pollers source if CGI exits early
 		bool m_isChunked;		 // Send using chunked encoding
 		bool m_doneReading;		 // No need to read from source
 		bool m_headersDone;		 // Done parsing CGI headers

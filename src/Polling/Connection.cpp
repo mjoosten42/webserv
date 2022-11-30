@@ -9,15 +9,14 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
+#include <memory> // shared_ptr
 #include <queue>
 #include <sys/socket.h> // recv, send
 
 Connection::Connection() {}
 
-Connection::Connection(FD fd, const Listener *listener, Poller *poller, const std::string &peer):
-	m_fd(fd), m_listener(listener), m_poller(poller), m_peer(peer), m_close(false) {
-	(void)m_poller;
-}
+Connection::Connection(FD fd, const Listener *listener, Poller *poller):
+	m_fd(fd), m_listener(listener), m_poller(poller) {}
 
 short Connection::receive() {
 	ssize_t bytes_received = ::recv(m_fd, buf, BUFFER_SIZE, 0);
@@ -28,7 +27,7 @@ short Connection::receive() {
 		case -1:
 			perror("recv");
 		case 0:
-			m_close = true;
+			m_poller->removeClient(m_fd);
 			break;
 		default:
 
@@ -49,45 +48,47 @@ short Connection::receive() {
 			}
 
 			if (!response.hasProcessedRequest()) { // Do once
-				response.m_peer = m_peer;
 				response.addServer(&m_listener->getServerByHost(request.getHost()));
 				response.processRequest();
 
-				if (!response.isCGI())
+				if (response.isCGI()) {
+					m_poller->addSource(response.getReadFD(), POLLIN, m_responses.back());
+					m_poller->addSource(response.getWriteFD(), POLLOUT, m_responses.back());
+				} else
 					flag |= POLLOUT;
 			}
 
 			if (request.getBody().size() < BUFFER_SIZE)
 				flag |= POLLIN;
 	}
-	LOG(CYAN "Returning " DEFAULT << getEventsAsString(flag));
 	return flag;
 }
 
 // Send data back to a client
 // This should only be called if POLLOUT is set
 short Connection::send() {
-	Response	&response	= m_responses.front();
-	std::string &chunk		= response.getNextChunk();
-	ssize_t		 bytes_sent = ::send(m_fd, chunk.data(), chunk.size(), 0);
-	short		 flag		= 0;
+	Response		  &response	  = *m_responses.front();
+	const std::string &chunk	  = response.getNextChunk();
+	ssize_t			   bytes_sent = ::send(m_fd, chunk.data(), chunk.size(), 0);
+	short			   flag		  = 0;
+	bool			   close	  = false;
 
 	LOG(CYAN "Send: " DEFAULT << bytes_sent);
 	switch (bytes_sent) {
 		case -1:
 			perror("send");
 		case 0:
-			m_close = true;
-			break ;
+			close = true;
+			break;
 		default:
 
-			// LOG(YELLOW << std::string(winSize(), '-'));
-			// LOG(chunk.substr(0, bytes_sent));
-			// LOG(std::string(winSize(), '-') << DEFAULT);
+			LOG(YELLOW << std::string(winSize(), '-'));
+			LOG(chunk.substr(0, bytes_sent));
+			LOG(std::string(winSize(), '-') << DEFAULT);
 
 			response.trimChunk(bytes_sent);
 			if (response.isDone()) {
-				m_close |= response.wantsClose();
+				close |= response.wantsClose();
 				m_responses.pop();
 			}
 
@@ -96,16 +97,22 @@ short Connection::send() {
 			else
 				flag |= POLLOUT;
 	}
-	LOG(CYAN "Returning " DEFAULT << getEventsAsString(flag));
+	if (close)
+		m_poller->removeClient(m_fd);
+
 	return flag;
 }
 
-Response &Connection::getLastResponse() {
-	if (m_responses.empty() || m_responses.back().getRequest().getState() == DONE)
-		m_responses.push(Response());
-	return m_responses.back();
+int Connection::getFD() const {
+	return m_fd;
 }
 
-bool Connection::wantsClose() const {
-	return m_close;
+int Connection::getFirstReadFD() const {
+	return m_responses.front()->getReadFD();
+}
+
+Response &Connection::getLastResponse() {
+	if (m_responses.empty() || m_responses.back()->getRequest().getState() == DONE)
+		m_responses.push(std::make_shared<Response>(Response()));
+	return *m_responses.back();
 }

@@ -1,8 +1,9 @@
 #include "Response.hpp"
 #include "Server.hpp"
+#include "buffer.hpp" // buf
 #include "logger.hpp"
-#include "syscalls.hpp"
-#include "utils.hpp" // stringToIntegral
+#include "syscalls.hpp" // WS::write
+#include "utils.hpp"	// stringToIntegral
 
 #include <string>
 #include <unistd.h> // access
@@ -14,9 +15,6 @@ void Response::handleCGI() {
 		throw 403;
 
 	m_cgi.start(*this);
-
-	m_source_fd = m_cgi.popen.readfd;
-	m_hadFD		= true;
 
 	m_status = 200;
 }
@@ -43,7 +41,7 @@ void Response::parseCGIHeaders() {
 		line = getNextLine();
 		if (line.empty()) {
 			m_headersDone = true;
-			return;
+			break;
 		}
 		parseHeader(line);
 	}
@@ -71,4 +69,55 @@ void Response::processCGIHeaders() {
 	}
 
 	m_chunk = getResponseAsString();
+}
+
+short Response::readFromCGI() {
+	int		fd		   = m_cgi.popen.readfd;
+	ssize_t bytes_read = ::read(fd, buf, BUFFER_SIZE);
+	short	flags	   = 0;
+
+	LOG(CYAN "Read: " DEFAULT << bytes_read);
+	switch (bytes_read) {
+		case -1:
+			perror("read");
+		case 0:
+			m_doneReading = true;
+			break;
+		default:
+
+			LOG(YELLOW << std::string(winSize(), '-'));
+			LOG(std::string(buf, bytes_read));
+			LOG(std::string(winSize(), '-') << DEFAULT);
+
+			m_saved.append(buf, bytes_read);
+
+			flags |= POLLIN;
+	}
+	return flags;
+}
+
+short Response::writeToCGI() {
+	std::string &body		   = m_request.getBody();
+	int			 fd			   = m_cgi.popen.writefd;
+	ssize_t		 bytes_written = ::write(fd, body.data(), body.size());
+	short		 flags		   = 0;
+
+	LOG(CYAN "Write: " DEFAULT << bytes_written);
+	switch (bytes_written) {
+		case -1:
+			perror("write");
+		case 0:
+			m_cgi.popen.writefd.close();
+			break;
+		default:
+
+			LOG(YELLOW << std::string(winSize(), '-'));
+			LOG(body.substr(0, bytes_written));
+			LOG(std::string(winSize(), '-') << DEFAULT);
+
+			body.erase(0, bytes_written);
+	}
+	if (m_request.getBodyTotal() < m_request.getContentLength())
+		flags |= POLLOUT;
+	return flags;
 }

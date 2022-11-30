@@ -33,7 +33,6 @@ Response::Response():
 	m_server(NULL),
 	m_processedRequest(false),
 	m_isCGI(false),
-	m_hadFD(false),
 	m_isChunked(false),
 	m_doneReading(false),
 	m_headersDone(false),
@@ -60,8 +59,6 @@ void Response::setFlags() {
 
 	m_isCGI = (m_server->isCGI(m_locationIndex, ext));
 	m_close = (m_request.getHeader("Connection") == "close");
-
-	m_isCGI = false; // TODO
 }
 
 void Response::addDefaultHeaders() {
@@ -102,8 +99,12 @@ Request &Response::getRequest() {
 	return m_request;
 }
 
-FD Response::getSourceFD() const {
-	return m_source_fd;
+int Response::getReadFD() const {
+	return m_cgi.popen.readfd;
+}
+
+int Response::getWriteFD() const {
+	return m_cgi.popen.writefd;
 }
 
 bool Response::wantsClose() const {
@@ -116,10 +117,6 @@ bool Response::hasProcessedRequest() const {
 
 bool Response::isCGI() const {
 	return m_isCGI;
-}
-
-bool Response::hadFD() const {
-	return m_hadFD;
 }
 
 bool Response::isDone() const {
@@ -135,4 +132,9 @@ bool Response::isStatus(const std::string &status) const {
 	} catch (...) {
 	}
 	return false;
+}
+
+void Response::setDoneReading() {
+	addToChunk(0);
+	m_doneReading = true;
 }

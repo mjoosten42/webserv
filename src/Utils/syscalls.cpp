@@ -23,14 +23,6 @@ int close(int fd) {
 	return ret;
 }
 
-ssize_t read(int fd) {
-	ssize_t ret = ::read(fd, buf, BUFFER_SIZE);
-
-	if (ret == -1)
-		LOG_ERR("read(" << fd << "): " << strerror(errno));
-	return ret;
-}
-
 ssize_t write(int fd, const std::string &str) {
 	ssize_t ret = ::write(fd, str.data(), str.length());
 
@@ -73,15 +65,6 @@ int poll(std::vector<pollfd> &pollfds) {
 			LOG_ERR("poll: " << strerror(errno));
 	if (ret == 0)
 		LOG_ERR("poll returned zero");
-	return ret;
-}
-
-int accept(int fd, sockaddr *peer) {
-	socklen_t size = sizeof(sockaddr);
-	int		  ret  = ::accept(fd, peer, &size);
-
-	if (ret == -1)
-		LOG_ERR("accept(" << fd << "): " << strerror(errno));
 	return ret;
 }
 
