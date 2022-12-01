@@ -8,12 +8,12 @@
 
 char ConfigParser::m_tokens[SIZE] = { ';', '#', '{', '}' };
 
-ConfigParser::ConfigParser(const char *path) {
+ConfigParser::ConfigParser(const char *path): config(1) {
 	config = readFile(path);
 	init();
 }
 
-ConfigParser::ConfigParser(const std::string &data) {
+ConfigParser::ConfigParser(const std::string &data): config(1) {
 	config = readData(data);
 	init();
 }
@@ -33,8 +33,10 @@ std::vector<std::string> ConfigParser::readData(const std::string &data) {
 	std::istringstream		 stream(data);
 	std::string				 line;
 
-	while (std::getline(stream, line, '\n'))
+	while (std::getline(stream, line, '\n')) {
+		trim(line, IFS);
 		ret.push_back(line);
+	}
 	return ret;
 }
 
@@ -48,31 +50,28 @@ std::vector<std::string> ConfigParser::readFile(const char *path) {
 
 	while (conf_stream.good()) {
 		std::getline(conf_stream, line);
+		trim(line, IFS);
 		ret.push_back(line);
 	}
 	return ret;
 }
 
 // Returns a vector of pointers to all block_directives who's name matches 'blocks_to_fetch'.
-// Only searches the context of the block_directive object this function was called on and its sub directives.
-std::vector<block_directive *> block_directive::fetch_matching_blocks(const std::string &blocks_to_fetch) {
-	std::vector<block_directive *> ret;
-	std::vector<block_directive *> tmp;
+// Only searches the context of the block_directive object this function was called on
+std::vector<block_directive> block_directive::fetch_matching_blocks(const std::string &blocks_to_fetch) const {
+	std::vector<block_directive> blocks;
 
-	for (auto &block : block_directives) {
+	for (auto &block : block_directives)
 		if (block.name == blocks_to_fetch)
-			ret.push_back(&block);
-		tmp = block.fetch_matching_blocks(blocks_to_fetch);
-		ret.insert(ret.end(), tmp.begin(), tmp.end()); // Append tmp to ret
-	}
+			blocks.push_back(block);
 
-	return (ret);
+	return blocks;
 }
 
 // Returns first params associated with the requested simple_directive, if it is present in the
 // block_directive this method was called on.
 // Otherwise returns empty string.
-std::string block_directive::fetch_simple(const std::string &key) {
+std::string block_directive::fetch_simple(const std::string &key) const {
 	for (auto &simple : simple_directives)
 		if (simple.name == key)
 			return (simple.params);

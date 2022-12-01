@@ -11,8 +11,8 @@ std::string ConfigParser::getSimpleAsString(const simple_directive &simple, cons
 std::string ConfigParser::getBlockAsString(const block_directive &block, const std::string &tabs) {
 	std::string str = tabs + block.name;
 
-	if (!block.additional_params.empty())
-		str += " " + block.additional_params;
+	if (!block.params.empty())
+		str += " " + block.params;
 	str += " {\n";
 
 	for (auto &simple : block.simple_directives)

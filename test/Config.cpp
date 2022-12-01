@@ -441,7 +441,8 @@ TEST_CASE( "Configs", "[Config]")
 {
     std::string config_root_dir = "./test/Config/";
 
-    test_all_invalid(config_root_dir + "invalid/");
+	REQUIRE_NOTHROW(test_all_invalid(config_root_dir + "invalid/"));
+
     test_all_valid(config_root_dir + "valid/");
 
 }

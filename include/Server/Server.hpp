@@ -14,7 +14,7 @@ class Server {
 	public:
 		Server();
 
-		void add(block_directive *constructor_specs);
+		void add(const block_directive &constructor_specs);
 
 		int getLocationIndex(const std::string &address_to_find) const;
 
@@ -40,8 +40,8 @@ class Server {
 		std::string getServerAsString(std::string tabs = "") const;
 		std::string getAllowedMethodsAsString(int loc_index) const;
 
-		bool isAllowedContextDirective(const std::string &str, const char **list) const;
-		bool hasOnlyAllowedDirectives(block_directive *constructor_specs, const char **list) const;
+		bool isAllowedContextDirective(const std::string &str, const char *list[], size_t size) const;
+		bool hasOnlyAllowedDirectives(const block_directive &constructor_specs, const char *list[], size_t size) const;
 
 	private:
 		std::string				 m_host;  // the IP address this server listens on.

@@ -15,9 +15,9 @@ Location::Location():
 	m_client_max_body_size(0),
 	m_auto_index(false) {}
 
-void Location::add(block_directive *constructor_specs) {
-	if (!constructor_specs->additional_params.empty())
-		m_location = constructor_specs->additional_params;
+void Location::add(const block_directive &constructor_specs) {
+	if (!constructor_specs.params.empty())
+		m_location = constructor_specs.params;
 
 	if (m_location.front() != '/')
 		throw(std::invalid_argument("Location blocks must start with a leading '/'."));

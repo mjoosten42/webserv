@@ -15,7 +15,7 @@ class Location {
 	public:
 		Location();
 
-		void add(block_directive *constructor_specs);
+		void add(const block_directive &constructor_specs);
 
 		const std::string &getLocation() const;
 

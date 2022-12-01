@@ -6,8 +6,8 @@
 #include <vector>
 
 static std::vector<Server> initServers(ConfigParser &config) {
-	std::vector<block_directive *> server_config_blocks = config.m_main_context.fetch_matching_blocks("server");
-	std::vector<Server>			   servers(server_config_blocks.size()); // Default construct all servers
+	std::vector<block_directive> server_config_blocks = config.m_main_context.fetch_matching_blocks("server");
+	std::vector<Server>			 servers(server_config_blocks.size()); // Default construct all servers
 
 	for (size_t i = 0; i != servers.size(); i++)
 		servers[i].add(server_config_blocks[i]);

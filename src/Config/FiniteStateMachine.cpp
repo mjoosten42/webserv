@@ -1,5 +1,6 @@
 #include "ConfigParser.hpp"
 #include "defines.hpp"	   // IFS
+#include "logger.hpp"	   // TODO
 #include "stringutils.hpp" // trim
 
 void ConfigParser::finite_state_machine() {
@@ -9,17 +10,19 @@ void ConfigParser::finite_state_machine() {
 		std::string &line = config[i];
 		size_t		 pos  = line.find_first_of(m_tokens, 0, SIZE);
 
+		if (line.empty())
+			continue;
+
 		if (pos == std::string::npos)
 			throw_config_error(i, "Missing semicolon");
 
-		char c = line[pos];
-		line.erase(pos);
-		switch (c) {
+		switch (line[pos]) {
 			case (';'):
+				line.erase(pos);
 				state_simpledirective(&context, line, i);
 				break;
 			case ('{'):
-				state_openblock(&context, line);
+				state_openblock(&context, line, i);
 				break;
 			case ('}'):
 				state_closeblock(&context);
@@ -30,37 +33,40 @@ void ConfigParser::finite_state_machine() {
 	}
 }
 
-void ConfigParser::state_simpledirective(block_directive **context, const std::string &line, size_t i) {
-	simple_directive tmp;
+void ConfigParser::state_simpledirective(block_directive **context, std::string &line, size_t i) {
 	size_t			 pos = line.find_first_of(IFS);
+	simple_directive tmp;
 
 	tmp.name = line.substr(0, pos);
+	strToLower(tmp.name);
 
-	if (pos != std::string::npos) {
-		pos = line.find_first_not_of(IFS, pos);
-		if (pos != std::string::npos) {
-			tmp.params = line.substr(pos);
-			trim(tmp.params, IFS);
-		}
-	}
+	if (pos != std::string::npos)
+		tmp.params = line.substr(pos);
+	trim(tmp.params, IFS);
+
 	if (tmp.params.empty())
 		throw_config_error(i, "Missing directive parameters");
 	check_overflow_errors(i, tmp);
 	(*context)->simple_directives.push_back(tmp);
 }
 
-void ConfigParser::state_openblock(block_directive **context, const std::string &line) {
-	block_directive				tmp;
-	std::string::const_iterator str_i = line.begin();
-	std::string				   *field = &(tmp.name);
-	tmp.parent_context				  = *context;
+void ConfigParser::state_openblock(block_directive **context, std::string &line, size_t i) {
+	size_t			pos = line.find_first_of(IFS);
+	block_directive tmp;
 
-	for (; str_i != line.end() && *str_i != m_tokens[OPEN_BRACE]; ++str_i) {
-		if (std::isspace(*str_i) && field == &(tmp.name))
-			field = &(tmp.additional_params);
-		*field += *str_i;
-	}
-	trim(tmp.additional_params, IFS);
+	if (line.back() != '{')
+		throw_config_error(i, "Info after brace");
+	line.pop_back(); // remove brace
+
+	tmp.name = line.substr(0, pos);
+	strToLower(tmp.name);
+
+	tmp.parent_context = *context;
+
+	if (pos != std::string::npos)
+		tmp.params = line.substr(pos);
+	trim(tmp.params, IFS);
+
 	(*context)->block_directives.push_back(tmp);
 	(*context) = &((*context)->block_directives.back());
 }

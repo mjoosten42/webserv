@@ -2,7 +2,7 @@
 
 #include "MIME.hpp"
 #include "Server.hpp"
-#include "defines.hpp" // CRLF, SIZEOF_ARRAY
+#include "defines.hpp" // CRLF, SIZEOF
 #include "file.hpp"	   // extension
 #include "logger.hpp"
 #include "stringutils.hpp"
@@ -69,7 +69,7 @@ void Response::addDefaultHeaders() {
 }
 
 std::string Response::getStatusMessage() const {
-	const char *msg = binarySearchKeyValue(m_status, statusMessages, SIZEOF_ARRAY(statusMessages));
+	const char *msg = binarySearchKeyValue(m_status, statusMessages, SIZEOF(statusMessages));
 	if (msg != NULL)
 		return msg;
 	LOG_ERR("Status code not found: " << m_status);
@@ -128,7 +128,7 @@ bool Response::isStatus(const std::string &status) const {
 	try {
 		if (status.find_first_not_of("0123456789") == std::string::npos) {
 			int code = stringToIntegral<int>(status);
-			return binarySearchKeyValue(code, statusMessages, SIZEOF_ARRAY(statusMessages)) != NULL;
+			return binarySearchKeyValue(code, statusMessages, SIZEOF(statusMessages)) != NULL;
 		}
 	} catch (...) {
 	}

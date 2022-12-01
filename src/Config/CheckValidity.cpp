@@ -13,7 +13,6 @@ void ConfigParser::check_validity() {
 		trim(line, IFS);
 
 	discard_comments();
-	discard_empty();
 	check_braces_error();
 	check_semicolon_error();
 }
@@ -43,6 +42,10 @@ void ConfigParser::check_semicolon_error() {
 	for (size_t i = 0; i != config.size(); i++) {
 		std::string &line = config[i];
 		size_t		 pos  = line.find_first_of(m_tokens, 0, SIZE);
+
+		if (line.empty())
+			continue;
+
 		if (pos == std::string::npos)
 			missing_semicolon.push(i);
 		else {
@@ -68,14 +71,7 @@ void ConfigParser::discard_comments() {
 		size_t pos = line.find(m_tokens[COMMENT]);
 		if (pos != std::string::npos)
 			line.erase(pos);
-	}
-}
-
-void ConfigParser::discard_empty() {
-	for (auto it = config.begin(); it != config.end(); it++) {
-		size_t pos = it->find_first_not_of(IFS);
-		if (pos == std::string::npos)
-			config.erase(it--);
+		trim(line, IFS);
 	}
 }
 

@@ -1,6 +1,6 @@
 #include "MIME.hpp"
 
-#include "defines.hpp" // SIZEOF_ARRAY
+#include "defines.hpp" // SIZEOF
 #include "file.hpp"	   // extension
 #include "stringutils.hpp"
 #include "utils.hpp"
@@ -370,7 +370,7 @@ std::string fromFileName(const std::string &filename) {
 
 	strToLower(ext);
 
-	const char *result = binarySearchKeyValue(ext, entries, SIZEOF_ARRAY(entries));
+	const char *result = binarySearchKeyValue(ext, entries, SIZEOF(entries));
 	if (result == NULL)
 		return DEFAULT_MIME_TYPE;
 	return result;

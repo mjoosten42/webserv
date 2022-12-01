@@ -3,10 +3,10 @@
 #include "IO.hpp"
 #include "Location.hpp"
 #include "defines.hpp"
+#include "logger.hpp"
 #include "overwrite.hpp"
 #include "stringutils.hpp"
 #include "utils.hpp"
-#include "logger.hpp"
 
 #include <algorithm> // sort
 
@@ -24,21 +24,22 @@ const static char *location_directives[] = {
 
 Server::Server(): m_host("127.0.0.1"), m_port(8000), m_names({ { "webserv.com" } }), m_locations(1) {}
 
-void Server::add(block_directive *constructor_specs) {
-	hasOnlyAllowedDirectives(constructor_specs, server_directives); // will throw if not
+void Server::add(const block_directive &constructor_specs) {
+	hasOnlyAllowedDirectives(constructor_specs, server_directives, SIZEOF(server_directives)); // will throw if not
+
 	m_locations.front().add(constructor_specs);
 
 	overwriteIfSpecified("listen", m_port, constructor_specs, stringToIntegral<short>);
 	overwriteIfSpecified("server_name", m_names, constructor_specs, stringSplit);
 
-	for (auto &block : constructor_specs->block_directives) {
+	for (auto &block : constructor_specs.fetch_matching_blocks("location")) {
 		if (block.name != "location")
 			continue;
 		m_locations.push_back(m_locations.front()); // Copy server default to new location
-		if (block.additional_params.empty())
+		if (block.params.empty())
 			throw(std::invalid_argument("All location blocks must have a name."));
-		hasOnlyAllowedDirectives(&block, location_directives);
-		m_locations.back().add(&block); // Add config
+		hasOnlyAllowedDirectives(block, location_directives, SIZEOF(location_directives));
+		m_locations.back().add(block); // Add config
 	}
 
 	// Overwrite default '/' with configs '/' if provided
@@ -79,19 +80,17 @@ bool Server::isCGI(int loc_index, const std::string &ext) const {
 	return std::find(CGIs.begin(), CGIs.end(), ext) != CGIs.end();
 }
 
-bool Server::isAllowedContextDirective(const std::string &str, const char **list) const {
-	size_t len = (list == server_directives) ? SIZEOF_ARRAY(server_directives) : SIZEOF_ARRAY(location_directives);
-	for (size_t i = 0; i < len; i++)
+bool Server::isAllowedContextDirective(const std::string &str, const char *list[], size_t size) const {
+	for (size_t i = 0; i < size; i++)
 		if (str == list[i])
 			return true;
 	return false;
 }
 
-bool Server::hasOnlyAllowedDirectives(block_directive *constructor_specs, const char **list) const {
-	auto it = constructor_specs->simple_directives.begin();
-	for (; it != constructor_specs->simple_directives.end(); ++it)
-		if (!isAllowedContextDirective(it->name, list))
-			throw(std::invalid_argument("Directive \"" + it->name + "\" is not allowed in this context."));
+bool Server::hasOnlyAllowedDirectives(const block_directive &constructor_specs, const char *list[], size_t size) const {
+	for (auto &simple : constructor_specs.simple_directives)
+		if (!isAllowedContextDirective(simple.name, list, size))
+			throw(std::invalid_argument("Directive \"" + simple.name + "\" is not allowed in this context."));
 	return true;
 }
 

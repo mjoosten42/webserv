@@ -24,14 +24,13 @@ struct simple_directive {
 
 struct block_directive {
 		std::string					  name;
-		std::string					  additional_params;
+		std::string					  params;
 		std::vector<simple_directive> simple_directives;
 		std::vector<block_directive>  block_directives;
 		struct block_directive		 *parent_context;
 
-		std::vector<struct block_directive *> fetch_matching_blocks(const std::string &blocks_to_fetch);
-
-		std::string fetch_simple(const std::string &key);
+		std::vector<struct block_directive> fetch_matching_blocks(const std::string &blocks_to_fetch) const;
+		std::string							fetch_simple(const std::string &key) const;
 };
 
 class ConfigParser {
@@ -59,8 +58,8 @@ class ConfigParser {
 
 		//	Finite state machine
 		void finite_state_machine();
-		void state_simpledirective(block_directive **context, const std::string &line, size_t i);
-		void state_openblock(block_directive **context, const std::string &line);
+		void state_simpledirective(block_directive **context, std::string &line, size_t i);
+		void state_openblock(block_directive **context, std::string &line, size_t i);
 		void state_closeblock(block_directive **context);
 
 		enum Token { SEMICOLON, COMMENT, OPEN_BRACE, CLOSE_BRACE, SIZE };

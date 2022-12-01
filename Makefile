@@ -20,7 +20,7 @@ include make/include.mk
 
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 
-DEBUG := 0
+DEBUG := 1
 SAN := 1
 
 ifeq ($(DEBUG), 1)
@@ -105,7 +105,7 @@ upload:
 # ============================= #
 
 test: $(TEST)
-	LLVM_PROFILE_FILE="$(TEST).profraw" ./$(TEST)
+	-LLVM_PROFILE_FILE="$(TEST).profraw" ./$(TEST)
 	llvm-profdata merge -sparse $(TEST).profraw -o $(TEST)_profdata
 	$(RM) $(TEST).profraw
 

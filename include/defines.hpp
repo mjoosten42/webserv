@@ -7,7 +7,7 @@
 #define IFS " \n\r\t\f\v"
 
 // Size of array literal
-#define SIZEOF_ARRAY(x) (sizeof(x) / sizeof(*x))
+#define SIZEOF(x) (sizeof(x) / sizeof(*x))
 
 // Terminal colors
 #define DEFAULT "\033[0m"
