@@ -20,8 +20,8 @@ include make/include.mk
 
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 
-DEBUG := 1
-SAN := 1
+DEBUG := 0
+SAN := 0
 
 ifeq ($(DEBUG), 1)
 	CXX_FLAGS += -O0 -D DEBUG -g3

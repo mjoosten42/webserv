@@ -87,7 +87,7 @@ void Popen::my_popen(const std::string &filename, const EnvironmentMap &em) {
 			WS::close(serverToCgi[0]);
 
 			set_fd_nonblocking(cgiToServer[0]);
-			set_fd_nonblocking(serverToCgi[1]);
+			// set_fd_nonblocking(serverToCgi[1]);
 
 			readfd	= cgiToServer[0];
 			writefd = serverToCgi[1];
